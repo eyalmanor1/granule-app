@@ -1,0 +1,963 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>AI Smart Sorting Simulation</title>
+<style>
+    body {
+      background: #121212;
+      color: #b3b3ff;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #1e1e2e;
+      padding: 10px;
+      font-weight: bold;
+      text-align: center;
+      color: #faae52;
+    }
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      background: #1e1e2e;
+      border-top: 1px solid #3a3a4a;
+    }
+    nav button {
+      flex: 1;
+      padding: 10px;
+      background: none;
+      border: none;
+      color: #a5b4fc;
+      font-weight: bold;
+    }
+    nav button.active {
+      background: #2c2c3c;
+    }
+    .tab {
+      display: none;
+      padding: 16px;
+    }
+    .tab.active {
+      display: block;
+      background-color: #1f1f2f;
+    }
+    .color-dot {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid #999;
+      box-shadow: 0 0 5px #000;
+    }
+    .quick-map {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      margin: 10px 0;
+    }
+    .preview-box {
+      height: 50px;
+      border-radius: 8px;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      background: #2b2b3a;
+      color: #ffffff;
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.05);
+    }
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      margin-bottom: 12px;
+      width: 100%;
+    }
+    .slider-row label {
+      font-size: 0.9em;
+      margin-bottom: 6px;
+      color: #b3b3ff;
+      padding-left: 4px;
+    }
+    .slider-row input[type=range] {
+      width: 100%;
+      height: 30px;
+    }
+    .slider-block {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding-top: 10px;
+      min-height: 220px;
+    }
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 24px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #444;
+      transition: 0.4s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #fca17d;
+    }
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+    
+
+.analysis-styled {
+  padding: 10px;
+}
+.analysis-block {
+  margin-bottom: 14px;
+}
+.label-box {
+  background-color: #2c2c3c;
+  color: #faae52;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.85em;
+}
+.preview-box {
+  height: 40px;
+  border-radius: 6px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+
+#tab-analysis h2 {
+  margin-bottom: 12px;
+  padding: 0 10px;
+}
+
+#tab-analysis .scroll-container {
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+  padding: 10px;
+}
+
+
+#tab-simulation .camera-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  height: calc(100vh - 140px);
+  box-sizing: border-box;
+  justify-content: space-evenly;
+}
+
+#tab-simulation canvas {
+  width: 90vw;
+  height: 32vh;
+  max-height: 200px;
+  border-radius: 8px;
+  box-shadow: 0 0 4px rgba(0,0,0,0.3);
+}
+
+
+/* Improve preview-box stretch and alignment */
+.preview-box {
+  width: 100%;
+  max-width: 100%;
+  height: 75px;
+  margin: 0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+#tab-valid .preview-box {
+  height: 55px;
+}
+
+
+</style>
+</head>
+<body>
+<header>AI Smart Sorting Simulation</header>
+<section class="tab active" id="tab-valid">
+<h2>Valid Granule</h2>
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+<span style="font-size: 0.8em;">Opacity</span>
+<label class="switch">
+<input id="transparent-toggle" type="checkbox"/>
+<span class="slider"></span>
+</label>
+<span style="font-size: 0.8em;">Transparent</span>
+</div>
+<div class="quick-map" id="valid-map"></div>
+<div class="preview-box" id="valid-preview">#808080</div>
+<div class="slider-block">
+<div class="slider-row"><label for="valid-r">Red</label><input id="valid-r" max="255" min="0" type="range" value="128"/></div>
+<div class="slider-row"><label for="valid-g">Green</label><input id="valid-g" max="255" min="0" type="range" value="128"/></div>
+<div class="slider-row"><label for="valid-b">Blue</label><input id="valid-b" max="255" min="0" type="range" value="128"/></div>
+</div>
+</section>
+<section class="tab" id="tab-defect">
+<h2>Defect Granule</h2>
+<div class="quick-map" id="defect-map"></div>
+<div class="preview-box" id="defect-preview">#808080</div>
+<div class="slider-block">
+<div class="slider-row"><label for="defect-r">Red</label><input id="defect-r" max="255" min="0" type="range" value="128"/></div>
+<div class="slider-row"><label for="defect-g">Green</label><input id="defect-g" max="255" min="0" type="range" value="128"/></div>
+<div class="slider-row"><label for="defect-b">Blue</label><input id="defect-b" max="255" min="0" type="range" value="128"/></div>
+</div>
+</section>
+<section class="tab" id="tab-analysis">
+<h2>Analysis</h2>
+<div class="scroll-container"><div class="analysis-styled">
+<div class="analysis-block">
+<div class="label-box">Valid Granule</div>
+<div class="preview-box" id="analysis-valid">#808080</div>
+</div>
+<div class="analysis-block">
+<div class="label-box">Defect Granule</div>
+<div class="preview-box" id="analysis-defect">#808080</div>
+</div>
+<div class="analysis-block">
+<div class="label-box">Front Light</div>
+<div class="preview-box" id="front-light-box">180</div>
+</div>
+<div class="analysis-block">
+<div class="label-box">Back Light</div>
+<div class="preview-box" id="back-light-box">160</div>
+</div>
+<div class="analysis-block">
+<div class="label-box">Front Background</div>
+<div class="preview-box" id="fgBackgroundBox">RGB(90,90,90)</div>
+</div>
+<div class="analysis-block">
+<div class="label-box">Back Background</div>
+<div class="preview-box" id="bgCameraBackgroundBox">RGB(90,90,90)</div>
+</div>
+<div class="analysis-block">
+<div class="label-box">Sorting Program</div>
+<div class="preview-box" id="sortingProgramBox">Program A</div>
+</div>
+<div class="analysis-block">
+<div class="label-box">Analysis Channel</div>
+<div class="preview-box" id="analysisChannelBox">Blue</div>
+</div>
+<div class="analysis-block">
+<div class="label-box">Sensitivity (%)</div>
+<div class="preview-box" id="sensitivityBox">50%</div>
+</div>
+</div></div></section>
+<section class="tab" id="tab-simulation">
+<h2>Simulation</h2>
+<div style="display: flex; flex-direction: column; gap: 20px;">
+<div style="border: 2px solid #4cc9f0; padding: 8px; border-radius: 10px; background-color: #0f172a;">
+<h3 style="margin: 0; color: #90e0ef;">Front Camera Simulation</h3>
+<canvas height="180" id="front-canvas" style="width: 100%; max-width: 100%; height: 130px;" width="320"></canvas>
+</div>
+<div style="border: 2px solid #f72585; padding: 8px; border-radius: 10px; background-color: #0f172a;">
+<h3 style="margin: 0; color: #f72585;">Back Camera Simulation</h3>
+<canvas height="180" id="back-canvas" style="width: 100%; max-width: 100%; height: 130px;" width="320"></canvas>
+</div>
+</div>
+</section>
+<nav>
+<button onclick="switchTab('valid')">Valid</button>
+<button onclick="switchTab('defect')">Defect</button>
+<button onclick="switchTab('analysis')">Analysis</button>
+<button onclick="switchTab(\'simulation\')">Simulation</button>
+<button onclick="switchTab('camera')">Camera</button></nav>
+<script>
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+      document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+      document.querySelector('nav button[onclick*="' + tab + '"]').classList.add('active');
+    }
+
+    const COLORS = [
+      [255, 0, 0], [0, 255, 0], [0, 0, 255],
+      [255, 255, 0], [0, 255, 255], [255, 0, 255],
+      [128, 0, 0], [0, 128, 0], [0, 0, 128],
+      [255, 255, 255], [128, 128, 128], [0, 0, 0]
+    ];
+
+    function renderMap(prefix) {
+      const map = document.getElementById(`${prefix}-map`);
+      COLORS.forEach(([r, g, b]) => {
+        const dot = document.createElement('div');
+        dot.className = 'color-dot';
+        dot.style.background = `rgb(${r},${g},${b})`;
+        dot.onclick = () => {
+          document.getElementById(`${prefix}-r`).value = r;
+          document.getElementById(`${prefix}-g`).value = g;
+          document.getElementById(`${prefix}-b`).value = b;
+          updateAll(prefix);
+        };
+        map.appendChild(dot);
+      });
+    }
+
+    function updatePreview(prefix) {
+      const r = +document.getElementById(`${prefix}-r`).value;
+      const g = +document.getElementById(`${prefix}-g`).value;
+      const b = +document.getElementById(`${prefix}-b`).value;
+      const hex = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+      const box = document.getElementById(`${prefix}-preview`);
+      box.style.background = `rgb(${r},${g},${b})`;
+      box.style.color = (r + g + b) / 3 < 128 ? '#fff' : '#000';
+      box.textContent = hex;
+    }
+
+    function updateAll(prefix) {
+  if (prefix === 'valid' || prefix === 'defect') {
+    frontParticles = [];
+    backParticles = [];
+  }
+
+  updateAnalysis();
+      updatePreview(prefix);
+    }
+
+    ['valid','defect'].forEach(prefix => {
+      ['r','g','b'].forEach(ch => {
+        document.getElementById(`${prefix}-${ch}`).addEventListener('input', () => updateAll(prefix));
+      });
+      renderMap(prefix);
+      updateAll(prefix);
+    });
+  
+function updateAnalysis() {
+  updateSortingProgram();
+  updateChannel();
+  updateFrontBackground();
+  updateBackBackground();
+  updateFrontLight();
+  updateGranuleDisplays();
+  updateBackCameraBackground();
+
+  // Update bgBackgroundBox background from calculated values
+  const bgBox = document.getElementById("bgBackgroundBox");
+  if (bgBox) {
+    const bgColor = bgBox.style.backgroundColor; // Use current for display
+    bgBox.textContent = bgColor;
+  }
+}
+
+function getLightValues() {
+  const isTransparent = document.getElementById('transparent-toggle')?.checked;
+  const front = isTransparent ? 0 : 180;
+  const back = isTransparent ? 255 : 160;
+  return { front, back };
+}
+
+function blendColorComponent(c1, c2, front, back) {
+  return Math.round((c1 * front + c2 * back) / (front + back));
+}
+
+
+function updateBackBackground() {
+  const bgBox = document.getElementById('bgBackgroundBox');
+  if (!bgBox) return;
+
+  const r = +document.getElementById('valid-r').value;
+  const g = +document.getElementById('valid-g').value;
+  const b = +document.getElementById('valid-b').value;
+
+  const isTransparent = document.getElementById('transparent-toggle')?.checked;
+  const front = isTransparent ? 0 : 180;
+  const back = isTransparent ? 255 : 160;
+
+  const mix = ((front + back) / 2) / 255;
+
+  const rr = Math.round(r * mix);
+  const gg = Math.round(g * mix);
+  const bb = Math.round(b * mix);
+
+  bgBox.style.backgroundColor = `rgb(${rr},${gg},${bb})`;
+  bgBox.style.color = (rr + gg + bb) / 3 < 128 ? '#fff' : '#000';
+  bgBox.textContent = `RGB(${rr},${gg},${bb})`;
+}
+
+function updateBackCameraBackground() {
+  const bgCamBox = document.getElementById('bgCameraBackgroundBox');
+  if (!bgCamBox) return;
+
+  const r = +document.getElementById('valid-r').value;
+  const g = +document.getElementById('valid-g').value;
+  const b = +document.getElementById('valid-b').value;
+
+  const isTransparent = document.getElementById('transparent-toggle')?.checked;
+  const back = isTransparent ? 255 : 160;
+
+  const rr = Math.round(r * (back / 255));
+  const gg = Math.round(g * (back / 255));
+  const bb = Math.round(b * (back / 255));
+
+  bgCamBox.style.backgroundColor = `rgb(${rr},${gg},${bb})`;
+  bgCamBox.style.color = (rr + gg + bb) / 3 < 128 ? '#fff' : '#000';
+  bgCamBox.textContent = `RGB(${rr},${gg},${bb})`;
+}
+function updateFrontBackground() {
+  const fgBox = document.getElementById('fgBackgroundBox');
+  if (!fgBox) return;
+
+  const r = +document.getElementById('valid-r').value;
+  const g = +document.getElementById('valid-g').value;
+  const b = +document.getElementById('valid-b').value;
+
+  const isTransparent = document.getElementById('transparent-toggle')?.checked;
+  const front = isTransparent ? 0 : 180;
+  const back = isTransparent ? 255 : 160;
+
+  const mix = ((front + back) / 2) / 255;
+
+  const rr = Math.round(r * mix);
+  const gg = Math.round(g * mix);
+  const bb = Math.round(b * mix);
+
+  fgBox.style.backgroundColor = `rgb(${rr},${gg},${bb})`;
+  fgBox.style.color = (rr + gg + bb) / 3 < 128 ? '#fff' : '#000';
+  fgBox.textContent = `RGB(${rr},${gg},${bb})`;
+}
+
+function updateFrontLight() {
+  const isTransparent = document.getElementById('transparent-toggle')?.checked;
+  const frontLightBox = document.getElementById('front-light-box');
+  if (!frontLightBox) return;
+  const value = isTransparent ? 0 : 180;
+  frontLightBox.textContent = value.toString();
+  frontLightBox.style.backgroundColor = `rgb(${value},${value},${value})`;
+  frontLightBox.style.color = value < 128 ? '#fff' : '#000';
+}
+
+function updateGranuleDisplays() {
+  const validR = +document.getElementById('valid-r').value;
+  const validG = +document.getElementById('valid-g').value;
+  const validB = +document.getElementById('valid-b').value;
+  const defectR = +document.getElementById('defect-r').value;
+  const defectG = +document.getElementById('defect-g').value;
+  const defectB = +document.getElementById('defect-b').value;
+
+  const validHex = '#' + [validR, validG, validB].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+  const defectHex = '#' + [defectR, defectG, defectB].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+
+  const validBox = document.getElementById('analysis-valid');
+  const defectBox = document.getElementById('analysis-defect');
+
+  if (validBox) {
+    validBox.style.backgroundColor = `rgb(${validR},${validG},${validB})`;
+    validBox.style.color = (validR + validG + validB) / 3 < 128 ? '#fff' : '#000';
+    validBox.textContent = validHex;
+  }
+
+  if (defectBox) {
+    defectBox.style.backgroundColor = `rgb(${defectR},${defectG},${defectB})`;
+    defectBox.style.color = (defectR + defectG + defectB) / 3 < 128 ? '#fff' : '#000';
+    defectBox.textContent = defectHex;
+  }
+}
+
+
+const toggle = document.getElementById('transparent-toggle');
+if (toggle) {
+  toggle.addEventListener('change', updateAnalysis);
+}
+
+
+function updateSortingProgram() {
+  const programBox = document.getElementById('sortingProgramBox');
+  if (!programBox) return;
+
+  const isTransparent = document.getElementById('transparent-toggle')?.checked;
+  const vr = +document.getElementById('valid-r')?.value || 0;
+  const vg = +document.getElementById('valid-g')?.value || 0;
+  const vb = +document.getElementById('valid-b')?.value || 0;
+  const dr = +document.getElementById('defect-r')?.value || 0;
+  const dg = +document.getElementById('defect-g')?.value || 0;
+  const db = +document.getElementById('defect-b')?.value || 0;
+
+  const deltaR = Math.abs(vr - dr);
+  const deltaG = Math.abs(vg - dg);
+  const deltaB = Math.abs(vb - db);
+  const maxDelta = Math.max(deltaR, deltaG, deltaB);
+
+  let program = "";
+
+  if (isTransparent) {
+    program = maxDelta > 100 ? "Chromatic Sensitivity 2" : "Chromatic Sensitivity 1";
+  } else {
+    if (deltaR >= deltaG && deltaR >= deltaB) {
+      program = dr > vr ? "Color Upper 1" : "Color Lower 1";
+    } else {
+      program = (deltaG >= deltaB)
+        ? (dg > vg ? "Color Upper 2" : "Color Lower 2")
+        : (db > vb ? "Color Upper 2" : "Color Lower 2");
+    }
+  }
+
+  programBox.textContent = program;
+}
+function updateChannel() {
+  const box = document.getElementById('analysisChannelBox');
+  if (!box) return;
+
+  const vr = +document.getElementById('valid-r')?.value || 0;
+  const vg = +document.getElementById('valid-g')?.value || 0;
+  const vb = +document.getElementById('valid-b')?.value || 0;
+  const dr = +document.getElementById('defect-r')?.value || 0;
+  const dg = +document.getElementById('defect-g')?.value || 0;
+  const db = +document.getElementById('defect-b')?.value || 0;
+
+  const deltaR = Math.abs(vr - dr);
+  const deltaG = Math.abs(vg - dg);
+  const deltaB = Math.abs(vb - db);
+
+  let channel = 'Red';
+  let bg = 'rgb(255, 80, 80)';
+
+  if (deltaG >= deltaR && deltaG >= deltaB) {
+    channel = 'Green';
+    bg = 'rgb(80, 255, 80)';
+  } else if (deltaB >= deltaR && deltaB >= deltaG) {
+    channel = 'Blue';
+    bg = 'rgb(80, 80, 255)';
+  }
+
+  box.textContent = channel;
+  box.style.backgroundColor = bg;
+  box.style.color = '#000';
+}
+</script>
+<script>
+let frontParticles = [];
+let backParticles = [];
+
+function createParticle(color) {
+  return {
+    x: Math.random() * 300 + 10,
+    y: -10,
+    radius: 5,
+    color,
+    speed: Math.random() * 2 + 1
+  };
+}
+
+function updateParticles(ctx, particles, bgColor) {
+  ctx.clearRect(0, 0, 320, 180);
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, 320, 180);
+
+  for (let p of particles) {
+    p.y += p.speed;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.fill();
+  }
+
+  // Optional: Show RGB on canvas
+  ctx.fillStyle = "white";
+  ctx.font = "14px Arial";
+  ctx.fillText(bgColor, 10, 20);
+
+  return particles.filter(p => p.y < 180);
+}
+
+function getRGBFromBox(id) {
+  const box = document.getElementById(id);
+  if (!box) return "rgb(128,128,128)";
+  return window.getComputedStyle(box).getPropertyValue("background-color");
+}
+
+function runDualSimulation() {
+  updateAnalysis(); // Ensure values are fresh
+
+  const frontCanvas = document.getElementById('front-canvas');
+  const backCanvas = document.getElementById('back-canvas');
+  const frontCtx = frontCanvas.getContext('2d');
+  const backCtx = backCanvas.getContext('2d');
+
+  setInterval(() => {
+    const fgColor = getRGBFromBox('fgBackgroundBox'); // Read from Analysis
+    const bgColor = getRGBFromBox('bgCameraBackgroundBox'); // Read from Analysis
+    const validColor = getRGBFromBox('analysis-valid');
+    const defectColor = getRGBFromBox('analysis-defect');
+
+    const rand = Math.random();
+    if (rand < 0.7) {
+      frontParticles.push(createParticle(validColor));
+      backParticles.push(createParticle(validColor));
+    } else {
+      frontParticles.push(createParticle(defectColor));
+      backParticles.push(createParticle(defectColor));
+    }
+
+    frontParticles = updateParticles(frontCtx, frontParticles, fgColor);
+    backParticles = updateParticles(backCtx, backParticles, bgColor);
+  }, 50);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  let started = false;
+  document.querySelector('button[onclick*="simulation"]')?.addEventListener('click', () => {
+    switchTab('simulation');
+    if (!started) {
+      runDualSimulation();
+      started = true;
+    }
+  });
+});
+</script>
+<section class="tab" id="tab-camera"><h2 style="color: #aab0ff;">Camera</h2><div style="display: flex; flex-direction: column; align-items: center; gap: 12px;"><input accept="image/*" capture="environment" id="image-upload" style="width: 180px; height: 36px; border-radius: 20px; padding: 6px; background: #2c2c2c; color: white; text-align: center; box-shadow: inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 5px rgba(0,0,0,0.5), 0 3px 8px rgba(0,0,0,0.4);" type="file"/><button id="analyze-btn" style="width: 180px; height: 36px; border-radius: 20px; background: #2c2c2c; color: white; font-weight: bold; box-shadow: inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 5px rgba(0,0,0,0.5), 0 3px 8px rgba(0,0,0,0.4);">Analyze Picker</button><div style="display: flex; justify-content: center; align-items: center; gap: 20px;"><canvas height="140" id="preview" style="border-radius: 12px; border: 2px solid #999; background: #000;" width="140"></canvas><div id="image-color-box" style="width: 140px; height: 140px; display: flex; justify-content: center; align-items: center; border-radius: 12px; background: #3a3a3a; color: white; font-weight: bold; border: 2px solid #999;">Color Preview</div></div><div style="display: flex; justify-content: center; gap: 20px;"><button id="save-valid-btn" onclick="saveGranule('valid')" style="width: 130px; height: 36px; border-radius: 20px; background: #2c2c2c; color: white; font-weight: bold; box-shadow: inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 5px rgba(0,0,0,0.5), 0 3px 8px rgba(0,0,0,0.4);">Save as Valid</button><button id="save-defect-btn" onclick="saveGranule('defect')" style="width: 130px; height: 36px; border-radius: 20px; background: #2c2c2c; color: white; font-weight: bold; box-shadow: inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 5px rgba(0,0,0,0.5), 0 3px 8px rgba(0,0,0,0.4);">Save as Defect</button></div></div><div id="saved-valid-list" style="display:none;"></div><div id="saved-defect-list" style="display:none;"></div><button id="showSavedValidGranule" style="margin-top: 12px; background-color: #faae52; color: #121212; border: none; padding: 10px 16px; font-weight: bold; border-radius: 6px; cursor: pointer;">Show Saved Valid Granules</button><button id="showSavedDefectGranule" style="margin-top: 12px; background-color: #f88379; color: #121212; border: none; padding: 10px 16px; font-weight: bold; border-radius: 6px; cursor: pointer;">Show Saved Defect Granules</button></section>
+<script>
+function analyzeImage() {
+  const img = document.getElementById('preview');
+  if (!img.src) return;
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  ctx.drawImage(img, 0, 0);
+
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+
+  let r = 0, g = 0, b = 0, count = 0;
+
+  for (let i = 0; i < data.length; i += 4) {
+    r += data[i];
+    g += data[i + 1];
+    b += data[i + 2];
+    count++;
+  }
+
+  r = Math.round(r / count);
+  g = Math.round(g / count);
+  b = Math.round(b / count);
+
+  const hex = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+
+  document.getElementById('image-color-box').style.backgroundColor = `rgb(${r},${g},${b})`;
+  document.getElementById('image-color-box').style.color = (r + g + b) / 3 < 128 ? '#fff' : '#000';
+  document.getElementById('rgb-output').textContent = `(${r}, ${g}, ${b})`;
+  document.getElementById('hex-output').textContent = hex;
+}
+
+document.getElementById('camera-input').addEventListener('change', function(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = document.getElementById('preview');
+    img.src = e.target.result;
+    img.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+});
+</script><script>
+const imgPreview = document.getElementById('preview');
+const colorBox = document.getElementById('image-color-box');
+const fileInput = document.getElementById('image-upload');
+
+const ctx = imgPreview.getContext('2d');
+let validColor = null, defectColor = null;
+let lastImageDataURL = null;
+
+fileInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const img = new Image();
+  img.onload = () => {
+    ctx.clearRect(0, 0, imgPreview.width, imgPreview.height);
+    ctx.drawImage(img, 0, 0, imgPreview.width, imgPreview.height);
+    lastImageDataURL = img.src;
+  };
+  img.src = URL.createObjectURL(file);
+});
+
+function analyzeImage() {
+  const imageData = ctx.getImageData(0, 0, imgPreview.width, imgPreview.height).data;
+  let r = 0, g = 0, b = 0, count = 0;
+  for (let i = 0; i < imageData.length; i += 4) {
+    r += imageData[i];
+    g += imageData[i + 1];
+    b += imageData[i + 2];
+    count++;
+  }
+  r = Math.round(r / count);
+  g = Math.round(g / count);
+  b = Math.round(b / count);
+  colorBox.innerText = `RGB(${r},${g},${b})`;
+  colorBox.style.backgroundColor = `rgb(${r},${g},${b})`;
+  colorBox.style.color = (r + g + b) / 3 < 128 ? '#fff' : '#000';
+}
+
+document.getElementById('analyze-btn').addEventListener('click', analyzeImage);
+document.getElementById('save-valid-btn').addEventListener('click', () => {
+  validColor = colorBox.innerText;
+  alert('Saved as Valid: ' + validColor);
+});
+document.getElementById('save-defect-btn').addEventListener('click', () => {
+  defectColor = colorBox.innerText;
+  alert('Saved as Defect: ' + defectColor);
+});
+
+document.querySelector('button[onclick*="tab-camera"]')?.addEventListener('click', () => {
+  if (lastImageDataURL) {
+    const img = new Image();
+    img.onload = () => {
+      ctx.clearRect(0, 0, imgPreview.width, imgPreview.height);
+      ctx.drawImage(img, 0, 0, imgPreview.width, imgPreview.height);
+    };
+    img.src = lastImageDataURL;
+  }
+});
+</script><section class="tab" id="tab-saved">
+<h2 style="color: #faae52;">Saved Granules</h2>
+<div id="saved-list" style="display: flex; flex-wrap: wrap; gap: 12px; padding-top: 10px;"></div>
+</section><script>
+let savedGranules = JSON.parse(localStorage.getItem('granules') || "[]");
+
+function saveGranule(type) {
+  const color = document.getElementById('image-color-box').style.backgroundColor;
+  const hex = document.getElementById('image-color-box').innerText;
+  const canvas = document.getElementById('preview');
+  const imageData = canvas.toDataURL("image/png");
+
+  const ctx = canvas.getContext('2d');
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+  let r = 0, g = 0, b = 0, count = 0;
+  for (let i = 0; i < imgData.length; i += 4) {
+    r += imgData[i];
+    g += imgData[i + 1];
+    b += imgData[i + 2];
+    count++;
+  }
+
+  r = Math.round(r / count);
+  g = Math.round(g / count);
+  b = Math.round(b / count);
+
+  savedGranules.push({ type, image: imageData, rgb: [r, g, b], hex });
+  localStorage.setItem('granules', JSON.stringify(savedGranules));
+  alert("Granule saved!");
+  renderSavedGranules();
+}
+
+function renderSavedGranules() {
+  const container = document.getElementById('saved-list');
+  if (!container) return;
+  container.innerHTML = '';
+  savedGranules.forEach((g, index) => {
+    const div = document.createElement('div');
+    div.style.border = "1px solid #666";
+    div.style.borderRadius = "8px";
+    div.style.padding = "6px";
+    div.style.background = "#1e1e2e";
+    div.style.color = "#ccc";
+    div.style.width = "120px";
+    div.style.textAlign = "center";
+
+    const img = new Image();
+    img.src = g.image;
+    img.style.width = "100px";
+    img.style.height = "100px";
+    img.style.borderRadius = "6px";
+
+    const label = document.createElement("div");
+    label.textContent = g.type.toUpperCase();
+
+    const colorBox = document.createElement("div");
+    colorBox.style.backgroundColor = g.hex;
+    colorBox.textContent = g.hex;
+    colorBox.style.marginTop = "6px";
+    colorBox.style.padding = "2px";
+    colorBox.style.borderRadius = "4px";
+    colorBox.style.fontSize = "12px";
+
+    const btn = document.createElement("button");
+    btn.textContent = "Load";
+    btn.style.marginTop = "6px";
+    btn.onclick = () => {
+      const [r, g1, b] = g.rgb;
+      if (g.type === 'valid') {
+        document.getElementById('valid-r').value = r;
+        document.getElementById('valid-g').value = g1;
+        document.getElementById('valid-b').value = b;
+        updateAll('valid');
+        switchTab('valid');
+      } else {
+        document.getElementById('defect-r').value = r;
+        document.getElementById('defect-g').value = g1;
+        document.getElementById('defect-b').value = b;
+        updateAll('defect');
+        switchTab('defect');
+      }
+    };
+
+    div.appendChild(img);
+    div.appendChild(label);
+    div.appendChild(colorBox);
+    div.appendChild(btn);
+    container.appendChild(div);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", renderSavedGranules);
+</script><section class="tab" id="tab-saved-valid-granular"><h2>Saved Valid Granules</h2><div id="tab-saved-valid-granular-list" style="display: flex; flex-wrap: wrap; gap: 12px; padding-top: 10px;"></div></section><script>
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  const targetTab = document.getElementById('tab-' + tab);
+  if (targetTab) {
+    targetTab.classList.add('active');
+  }
+  document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+  const navBtn = document.querySelector('nav button[onclick*="' + tab + '"]');
+  if (navBtn) {
+    navBtn.classList.add('active');
+  }
+}
+
+document.getElementById('showSavedValidGranule')?.addEventListener('click', () => {
+  switchTab('saved-valid-granular');
+});
+document.getElementById('showSavedDefectGranule')?.addEventListener('click', () => {
+  switchTab('saved-defect-granular');
+});
+
+document.getElementById('save-valid-btn')?.addEventListener('click', () => {
+  const canvas = document.getElementById('preview');
+  const image = canvas.toDataURL("image/png");
+  const hex = document.getElementById('image-color-box').innerText;
+
+  const createBox = (labelText) => {
+    const box = document.createElement('div');
+    box.style.border = "1px solid #666";
+    box.style.borderRadius = "8px";
+    box.style.padding = "6px";
+    box.style.background = "#1e1e2e";
+    box.style.color = "#ccc";
+    box.style.width = "120px";
+    box.style.textAlign = "center";
+
+    const img = new Image();
+    img.src = image;
+    img.style.width = "100px";
+    img.style.height = "100px";
+    img.style.borderRadius = "6px";
+
+    const label = document.createElement("div");
+    label.textContent = labelText;
+
+    const colorBox = document.createElement("div");
+    colorBox.style.backgroundColor = hex;
+    colorBox.textContent = hex;
+    colorBox.style.marginTop = "6px";
+    colorBox.style.padding = "2px";
+    colorBox.style.borderRadius = "4px";
+    colorBox.style.fontSize = "12px";
+
+    box.appendChild(img);
+    box.appendChild(label);
+    box.appendChild(colorBox);
+    return box;
+  };
+
+  const validBox1 = createBox("VALID");
+  const validBox2 = createBox("VALID");
+
+  document.getElementById("saved-valid-list").appendChild(validBox1);
+  document.getElementById("tab-saved-valid-granular-list").appendChild(validBox2);
+});
+
+document.getElementById('save-defect-btn')?.addEventListener('click', () => {
+  const canvas = document.getElementById('preview');
+  const image = canvas.toDataURL("image/png");
+  const hex = document.getElementById('image-color-box').innerText;
+
+  const createBox = (labelText) => {
+    const box = document.createElement('div');
+    box.style.border = "1px solid #666";
+    box.style.borderRadius = "8px";
+    box.style.padding = "6px";
+    box.style.background = "#1e1e2e";
+    box.style.color = "#ccc";
+    box.style.width = "120px";
+    box.style.textAlign = "center";
+
+    const img = new Image();
+    img.src = image;
+    img.style.width = "100px";
+    img.style.height = "100px";
+    img.style.borderRadius = "6px";
+
+    const label = document.createElement("div");
+    label.textContent = labelText;
+
+    const colorBox = document.createElement("div");
+    colorBox.style.backgroundColor = hex;
+    colorBox.textContent = hex;
+    colorBox.style.marginTop = "6px";
+    colorBox.style.padding = "2px";
+    colorBox.style.borderRadius = "4px";
+    colorBox.style.fontSize = "12px";
+
+    box.appendChild(img);
+    box.appendChild(label);
+    box.appendChild(colorBox);
+    return box;
+  };
+
+  const defectBox1 = createBox("DEFECT");
+  const defectBox2 = createBox("DEFECT");
+
+  document.getElementById("saved-defect-list").appendChild(defectBox1);
+  document.getElementById("tab-saved-defect-granular-list").appendChild(defectBox2);
+});</script><section class="tab" id="tab-saved-defect-granular"><h2>Saved Defect Granules</h2><div id="tab-saved-defect-granular-list" style="display: flex; flex-wrap: wrap; gap: 12px; padding-top: 10px;"></div></section></body>
+</html>
