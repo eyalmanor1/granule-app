@@ -1,0 +1,10 @@
+{
+  "name": "AI Smart Sorting",
+  "short_name": "Sorting",
+  "start_url": "./Fix8.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#1e1e2e",
+  "orientation": "portrait-primary"
+}

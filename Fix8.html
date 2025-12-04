@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>AI Smart Sorting Simulation - Fix8</title>
+
+<!-- PWA / Standalone -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e1e2e">
+
+<!-- iOS / general standalone hints -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AI Sorting">
+
+<style>
+  body {
+    background: #121212;
+    color: #b3b3ff;
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  header {
+    background: #1e1e2e;
+    padding: 10px;
+    font-weight: bold;
+    text-align: center;
+    color: #faae52;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  /* Bottom nav: horizontal scroll so Saved never disappears */
+  nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    display: flex;
+    background: #1e1e2e;
+    border-top: 1px solid #3a3a4a;
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 20;
+
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+  nav button {
+    flex: 0 0 auto;
+    min-width: 86px;
+    padding: 10px 12px;
+    background: none;
+    border: none;
+    color: #a5b4fc;
+    font-weight: bold;
+    font-size: 15px;
+  }
+  nav button.active { background: #2c2c3c; }
+
+  /* App-like behavior: lock page scroll */
+  html, body {
+    height: 100%;
+    overflow: hidden;              /* prevent whole-page scrolling */
+    overscroll-behavior: none;     /* disable bounce / pull-to-refresh */
+    touch-action: manipulation;
+  }
+
+  /* Tabs scroll internally only */
+  .tab {
+    display: none;
+    padding: 16px;
+    padding-bottom: calc(90px + env(safe-area-inset-bottom));
+    box-sizing: border-box;
+    background-color: #1f1f2f;
+
+    height: calc(100vh - 60px);    /* approx header height */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tab.active { display: block; }
+
+  h2 { margin-top: 0; }
+
+  .color-dot {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #999;
+    box-shadow: 0 0 5px #000;
+  }
+  .quick-map {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    margin: 10px 0;
+  }
+
+  .preview-box {
+    width: 100%;
+    height: 55px;
+    border-radius: 10px;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    background: #2b2b3a;
+    color: #ffffff;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.05);
+  }
+
+  .slider-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+    width: 100%;
+  }
+  .slider-row label {
+    font-size: 0.9em;
+    margin-bottom: 6px;
+    color: #b3b3ff;
+    padding-left: 4px;
+  }
+  .slider-row input[type=range] { width: 100%; height: 30px; }
+
+  .slider-block {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-top: 10px;
+    min-height: 220px;
+  }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 48px; height: 24px;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #444;
+    transition: 0.4s;
+    border-radius: 24px;
+  }
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px; width: 18px;
+    left: 3px; bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+  }
+  input:checked + .slider { background-color: #fca17d; }
+  input:checked + .slider:before { transform: translateX(24px); }
+
+  /* Analysis styling */
+  #tab-analysis .scroll-container {
+    max-height: calc(100vh - 160px);
+    overflow-y: auto;
+    padding: 10px;
+  }
+  .analysis-styled { padding: 10px; }
+  .analysis-block { margin-bottom: 14px; }
+  .label-box {
+    background-color: #2c2c3c;
+    color: #faae52;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 0.85em;
+  }
+
+  /* Simulation canvases */
+  #tab-simulation canvas {
+    width: 90vw;
+    height: 32vh;
+    max-height: 200px;
+    border-radius: 8px;
+    box-shadow: 0 0 4px rgba(0,0,0,0.3);
+  }
+
+  /* Camera tab scrollable in portrait mobile */
+  #tab-camera {
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Sticky save bar so buttons never hide */
+  .camera-save-bar {
+    position: sticky;
+    bottom: 0;
+    background: #1f1f2f;
+    padding: 10px 0;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    border-top: 1px solid #3a3a4a;
+  }
+</style>
+</head>
+
+<body>
+<header>AI Smart Sorting Simulation</header>
+
+<!-- VALID TAB -->
+<section class="tab active" id="tab-valid">
+  <h2>Valid Granule</h2>
+
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+    <span style="font-size: 0.8em;">Opacity</span>
+    <label class="switch">
+      <input id="transparent-toggle" type="checkbox"/>
+      <span class="slider"></span>
+    </label>
+    <span style="font-size: 0.8em;">Transparent</span>
+  </div>
+
+  <div class="quick-map" id="valid-map"></div>
+  <div class="preview-box" id="valid-preview">RGB(128,128,128)</div>
+
+  <div class="slider-block">
+    <div class="slider-row"><label for="valid-r">Red</label><input id="valid-r" min="0" max="255" type="range" value="128"/></div>
+    <div class="slider-row"><label for="valid-g">Green</label><input id="valid-g" min="0" max="255" type="range" value="128"/></div>
+    <div class="slider-row"><label for="valid-b">Blue</label><input id="valid-b" min="0" max="255" type="range" value="128"/></div>
+  </div>
+</section>
+
+<!-- DEFECT TAB -->
+<section class="tab" id="tab-defect">
+  <h2>Defect Granule</h2>
+
+  <div class="quick-map" id="defect-map"></div>
+  <div class="preview-box" id="defect-preview">RGB(128,128,128)</div>
+
+  <div class="slider-block">
+    <div class="slider-row"><label for="defect-r">Red</label><input id="defect-r" min="0" max="255" type="range" value="128"/></div>
+    <div class="slider-row"><label for="defect-g">Green</label><input id="defect-g" min="0" max="255" type="range" value="128"/></div>
+    <div class="slider-row"><label for="defect-b">Blue</label><input id="defect-b" min="0" max="255" type="range" value="128"/></div>
+  </div>
+</section>
+
+<!-- ANALYSIS TAB -->
+<section class="tab" id="tab-analysis">
+  <h2>Analysis</h2>
+  <div class="scroll-container">
+    <div class="analysis-styled">
+
+      <div class="analysis-block">
+        <div class="label-box">Valid Granule</div>
+        <div class="preview-box" id="analysis-valid">#808080</div>
+      </div>
+
+      <div class="analysis-block">
+        <div class="label-box">Defect Granule</div>
+        <div class="preview-box" id="analysis-defect">#808080</div>
+      </div>
+
+      <div class="analysis-block">
+        <div class="label-box">Front Light</div>
+        <div class="preview-box" id="front-light-box">180</div>
+      </div>
+
+      <div class="analysis-block">
+        <div class="label-box">Back Light</div>
+        <div class="preview-box" id="back-light-box">160</div>
+      </div>
+
+      <div class="analysis-block">
+        <div class="label-box">Front Background</div>
+        <div class="preview-box" id="fgBackgroundBox">RGB(90,90,90)</div>
+      </div>
+
+      <div class="analysis-block">
+        <div class="label-box">Back Background</div>
+        <div class="preview-box" id="bgCameraBackgroundBox">RGB(90,90,90)</div>
+      </div>
+
+      <div class="analysis-block">
+        <div class="label-box">Sorting Program</div>
+        <div class="preview-box" id="sortingProgramBox">Program A</div>
+      </div>
+
+      <div class="analysis-block">
+        <div class="label-box">Analysis Channel</div>
+        <div class="preview-box" id="analysisChannelBox">Blue</div>
+      </div>
+
+      <div class="analysis-block">
+        <div class="label-box">Sensitivity (%)</div>
+        <div class="preview-box" id="sensitivityBox">50%</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SIMULATION TAB -->
+<section class="tab" id="tab-simulation">
+  <h2>Simulation</h2>
+
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <div style="border: 2px solid #4cc9f0; padding: 8px; border-radius: 10px; background-color: #0f172a;">
+      <h3 style="margin: 0; color: #90e0ef;">Front Camera Simulation</h3>
+      <canvas id="front-canvas" width="320" height="180" style="width: 100%; max-width: 100%; height: 130px;"></canvas>
+    </div>
+
+    <div style="border: 2px solid #f72585; padding: 8px; border-radius: 10px; background-color: #0f172a;">
+      <h3 style="margin: 0; color: #f72585;">Back Camera Simulation</h3>
+      <canvas id="back-canvas" width="320" height="180" style="width: 100%; max-width: 100%; height: 130px;"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- CAMERA TAB -->
+<section class="tab" id="tab-camera">
+  <h2 style="color: #aab0ff;">Camera / Upload Image</h2>
+
+  <input type="file" accept="image/*" id="image-upload"
+         style="width: 200px; height: 40px; border-radius: 8px; margin-bottom: 10px;" />
+
+  <div style="display: flex; justify-content: center; gap: 16px;">
+    <canvas id="preview" width="140" height="140"
+            style="border-radius: 12px; border: 2px solid #999; background: #000;"></canvas>
+
+    <div id="image-color-box"
+         style="width: 140px; height: 140px; display:flex; justify-content:center; align-items:center;
+                border-radius: 12px; background: #3a3a3a; color: white; font-weight: bold;">
+      RGB Preview
+    </div>
+  </div>
+
+  <button id="analyze-btn"
+          style="margin-top: 10px; width: 180px; height: 40px;">Analyze Image</button>
+
+  <div class="camera-save-bar">
+    <button id="save-valid-btn" style="width: 130px; height: 36px;">Save as Valid</button>
+    <button id="save-defect-btn" style="width: 130px; height: 36px;">Save as Defect</button>
+  </div>
+</section>
+
+<!-- SAVED TAB -->
+<section class="tab" id="tab-saved">
+  <h2 style="color: #faae52;">Saved Granules</h2>
+
+  <!-- Setups / Presets library -->
+  <div style="margin-bottom:16px; padding:10px; border:1px solid #3a3a4a; border-radius:10px; background:#181827;">
+    <h3 style="margin:0 0 8px; color:#faae52;">Saved Setups (Valid+Defect)</h3>
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+      <input id="setup-name" type="text" placeholder="Setup name..."
+             style="flex:1; min-width:160px; height:38px; border-radius:8px; border:1px solid #555; padding:0 8px;" />
+      <button id="save-setup-btn" style="height:38px; min-width:140px;">Save Current Setup</button>
+    </div>
+
+    <div id="setup-list" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;"></div>
+  </div>
+
+  <div id="saved-list" style="display:flex; flex-wrap:wrap; gap:12px; padding-top:10px;"></div>
+</section>
+
+<!-- NAV -->
+<nav>
+  <button onclick="switchTab('valid')">Valid</button>
+  <button onclick="switchTab('defect')">Defect</button>
+  <button onclick="switchTab('analysis')">Analysis</button>
+  <button onclick="switchTab('simulation')">Simulation</button>
+  <button onclick="switchTab('camera')">Camera</button>
+  <button onclick="switchTab('saved')">Saved</button>
+</nav>
+
+<script>
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+
+    document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+    const btn = document.querySelector('nav button[onclick*="' + tab + '"]');
+    btn.classList.add('active');
+
+    // bring active button into view on small screens
+    btn.scrollIntoView({behavior: "smooth", inline: "center"});
+  }
+
+  const COLORS = [
+    [255, 0, 0], [0, 255, 0], [0, 0, 255],
+    [255, 255, 0], [0, 255, 255], [255, 0, 255],
+    [128, 0, 0], [0, 128, 0], [0, 0, 128],
+    [255, 255, 255], [128, 128, 128], [0, 0, 0]
+  ];
+
+  function renderMap(prefix) {
+    const map = document.getElementById(`${prefix}-map`);
+    COLORS.forEach(([r, g, b]) => {
+      const dot = document.createElement('div');
+      dot.className = 'color-dot';
+      dot.style.background = `rgb(${r},${g},${b})`;
+      dot.onclick = () => {
+        document.getElementById(`${prefix}-r`).value = r;
+        document.getElementById(`${prefix}-g`).value = g;
+        document.getElementById(`${prefix}-b`).value = b;
+        updateAll(prefix);
+      };
+      map.appendChild(dot);
+    });
+  }
+
+  function updatePreview(prefix) {
+    const r = +document.getElementById(`${prefix}-r`).value;
+    const g = +document.getElementById(`${prefix}-g`).value;
+    const b = +document.getElementById(`${prefix}-b`).value;
+
+    const box = document.getElementById(`${prefix}-preview`);
+    box.style.background = `rgb(${r},${g},${b})`;
+    box.style.color = (r + g + b) / 3 < 128 ? '#fff' : '#000';
+    box.textContent = `RGB(${r},${g},${b})`;
+  }
+
+  function updateAll(prefix) {
+    if (prefix === 'valid' || prefix === 'defect') {
+      window.frontParticles = [];
+      window.backParticles = [];
+    }
+    updateAnalysis();
+    updatePreview(prefix);
+  }
+
+  ['valid','defect'].forEach(prefix => {
+    ['r','g','b'].forEach(ch => {
+      document.getElementById(`${prefix}-${ch}`).addEventListener('input', () => updateAll(prefix));
+    });
+    renderMap(prefix);
+    updateAll(prefix);
+  });
+
+  function updateAnalysis() {
+    updateSortingProgram();
+    updateChannel();
+    updateFrontBackground();
+    updateBackCameraBackground();
+    updateFrontLight();
+    updateBackLight();
+    updateGranuleDisplays();
+  }
+
+  function getLightValues() {
+    const isTransparent = document.getElementById('transparent-toggle')?.checked;
+    const front = isTransparent ? 0 : 180;
+    const back = isTransparent ? 255 : 160;
+    return { front, back };
+  }
+
+  function updateFrontBackground() {
+    const fgBox = document.getElementById('fgBackgroundBox');
+    if (!fgBox) return;
+
+    const r = +document.getElementById('valid-r').value;
+    const g = +document.getElementById('valid-g').value;
+    const b = +document.getElementById('valid-b').value;
+
+    const { front, back } = getLightValues();
+    const mix = ((front + back) / 2) / 255;
+
+    const rr = Math.round(r * mix);
+    const gg = Math.round(g * mix);
+    const bb = Math.round(b * mix);
+
+    fgBox.style.backgroundColor = `rgb(${rr},${gg},${bb})`;
+    fgBox.style.color = (rr + gg + bb) / 3 < 128 ? '#fff' : '#000';
+    fgBox.textContent = `RGB(${rr},${gg},${bb})`;
+  }
+
+  function updateBackCameraBackground() {
+    const bgCamBox = document.getElementById('bgCameraBackgroundBox');
+    if (!bgCamBox) return;
+
+    const r = +document.getElementById('valid-r').value;
+    const g = +document.getElementById('valid-g').value;
+    const b = +document.getElementById('valid-b').value;
+
+    const isTransparent = document.getElementById('transparent-toggle')?.checked;
+    const back = isTransparent ? 255 : 160;
+
+    const rr = Math.round(r * (back / 255));
+    const gg = Math.round(g * (back / 255));
+    const bb = Math.round(b * (back / 255));
+
+    bgCamBox.style.backgroundColor = `rgb(${rr},${gg},${bb})`;
+    bgCamBox.style.color = (rr + gg + bb) / 3 < 128 ? '#fff' : '#000';
+    bgCamBox.textContent = `RGB(${rr},${gg},${bb})`;
+  }
+
+  function updateFrontLight() {
+    const isTransparent = document.getElementById('transparent-toggle')?.checked;
+    const frontLightBox = document.getElementById('front-light-box');
+    if (!frontLightBox) return;
+
+    const value = isTransparent ? 0 : 180;
+    frontLightBox.textContent = value.toString();
+    frontLightBox.style.backgroundColor = `rgb(${value},${value},${value})`;
+    frontLightBox.style.color = value < 128 ? '#fff' : '#000';
+  }
+
+  function updateBackLight() {
+    const isTransparent = document.getElementById('transparent-toggle')?.checked;
+    const backLightBox = document.getElementById('back-light-box');
+    if (!backLightBox) return;
+
+    const value = isTransparent ? 255 : 160;
+    backLightBox.textContent = value.toString();
+    backLightBox.style.backgroundColor = `rgb(${value},${value},${value})`;
+    backLightBox.style.color = value < 128 ? '#fff' : '#000';
+  }
+
+  function updateGranuleDisplays() {
+    const validR = +document.getElementById('valid-r').value;
+    const validG = +document.getElementById('valid-g').value;
+    const validB = +document.getElementById('valid-b').value;
+    const defectR = +document.getElementById('defect-r').value;
+    const defectG = +document.getElementById('defect-g').value;
+    const defectB = +document.getElementById('defect-b').value;
+
+    const validHex = '#' + [validR, validG, validB].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+    const defectHex = '#' + [defectR, defectG, defectB].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+
+    const validBox = document.getElementById('analysis-valid');
+    const defectBox = document.getElementById('analysis-defect');
+
+    if (validBox) {
+      validBox.style.backgroundColor = `rgb(${validR},${validG},${validB})`;
+      validBox.style.color = (validR + validG + validB) / 3 < 128 ? '#fff' : '#000';
+      validBox.textContent = validHex;
+    }
+    if (defectBox) {
+      defectBox.style.backgroundColor = `rgb(${defectR},${defectG},${defectB})`;
+      defectBox.style.color = (defectR + defectG + defectB) / 3 < 128 ? '#fff' : '#000';
+      defectBox.textContent = defectHex;
+    }
+  }
+
+  function updateSortingProgram() {
+    const programBox = document.getElementById('sortingProgramBox');
+    if (!programBox) return;
+
+    const isTransparent = document.getElementById('transparent-toggle')?.checked;
+    const vr = +document.getElementById('valid-r')?.value || 0;
+    const vg = +document.getElementById('valid-g')?.value || 0;
+    const vb = +document.getElementById('valid-b')?.value || 0;
+    const dr = +document.getElementById('defect-r')?.value || 0;
+    const dg = +document.getElementById('defect-g')?.value || 0;
+    const db = +document.getElementById('defect-b')?.value || 0;
+
+    const deltaR = Math.abs(vr - dr);
+    const deltaG = Math.abs(vg - dg);
+    const deltaB = Math.abs(vb - db);
+    const maxDelta = Math.max(deltaR, deltaG, deltaB);
+
+    let program = "";
+    if (isTransparent) {
+      program = maxDelta > 100 ? "Chromatic Sensitivity 2" : "Chromatic Sensitivity 1";
+    } else {
+      if (deltaR >= deltaG && deltaR >= deltaB) {
+        program = dr > vr ? "Color Upper 1" : "Color Lower 1";
+      } else {
+        program = (deltaG >= deltaB)
+          ? (dg > vg ? "Color Upper 2" : "Color Lower 2")
+          : (db > vb ? "Color Upper 2" : "Color Lower 2");
+      }
+    }
+    programBox.textContent = program;
+  }
+
+  function updateChannel() {
+    const box = document.getElementById('analysisChannelBox');
+    if (!box) return;
+
+    const vr = +document.getElementById('valid-r')?.value || 0;
+    const vg = +document.getElementById('valid-g')?.value || 0;
+    const vb = +document.getElementById('valid-b')?.value || 0;
+    const dr = +document.getElementById('defect-r')?.value || 0;
+    const dg = +document.getElementById('defect-g')?.value || 0;
+    const db = +document.getElementById('defect-b')?.value || 0;
+
+    const deltaR = Math.abs(vr - dr);
+    const deltaG = Math.abs(vg - dg);
+    const deltaB = Math.abs(vb - db);
+
+    let channel = 'Red';
+    let bg = 'rgb(255, 80, 80)';
+    if (deltaG >= deltaR && deltaG >= deltaB) {
+      channel = 'Green'; bg = 'rgb(80, 255, 80)';
+    } else if (deltaB >= deltaR && deltaB >= deltaG) {
+      channel = 'Blue'; bg = 'rgb(80, 80, 255)';
+    }
+    box.textContent = channel;
+    box.style.backgroundColor = bg;
+    box.style.color = '#000';
+  }
+
+  document.getElementById('transparent-toggle')?.addEventListener('change', updateAnalysis);
+</script>
+
+<script>
+  // === Simulation (dual) ===
+  window.frontParticles = [];
+  window.backParticles = [];
+
+  function createParticle(color) {
+    return {
+      x: Math.random() * 300 + 10,
+      y: -10,
+      radius: 5,
+      color,
+      speed: Math.random() * 2 + 1
+    };
+  }
+
+  function updateParticles(ctx, particles, bgColor) {
+    ctx.clearRect(0, 0, 320, 180);
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, 320, 180);
+
+    for (let p of particles) {
+      p.y += p.speed;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+    }
+
+    ctx.fillStyle = "white";
+    ctx.font = "14px Arial";
+    ctx.fillText(bgColor, 10, 20);
+
+    return particles.filter(p => p.y < 180);
+  }
+
+  function getRGBFromBox(id) {
+    const box = document.getElementById(id);
+    if (!box) return "rgb(128,128,128)";
+    return window.getComputedStyle(box).getPropertyValue("background-color");
+  }
+
+  function runDualSimulation() {
+    updateAnalysis();
+
+    const frontCanvas = document.getElementById('front-canvas');
+    const backCanvas = document.getElementById('back-canvas');
+    const frontCtx = frontCanvas.getContext('2d');
+    const backCtx = backCanvas.getContext('2d');
+
+    setInterval(() => {
+      const fgColor = getRGBFromBox('fgBackgroundBox');
+      const bgColor = getRGBFromBox('bgCameraBackgroundBox');
+      const validColor = getRGBFromBox('analysis-valid');
+      const defectColor = getRGBFromBox('analysis-defect');
+
+      const rand = Math.random();
+      if (rand < 0.7) {
+        frontParticles.push(createParticle(validColor));
+        backParticles.push(createParticle(validColor));
+      } else {
+        frontParticles.push(createParticle(defectColor));
+        backParticles.push(createParticle(defectColor));
+      }
+
+      frontParticles = updateParticles(frontCtx, frontParticles, fgColor);
+      backParticles = updateParticles(backCtx, backParticles, bgColor);
+      window.frontParticles = frontParticles;
+      window.backParticles = backParticles;
+    }, 50);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    let started = false;
+    document.querySelector('nav button[onclick*="simulation"]')?.addEventListener('click', () => {
+      switchTab('simulation');
+      if (!started) {
+        runDualSimulation();
+        started = true;
+      }
+    });
+  });
+</script>
+
+<script>
+  // === Camera + Saved Granules ===
+  const fileInput = document.getElementById('image-upload');
+  const imgPreview = document.getElementById('preview');
+  const colorBox = document.getElementById('image-color-box');
+  const ctx = imgPreview.getContext('2d');
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const img = new Image();
+    img.onload = () => {
+      ctx.clearRect(0, 0, imgPreview.width, imgPreview.height);
+      ctx.drawImage(img, 0, 0, imgPreview.width, imgPreview.height);
+    };
+    img.src = URL.createObjectURL(file);
+  });
+
+  function analyzeImage() {
+    const data = ctx.getImageData(0, 0, imgPreview.width, imgPreview.height).data;
+    let r = 0, g = 0, b = 0, count = 0;
+
+    for (let i = 0; i < data.length; i += 4) {
+      r += data[i];
+      g += data[i + 1];
+      b += data[i + 2];
+      count++;
+    }
+
+    r = Math.round(r / count);
+    g = Math.round(g / count);
+    b = Math.round(b / count);
+
+    colorBox.textContent = `RGB(${r},${g},${b})`;
+    colorBox.style.backgroundColor = `rgb(${r},${g},${b})`;
+    colorBox.style.color = (r + g + b) / 3 < 128 ? '#fff' : '#000';
+  }
+
+  document.getElementById('analyze-btn').addEventListener('click', analyzeImage);
+
+  let savedGranules = JSON.parse(localStorage.getItem('granules') || "[]");
+
+  function saveGranule(type) {
+    const canvas = document.getElementById('preview');
+    const imageData = canvas.toDataURL("image/png");
+
+    const data = ctx.getImageData(0, 0, imgPreview.width, imgPreview.height).data;
+    let r = 0, g = 0, b = 0, count = 0;
+
+    for (let i = 0; i < data.length; i += 4) {
+      r += data[i];
+      g += data[i + 1];
+      b += data[i + 2];
+      count++;
+    }
+
+    r = Math.round(r / count);
+    g = Math.round(g / count);
+    b = Math.round(b / count);
+
+    const hex = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+
+    savedGranules.push({ type, image: imageData, rgb: [r, g, b], hex });
+    localStorage.setItem('granules', JSON.stringify(savedGranules));
+
+    renderSavedGranules();
+    switchTab('saved');
+
+    alert(`Saved as ${type.toUpperCase()} ✅`);
+  }
+
+  function renderSavedGranules() {
+    const container = document.getElementById('saved-list');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    savedGranules.forEach((g, index) => {
+      const div = document.createElement('div');
+      div.style.border = "1px solid #666";
+      div.style.borderRadius = "8px";
+      div.style.padding = "6px";
+      div.style.background = "#1e1e2e";
+      div.style.color = "#ccc";
+      div.style.width = "120px";
+      div.style.textAlign = "center";
+
+      const img = new Image();
+      img.src = g.image;
+      img.style.width = "100px";
+      img.style.height = "100px";
+      img.style.borderRadius = "6px";
+
+      const label = document.createElement("div");
+      label.textContent = g.type.toUpperCase();
+
+      const cbox = document.createElement("div");
+      cbox.style.backgroundColor = `rgb(${g.rgb[0]},${g.rgb[1]},${g.rgb[2]})`;
+      cbox.textContent = g.hex;
+      cbox.style.marginTop = "6px";
+      cbox.style.padding = "2px";
+      cbox.style.borderRadius = "4px";
+      cbox.style.fontSize = "12px";
+
+      const loadBtn = document.createElement("button");
+      loadBtn.textContent = "Load";
+      loadBtn.style.marginTop = "6px";
+      loadBtn.style.width = "100%";
+      loadBtn.onclick = () => {
+        const [rr, gg, bb] = g.rgb;
+        if (g.type === 'valid') {
+          document.getElementById('valid-r').value = rr;
+          document.getElementById('valid-g').value = gg;
+          document.getElementById('valid-b').value = bb;
+          updateAll('valid');
+          switchTab('valid');
+        } else {
+          document.getElementById('defect-r').value = rr;
+          document.getElementById('defect-g').value = gg;
+          document.getElementById('defect-b').value = bb;
+          updateAll('defect');
+          switchTab('defect');
+        }
+      };
+
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "Delete";
+      delBtn.style.marginTop = "6px";
+      delBtn.style.width = "100%";
+      delBtn.style.background = "#3a1f2b";
+      delBtn.style.color = "#ffb3c1";
+      delBtn.style.border = "1px solid #ff758f";
+      delBtn.style.borderRadius = "6px";
+      delBtn.onclick = () => {
+        savedGranules.splice(index, 1);
+        localStorage.setItem('granules', JSON.stringify(savedGranules));
+        renderSavedGranules();
+      };
+
+      div.appendChild(img);
+      div.appendChild(label);
+      div.appendChild(cbox);
+      div.appendChild(loadBtn);
+      div.appendChild(delBtn);
+      container.appendChild(div);
+    });
+  }
+
+  document.getElementById('save-valid-btn')?.addEventListener('click', () => saveGranule('valid'));
+  document.getElementById('save-defect-btn')?.addEventListener('click', () => saveGranule('defect'));
+
+  document.addEventListener("DOMContentLoaded", renderSavedGranules);
+</script>
+
+<script>
+  // ===== Saved Setups Library =====
+  let savedSetups = JSON.parse(localStorage.getItem('setups') || "[]");
+
+  function getCurrentSetup() {
+    const valid = [
+      +document.getElementById('valid-r').value,
+      +document.getElementById('valid-g').value,
+      +document.getElementById('valid-b').value
+    ];
+    const defect = [
+      +document.getElementById('defect-r').value,
+      +document.getElementById('defect-g').value,
+      +document.getElementById('defect-b').value
+    ];
+    const transparent = !!document.getElementById('transparent-toggle')?.checked;
+    return { valid, defect, transparent };
+  }
+
+  function saveCurrentSetup() {
+    const nameInput = document.getElementById('setup-name');
+    const name = (nameInput.value || "").trim() || `Setup ${savedSetups.length + 1}`;
+
+    const { valid, defect, transparent } = getCurrentSetup();
+
+    savedSetups.push({
+      name,
+      valid,
+      defect,
+      transparent,
+      createdAt: new Date().toISOString()
+    });
+
+    localStorage.setItem('setups', JSON.stringify(savedSetups));
+    nameInput.value = "";
+    renderSavedSetups();
+    alert(`Setup saved: ${name} ✅`);
+  }
+
+  function loadSetup(index) {
+    const s = savedSetups[index];
+    if (!s) return;
+
+    document.getElementById('valid-r').value = s.valid[0];
+    document.getElementById('valid-g').value = s.valid[1];
+    document.getElementById('valid-b').value = s.valid[2];
+
+    document.getElementById('defect-r').value = s.defect[0];
+    document.getElementById('defect-g').value = s.defect[1];
+    document.getElementById('defect-b').value = s.defect[2];
+
+    const tgl = document.getElementById('transparent-toggle');
+    if (tgl) tgl.checked = s.transparent;
+
+    updateAll('valid');
+    updateAll('defect');
+    updateAnalysis();
+
+    switchTab('analysis');
+  }
+
+  function deleteSetup(index) {
+    savedSetups.splice(index, 1);
+    localStorage.setItem('setups', JSON.stringify(savedSetups));
+    renderSavedSetups();
+  }
+
+  function renderSavedSetups() {
+    const container = document.getElementById('setup-list');
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    savedSetups.forEach((s, i) => {
+      const card = document.createElement("div");
+      card.style.width = "220px";
+      card.style.border = "1px solid #444";
+      card.style.borderRadius = "10px";
+      card.style.padding = "8px";
+      card.style.background = "#1e1e2e";
+      card.style.color = "#ccc";
+
+      const title = document.createElement("div");
+      title.style.fontWeight = "bold";
+      title.style.marginBottom = "6px";
+      title.textContent = s.name;
+
+      const vBox = document.createElement("div");
+      vBox.textContent = `Valid: RGB(${s.valid.join(",")})`;
+      vBox.style.background = `rgb(${s.valid[0]},${s.valid[1]},${s.valid[2]})`;
+      vBox.style.color = (s.valid[0]+s.valid[1]+s.valid[2])/3 < 128 ? "#fff" : "#000";
+      vBox.style.padding = "4px";
+      vBox.style.borderRadius = "6px";
+      vBox.style.marginBottom = "4px";
+
+      const dBox = document.createElement("div");
+      dBox.textContent = `Defect: RGB(${s.defect.join(",")})`;
+      dBox.style.background = `rgb(${s.defect[0]},${s.defect[1]},${s.defect[2]})`;
+      dBox.style.color = (s.defect[0]+s.defect[1]+s.defect[2])/3 < 128 ? "#fff" : "#000";
+      dBox.style.padding = "4px";
+      dBox.style.borderRadius = "6px";
+      dBox.style.marginBottom = "6px";
+
+      const meta = document.createElement("div");
+      meta.style.fontSize = "12px";
+      meta.style.opacity = "0.8";
+      meta.textContent = `Transparent: ${s.transparent ? "Yes" : "No"}`;
+
+      const loadBtn = document.createElement("button");
+      loadBtn.textContent = "Load Setup";
+      loadBtn.style.width = "100%";
+      loadBtn.style.marginTop = "6px";
+      loadBtn.onclick = () => loadSetup(i);
+
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "Delete Setup";
+      delBtn.style.width = "100%";
+      delBtn.style.marginTop = "6px";
+      delBtn.style.background = "#3a1f2b";
+      delBtn.style.color = "#ffb3c1";
+      delBtn.style.border = "1px solid #ff758f";
+      delBtn.style.borderRadius = "6px";
+      delBtn.onclick = () => deleteSetup(i);
+
+      card.appendChild(title);
+      card.appendChild(vBox);
+      card.appendChild(dBox);
+      card.appendChild(meta);
+      card.appendChild(loadBtn);
+      card.appendChild(delBtn);
+      container.appendChild(card);
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    renderSavedSetups();
+    document.getElementById("save-setup-btn")?.addEventListener("click", saveCurrentSetup);
+  });
+</script>
+
+</body>
+</html>
