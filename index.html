@@ -427,13 +427,6 @@
       max-width:320px;
       max-height:320px;
     }
-
-  /* interactive frozen capture */
-  #tab-camera #preview{
-    touch-action:none;
-    cursor:grab;
-  }
-  #tab-camera #preview.dragging{ cursor:grabbing; }
   }
 
   /* smaller RGB preview */
@@ -761,7 +754,6 @@ window.App = window.App || {
       <div class="cam-row" style="margin-top:10px;">
         <button id="open-camera-btn" class="cam-btn primary" onclick="openCamera()" type="button">Open Camera</button>
         <button id="capture-photo-btn" class="cam-btn" type="button" onclick="captureAndAnalyze()" disabled>Capture & Analyze</button>
-        <button id="reset-view-btn" class="cam-btn" type="button" onclick="resetFrozenView()" style="display:none;">Reset View</button>
         <button id="close-camera-btn" class="cam-btn danger" type="button" onclick="closeCamera()" style="display:none;">Close Camera</button>
       </div>
              <div class="cam-row" style="margin-top:8px;">
@@ -798,6 +790,23 @@ window.App = window.App || {
         <div class="cam-row" style="margin-top:10px;">
           <label id="upload-choose-btn" class="cam-btn primary" for="image-upload">Choose a picture</label>
 </div>
+</div>
+
+        <!-- Upload preview area (separate from live camera) -->
+        <div class="cam-view" style="margin-top:12px;">
+          <div class="cam-frame">
+            <canvas id="upload-preview" width="240" height="240"></canvas>
+            <div class="reticle-overlay square-mode" id="upload-reticle-overlay">
+              <div class="circle"></div>
+              <div class="square"></div>
+              <div class="hline"></div>
+              <div class="vline"></div>
+              <div class="dot"></div>
+              <div class="label">Center the granule inside the reticle (ROI)</div>
+            </div>
+          </div>
+        </div>
+
 
         <div class="cam-row" style="margin-top:8px;">
           <button id="save-valid-upload-btn" class="cam-btn" type="button">Save as Valid</button>
@@ -1333,13 +1342,14 @@ function renderSavedGranules(){
 }
 
 function capturePreviewDataURL(){
-
+  const canvas = document.getElementById('preview');
   if(!canvas) return null;
   try{ return canvas.toDataURL('image/jpeg', 0.8); }
   catch(e){ return null; }
 }
 
 function computeAverageRGB(){
+  const canvas = document.getElementById('preview');
   if(!canvas) return [0,0,0];
   const ctx = canvas.getContext('2d');
   const w=canvas.width, h=canvas.height;
@@ -1365,7 +1375,9 @@ function saveGranule(type){
   }
   window.__lastSaveKey = key;
   window.__lastSaveTs = now;
-if(!canvas) return;
+
+  const canvas = document.getElementById('preview');
+  if(!canvas) return;
   const ctx = canvas.getContext('2d');
   const w = canvas.width, h = canvas.height;
   if(w===0||h===0) return;
@@ -1412,45 +1424,7 @@ function attachCameraHandlers(){
     fileInput.onchange = (e)=>{
       const file = e.target.files?.[0];
       if(!file) return;
-      const img = new Image();
-      img.onload = ()=>{
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-
-  // keep preview size fixed (use CSS size)
-  const cw = canvas.clientWidth || 320;
-  const ch = canvas.clientHeight || 240;
-  canvas.width = cw;
-  canvas.height = ch;
-
-  ctx.clearRect(0,0,cw,ch);
-
-  // contain-fit the image inside preview
-  const ar = img.width / img.height;
-  const cr = cw / ch;
-  let dw=cw, dh=ch, dx=0, dy=0;
-  if(ar > cr){
-    dh = cw / ar;
-    dy = (ch - dh)/2;
-  } else {
-    dw = ch * ar;
-    dx = (cw - dw)/2;
-  }
-  ctx.drawImage(img, dx, dy, dw, dh);
-
-  // reset last analysis
-  window.lastAnalyzedRGB = null;
-  window.lastAnalyzedHex = null;
-  const colorBox = document.getElementById('image-color-box');
-  if(colorBox){
-    colorBox.textContent = '—';
-    colorBox.style.background = '#0f1324';
-    colorBox.style.color = '#e8e8ff';
-  }
-  // Auto analyze on upload
-  if(typeof analyzeImage==='function') analyzeImage();
-};
-      img.src = URL.createObjectURL(file);
+      handleUpload(file);
     };
   }
 
@@ -1460,7 +1434,14 @@ function attachCameraHandlers(){
   }
 
   if(analyzeBtn){
-    analyzeBtn.onclick = analyzeImage;
+    analyzeBtn.onclick = ()=>{
+      const uploadTab = document.getElementById('tab-upload');
+      if(uploadTab && uploadTab.classList.contains('active')){
+        analyzeImage('upload-preview','upload-reticle-overlay');
+      } else {
+        analyzeImage();
+      }
+    };
   }
 
   if(saveValidBtn){
@@ -1640,11 +1621,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 <script>
 /* ==== Fix Analyze Button (stable, no globals) ==== */
-function analyzeImage(canvasId='preview'){
-  const canvas = document.getElementById(canvasId);
-  
+function analyzeImage(canvasId='preview', reticleId=null){
+  const canvas = document.getElementById(canvasId) || document.getElementById('preview');
   if(!canvas){
-    console.warn("preview canvas not found");
+    console.warn('canvas not found for analyzeImage:', canvasId);
     return;
   }
   const ctx = canvas.getContext('2d');
@@ -1655,7 +1635,7 @@ function analyzeImage(canvasId='preview'){
   }
 
   // --- ROI settings from reticle overlay (if present) ---
-  const reticle = document.getElementById('reticle-overlay');
+  const reticle = reticleId ? document.getElementById(reticleId) : document.getElementById('reticle-overlay');
   const shape = (reticle && reticle.classList.contains('square-mode')) ? 'square' : 'circle';
   let frac = 0.58; // medium default
   if(reticle){
@@ -1786,7 +1766,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       
       // Fix40: always show Live video on open
       video.style.display = "block";
-      
+      const canvas = document.getElementById('preview');
       if(canvas) canvas.style.display = "none";
 if(capBtn) capBtn.disabled = false;
       if(closeBtn) closeBtn.style.display = "inline-block";
@@ -1820,7 +1800,7 @@ if(capBtn) capBtn.disabled = false;
       video.style.display = "none";
     }
     // Fix40: restore preview canvas
-    
+    const canvas = document.getElementById('preview');
     if(canvas) canvas.style.display = "block";
     if(capBtn) capBtn.disabled = true;
     if(closeBtn) closeBtn.style.display = "none";
@@ -1830,7 +1810,7 @@ if(capBtn) capBtn.disabled = false;
 
   function _captureAndAnalyze(){
     const video = document.getElementById('live-video');
-    
+    const canvas = document.getElementById('preview');
     if(!video || !canvas) return;
 
     const ctx = canvas.getContext('2d');
@@ -1961,129 +1941,6 @@ if(capBtn) capBtn.disabled = false;
 
   const getZoom = ()=>{ const z = parseFloat(localStorage.getItem("reticleZoom")||"1"); return (isFinite(z)&&z>0)?z:1; };
 
-  // frozen capture interactive state
-  let frozenBitmap = null;
-  let isFrozen = false;
-  let viewScale = 1;
-  let viewX = 0;
-  let viewY = 0;
-  let pointers = new Map();
-  let pinchStartDist = 0;
-  let pinchStartScale = 1;
-
-  function resetFrozenView(){
-    viewScale = 1; viewX = 0; viewY = 0;
-    renderFrozen();
-  }
-  window.resetFrozenView = resetFrozenView;
-
-
-  function renderFrozen(){
-    if(!isFrozen || !frozenBitmap) return;
-    const canvas = qs('preview');
-    if(!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const cw = canvas.width, ch = canvas.height;
-    const iw = frozenBitmap.width, ih = frozenBitmap.height;
-
-    ctx.save();
-    ctx.setTransform(1,0,0,1,0,0);
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0,0,cw,ch);
-
-    // base fit-to-cover scale so image fills canvas similarly to live view
-    const baseScale = Math.max(cw/iw, ch/ih);
-    const s = baseScale * viewScale;
-
-    const dx = (cw - iw*s)/2 + viewX;
-    const dy = (ch - ih*s)/2 + viewY;
-    ctx.drawImage(frozenBitmap, dx, dy, iw*s, ih*s);
-    ctx.restore();
-
-    if(typeof analyzeImage === 'function') analyzeImage();
-  }
-
-  function attachFrozenHandlers(){
-    const canvas = qs('preview');
-    if(!canvas || canvas._frozenHandlersAttached) return;
-    canvas._frozenHandlersAttached = true;
-
-    const clampScale = (v)=>Math.max(0.5, Math.min(8, v));
-
-    canvas.addEventListener('wheel', (e)=>{
-      if(!isFrozen) return;
-      e.preventDefault();
-      e.stopPropagation();
-      const rect = canvas.getBoundingClientRect();
-      const cx = e.clientX - rect.left;
-      const cy = e.clientY - rect.top;
-
-      const prevScale = viewScale;
-      const k = e.deltaY < 0 ? 1.08 : 0.92;
-      viewScale = clampScale(viewScale * k);
-
-      // zoom towards cursor
-      const zoomRatio = viewScale/prevScale;
-      viewX = (viewX - (cx - canvas.width/2)) * zoomRatio + (cx - canvas.width/2);
-      viewY = (viewY - (cy - canvas.height/2)) * zoomRatio + (cy - canvas.height/2);
-
-      renderFrozen();
-    }, {passive:false});
-
-    canvas.addEventListener('pointerdown', (e)=>{
-      if(!isFrozen) return;
-      e.preventDefault(); e.stopPropagation();
-      canvas.setPointerCapture(e.pointerId);
-      pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
-      if(pointers.size === 2){
-        const pts = Array.from(pointers.values());
-        pinchStartDist = Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
-        pinchStartScale = viewScale;
-      }
-      canvas.classList.add('dragging');
-    });
-
-    canvas.addEventListener('pointermove', (e)=>{
-      if(!isFrozen || !pointers.has(e.pointerId)) return;
-      e.preventDefault(); e.stopPropagation();
-      const prev = pointers.get(e.pointerId);
-      const dx = e.clientX - prev.x;
-      const dy = e.clientY - prev.y;
-      pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
-
-      if(pointers.size === 1){
-        viewX += dx;
-        viewY += dy;
-        renderFrozen();
-      }else if(pointers.size === 2){
-        const pts = Array.from(pointers.values());
-        const dist = Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
-        if(pinchStartDist > 0){
-          viewScale = clampScale(pinchStartScale * (dist/pinchStartDist));
-          renderFrozen();
-        }
-      }
-    });
-
-    const endPointer = (e)=>{
-      if(!isFrozen) return;
-      e.preventDefault(); e.stopPropagation();
-      if(pointers.has(e.pointerId)){
-        pointers.delete(e.pointerId);
-      }
-      if(pointers.size < 2){
-        pinchStartDist = 0;
-      }
-      if(pointers.size === 0){
-        canvas.classList.remove('dragging');
-      }
-    };
-    canvas.addEventListener('pointerup', endPointer);
-    canvas.addEventListener('pointercancel', endPointer);
-    canvas.addEventListener('pointerleave', endPointer);
-  }
-
-
   function enableLiveSaveButtons(on){
     const sv=qs('save-valid-live-btn'), sd=qs('save-defect-live-btn');
     if(sv) sv.disabled=!on;
@@ -2106,7 +1963,7 @@ if(capBtn) capBtn.disabled = false;
       if(capBtn) capBtn.disabled=false;
       if(closeBtn) closeBtn.style.display="inline-block";
       if(openBtn) openBtn.disabled=true;
-      isFrozen=false; frozenBitmap=null; const rb=qs("reset-view-btn"); if(rb) rb.style.display="none"; enableLiveSaveButtons(false);
+      enableLiveSaveButtons(false);
     }catch(e){
       alert("Camera access failed. Please allow camera permission.");
       console.warn(e);
@@ -2139,40 +1996,21 @@ if(capBtn) capBtn.disabled = false;
     const zcw = cw/zoom, zch = ch/zoom;
     if(ar>cr){ dh=zcw/ar; dy=(ch-dh*zoom)/2; dw=cw; } else { dw=ch*ar; dx=(cw-dw)/2; }
 
-    // draw current frame to preview
     ctx.fillStyle="#000"; ctx.fillRect(0,0,cw,ch);
     ctx.drawImage(video, dx, dy, dw, dh);
 
-    // freeze for interaction
-    (async ()=>{
-      try{
-        frozenBitmap = await createImageBitmap(canvas);
-      }catch(e){
-        const img = new Image();
-        img.onload = ()=>{ renderFrozen(); };
-        img.src = canvas.toDataURL("image/png");
-        frozenBitmap = img;
-      }
-      isFrozen = true;
-      viewScale = 1; viewX = 0; viewY = 0;
+    show(canvas); hide(video);
 
-      show(canvas); hide(video);
-      attachFrozenHandlers();
-
-      const resetBtn = qs('reset-view-btn');
-      if(resetBtn) resetBtn.style.display="inline-block";
-
-      renderFrozen();
-      enableLiveSaveButtons(true);
-    })();
+    if(typeof analyzeImage==='function') analyzeImage();
+    enableLiveSaveButtons(true);
   }
-
 
   function handleUpload(file){
     if(!file) return;
     const img=new Image();
     img.onload=()=>{
-      const canvas=qs('upload-preview'); if(!canvas) return;
+      const canvas=document.getElementById('upload-preview');
+      if(!canvas) return;
       const ctx=canvas.getContext('2d');
       const cw=canvas.clientWidth||240, ch=canvas.clientHeight||240;
       canvas.width=cw; canvas.height=ch;
@@ -2180,19 +2018,18 @@ if(capBtn) capBtn.disabled = false;
 
       const ar=img.width/img.height, cr=cw/ch;
       let dw=cw, dh=ch, dx=0, dy=0;
-    const zoom = getZoom();
-    const zcw = cw/zoom, zch = ch/zoom;
-      if(ar>cr){ dh=zcw/ar; dy=(ch-dh*zoom)/2; dw=cw; } else { dw=ch*ar; dx=(cw-dw)/2; }
+      if(ar>cr){ dh=cw/ar; dy=(ch-dh)/2; dw=cw; } else { dw=ch*ar; dx=(cw-dw)/2; dh=ch; }
 
       ctx.fillStyle="#000"; ctx.fillRect(0,0,cw,ch);
       ctx.drawImage(img, dx, dy, dw, dh);
 
-      show(canvas); hide(qs('live-video'));
-      if(typeof analyzeImage==='function') analyzeImage();
+      show(canvas);
+      if(typeof analyzeImage==='function') analyzeImage('upload-preview','upload-reticle-overlay');
       enableLiveSaveButtons(true);
     };
     img.src=URL.createObjectURL(file);
   }
+
 
   function bind(){
     // live buttons
@@ -2211,7 +2048,7 @@ if(capBtn) capBtn.disabled = false;
     if(upload){
       upload.onchange=(e)=>handleUpload(e.target.files?.[0]);    }    // Upload choose button is a <label for='image-upload'> to prefer gallery on mobile.
     const analyzeBtn=qs('analyze-btn');
-    if(analyzeBtn) analyzeBtn.onclick=()=>{ if(typeof analyzeImage==='function') analyzeImage('upload-preview'); enableLiveSaveButtons(true); };
+    if(analyzeBtn) analyzeBtn.onclick=()=>{ if(typeof analyzeImage==='function') analyzeImage(); enableLiveSaveButtons(true); };
 
     // save sample buttons in upload pane
     const sv=qs('save-valid-btn'), sd=qs('save-defect-btn');
@@ -2407,5 +2244,4 @@ if(capBtn) capBtn.disabled = false;
 </script>
 
 </body>
-</html>.cam-frame-canvas{width:100%;height:100%;display:block;}
-#preview{touch-action:none;}
+</html>
