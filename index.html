@@ -2133,6 +2133,42 @@ nav button.active::after{
 }
 /* ===== End Video Manuals ===== */
 
+
+/* ===== Mobile fit fixes (Android/iPhone) ===== */
+@media (max-width: 520px){
+  /* Bottom nav: avoid 'Simula…' */
+  .legacy-nav button{
+    white-space: normal !important;
+    text-overflow: clip !important;
+    overflow: hidden !important;
+    height: 42px !important;
+    line-height: 1.05 !important;
+    padding: 6px 4px !important;
+    font-size: 11px !important;
+  }
+}
+@media (max-width: 420px){
+  /* RGB/Tone/Sat lines: keep everything within one screen, no horizontal scroll */
+  .fp-line{
+    grid-template-columns: 28px 1fr !important;
+    grid-template-rows: auto auto !important;
+    gap: 6px 10px !important;
+    align-items: center !important;
+  }
+  .fp-line input[type="range"]{ grid-column: 2 / 3 !important; grid-row: 1 / 2 !important; width:100% !important; min-width:0 !important; }
+  .fp-line .fp-label{ grid-column: 1 / 2 !important; grid-row: 1 / 2 !important; }
+  .fp-line .fp-val{
+    grid-column: 2 / 3 !important;
+    grid-row: 2 / 3 !important;
+    text-align: right !important;
+    justify-self: end !important;
+    padding-right: 2px !important;
+  }
+  /* Prevent any accidental sideways scroll */
+  html, body{ overflow-x: hidden !important; }
+  #app, .container, .tab{ overflow-x: hidden !important; }
+}
+
 </style>
 </head>
 

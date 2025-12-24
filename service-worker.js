@@ -1,4 +1,4 @@
-const CACHE = "granule-app-v1";
+const CACHE = "manor-autopilot-v4";
 const ASSETS = [
   "./",
   "./index.html",
