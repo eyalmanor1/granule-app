@@ -644,7 +644,6 @@
 .quick-map{display:none !important;}
 
 
-
 /* ===== QA TAB (Fix v2: scrollable + no overlap on Android) ===== */
 #tab-qa{
   padding:12px;
@@ -1023,7 +1022,6 @@
 .qa2-kpi.qa2-score-hero .qa2-kvalue{ font-size:28px; }
 .qa2-scorebar{height:10px; border-radius:999px; background:rgba(255,255,255,.10); overflow:hidden; margin-top:6px;}
 .qa2-scorebar > div{height:100%; width:0%; background:#faae52;}
-
 
 
 /* QA Visual – compact & 3D */
@@ -2023,7 +2021,6 @@ nav button.active::after{
 /* ===== End Fit-on-one-screen pack ===== */
 
 
-
 /* ===== Video Manuals (Tools) – card list + large player modal ===== */
 .manuals-list{
   display:flex;
@@ -2399,6 +2396,73 @@ html[dir="rtl"] body{ direction: rtl; text-align: right; }
   html, body{ overflow-x:hidden !important; }
 }
 
+
+  /* ===== Tools: Light meters (Color Temp / Flicker / Spectrometer) ===== */
+  .tool-wrap{ display:flex; flex-direction:column; gap:12px; }
+  .tool-card{
+    background:#161a2b;
+    border:1px solid #2f3350;
+    border-radius:12px;
+    padding:12px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.25);
+  }
+  .tool-top{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .tool-title{
+    font-size:15px; color:#faae52; font-weight:800;
+  }
+  .tool-readout{
+    font-size:44px; font-weight:900; color:#cbd5ff; letter-spacing:0.5px;
+    line-height:1;
+  }
+  .tool-unit{ font-size:14px; opacity:0.8; margin-right:6px; }
+  .tool-sub{ font-size:13px; opacity:0.85; margin-top:6px; color:#cbd5ff;}
+  .tool-preview{
+    position:relative;
+    width:100%;
+    aspect-ratio: 16 / 9;
+    background:#000;
+    border-radius:12px;
+    border:2px solid #2a2e48;
+    overflow:hidden;
+  }
+  .tool-preview canvas{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .tool-overlay{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:900; font-size:22px;
+    color:#ff5b5b;
+    text-shadow:0 2px 8px rgba(0,0,0,0.8);
+    background:rgba(0,0,0,0.15);
+    padding:10px;
+    text-align:center;
+  }
+  .tool-scale{
+    margin-top:10px;
+    height:14px;
+    border-radius:999px;
+    border:1px solid #2a2e48;
+    background:linear-gradient(to right, #fca17d 0%, #fca17d 25%, #cbd5ff 55%, #7aa0ff 100%);
+    position:relative;
+    overflow:hidden;
+  }
+  .tool-needle{
+    position:absolute; top:-4px;
+    width:2px; height:22px;
+    background:#fff;
+    box-shadow:0 0 10px rgba(255,255,255,0.45);
+    transform:translateX(-1px);
+  }
+  .tool-scale-labels{
+    display:flex; justify-content:space-between;
+    font-size:11px; opacity:0.75; margin-top:6px;
+  }
+  .tool-mini-note{ font-size:12px; opacity:0.75; margin-top:8px; }
+
+
+  
+
 </style>
 </head>
 
@@ -2697,7 +2761,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   initFamilyPicker('valid');
   initFamilyPicker('defect');
 });
-
 
 
 // ===== Mock IoT Dashboard =====
@@ -3513,7 +3576,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
 </section>
 
 
-
 <!-- ANALYSIS TAB -->
 <section class="tab" id="tab-analysis">
   <h2>Analyze / Signal Settings</h2>
@@ -3791,6 +3853,104 @@ document.addEventListener('DOMContentLoaded', ()=>{
 </section>
 
 
+<section class="tab" id="tab-colorTemp">
+  <h2 style="color:#faae52; margin-bottom:6px;">Color Temperature</h2>
+
+  <div class="tool-wrap">
+    <div class="tool-card">
+      <div class="tool-top">
+        <div class="tool-title">CCT</div>
+        <div>
+          <span class="tool-readout" id="ct-kelvin">—</span>
+          <span class="tool-unit">K</span>
+        </div>
+      </div>
+      <div class="tool-scale" aria-hidden="true">
+        <div class="tool-needle" id="ct-needle" style="left:25%;"></div>
+      </div>
+      <div class="tool-scale-labels">
+        <div>Warm White</div><div>Neutral</div><div>Cold White</div>
+      </div>
+      <div class="tool-sub">Δuv (Magenta/Green shift): <b id="ct-duv">—</b></div>
+      <div class="tool-mini-note">מדידה מקורבת מתוך המצלמה. לקבלת דיוק גבוה – יש להשתמש בחיישן ייעודי.</div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-title" style="margin-bottom:8px;">Live Preview</div>
+      <div class="tool-preview">
+        <canvas id="ct-preview" width="640" height="360"></canvas>
+        <div class="tool-overlay" id="ct-overlay" hidden>Too dark to make a reliable measurement</div>
+      </div>
+
+      <div class="cam-row" style="margin-top:10px;">
+        <button class="cam-btn primary" type="button" onclick="openCamera()" dir="ltr">Open Camera</button>
+        <button class="cam-btn danger" type="button" onclick="closeCamera()" dir="ltr">Close Camera</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tab" id="tab-flicker">
+  <h2 style="color:#faae52; margin-bottom:6px;">Flicker Meter</h2>
+
+  <div class="tool-wrap">
+    <div class="tool-card">
+      <div class="tool-top">
+        <div class="tool-title">Flickering</div>
+        <div>
+          <span class="tool-readout" id="flk-pct">—</span><span class="tool-unit">%</span>
+        </div>
+      </div>
+      <div class="tool-sub">Estimated frequency: <b id="flk-hz">—</b> Hz</div>
+      <div class="tool-mini-note">המדידה מבוססת על תנודות בהירות בפריימים מהמצלמה (הערכה).</div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-title" style="margin-bottom:8px;">Live Preview</div>
+      <div class="tool-preview">
+        <canvas id="flk-preview" width="640" height="360"></canvas>
+        <div class="tool-overlay" id="flk-overlay" hidden>Too dark to make a reliable measurement</div>
+      </div>
+
+      <div class="cam-row" style="margin-top:10px;">
+        <button class="cam-btn primary" type="button" onclick="openCamera()" dir="ltr">Open Camera</button>
+        <button class="cam-btn danger" type="button" onclick="closeCamera()" dir="ltr">Close Camera</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tab" id="tab-spectrometer">
+  <h2 style="color:#faae52; margin-bottom:6px;">Light Spectrometer</h2>
+
+  <div class="tool-wrap">
+    <div class="tool-card">
+      <div class="tool-top">
+        <div class="tool-title">Dominant Wavelength</div>
+        <div>
+          <span class="tool-readout" id="sp-nm">—</span><span class="tool-unit">nm</span>
+        </div>
+      </div>
+      <div class="tool-sub">Color saturation: <b id="sp-sat">—</b>%</div>
+      <div class="tool-mini-note">מיפוי גוון (Hue) לגל אורך-גל משוער (לא ספקטרומטר אמיתי).</div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-title" style="margin-bottom:8px;">Live Preview</div>
+      <div class="tool-preview">
+        <canvas id="sp-preview" width="640" height="360"></canvas>
+        <div class="tool-overlay" id="sp-overlay" hidden>Too dark to make a reliable measurement</div>
+      </div>
+
+      <div class="cam-row" style="margin-top:10px;">
+        <button class="cam-btn primary" type="button" onclick="openCamera()" dir="ltr">Open Camera</button>
+        <button class="cam-btn danger" type="button" onclick="closeCamera()" dir="ltr">Close Camera</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
 <section class="tab" id="tab-upload">
   <h2 style="color:#faae52; margin-bottom:6px;">Upload</h2>
 
@@ -3907,12 +4067,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     </div>
   </details>
 </section>
-
-
-
-
-
-
 
 
 <!-- QA TAB -->
@@ -4467,6 +4621,9 @@ if(tab === 'simulation' && typeof runDualSimulation === 'function'){
       { label: 'Defect', tab: 'defect' }
     ],
     tools: [
+      { label: 'Color Temp', tab: 'colorTemp' },
+      { label: 'Flicker',    tab: 'flicker' },
+      { label: 'Spectrometer', tab: 'spectrometer' },
       { label: 'QA',          tab: 'qa'     },
       { label: 'Saved',       tab: 'saved'  },
       { label: 'Upload',      tab: 'upload' },
@@ -4685,9 +4842,6 @@ function updateAll(prefix) {
       b: Math.max(0, Math.min(50, Math.round(b * 50 / 255))),
     };
   }
-
-
-
 
 
   function clampRgbToMax(r,g,b,maxVal){
@@ -4949,7 +5103,6 @@ if(tLabel){
 
     return { mode: 'chromatic', maxDelta: arr[0].v, secondDelta: arr[1].v, arr };
   }
-
 
 
   function updateSortingProgram() {
@@ -5496,9 +5649,6 @@ function computeAverageRGB(){
 }
 
 
-
-
-
 /* Upload handler */
 function attachCameraHandlers(){
   if(window.__cameraHandlersAttached) return;
@@ -5960,7 +6110,8 @@ if(capBtn) capBtn.disabled = false;
       const _old = window.switchTab;
       window.switchTab = function(tab){
         _old(tab);
-        if(tab !== 'camera') _closeCamera();
+        const keepCamTabs = new Set(['camera','colorTemp','flicker','spectrometer']);
+        if(!keepCamTabs.has(tab)) _closeCamera();
       };
     }
   });
@@ -6787,7 +6938,6 @@ function bind(){
   });
 })();
 </script>
-
 
 
 <script>
@@ -7644,6 +7794,220 @@ document.addEventListener('DOMContentLoaded', ()=>{
       try{ if(typeof switchTab === 'function') switchTab('camera'); try{ if(typeof openCamera==='function') openCamera(); }catch(e){} }catch(e){}
     }
   });
+})();
+</script>
+
+
+<script>
+/* ===== Tools meters engine (ColorTemp / Flicker / Spectrometer) ===== */
+(function(){
+  const $ = (id)=>document.getElementById(id);
+
+  const samp = document.createElement('canvas');
+  const sctx = samp.getContext('2d', { willReadFrequently:true });
+
+  function sampleROI(video, w=80, h=80){
+    if(!video || video.readyState < 2) return null;
+    samp.width = w; samp.height = h;
+
+    const vw = video.videoWidth || 0;
+    const vh = video.videoHeight || 0;
+    if(!vw || !vh) return null;
+
+    const sx = Math.max(0, (vw - w) / 2);
+    const sy = Math.max(0, (vh - h) / 2);
+
+    sctx.drawImage(video, sx, sy, w, h, 0, 0, w, h);
+    const img = sctx.getImageData(0,0,w,h).data;
+
+    let r=0,g=0,b=0, y=0;
+    const n = w*h;
+    for(let i=0;i<img.length;i+=4){
+      const rr=img[i], gg=img[i+1], bb=img[i+2];
+      r+=rr; g+=gg; b+=bb;
+      y += 0.2126*rr + 0.7152*gg + 0.0722*bb;
+    }
+    return { r:r/n, g:g/n, b:b/n, lum:y/n };
+  }
+
+  function clamp(x,a,b){ return Math.max(a, Math.min(b,x)); }
+
+  function srgbToLinear(c){
+    c = c/255;
+    return (c <= 0.04045) ? (c/12.92) : Math.pow((c+0.055)/1.055, 2.4);
+  }
+
+  function rgbToCct(r,g,b){
+    const R=srgbToLinear(r), G=srgbToLinear(g), B=srgbToLinear(b);
+    const X = 0.4124*R + 0.3576*G + 0.1805*B;
+    const Y = 0.2126*R + 0.7152*G + 0.0722*B;
+    const Z = 0.0193*R + 0.1192*G + 0.9505*B;
+
+    const sum = X+Y+Z;
+    if(sum <= 1e-6) return null;
+    const x = X/sum;
+    const y = Y/sum;
+
+    const n = (x - 0.3320) / (0.1858 - y);
+    const cct = (-449*Math.pow(n,3)) + (3525*Math.pow(n,2)) - (6823.3*n) + 5520.33;
+    return clamp(cct, 1000, 12000);
+  }
+
+  function rgbToDuvProxy(r,g,b){
+    const duv = ((g - (r+b)/2) / 255) * 0.06;
+    return clamp(duv, -0.08, 0.08);
+  }
+
+  function rgbToHsv(r,g,b){
+    r/=255; g/=255; b/=255;
+    const max=Math.max(r,g,b), min=Math.min(r,g,b);
+    const d=max-min;
+    let h=0;
+    if(d===0) h=0;
+    else if(max===r) h=((g-b)/d)%6;
+    else if(max===g) h=(b-r)/d + 2;
+    else h=(r-g)/d + 4;
+    h = (h*60 + 360) % 360;
+    const s = (max===0)?0:d/max;
+    const v = max;
+    return {h,s,v};
+  }
+
+  function hueToWavelength(h){
+    const pts = [
+      {h:0, nm:650},
+      {h:60, nm:580},
+      {h:120, nm:530},
+      {h:180, nm:500},
+      {h:240, nm:460},
+      {h:300, nm:400},
+      {h:360, nm:650},
+    ];
+    for(let i=0;i<pts.length-1;i++){
+      const a=pts[i], b=pts[i+1];
+      if(h>=a.h && h<=b.h){
+        const t=(h-a.h)/(b.h-a.h || 1);
+        return a.nm + t*(b.nm-a.nm);
+      }
+    }
+    return 550;
+  }
+
+  const flick = [];
+  function flickerUpdate(lum, t){
+    flick.push({t, lum});
+    while(flick.length && (t - flick[0].t) > 2500) flick.shift();
+    if(flick.length < 15) return null;
+
+    let min=1e9, max=-1e9;
+    for(const p of flick){ min=Math.min(min,p.lum); max=Math.max(max,p.lum); }
+    const pct = (max+min>1e-6) ? ((max-min)/(max+min))*100 : 0;
+
+    const ys = flick.map(p=>p.lum);
+    const mean = ys.reduce((a,b)=>a+b,0)/ys.length;
+    const xs = ys.map(v=>v-mean);
+    const ts = flick.map(p=>p.t);
+    const dt = (ts[ts.length-1]-ts[0])/(ts.length-1 || 1);
+    if(!isFinite(dt) || dt<=0) return {pct, hz:null};
+
+    const N = xs.length;
+    let bestLag = 0;
+    let bestCorr = 0;
+    const maxLag = Math.floor(N/2);
+    for(let lag=2; lag<maxLag; lag++){
+      let c=0;
+      for(let i=0;i<N-lag;i++) c += xs[i]*xs[i+lag];
+      if(c > bestCorr){ bestCorr = c; bestLag = lag; }
+    }
+    const periodMs = bestLag ? (bestLag*dt) : null;
+    const hz = periodMs ? (1000/periodMs) : null;
+    return { pct, hz };
+  }
+
+  function drawPreview(video, canvas){
+    if(!canvas || !video || video.readyState < 2) return;
+    const ctx = canvas.getContext('2d');
+    const cw = canvas.width, ch = canvas.height;
+    const vw = video.videoWidth, vh = video.videoHeight;
+    if(!vw || !vh) return;
+
+    const cr = cw/ch, vr = vw/vh;
+    let sw=vw, sh=vh, sx=0, sy=0;
+    if(vr > cr){
+      sh = vh; sw = vh*cr; sx = (vw - sw)/2;
+    }else{
+      sw = vw; sh = vw/cr; sy = (vh - sh)/2;
+    }
+    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch);
+  }
+
+  function loop(){
+    const video = document.getElementById('live-video');
+    const active = document.querySelector('.tab.active')?.id || '';
+    const isCT = active === 'tab-colorTemp';
+    const isF  = active === 'tab-flicker';
+    const isSP = active === 'tab-spectrometer';
+
+    if(!(isCT || isF || isSP)){
+      requestAnimationFrame(loop);
+      return;
+    }
+
+    const roi = sampleROI(video, 96, 96);
+    const now = performance.now();
+    const dark = (!roi) || (roi.lum < 18);
+
+    if(isCT){
+      const c=$('ct-preview'); if(c) drawPreview(video,c);
+      const ov=$('ct-overlay'); if(ov) ov.hidden=!dark;
+      if(!dark && roi){
+        const cct = rgbToCct(roi.r, roi.g, roi.b);
+        const duv = rgbToDuvProxy(roi.r, roi.g, roi.b);
+        if(cct){
+          $('ct-kelvin').textContent = Math.round(cct).toString();
+          $('ct-duv').textContent = (duv>=0?'+':'') + duv.toFixed(3);
+          const pct = clamp((cct-2500)/(7500-2500),0,1)*100;
+          const needle=$('ct-needle'); if(needle) needle.style.left = pct.toFixed(1)+'%';
+        }
+      }else{
+        $('ct-kelvin').textContent='—';
+        $('ct-duv').textContent='—';
+      }
+    }
+
+    if(isF){
+      const c=$('flk-preview'); if(c) drawPreview(video,c);
+      const ov=$('flk-overlay'); if(ov) ov.hidden=!dark;
+      if(!dark && roi){
+        const res = flickerUpdate(roi.lum, now);
+        if(res){
+          $('flk-pct').textContent = clamp(res.pct,0,100).toFixed(0);
+          $('flk-hz').textContent  = res.hz ? res.hz.toFixed(0) : '—';
+        }
+      }else{
+        $('flk-pct').textContent='—';
+        $('flk-hz').textContent='—';
+      }
+    }
+
+    if(isSP){
+      const c=$('sp-preview'); if(c) drawPreview(video,c);
+      const ov=$('sp-overlay'); if(ov) ov.hidden=!dark;
+      if(!dark && roi){
+        const hsv = rgbToHsv(roi.r, roi.g, roi.b);
+        const nm = hueToWavelength(hsv.h);
+        $('sp-nm').textContent  = Math.round(clamp(nm,380,700)).toString();
+        $('sp-sat').textContent = Math.round(clamp(hsv.s,0,1)*100).toString();
+      }else{
+        $('sp-nm').textContent='—';
+        $('sp-sat').textContent='—';
+      }
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=>{ requestAnimationFrame(loop); });
 })();
 </script>
 
