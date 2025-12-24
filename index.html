@@ -2314,89 +2314,102 @@ html[dir="rtl"] body{ direction: rtl; text-align: right; }
 .rtl, [dir="rtl"]{ direction:rtl; unicode-bidi:isolate; text-align:right; }
 
 
-/* ===== Mobile: Granules sliders layout fix (avoid overlap) ===== */
+/* ===== Mobile Redesign: Valid Granule Parameter Focus (UI only) ===== */
 @media (max-width: 520px){
-  .fp-line{
-    grid-template-columns: 36px 1fr !important;
-    gap: 8px !important;
-    position: relative !important;
-    padding-inline: 54px !important;  /* reserve space for step buttons on both sides if present */
-    min-width: 0 !important;
+  #tab-valid .family-picker{ margin-top: 10px; }
+  #tab-valid .fp-title{ font-size: 14px; opacity:.9; }
+  #tab-valid .fp-controls.pf-enabled{
+    padding-top: 10px;
   }
-  .fp-line input[type="range"]{ width:100% !important; min-width:0 !important; }
-  .fp-line .fp-val{
-    position:absolute !important;
-    inset-inline-start: 6px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    width: 44px !important;
-    text-align: center !important;
-    padding: 2px 6px !important;
-    border-radius: 10px !important;
-    background: rgba(0,0,0,0.32) !important;
-    border: 1px solid rgba(255,255,255,0.14) !important;
-    pointer-events:none !important;
+  #tab-valid .pf-tabs{
+    display:flex;
+    gap:8px;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    padding: 0 2px 10px;
+    -webkit-overflow-scrolling: touch;
   }
-  /* Hard stop for sideways scrolling */
-  html, body{ overflow-x:hidden !important; }
-}
+  #tab-valid .pf-tab{
+    flex:0 0 auto;
+    padding:8px 12px;
+    border-radius: 999px;
+    border:1px solid rgba(255,255,255,0.14);
+    background: rgba(0,0,0,0.18);
+    color: rgba(255,255,255,0.88);
+    font-weight: 800;
+    font-size: 12px;
+    cursor:pointer;
+  }
+  #tab-valid .pf-tab.active{
+    border-color: rgba(250,174,82,0.55);
+    box-shadow: 0 0 0 2px rgba(250,174,82,0.14) inset;
+    color:#fff;
+  }
 
+  #tab-valid .pf-card{
+    position:relative;
+    border-radius: 22px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(10,14,28,0.55);
+    box-shadow: 0 18px 55px rgba(0,0,0,0.45);
+    padding: 14px 14px 16px;
+  }
 
-/* ===== Granules UX redesign (mobile) ===== */
-@media (max-width: 520px){
-  /* keep preview strip on top - no change */
-  .fp-line{
-    display:grid !important;
-    grid-template-columns: 1fr auto !important;
-    grid-template-rows: auto auto !important;
-    gap: 8px 10px !important;
-    align-items:center !important;
-    padding: 10px 10px 12px !important;
-    border-radius: 16px !important;
-    border: 1px solid rgba(255,255,255,0.10) !important;
-    background: rgba(255,255,255,0.04) !important;
-    margin-top: 10px !important;
+  #tab-valid .pf-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom: 12px;
   }
-  .fp-label{ grid-column:1; grid-row:1; font-weight:800 !important; opacity:.9 !important; }
-  .fp-val{
-    grid-column:2; grid-row:1;
-    justify-self:end;
-    min-width: 52px;
-    text-align:center !important;
-    padding: 4px 8px !important;
-    border-radius: 12px !important;
-    background: rgba(0,0,0,0.28) !important;
-    border: 1px solid rgba(255,255,255,0.12) !important;
+  #tab-valid .pf-name{
+    font-size: 14px;
+    font-weight: 900;
+    opacity: .92;
   }
-  .fp-sliderwrap{
-    grid-column:1 / 3 !important;
-    grid-row:2 !important;
-    display:grid !important;
-    grid-template-columns: 1fr 44px !important;
-    grid-template-rows: 1fr 1fr !important;
-    gap: 10px !important;
-    align-items:center !important;
+  #tab-valid .pf-value{
+    min-width: 60px;
+    text-align:center;
+    font-weight: 900;
+    font-size: 14px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.28);
+    border:1px solid rgba(255,255,255,0.14);
   }
-  .fp-sliderwrap input[type=range]{
-    grid-column:1 !important;
-    grid-row:1 / 3 !important;
+
+  #tab-valid .pf-body{
+    display:grid;
+    grid-template-columns: 1fr 52px;
+    gap: 12px;
+    align-items:center;
+  }
+
+  #tab-valid .pf-slider input[type="range"]{
     width:100% !important;
-    min-width:0 !important;
   }
-  .fp-sliderwrap .fp-step{
-    width:42px !important;
-    height:42px !important;
-    line-height:42px !important;
-    font-size:18px !important;
-    border-radius: 14px !important;
-    background: rgba(255,255,255,0.10) !important;
-  }
-  /* stack arrows on the right (plus on top, minus bottom) */
-  .fp-sliderwrap button.fp-step:first-child{ grid-column:2 !important; grid-row:2 !important; }
-  .fp-sliderwrap button.fp-step:last-child{  grid-column:2 !important; grid-row:1 !important; }
 
-  /* Prevent overlap + keep everything inside screen */
-  html, body{ overflow-x:hidden !important; }
+  #tab-valid .pf-steps{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    align-items:stretch;
+  }
+  #tab-valid .pf-step{
+    height:44px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,0.14);
+    background: rgba(0,0,0,0.18);
+    color:#fff;
+    font-size: 18px;
+    font-weight: 900;
+    cursor:pointer;
+  }
+  #tab-valid .pf-step:active{ transform: scale(0.98); }
+
+  /* Hide old stacked lines when PF enabled */
+  #tab-valid .fp-controls.pf-enabled .fp-line{ display:none; }
+  #tab-valid .fp-controls.pf-enabled .fp-hint{ font-size: 12px; opacity:.8; margin-top:10px; }
 }
 
 </style>
@@ -7643,6 +7656,162 @@ document.addEventListener('DOMContentLoaded', ()=>{
       // Always start on camera
       try{ if(typeof switchTab === 'function') switchTab('camera'); try{ if(typeof openCamera==='function') openCamera(); }catch(e){} }catch(e){}
     }
+  });
+})();
+</script>
+
+
+<script>
+(() => {
+  function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+  function stepInput(input, delta){
+    const min = input.min !== "" ? Number(input.min) : 0;
+    const max = input.max !== "" ? Number(input.max) : 100;
+    const step = input.step !== "" ? Number(input.step) : 1;
+    const cur = Number(input.value);
+    const next = clamp(cur + delta*step, min, max);
+    input.value = String(next);
+    input.dispatchEvent(new Event('input', {bubbles:true}));
+    input.dispatchEvent(new Event('change', {bubbles:true}));
+  }
+
+  function buildValidPF(){
+    const tab = document.getElementById('tab-valid');
+    if(!tab) return;
+
+    // Only mobile
+    if(window.matchMedia('(max-width: 520px)').matches === false) return;
+
+    const controls = tab.querySelector('.fp-controls');
+    if(!controls || controls.classList.contains('pf-enabled')) return;
+
+    const lines = Array.from(controls.querySelectorAll('.fp-line'));
+    if(lines.length < 5) return;
+
+    const tone = lines.find(l => l.querySelector('#valid-tone'));
+    const sat  = lines.find(l => l.querySelector('#valid-sat'));
+    const r    = lines.find(l => l.querySelector('#valid-r'));
+    const g    = lines.find(l => l.querySelector('#valid-g'));
+    const b    = lines.find(l => l.querySelector('#valid-b'));
+    const ordered = [tone, sat, r, g, b].filter(Boolean);
+    if(ordered.length < 5) return;
+
+    controls.classList.add('pf-enabled');
+
+    // Tabs
+    const tabs = document.createElement('div');
+    tabs.className = 'pf-tabs';
+    const tabDefs = [
+      {key:'tone', text:'גוון'},
+      {key:'sat',  text:'רוויה'},
+      {key:'r',    text:'R', ltr:true},
+      {key:'g',    text:'G', ltr:true},
+      {key:'b',    text:'B', ltr:true},
+    ];
+    const btns = {};
+    tabDefs.forEach(d => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pf-tab';
+      btn.textContent = d.text;
+      if(d.ltr){
+        btn.style.direction='ltr';
+        btn.style.textAlign='left';
+      }
+      tabs.appendChild(btn);
+      btns[d.key]=btn;
+    });
+
+    // Card
+    const card = document.createElement('div');
+    card.className = 'pf-card';
+    const head = document.createElement('div');
+    head.className = 'pf-head';
+    const name = document.createElement('div');
+    name.className = 'pf-name';
+    const value = document.createElement('div');
+    value.className = 'pf-value';
+    head.appendChild(name);
+    head.appendChild(value);
+
+    const body = document.createElement('div');
+    body.className = 'pf-body';
+    const sliderWrap = document.createElement('div');
+    sliderWrap.className = 'pf-slider';
+    const steps = document.createElement('div');
+    steps.className = 'pf-steps';
+
+    const up = document.createElement('button');
+    up.type='button'; up.className='pf-step'; up.textContent='▲';
+    const down = document.createElement('button');
+    down.type='button'; down.className='pf-step'; down.textContent='▼';
+    steps.appendChild(up);
+    steps.appendChild(down);
+
+    body.appendChild(sliderWrap);
+    body.appendChild(steps);
+
+    card.appendChild(head);
+    card.appendChild(body);
+
+    // Insert near top of controls
+    controls.insertBefore(tabs, controls.firstChild);
+    controls.insertBefore(card, tabs.nextSibling);
+
+    const map = {
+      tone:{ line:tone, label:'גוון', input: tone.querySelector('input'), val: tone.querySelector('.fp-val') },
+      sat: { line:sat,  label:'רוויה', input: sat.querySelector('input'), val: sat.querySelector('.fp-val') },
+      r:   { line:r,    label:'R', input: r.querySelector('input'), val: r.querySelector('.fp-val') },
+      g:   { line:g,    label:'G', input: g.querySelector('input'), val: g.querySelector('.fp-val') },
+      b:   { line:b,    label:'B', input: b.querySelector('input'), val: b.querySelector('.fp-val') },
+    };
+
+    let activeKey = 'tone';
+    function render(){
+      const m = map[activeKey];
+      if(!m) return;
+
+      // update title + value
+      name.textContent = m.label;
+      value.textContent = m.val ? m.val.textContent : (m.input ? m.input.value : '');
+
+      // LTR for RGB labels/value
+      if(activeKey==='r' || activeKey==='g' || activeKey==='b'){
+        name.style.direction='ltr'; name.style.textAlign='left';
+        value.style.direction='ltr'; value.style.textAlign='center';
+      }else{
+        name.style.direction='rtl'; name.style.textAlign='right';
+        value.style.direction='rtl'; value.style.textAlign='center';
+      }
+
+      // set active tab
+      Object.keys(btns).forEach(k => btns[k].classList.toggle('active', k===activeKey));
+
+      // mount slider input into sliderWrap (keep original input node)
+      sliderWrap.innerHTML = '';
+      sliderWrap.appendChild(m.input);
+
+      // keep value synced
+      const sync = () => { value.textContent = m.input.value; if(m.val) m.val.textContent = m.input.value; };
+      m.input.addEventListener('input', sync);
+
+      // step buttons behavior
+      const delta = (activeKey==='tone' || activeKey==='sat') ? 1 : 1;
+      up.onclick = () => stepInput(m.input, +delta);
+      down.onclick = () => stepInput(m.input, -delta);
+    }
+
+    tabDefs.forEach(d => {
+      btns[d.key].onclick = () => { activeKey = d.key; render(); };
+    });
+
+    render();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    try{ buildValidPF(); }catch(e){}
+    // if orientation changes, rebuild
+    window.addEventListener('resize', () => { try{ buildValidPF(); }catch(e){} }, {passive:true});
   });
 })();
 </script>
