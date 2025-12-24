@@ -2148,13 +2148,44 @@ nav button.active::after{
   }
 }
 @media (max-width: 420px){
-  /* RGB/Tone/Sat lines: keep everything within one screen, no horizontal scroll */
+  /* RGB/Tone/Sat lines: keep everything within one screen WITHOUT adding height */
   .fp-line{
     grid-template-columns: 28px 1fr !important;
-    grid-template-rows: auto auto !important;
     gap: 6px 10px !important;
     align-items: center !important;
+    position: relative !important;
+    min-width: 0 !important;
   }
+  /* Slider fills the row */
+  .fp-line input[type="range"]{
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  /* Value becomes an overlay pill (doesn't add a new row) */
+  .fp-line .fp-val{
+    position: absolute !important;
+    right: 0 !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    min-width: 36px !important;
+    text-align: right !important;
+    padding: 2px 6px !important;
+    border-radius: 8px !important;
+    background: rgba(0,0,0,0.35) !important;
+    border: 1px solid rgba(255,255,255,0.14) !important;
+    pointer-events: none !important;
+  }
+  /* Give slider some breathing room so the thumb doesn't sit under the value */
+  .fp-line input[type="range"]{
+    padding-right: 0 !important; /* range padding not reliable, keep for safety */
+    margin-right: 46px !important;
+    width: calc(100% - 46px) !important;
+  }
+
+  /* Prevent any accidental sideways scroll */
+  html, body{ overflow-x: hidden !important; }
+  #app, .container, .tab{ overflow-x: hidden !important; }
+}
   .fp-line input[type="range"]{ grid-column: 2 / 3 !important; grid-row: 1 / 2 !important; width:100% !important; min-width:0 !important; }
   .fp-line .fp-label{ grid-column: 1 / 2 !important; grid-row: 1 / 2 !important; }
   .fp-line .fp-val{
@@ -2169,10 +2200,211 @@ nav button.active::after{
   #app, .container, .tab{ overflow-x: hidden !important; }
 }
 
+
+/* ===== Onboarding + Install Overlays ===== */
+#onboard-overlay, #install-overlay{
+  position:fixed; inset:0;
+  z-index:99998;
+  display:none;
+  align-items:center; justify-content:center;
+  padding:18px 14px;
+  background: radial-gradient(1200px circle at 50% 40%, rgba(11,16,32,.92) 0%, rgba(5,7,14,.97) 60%, rgba(0,0,0,.98) 100%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+#onboard-overlay.show, #install-overlay.show{ display:flex; }
+.onb-card{
+  width:min(920px, 100%);
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,0.10);
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+  box-shadow: 0 18px 50px rgba(0,0,0,0.45);
+  overflow:hidden;
+}
+.onb-head{
+  padding:18px 18px 12px;
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.onb-brand{
+  display:flex; align-items:center; gap:14px; min-width:0;
+}
+.onb-logo{
+  width:56px; height:56px; border-radius:14px;
+  background: rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.onb-logo img{ width:88%; height:auto; display:block; }
+.onb-titlewrap{ min-width:0; }
+.onb-title{
+  font-weight:900; letter-spacing:.3px; font-size:18px; line-height:1.1;
+}
+.onb-sub{ margin-top:4px; font-size:12px; opacity:.85; }
+.onb-close{
+  appearance:none; border:1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.18);
+  color:#fff; border-radius:10px;
+  padding:8px 10px; cursor:pointer;
+}
+.onb-body{ padding:16px 18px 18px; }
+.onb-grid{
+  display:grid; grid-template-columns: 1.2fr .8fr; gap:14px;
+}
+@media (max-width: 780px){
+  .onb-grid{ grid-template-columns:1fr; }
+}
+.onb-panel{
+  border:1px solid rgba(255,255,255,0.10);
+  background: rgba(10,14,28,0.55);
+  border-radius:16px;
+  padding:14px;
+}
+.onb-panel h3{
+  margin:0 0 8px; font-size:14px; font-weight:900;
+}
+.onb-panel p{ margin:0 0 10px; font-size:12.5px; line-height:1.55; opacity:.9; }
+.onb-actions{
+  display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;
+}
+.onb-btn{
+  appearance:none; border-radius:12px;
+  border:1px solid rgba(255,255,255,0.14);
+  background: linear-gradient(180deg, rgba(255,255,255,0.09), rgba(0,0,0,0.20));
+  color:#fff; padding:10px 12px;
+  font-weight:900; font-size:12px;
+  cursor:pointer;
+}
+.onb-btn.primary{
+  border-color: rgba(250,174,82,0.55);
+  box-shadow: 0 0 0 2px rgba(250,174,82,0.14) inset;
+}
+.onb-kpis{
+  display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;
+}
+.onb-kpi{
+  border:1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.18);
+  border-radius:14px;
+  padding:10px;
+}
+.onb-kpi .k{ font-size:11px; opacity:.78; }
+.onb-kpi .v{ font-size:13px; font-weight:900; margin-top:3px; }
+.install-steps{ margin-top:8px; }
+.install-step{
+  display:flex; gap:10px; align-items:flex-start;
+  padding:8px 0; border-top:1px dashed rgba(255,255,255,0.10);
+}
+.install-step:first-child{ border-top:none; padding-top:0; }
+.step-n{
+  width:22px; height:22px; border-radius:7px;
+  background: rgba(250,174,82,0.18);
+  border:1px solid rgba(250,174,82,0.35);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:900; font-size:12px;
+}
+.step-t{ font-size:12.5px; line-height:1.5; opacity:.92; }
+
 </style>
 </head>
 
 <body>
+<!-- ===== Onboarding Overlay (after splash) ===== -->
+<div id="onboard-overlay" aria-hidden="true">
+  <div class="onb-card" role="dialog" aria-label="Welcome">
+    <div class="onb-head">
+      <div class="onb-brand">
+        <div class="onb-logo"><img src="./assets/logo.png" alt="MANOR ENGINEERING"></div>
+        <div class="onb-titlewrap">
+          <div class="onb-title">MANOR ENGINEERING – Autopilot</div>
+          <div class="onb-sub">ממשק מהיר ומבוקר למפעיל • בחירת גרגיר תקין, ניתוח והשוואה • עבודה רציפה</div>
+        </div>
+      </div>
+      <button id="onb-close" class="onb-close" aria-label="Close">✕</button>
+    </div>
+
+    <div class="onb-body">
+      <div class="onb-grid">
+        <div class="onb-panel">
+          <h3>איך מתחילים</h3>
+          <p>
+            כדי לעבוד בצורה נכונה, מתחילים בבחירת <b>גרגיר תקין (Valid)</b>. לאחר מכן אפשר לבחור Defect,
+            לבצע Analysis, ולהריץ Simulation לפי הצורך.
+          </p>
+          <div class="onb-actions">
+            <button id="onb-go-valid" class="onb-btn primary">בחר גרגיר תקין (Valid)</button>
+            <button id="onb-go-granules" class="onb-btn">עבור ל‑Granules</button>
+            <button id="onb-go-analysis" class="onb-btn">עבור ל‑Analysis</button>
+            <button id="onb-go-simulation" class="onb-btn">עבור ל‑Simulation</button>
+          </div>
+
+          <div class="onb-kpis">
+            <div class="onb-kpi"><div class="k">מטרה</div><div class="v">הקלה על המפעיל</div></div>
+            <div class="onb-kpi"><div class="k">גישה</div><div class="v">תהליך ברור וצעד‑אחר‑צעד</div></div>
+            <div class="onb-kpi"><div class="k">דיוק</div><div class="v">עבודה לפי פרמטרים אחידים</div></div>
+            <div class="onb-kpi"><div class="k">זמינות</div><div class="v">נייד/טאבלט/דסקטופ</div></div>
+          </div>
+        </div>
+
+        <div class="onb-panel">
+          <h3>התקנה כאפליקציה</h3>
+          <p>
+            החברה <b>MANOR ENGINEERING</b> פיתחה את Autopilot כדי לייצר עבודה שוטפת, להפחית טעויות,
+            ולהציג למפעיל את המידע בצורה נקייה ומהירה.
+          </p>
+          <div class="onb-actions">
+            <button id="onb-install" class="onb-btn">התקן עכשיו (Install)</button>
+          </div>
+          <p style="margin-top:10px; font-size:11.5px; opacity:.8;">
+            אם הכפתור לא זמין – עדיין אפשר להתקין דרך התפריט של הדפדפן (Add to Home Screen).
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Install Overlay (first time) ===== -->
+<div id="install-overlay" aria-hidden="true">
+  <div class="onb-card" role="dialog" aria-label="Install">
+    <div class="onb-head">
+      <div class="onb-brand">
+        <div class="onb-logo"><img src="./assets/logo.png" alt="MANOR ENGINEERING"></div>
+        <div class="onb-titlewrap">
+          <div class="onb-title">התקנת Autopilot</div>
+          <div class="onb-sub">הפוך את זה לאפליקציה מלאה על המסך שלך</div>
+        </div>
+      </div>
+      <button id="ins-close" class="onb-close" aria-label="Close">✕</button>
+    </div>
+    <div class="onb-body">
+      <div class="onb-panel">
+        <h3>למה להתקין?</h3>
+        <p>
+          התקנה מאפשרת פתיחה מהירה, מסך מלא ללא שורת כתובת, וחוויית עבודה “אפליקטיבית” שמותאמת למפעיל.
+        </p>
+
+        <div id="install-android" class="install-steps" style="display:none;">
+          <div class="install-step"><div class="step-n">1</div><div class="step-t">לחץ על <b>Install</b> (או “Install app”) כאשר מוצג בדפדפן.</div></div>
+          <div class="install-step"><div class="step-n">2</div><div class="step-t">אשר התקנה. האפליקציה תופיע במסך הבית.</div></div>
+        </div>
+
+        <div id="install-ios" class="install-steps" style="display:none;">
+          <div class="install-step"><div class="step-n">1</div><div class="step-t">ב‑Safari לחץ על כפתור <b>Share</b> (ריבוע עם חץ למעלה).</div></div>
+          <div class="install-step"><div class="step-n">2</div><div class="step-t">בחר <b>Add to Home Screen</b>.</div></div>
+          <div class="install-step"><div class="step-n">3</div><div class="step-t">אשר. Autopilot יופיע על מסך הבית וייפתח במסך מלא.</div></div>
+        </div>
+
+        <div class="onb-actions" style="margin-top:14px;">
+          <button id="ins-install" class="onb-btn primary">Install</button>
+          <button id="ins-ok" class="onb-btn">הבנתי</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
   
 <div id="intro-splash" aria-hidden="false">
   <div id="video-layer">
@@ -6423,7 +6655,8 @@ function bind(){
   function hide(){
     splash.classList.add('hide');
     splash.setAttribute('aria-hidden','true');
-    // show post‑splash home overlay (once)
+        try{ window.__showOnboard && window.__showOnboard(); }catch(e){}
+// show post‑splash home overlay (once)
   try { window.__showHomeOverlay && window.__showHomeOverlay(); } catch(e) {}
 }
   const skipBtn = document.getElementById('intro-skip');
@@ -7259,6 +7492,116 @@ document.addEventListener('DOMContentLoaded', ()=>{
       navigator.serviceWorker.register("./service-worker.js").catch(() => {});
     });
   }
+</script>
+
+
+<script>
+(() => {
+  const LS_ONBOARD = "autopilot_onboard_seen_v1";
+  const LS_INSTALL = "autopilot_install_seen_v1";
+  let deferredPrompt = null;
+
+  function isIOS(){
+    return /iphone|ipad|ipod/i.test(navigator.userAgent);
+  }
+  function isStandalone(){
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  }
+
+  function show(el){
+    if(!el) return;
+    el.classList.add('show');
+    el.setAttribute('aria-hidden','false');
+  }
+  function hide(el){
+    if(!el) return;
+    el.classList.remove('show');
+    el.setAttribute('aria-hidden','true');
+  }
+
+  function qs(id){ return document.getElementById(id); }
+
+  window.__showOnboard = function(){
+    const el = qs('onboard-overlay');
+    if(!el) return;
+    if(localStorage.getItem(LS_ONBOARD) === "1") return;
+    show(el);
+  };
+
+  function showInstall(){
+    const el = qs('install-overlay');
+    if(!el) return;
+    // show relevant instructions
+    const a = qs('install-android');
+    const i = qs('install-ios');
+    if(isIOS()){
+      if(i) i.style.display = "block";
+      if(a) a.style.display = "none";
+    }else{
+      if(a) a.style.display = "block";
+      if(i) i.style.display = "none";
+    }
+    show(el);
+    localStorage.setItem(LS_INSTALL, "1");
+  }
+
+  // Capture install prompt (Android/Chrome/Edge)
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+  });
+
+  function runInstallPrompt(){
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.finally(() => { deferredPrompt = null; });
+      return;
+    }
+    // If no prompt (iOS or unsupported), show instructions
+    showInstall();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Close buttons
+    const onb = qs('onboard-overlay');
+    const ins = qs('install-overlay');
+    const closeOnb = qs('onb-close');
+    const closeIns = qs('ins-close');
+    if(closeOnb) closeOnb.onclick = () => { hide(onb); localStorage.setItem(LS_ONBOARD,"1"); };
+    if(closeIns) closeIns.onclick = () => hide(ins);
+
+    // Actions
+    const goValid = qs('onb-go-valid');
+    const goGran = qs('onb-go-granules');
+    const goAna  = qs('onb-go-analysis');
+    const goSim  = qs('onb-go-simulation');
+    const onbInstall = qs('onb-install');
+
+    function finish(){ hide(onb); localStorage.setItem(LS_ONBOARD,"1"); }
+
+    if(goValid) goValid.onclick = () => { try{ switchTab('valid'); }catch(e){} finish(); };
+    if(goGran)  goGran.onclick  = () => { try{ /* family menu */ }catch(e){} finish(); };
+    if(goAna)   goAna.onclick   = () => { try{ switchTab('analysis'); }catch(e){} finish(); };
+    if(goSim)   goSim.onclick   = () => { try{ switchTab('simulation'); }catch(e){} finish(); };
+    if(onbInstall) onbInstall.onclick = () => runInstallPrompt();
+
+    // Install overlay buttons
+    const insInstall = qs('ins-install');
+    const insOk = qs('ins-ok');
+    if(insInstall) insInstall.onclick = () => runInstallPrompt();
+    if(insOk) insOk.onclick = () => hide(ins);
+
+    // Auto-show install help once (first visit) if not standalone
+    if(!isStandalone() && localStorage.getItem(LS_INSTALL) !== "1"){
+      // show after onboarding or if onboarding already seen
+      setTimeout(() => {
+        // don't interrupt if onboarding is visible
+        if(onb && onb.classList.contains('show')) return;
+        showInstall();
+      }, 1500);
+    }
+  });
+})();
 </script>
 
 </body>
