@@ -588,6 +588,114 @@
   .fp-label{font-size:12px; opacity:.85;}
   .fp-val{font-size:12px; text-align:right; opacity:.9;}
   .fp-hint{font-size:11px; opacity:.7; margin-top:2px;}
+  /* ===== Valid/Defect layout: RGB horizontal + Hue/Sat vertical ===== */
+  .fp-controls.fp-layout{
+    margin-top:10px;
+    display:grid;
+    grid-template-columns: 1fr 118px;
+    gap:12px;
+    align-items:stretch;
+  }
+  .fp-rgb-stack{display:flex; flex-direction:column; gap:10px;}
+  .fp-line.fp-rgb{grid-template-columns:36px 1fr; gap:10px;}
+  .fp-range-wrap{
+    position:relative;
+    display:flex;
+    align-items:center;
+    width:100%;
+  }
+  .fp-ontrack-val{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    font-weight:900;
+    font-size:12px;
+    padding:3px 8px;
+    border-radius:999px;
+    background:rgba(0,0,0,.35);
+    color:#fff;
+    text-shadow:0 2px 6px rgba(0,0,0,.6);
+    pointer-events:none;
+    z-index:2;
+  }
+  .fp-arrows{
+    position:absolute;
+    right:6px;
+    top:50%;
+    transform:translateY(-50%);
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    z-index:3;
+  }
+  .fp-step{
+    width:34px;
+    height:26px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.16);
+    background:rgba(10,14,28,.55);
+    color:#fff;
+    font-weight:900;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    touch-action:manipulation;
+  }
+  .fp-step:active{transform:scale(.98);}
+
+  .fp-hs-vert{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    justify-content:flex-start;
+    align-items:stretch;
+  }
+  .fp-vert{
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:14px;
+    padding:8px 6px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+  }
+  .fp-vert-title{
+    font-size:12px;
+    opacity:.85;
+    font-weight:700;
+  }
+  .fp-vert-track{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+  }
+  .fp-range-wrap.vertical{
+    width:64px;
+    height:220px;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  input[type="range"].fp-range-vert{
+    transform:rotate(-90deg);
+    width:220px;
+  }
+  .fp-ontrack-val.vertical{
+    transform:translate(-50%,-50%) rotate(90deg);
+  }
+
+  /* keep family picker swatches nicer on small screens */
+  @media (max-width: 520px){
+    .fp-controls.fp-layout{ grid-template-columns: 1fr 112px; }
+    .fp-range-wrap.vertical{ height:200px; }
+    input[type="range"].fp-range-vert{ width:200px; }
+  }
+
   @media (max-width: 520px){
     .fp-swatch{width:calc(50% - 5px);}
   }
@@ -1817,23 +1925,7 @@ nav button.active::after{
 }
 
 
-/* Mobile fine-adjust buttons on slider ends (no extra columns) */
-.fp-sliderwrap{position:relative; display:flex; align-items:center; gap:10px;}
-.fp-sliderwrap input[type=range]{flex:1;}
-.fp-step{
-  width:44px; height:44px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,0.18);
-  background:rgba(255,255,255,0.08);
-  color:#fff;
-  font-size:22px;
-  line-height:44px;
-  text-align:center;
-  user-select:none;
-  -webkit-user-select:none;
-  touch-action:manipulation;
-}
-.fp-step:active{transform:translateY(1px); background:rgba(255,255,255,0.14);}
+
 @media (min-width: 801px){
   .fp-step{width:34px;height:34px;line-height:34px;font-size:18px;border-radius:10px;}
 }
@@ -1977,30 +2069,48 @@ nav button.active::after{
 #tab-valid .fp-label, #tab-defect .fp-label{ font-size: 10.5px; }
 #tab-valid .fp-val, #tab-defect .fp-val{ font-size: 10.5px; }
 
+/* Make sliders finger-friendly (thick track + big round thumb)
+   NOTE: This intentionally overrides the earlier "ultra-compact" settings.
+*/
 #tab-valid .fp-line input[type=range], #tab-defect .fp-line input[type=range],
 #tab-valid .slider-row input[type=range], #tab-defect .slider-row input[type=range]{
-  height: 18px;
+  height: 34px;
 }
+/* Ensure the visible track is also thick (some browsers ignore input height) */
+#tab-valid .fp-line input[type=range]::-webkit-slider-runnable-track,
+#tab-defect .fp-line input[type=range]::-webkit-slider-runnable-track,
+#tab-valid .slider-row input[type=range]::-webkit-slider-runnable-track,
+#tab-defect .slider-row input[type=range]::-webkit-slider-runnable-track{
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.18);
+}
+#tab-valid .fp-line input[type=range]::-moz-range-track,
+#tab-defect .fp-line input[type=range]::-moz-range-track,
+#tab-valid .slider-row input[type=range]::-moz-range-track,
+#tab-defect .slider-row input[type=range]::-moz-range-track{
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.18);
+}
+#tab-valid .fp-line input[type=range]::-webkit-slider-thumb,
+#tab-defect .fp-line input[type=range]::-webkit-slider-thumb,
 #tab-valid .slider-row input[type=range]::-webkit-slider-thumb,
 #tab-defect .slider-row input[type=range]::-webkit-slider-thumb{
-  width: 30px;
-  height: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
 }
+#tab-valid .fp-line input[type=range]::-moz-range-thumb,
+#tab-defect .fp-line input[type=range]::-moz-range-thumb,
 #tab-valid .slider-row input[type=range]::-moz-range-thumb,
 #tab-defect .slider-row input[type=range]::-moz-range-thumb{
-  width: 14px;
-  height: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
 }
 
 /* RGB +/- buttons: smaller but still tappable */
-#tab-valid .fp-step, #tab-defect .fp-step{
-  width: 38px;
-  height: 38px;
-  line-height: 38px;
-  font-size: 20px;
-  border-radius: 11px;
-}
-
 /* Hint: keep but compact */
 #tab-valid .fp-hint, #tab-defect .fp-hint{
   font-size: 10.5px;
@@ -2365,33 +2475,7 @@ html[dir="rtl"] body{ direction: rtl; text-align: right; }
     background: rgba(0,0,0,0.28) !important;
     border: 1px solid rgba(255,255,255,0.12) !important;
   }
-  .fp-sliderwrap{
-    grid-column:1 / 3 !important;
-    grid-row:2 !important;
-    display:grid !important;
-    grid-template-columns: 1fr 44px !important;
-    grid-template-rows: 1fr 1fr !important;
-    gap: 10px !important;
-    align-items:center !important;
-  }
-  .fp-sliderwrap input[type=range]{
-    grid-column:1 !important;
-    grid-row:1 / 3 !important;
-    width:100% !important;
-    min-width:0 !important;
-  }
-  .fp-sliderwrap .fp-step{
-    width:42px !important;
-    height:42px !important;
-    line-height:42px !important;
-    font-size:18px !important;
-    border-radius: 14px !important;
-    background: rgba(255,255,255,0.10) !important;
-  }
   /* stack arrows on the right (plus on top, minus bottom) */
-  .fp-sliderwrap button.fp-step:first-child{ grid-column:2 !important; grid-row:2 !important; }
-  .fp-sliderwrap button.fp-step:last-child{  grid-column:2 !important; grid-row:1 !important; }
-
   /* Prevent overlap + keep everything inside screen */
   html, body{ overflow-x:hidden !important; }
 }
@@ -2807,56 +2891,127 @@ document.addEventListener('DOMContentLoaded', ()=>{
       <button type="button" class="fp-swatch" data-h="30" data-s="85"  data-name="כתומים" title="כתומים"></button>
       <button type="button" class="fp-swatch" data-h="0" data-s="85"   data-name="אדומים" title="אדומים"></button>
     </div>
-    <div class="fp-controls">
-      <div class="fp-line">
-        <div class="fp-label">גוון</div>
-        <input id="valid-tone" type="range" min="0" max="100" value="55" />
-        <div class="fp-val" id="valid-tone-val">55</div>
+    <div class="fp-controls fp-layout">
+  <div class="fp-rgb-stack">
+    <div class="fp-line fp-rgb">
+      <div class="fp-label">R</div>
+      <div class="fp-range-wrap">
+        <input class="fp-range" id="valid-r" min="0" max="255" type="range" value="128"/>
+        <div class="fp-ontrack-val" data-for="valid-r"></div>
+        <div class="fp-arrows">
+          <button type="button" class="fp-step fp-step-up" data-for="valid-r" data-delta="1">▲</button>
+          <button type="button" class="fp-step fp-step-down" data-for="valid-r" data-delta="-1">▼</button>
+        </div>
       </div>
-      <div class="fp-line">
-        <div class="fp-label">רוויה</div>
-        <input id="valid-sat" type="range" min="0" max="100" value="65" />
-        <div class="fp-val" id="valid-sat-val">65</div>
+    </div>
+    <div class="fp-line fp-rgb">
+      <div class="fp-label">G</div>
+      <div class="fp-range-wrap">
+        <input class="fp-range" id="valid-g" min="0" max="255" type="range" value="128"/>
+        <div class="fp-ontrack-val" data-for="valid-g"></div>
+        <div class="fp-arrows">
+          <button type="button" class="fp-step fp-step-up" data-for="valid-g" data-delta="1">▲</button>
+          <button type="button" class="fp-step fp-step-down" data-for="valid-g" data-delta="-1">▼</button>
+        </div>
       </div>
-      
-<div class="fp-line fp-rgb">
-  <div class="fp-label">R</div>
-  <input id="valid-r" min="0" max="255" type="range" value="128"/>
-  <div class="fp-val" id="valid-r-val">128</div>
-</div>
-<div class="fp-line fp-rgb">
-  <div class="fp-label">G</div>
-  <input id="valid-g" min="0" max="255" type="range" value="128"/>
-  <div class="fp-val" id="valid-g-val">128</div>
-</div>
-<div class="fp-line fp-rgb">
-  <div class="fp-label">B</div>
-  <input id="valid-b" min="0" max="255" type="range" value="128"/>
-  <div class="fp-val" id="valid-b-val">128</div>
-</div>
-      <div class="fp-hint" id="valid-fp-hint">בחר משפחה ואז כוון גוון/רוויה — הסליידרים RGB יתעדכנו.</div>
+    </div>
+    <div class="fp-line fp-rgb">
+      <div class="fp-label">B</div>
+      <div class="fp-range-wrap">
+        <input class="fp-range" id="valid-b" min="0" max="255" type="range" value="128"/>
+        <div class="fp-ontrack-val" data-for="valid-b"></div>
+        <div class="fp-arrows">
+          <button type="button" class="fp-step fp-step-up" data-for="valid-b" data-delta="1">▲</button>
+          <button type="button" class="fp-step fp-step-down" data-for="valid-b" data-delta="-1">▼</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="quick-map" id="valid-map"></div>
-  <div class="preview-box" id="valid-preview">RGB(128,128,128)</div>
-</div>
-</section>
+  <div class="fp-hs-vert">
+    <div class="fp-vert">
+      <div class="fp-vert-title">גוון</div>
+      <div class="fp-vert-track">
+        <button type="button" class="fp-step fp-step-up" data-for="valid-tone" data-delta="1">▲</button>
+        <div class="fp-range-wrap vertical">
+          <input class="fp-range fp-range-vert" id="valid-tone" type="range" min="0" max="100" value="55" />
+          <div class="fp-ontrack-val vertical" data-for="valid-tone"></div>
+        </div>
+        <button type="button" class="fp-step fp-step-down" data-for="valid-tone" data-delta="-1">▼</button>
+      </div>
+      <div class="fp-val" id="valid-tone-val" style="display:none">0</div>
+    </div>
 
-<!-- DEFECT TAB -->
-<section class="tab" id="tab-defect">
-  <h2 class="tab-title solo-title">Defect Granule</h2>
-<div class="valid-mini-row">
-  <div id="defect-mini" class="mini-rgb-indicator" title="Defect color">
-<div class="mini-rgb-text mini-rgb-text-small" id="defect-mini-text">RGB(—)</div>
+    <div class="fp-vert">
+      <div class="fp-vert-title">רוויה</div>
+      <div class="fp-vert-track">
+        <button type="button" class="fp-step fp-step-up" data-for="valid-sat" data-delta="1">▲</button>
+        <div class="fp-range-wrap vertical">
+          <input class="fp-ran<div class="fp-controls fp-layout">
+  <div class="fp-rgb-stack">
+    <div class="fp-line fp-rgb">
+      <div class="fp-label">R</div>
+      <div class="fp-range-wrap">
+        <input class="fp-range" id="defect-r" min="0" max="255" type="range" value="128"/>
+        <div class="fp-ontrack-val" data-for="defect-r"></div>
+        <div class="fp-arrows">
+          <button type="button" class="fp-step fp-step-up" data-for="defect-r" data-delta="1">▲</button>
+          <button type="button" class="fp-step fp-step-down" data-for="defect-r" data-delta="-1">▼</button>
+        </div>
+      </div>
+    </div>
+    <div class="fp-line fp-rgb">
+      <div class="fp-label">G</div>
+      <div class="fp-range-wrap">
+        <input class="fp-range" id="defect-g" min="0" max="255" type="range" value="128"/>
+        <div class="fp-ontrack-val" data-for="defect-g"></div>
+        <div class="fp-arrows">
+          <button type="button" class="fp-step fp-step-up" data-for="defect-g" data-delta="1">▲</button>
+          <button type="button" class="fp-step fp-step-down" data-for="defect-g" data-delta="-1">▼</button>
+        </div>
+      </div>
+    </div>
+    <div class="fp-line fp-rgb">
+      <div class="fp-label">B</div>
+      <div class="fp-range-wrap">
+        <input class="fp-range" id="defect-b" min="0" max="255" type="range" value="128"/>
+        <div class="fp-ontrack-val" data-for="defect-b"></div>
+        <div class="fp-arrows">
+          <button type="button" class="fp-step fp-step-up" data-for="defect-b" data-delta="1">▲</button>
+          <button type="button" class="fp-step fp-step-down" data-for="defect-b" data-delta="-1">▼</button>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
 
-<div class="family-picker" data-target="defect">
-    <div class="fp-title">בחירת צבע מהירה (Defect)</div>
-    <div class="fp-row">
-      <button type="button" class="fp-swatch" data-h="0" data-s="0"  data-name="לבן/אפור" title="לבן/אפור"></button>
-      <button type="button" class="fp-swatch" data-h="0" data-s="8"  data-name="ניטרלים" title="ניטרלים"></button>
+  <div class="fp-hs-vert">
+    <div class="fp-vert">
+      <div class="fp-vert-title">גוון</div>
+      <div class="fp-vert-track">
+        <button type="button" class="fp-step fp-step-up" data-for="defect-tone" data-delta="1">▲</button>
+        <div class="fp-range-wrap vertical">
+          <input class="fp-range fp-range-vert" id="defect-tone" type="range" min="0" max="100" value="55" />
+          <div class="fp-ontrack-val vertical" data-for="defect-tone"></div>
+        </div>
+        <button type="button" class="fp-step fp-step-down" data-for="defect-tone" data-delta="-1">▼</button>
+      </div>
+      <div class="fp-val" id="defect-tone-val" style="display:none">0</div>
+    </div>
+
+    <div class="fp-vert">
+      <div class="fp-vert-title">רוויה</div>
+      <div class="fp-vert-track">
+        <button type="button" class="fp-step fp-step-up" data-for="defect-sat" data-delta="1">▲</button>
+        <div class="fp-range-wrap vertical">
+          <input class="fp-range fp-range-vert" id="defect-sat" type="range" min="0" max="100" value="65" />
+          <div class="fp-ontrack-val vertical" data-for="defect-sat"></div>
+        </div>
+        <button type="button" class="fp-step fp-step-down" data-for="defect-sat" data-delta="-1">▼</button>
+      </div>
+      <div class="fp-val" id="defect-sat-val" style="display:none">0</div>
+    </div>
+  </div>
+</div>data-h="0" data-s="8"  data-name="ניטרלים" title="ניטרלים"></button>
       <button type="button" class="fp-swatch" data-h="270" data-s="60" data-name="סגולים" title="סגולים"></button>
       <button type="button" class="fp-swatch" data-h="210" data-s="75" data-name="כחולים" title="כחולים"></button>
       <button type="button" class="fp-swatch" data-h="120" data-s="65" data-name="ירוקים" title="ירוקים"></button>
@@ -7496,83 +7651,69 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
 })();
 
-/* Mobile slider fine adjust: inject +/- buttons around each range */
+
+/* ===== Finger-friendly slider arrows + value on slider ===== */
 (function(){
-  function injectSteppers(scopeId){
-    var scope = document.getElementById(scopeId);
-    if(!scope) return;
-    var lines = scope.querySelectorAll('.fp-line');
-    lines.forEach(function(line){
-      // already injected?
-      if(line.querySelector('.fp-sliderwrap')) return;
-      var rng = line.querySelector('input[type="range"]');
-      if(!rng) return;
-
-      var wrap = document.createElement('div');
-      wrap.className = 'fp-sliderwrap';
-
-      var minus = document.createElement('button');
-      minus.type = 'button';
-      minus.className = 'fp-step';
-      minus.textContent = '−';
-
-      var plus = document.createElement('button');
-      plus.type = 'button';
-      plus.className = 'fp-step';
-      plus.textContent = '+';
-
-      // Move range into wrap
-      rng.parentNode.insertBefore(wrap, rng);
-      wrap.appendChild(minus);
-      wrap.appendChild(rng);
-      wrap.appendChild(plus);
-
-      function step(delta){
-        var v = Number(rng.value||0);
-        var min = rng.min===''?0:Number(rng.min);
-        var max = rng.max===''?100:Number(rng.max);
-        var nv = Math.max(min, Math.min(max, v+delta));
-        if(nv !== v){
-          rng.value = nv;
-          rng.dispatchEvent(new Event('input', {bubbles:true}));
-          rng.dispatchEvent(new Event('change', {bubbles:true}));
-        }
-      }
-
-      function attach(btn, delta){
-        var timer=null;
-        var start = function(e){
-          e.preventDefault();
-          step(delta);
-          timer = setInterval(function(){ step(delta); }, 120);
-        };
-        var stop = function(){
-          if(timer){ clearInterval(timer); timer=null; }
-        };
-        btn.addEventListener('pointerdown', start);
-        btn.addEventListener('pointerup', stop);
-        btn.addEventListener('pointercancel', stop);
-        btn.addEventListener('pointerleave', stop);
-        btn.addEventListener('click', function(e){ e.preventDefault(); }); // prevent double-step on click
-      }
-
-      attach(minus, -1);
-      attach(plus, +1);
+  function updateVal(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    var val = el.value;
+    document.querySelectorAll('.fp-ontrack-val[data-for="'+id+'"]').forEach(function(n){
+      n.textContent = val;
     });
+    // keep legacy hidden val nodes updated (tone/sat)
+    var legacy = document.getElementById(id+'-val');
+    if(legacy) legacy.textContent = val;
   }
 
-  // inject on load
-  document.addEventListener('DOMContentLoaded', function(){
-    injectSteppers('tab-valid');
-    injectSteppers('tab-defect');
-  });
+  function hook(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('input', function(){ updateVal(id); }, {passive:true});
+    updateVal(id);
+  }
 
-  // also inject when tabs shown (in case DOM is lazy)
-  window.__injectSteppers = function(){
-    injectSteppers('tab-valid');
-    injectSteppers('tab-defect');
-  };
+  function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    [
+      'valid-r','valid-g','valid-b','valid-tone','valid-sat',
+      'defect-r','defect-g','defect-b','defect-tone','defect-sat'
+    ].forEach(hook);
+
+    document.querySelectorAll('.fp-step[data-for]').forEach(function(btn){
+      var id = btn.dataset.for;
+      var delta = parseFloat(btn.dataset.delta || '0');
+      var rng = document.getElementById(id);
+      if(!rng || !delta) return;
+
+      var step = parseFloat(rng.step || '1') || 1;
+      var min = rng.min !== '' ? parseFloat(rng.min) : 0;
+      var max = rng.max !== '' ? parseFloat(rng.max) : 100;
+
+      function apply(){
+        var v = parseFloat(rng.value || '0');
+        v = clamp(v + delta*step, min, max);
+        rng.value = v;
+        rng.dispatchEvent(new Event('input', {bubbles:true}));
+      }
+
+      var timer = null;
+      btn.addEventListener('pointerdown', function(e){
+        e.preventDefault();
+        apply();
+        timer = setInterval(apply, 120);
+      });
+      ['pointerup','pointercancel','pointerleave'].forEach(function(ev){
+        btn.addEventListener(ev, function(){
+          if(timer){ clearInterval(timer); timer = null; }
+        });
+      });
+      btn.addEventListener('click', function(e){ e.preventDefault(); });
+    });
+  });
 })();
+;
 
 </script>
 
