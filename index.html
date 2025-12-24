@@ -641,7 +641,7 @@
   }
   .qa-btn-primary{ background:#faae52; border-color:#faae52; color:#101226; }
 
-.quick-map{display:flex;}
+.quick-map{display:none !important;}
 
 
 
@@ -1393,7 +1393,7 @@ body{ padding-bottom: calc(110px + env(safe-area-inset-bottom)); }
   overflow-x: hidden;        /* no sideways scroll */
   overflow-y: hidden;
 }
-#bottomMenu .sub-menu[hidden]{ display:flex; }
+#bottomMenu .sub-menu[hidden]{ display:none !important; }
 
 /* Make sub-tabs look & feel identical to main tabs (straight corners, smaller to fit) */
 #bottomMenu .sub-menu button{
@@ -1844,7 +1844,7 @@ nav button.active::after{
 /* ===== Post‑Splash Home Overlay (mobile first) ===== */
 #home-overlay{
   position:fixed; inset:0; z-index:99998;
-  display:flex; align-items:center; justify-content:center;
+  display:none !important; align-items:center; justify-content:center;
   padding:16px;
   background:radial-gradient(1200px circle at 50% 40%, rgba(11,16,32,.92) 0%, rgba(5,7,14,.96) 60%, rgba(0,0,0,.98) 100%);
   backdrop-filter: blur(6px);
@@ -6358,18 +6358,7 @@ function bind(){
     el.setAttribute('aria-hidden','true');
   }
 
-  
-  // Wire buttons (neutral start)
-  function bindButtons(){
-    const goValid = document.getElementById('home-go-valid');
-    const skip = document.getElementById('home-skip');
-    const close = document.getElementById('home-close');
-    if(goValid) goValid.onclick = () => { try{ switchTab('valid'); }catch(e){} hide(); };
-    if(skip) skip.onclick = () => { hide(); };
-    if(close) close.onclick = () => { hide(); };
-  }
-  document.addEventListener('DOMContentLoaded', bindButtons);
-window.__showHomeOverlay = function __showHomeOverlay(){
+  window.__showHomeOverlay = function __showHomeOverlay(){
     return; // disabled
     // only show once per load
     if(window.__home_overlay_shown) return;
@@ -7283,22 +7272,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
       navigator.serviceWorker.register("./service-worker.js").catch(() => {});
     });
   }
-</script>
-
-
-<script>
-(() => {
-  function maybeShowStart(){
-    const splash = document.getElementById('intro-splash');
-    const overlay = document.getElementById('home-overlay');
-    if(!overlay) return;
-    const splashHidden = !splash || splash.classList.contains('hide') || splash.getAttribute('aria-hidden') === 'true';
-    if(splashHidden){
-      try { window.__showHomeOverlay && window.__showHomeOverlay(); } catch(e) {}
-    }
-  }
-  window.addEventListener('load', maybeShowStart);
-})();
 </script>
 
 </body>
