@@ -2310,16 +2310,36 @@ nav button.active::after{
 </head>
 
 <body>
-<!-- ===== Onboarding Overlay (after splash) ===== -->
-<div id="onboard-overlay" aria-hidden="true">
+
+<!-- ===== Simple Welcome Overlay ===== -->
+<div id="onboard-overlay" aria-hidden="false" class="show">
   <div class="onb-card" role="dialog" aria-label="Welcome">
     <div class="onb-head">
       <div class="onb-brand">
         <div class="onb-logo"><img src="./assets/logo.png" alt="MANOR ENGINEERING"></div>
         <div class="onb-titlewrap">
-          <div class="onb-title">MANOR ENGINEERING – Autopilot</div>
-          <div class="onb-sub">ממשק מהיר ומבוקר למפעיל • בחירת גרגיר תקין, ניתוח והשוואה • עבודה רציפה</div>
+          <div class="onb-title">ברוכים הבאים ל‑Autopilot</div>
+          <div class="onb-sub">פלטפורמת Cloud לניטור, שליטה ובקרה של מכונות מיון</div>
         </div>
+      </div>
+    </div>
+    <div class="onb-body">
+      <p style="font-size:13px; line-height:1.6; opacity:.9;">
+        Autopilot פותחה ע״י <b>MANOR ENGINEERING</b> כדי לפשט את עבודת המפעיל,
+        לאפשר תהליך עבודה ברור ואחיד, ולשפר דיוק ותפעול שוטף.
+      </p>
+      <p style="margin-top:10px; font-size:12.5px;">
+        כדי להתחיל, בחר את סוג הגרגיר:
+      </p>
+      <div class="onb-actions">
+        <button id="onb-go-valid" class="onb-btn primary">בחר גרגיר תקין (Valid)</button>
+        <button id="onb-go-defect" class="onb-btn">בחר גרגיר פגום (Defect)</button>
+        <button id="onb-skip" class="onb-btn">דלג והמשך</button>
+      </div>
+    </div>
+  </div>
+</div>
+
       </div>
       <button id="onb-close" class="onb-close" aria-label="Close">✕</button>
     </div>
