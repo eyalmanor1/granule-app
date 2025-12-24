@@ -1,6 +1,6 @@
 {
-  "name": "MANOR ENGINEERING – Autopilot",
-  "short_name": "Autopilot",
+  "name": "Granule App",
+  "short_name": "Granule",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -17,6 +17,5 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ],
-  "description": "MANOR ENGINEERING – Autopilot web app"
+  ]
 }

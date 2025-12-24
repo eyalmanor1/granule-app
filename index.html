@@ -4,7 +4,7 @@
 <meta http-equiv="Permissions-Policy" content="camera=(self)">
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>MANOR ENGINEERING – Autopilot</title>
+<title>QA</title>
 
 <!-- PWA / Standalone -->
 <link rel="manifest" href="./manifest.webmanifest">
@@ -2132,55 +2132,6 @@ nav button.active::after{
   border:1px solid rgba(255,255,255,0.10);
 }
 /* ===== End Video Manuals ===== */
-
-
-/* --- Manor Autopilot: mobile fit fixes (sliders + bottom tabs) --- */
-.fp-line{
-  min-width: 0;
-}
-.fp-line input[type="range"]{
-  min-width: 0;
-  width: 100%;
-}
-@media (max-width: 480px){
-  /* Put value under/next to label to avoid horizontal scroll */
-  .fp-line{
-    display: grid !important;
-    grid-template-columns: 56px 1fr;
-    grid-template-areas:
-      "label val"
-      "slider slider";
-    column-gap: 10px;
-    row-gap: 6px;
-    align-items: center;
-  }
-  .fp-line .fp-label{ grid-area: label; }
-  .fp-line input[type="range"]{ grid-area: slider; }
-  .fp-line .fp-val{
-    grid-area: val;
-    justify-self: end;
-    min-width: 0;
-    padding: 0;
-  }
-}
-/* Bottom main menu buttons: don't ellipsis "Simulation" */
-.legacy-nav.main-menu{
-  display: flex;
-  gap: 8px;
-  justify-content: space-between;
-}
-.legacy-nav.main-menu .menu-btn{
-  flex: 1 1 0;
-  white-space: nowrap;
-  overflow: visible;
-  text-overflow: clip;
-}
-@media (max-width: 360px){
-  .legacy-nav.main-menu .menu-btn{
-    font-size: 11px;
-    padding: 8px 4px;
-  }
-}
 
 </style>
 </head>
@@ -5184,7 +5135,7 @@ function renderSavedGranules(){
         document.getElementById('valid-g').value = gg;
         document.getElementById('valid-b').value = bb;
         updateAll('valid');
-        switchTab('welcome');
+        switchTab('valid');
       } else {
         document.getElementById('defect-r').value = rr;
         document.getElementById('defect-g').value = gg;
