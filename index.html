@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="rtl">
 <head>
 <meta http-equiv="Permissions-Policy" content="camera=(self)">
 <meta charset="utf-8"/>
@@ -644,7 +644,6 @@
 .quick-map{display:none !important;}
 
 
-
 /* ===== QA TAB (Fix v2: scrollable + no overlap on Android) ===== */
 #tab-qa{
   padding:12px;
@@ -1023,7 +1022,6 @@
 .qa2-kpi.qa2-score-hero .qa2-kvalue{ font-size:28px; }
 .qa2-scorebar{height:10px; border-radius:999px; background:rgba(255,255,255,.10); overflow:hidden; margin-top:6px;}
 .qa2-scorebar > div{height:100%; width:0%; background:#faae52;}
-
 
 
 /* QA Visual – compact & 3D */
@@ -1994,13 +1992,55 @@ nav button.active::after{
   height: 14px;
 }
 
-/* RGB +/- buttons: smaller but still tappable */
+/* RGB +/- buttons: bigger (finger-friendly) */
 #tab-valid .fp-step, #tab-defect .fp-step{
-  width: 38px;
-  height: 38px;
-  line-height: 38px;
-  font-size: 20px;
-  border-radius: 11px;
+  width: 46px;
+  height: 46px;
+  line-height: 46px;
+  font-size: 24px;
+  border-radius: 14px;
+}
+
+/* ===== Big sliders (Valid / Defect) ===== */
+#tab-valid .fp-controls input[type=range],
+#tab-defect .fp-controls input[type=range]{
+  height: 44px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+#tab-valid .fp-controls input[type=range]::-webkit-slider-thumb,
+#tab-defect .fp-controls input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  appearance:none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.92);
+  border: 3px solid rgba(0,0,0,0.22);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+  cursor: pointer;
+}
+#tab-valid .fp-controls input[type=range]::-moz-range-thumb,
+#tab-defect .fp-controls input[type=range]::-moz-range-thumb{
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.92);
+  border: 3px solid rgba(0,0,0,0.22);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+  cursor: pointer;
+}
+/* give the track a visible "rail" */
+#tab-valid .fp-controls input[type=range]::-webkit-slider-runnable-track,
+#tab-defect .fp-controls input[type=range]::-webkit-slider-runnable-track{
+  height: 14px;
+  border-radius: 999px;
+}
+#tab-valid .fp-controls input[type=range]::-moz-range-track,
+#tab-defect .fp-controls input[type=range]::-moz-range-track{
+  height: 14px;
+  border-radius: 999px;
 }
 
 /* Hint: keep but compact */
@@ -2021,7 +2061,6 @@ nav button.active::after{
   #valid-mini.mini-rgb-indicator, #defect-mini.mini-rgb-indicator{ height: 48px; }
 }
 /* ===== End Fit-on-one-screen pack ===== */
-
 
 
 /* ===== Video Manuals (Tools) – card list + large player modal ===== */
@@ -2148,13 +2187,44 @@ nav button.active::after{
   }
 }
 @media (max-width: 420px){
-  /* RGB/Tone/Sat lines: keep everything within one screen, no horizontal scroll */
+  /* RGB/Tone/Sat lines: keep everything within one screen WITHOUT adding height */
   .fp-line{
     grid-template-columns: 28px 1fr !important;
-    grid-template-rows: auto auto !important;
     gap: 6px 10px !important;
     align-items: center !important;
+    position: relative !important;
+    min-width: 0 !important;
   }
+  /* Slider fills the row */
+  .fp-line input[type="range"]{
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  /* Value becomes an overlay pill (doesn't add a new row) */
+  .fp-line .fp-val{
+    position: absolute !important;
+    right: 0 !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    min-width: 36px !important;
+    text-align: right !important;
+    padding: 2px 6px !important;
+    border-radius: 8px !important;
+    background: rgba(0,0,0,0.35) !important;
+    border: 1px solid rgba(255,255,255,0.14) !important;
+    pointer-events: none !important;
+  }
+  /* Give slider some breathing room so the thumb doesn't sit under the value */
+  .fp-line input[type="range"]{
+    padding-right: 0 !important; /* range padding not reliable, keep for safety */
+    margin-right: 46px !important;
+    width: calc(100% - 46px) !important;
+  }
+
+  /* Prevent any accidental sideways scroll */
+  html, body{ overflow-x: hidden !important; }
+  #app, .container, .tab{ overflow-x: hidden !important; }
+}
   .fp-line input[type="range"]{ grid-column: 2 / 3 !important; grid-row: 1 / 2 !important; width:100% !important; min-width:0 !important; }
   .fp-line .fp-label{ grid-column: 1 / 2 !important; grid-row: 1 / 2 !important; }
   .fp-line .fp-val{
@@ -2169,10 +2239,328 @@ nav button.active::after{
   #app, .container, .tab{ overflow-x: hidden !important; }
 }
 
+
+/* ===== RTL base ===== */
+html[dir="rtl"] body{ direction: rtl; text-align: right; }
+
+/* ===== Install prompt (web link) ===== */
+#install-hint{
+  position:fixed; inset:0;
+  z-index:99990;
+  display:none;
+  align-items:flex-end; justify-content:center;
+  padding:14px;
+  background: rgba(0,0,0,0.38);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+#install-hint.show{ display:flex; }
+.inst-card{
+  width:min(740px, 100%);
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,0.14);
+  background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(0,0,0,0.30));
+  box-shadow: 0 18px 50px rgba(0,0,0,0.55);
+  overflow:hidden;
+}
+.inst-head{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:12px 14px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.inst-brand{ display:flex; align-items:center; gap:10px; min-width:0; }
+.inst-logo{
+  width:44px; height:44px; border-radius:12px;
+  background: rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.14);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.inst-logo img{ width:92%; height:auto; display:block; }
+.inst-title{ font-weight:900; font-size:14px; }
+.inst-close{
+  appearance:none; border:1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.20);
+  color:#fff; border-radius:12px;
+  padding:6px 10px; cursor:pointer;
+}
+.inst-body{ padding:12px 14px 14px; }
+.inst-body p{ margin:0; font-size:12.5px; line-height:1.55; opacity:.92; }
+.inst-actions{ display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; }
+.inst-btn{
+  appearance:none; border-radius:12px;
+  border:1px solid rgba(255,255,255,0.14);
+  background: linear-gradient(180deg, rgba(255,255,255,0.09), rgba(0,0,0,0.22));
+  color:#fff; padding:9px 12px;
+  font-weight:900; font-size:12px;
+  cursor:pointer;
+}
+.inst-btn.primary{
+  border-color: rgba(250,174,82,0.55);
+  box-shadow: 0 0 0 2px rgba(250,174,82,0.14) inset;
+}
+
+/* ===== Intro (after install / in-app) ===== */
+#app-intro{
+  position:fixed; inset:0;
+  z-index:99995;
+  display:none;
+  align-items:center; justify-content:center;
+  padding:16px 12px;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+#app-intro.show{ display:flex; }
+.intro-card{
+  width:min(760px, 100%);
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,0.14);
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.28));
+  box-shadow: 0 18px 55px rgba(0,0,0,0.60);
+  overflow:hidden;
+}
+.intro-head{
+  padding:14px 16px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.intro-brand{ display:flex; align-items:center; gap:12px; min-width:0; }
+.intro-logo{
+  width:58px; height:58px; border-radius:16px;
+  background: rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.14);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.intro-logo img{ width:92%; height:auto; display:block; }
+.intro-titlewrap{ min-width:0; }
+.intro-title{ font-weight:900; font-size:16px; line-height:1.2; }
+.intro-sub{ margin-top:4px; font-size:12px; opacity:.85; }
+.intro-close{
+  appearance:none; border:1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.20);
+  color:#fff; border-radius:12px;
+  padding:8px 10px; cursor:pointer;
+}
+.intro-body{ padding:14px 16px 16px; }
+.intro-body p{ margin:0; font-size:13px; line-height:1.65; opacity:.92; }
+.intro-actions{ display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+
+
+/* ===== LTR helpers for English fragments ===== */
+.ltr, [dir="ltr"]{ direction:ltr; unicode-bidi:isolate; text-align:left; }
+.rtl, [dir="rtl"]{ direction:rtl; unicode-bidi:isolate; text-align:right; }
+
+
+/* ===== Mobile: Granules sliders layout fix (avoid overlap) ===== */
+@media (max-width: 520px){
+  .fp-line{
+    grid-template-columns: 36px 1fr !important;
+    gap: 8px !important;
+    position: relative !important;
+    padding-inline: 54px !important;  /* reserve space for step buttons on both sides if present */
+    min-width: 0 !important;
+  }
+  .fp-line input[type="range"]{ width:100% !important; min-width:0 !important; }
+  .fp-line .fp-val{
+    position:absolute !important;
+    inset-inline-start: 6px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 44px !important;
+    text-align: center !important;
+    padding: 2px 6px !important;
+    border-radius: 10px !important;
+    background: rgba(0,0,0,0.32) !important;
+    border: 1px solid rgba(255,255,255,0.14) !important;
+    pointer-events:none !important;
+  }
+  /* Hard stop for sideways scrolling */
+  html, body{ overflow-x:hidden !important; }
+}
+
+
+/* ===== Granules UX redesign (mobile) ===== */
+@media (max-width: 520px){
+  /* keep preview strip on top - no change */
+  .fp-line{
+    display:grid !important;
+    grid-template-columns: 1fr auto !important;
+    grid-template-rows: auto auto !important;
+    gap: 8px 10px !important;
+    align-items:center !important;
+    padding: 10px 10px 12px !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(255,255,255,0.10) !important;
+    background: rgba(255,255,255,0.04) !important;
+    margin-top: 10px !important;
+  }
+  .fp-label{ grid-column:1; grid-row:1; font-weight:800 !important; opacity:.9 !important; }
+  .fp-val{
+    grid-column:2; grid-row:1;
+    justify-self:end;
+    min-width: 52px;
+    text-align:center !important;
+    padding: 4px 8px !important;
+    border-radius: 12px !important;
+    background: rgba(0,0,0,0.28) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+  }
+  .fp-sliderwrap{
+    grid-column:1 / 3 !important;
+    grid-row:2 !important;
+    display:grid !important;
+    grid-template-columns: 1fr 44px !important;
+    grid-template-rows: 1fr 1fr !important;
+    gap: 10px !important;
+    align-items:center !important;
+  }
+  .fp-sliderwrap input[type=range]{
+    grid-column:1 !important;
+    grid-row:1 / 3 !important;
+    width:100% !important;
+    min-width:0 !important;
+  }
+  .fp-sliderwrap .fp-step{
+    width:42px !important;
+    height:42px !important;
+    line-height:42px !important;
+    font-size:18px !important;
+    border-radius: 14px !important;
+    background: rgba(255,255,255,0.10) !important;
+  }
+  /* stack arrows on the right (plus on top, minus bottom) */
+  .fp-sliderwrap button.fp-step:first-child{ grid-column:2 !important; grid-row:2 !important; }
+  .fp-sliderwrap button.fp-step:last-child{  grid-column:2 !important; grid-row:1 !important; }
+
+  /* Prevent overlap + keep everything inside screen */
+  html, body{ overflow-x:hidden !important; }
+}
+
+
+  /* ===== Tools: Light meters (Color Temp / Flicker / Spectrometer) ===== */
+  .tool-wrap{ display:flex; flex-direction:column; gap:12px; }
+  .tool-card{
+    background:#161a2b;
+    border:1px solid #2f3350;
+    border-radius:12px;
+    padding:12px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.25);
+  }
+  .tool-top{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .tool-title{
+    font-size:15px; color:#faae52; font-weight:800;
+  }
+  .tool-readout{
+    font-size:44px; font-weight:900; color:#cbd5ff; letter-spacing:0.5px;
+    line-height:1;
+  }
+  .tool-unit{ font-size:14px; opacity:0.8; margin-right:6px; }
+  .tool-sub{ font-size:13px; opacity:0.85; margin-top:6px; color:#cbd5ff;}
+  .tool-preview{
+    position:relative;
+    width:100%;
+    aspect-ratio: 16 / 9;
+    background:#000;
+    border-radius:12px;
+    border:2px solid #2a2e48;
+    overflow:hidden;
+  }
+  .tool-preview canvas{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .tool-overlay{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:900; font-size:22px;
+    color:#ff5b5b;
+    text-shadow:0 2px 8px rgba(0,0,0,0.8);
+    background:rgba(0,0,0,0.15);
+    padding:10px;
+    text-align:center;
+  }
+  .tool-scale{
+    margin-top:10px;
+    height:14px;
+    border-radius:999px;
+    border:1px solid #2a2e48;
+    background:linear-gradient(to right, #fca17d 0%, #fca17d 25%, #cbd5ff 55%, #7aa0ff 100%);
+    position:relative;
+    overflow:hidden;
+  }
+  .tool-needle{
+    position:absolute; top:-4px;
+    width:2px; height:22px;
+    background:#fff;
+    box-shadow:0 0 10px rgba(255,255,255,0.45);
+    transform:translateX(-1px);
+  }
+  .tool-scale-labels{
+    display:flex; justify-content:space-between;
+    font-size:11px; opacity:0.75; margin-top:6px;
+  }
+  .tool-mini-note{ font-size:12px; opacity:0.75; margin-top:8px; }
+
+
+  
+
 </style>
 </head>
 
 <body>
+<!-- ===== Install hint (shown on web link, not in installed app) ===== -->
+<div id="install-hint" aria-hidden="true">
+  <div class="inst-card" role="dialog" aria-label="Install">
+    <div class="inst-head">
+      <div class="inst-brand">
+        <div class="inst-logo"><img src="./assets/logo.png" alt="MANOR ENGINEERING"></div>
+        <div class="inst-title">התקנת Autopilot (מומלץ)</div>
+      </div>
+      <button id="inst-close" class="inst-close" aria-label="Close">✕</button>
+    </div>
+    <div class="inst-body">
+      <p>כדי לעבוד בצורה נוחה ובמסך מלא, מומלץ להתקין את Autopilot כאפליקציה על המכשיר.</p>
+      <div class="inst-actions">
+        <button id="inst-install" class="inst-btn primary" dir="ltr" dir="ltr">Install</button>
+        <button id="inst-how" class="inst-btn">איך מתקינים?</button>
+        <button id="inst-skip" class="inst-btn">לא עכשיו</button>
+      </div>
+      <p id="inst-steps" style="margin-top:10px; font-size:12px; opacity:.85; display:none;"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== In-app intro (shown after install, then goes to Camera) ===== -->
+<div id="app-intro" aria-hidden="true">
+  <div class="intro-card" role="dialog" aria-label="Intro">
+    <div class="intro-head">
+      <div class="intro-brand">
+        <div class="intro-logo"><img src="./assets/logo.png" alt="MANOR ENGINEERING"></div>
+        <div class="intro-titlewrap">
+          <div class="intro-title">Autopilot</div>
+          <div class="intro-sub">אוטומציה למפעיל • תהליך ברור • פחות טעויות</div>
+        </div>
+      </div>
+      <button id="intro-close2" class="intro-close" aria-label="Close">✕</button>
+    </div>
+    <div class="intro-body">
+      <p>
+        Autopilot היא פלטפורמת Cloud של <b>MANOR ENGINEERING</b> שנועדה להקל על העבודה השוטפת,
+        להפחית טעויות ולהציג למפעיל את המידע בצורה נקייה וברורה.
+      </p>
+      <p style="margin-top:10px;">
+        בגלל שיש הרבה סוגי גרגירים והרבה קונפיגורציות, המערכת מרכזת ומסדרת את התהליך —
+        ומאפשרת קונפיגורציה מהירה ונכונה של המכונה, בלי להסתמך על “זיכרון” וותק של מפעיל.
+      </p>
+      <div class="intro-actions">
+        <button id="intro-start" class="inst-btn primary">התחל</button>
+        <button id="intro-skip2" class="inst-btn">דלג</button>
+      </div>
+    </div>
+  </div>
+</div>
+
   
 <div id="intro-splash" aria-hidden="false">
   <div id="video-layer">
@@ -2415,7 +2803,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   initFamilyPicker('valid');
   initFamilyPicker('defect');
 });
-
 
 
 // ===== Mock IoT Dashboard =====
@@ -3231,7 +3618,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
 </section>
 
 
-
 <!-- ANALYSIS TAB -->
 <section class="tab" id="tab-analysis">
   <h2>Analyze / Signal Settings</h2>
@@ -3487,9 +3873,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
       </div>
 
       <div class="cam-row" style="margin-top:10px;">
-        <button id="open-camera-btn" class="cam-btn primary" onclick="openCamera()" type="button">Open Camera</button>
-        <button id="capture-photo-btn" class="cam-btn" type="button" onclick="captureAndAnalyze()" disabled>Capture & Analyze</button>
-        <button id="close-camera-btn" class="cam-btn danger" type="button" onclick="closeCamera()" style="display:none;">Close Camera</button>
+        <button id="open-camera-btn" class="cam-btn primary" onclick="openCamera()" type="button" dir="ltr">Open Camera</button>
+        <button id="capture-photo-btn" class="cam-btn" type="button" onclick="captureAndAnalyze()" disabled dir="ltr">Capture & Analyze</button>
+        <button id="close-camera-btn" class="cam-btn danger" type="button" onclick="closeCamera()" style="display:none;" dir="ltr">Close Camera</button>
       </div>
              <div class="cam-row" style="margin-top:8px;">
 </div>
@@ -3506,6 +3892,104 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
       </div>
 </div>
+</section>
+
+
+<section class="tab" id="tab-colorTemp">
+  <h2 style="color:#faae52; margin-bottom:6px;">Color Temperature</h2>
+
+  <div class="tool-wrap">
+    <div class="tool-card">
+      <div class="tool-top">
+        <div class="tool-title">CCT</div>
+        <div>
+          <span class="tool-readout" id="ct-kelvin">—</span>
+          <span class="tool-unit">K</span>
+        </div>
+      </div>
+      <div class="tool-scale" aria-hidden="true">
+        <div class="tool-needle" id="ct-needle" style="left:25%;"></div>
+      </div>
+      <div class="tool-scale-labels">
+        <div>Warm White</div><div>Neutral</div><div>Cold White</div>
+      </div>
+      <div class="tool-sub">Δuv (Magenta/Green shift): <b id="ct-duv">—</b></div>
+      <div class="tool-mini-note">מדידה מקורבת מתוך המצלמה. לקבלת דיוק גבוה – יש להשתמש בחיישן ייעודי.</div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-title" style="margin-bottom:8px;">Live Preview</div>
+      <div class="tool-preview">
+        <canvas id="ct-preview" width="640" height="360"></canvas>
+        <div class="tool-overlay" id="ct-overlay" hidden>Too dark to make a reliable measurement</div>
+      </div>
+
+      <div class="cam-row" style="margin-top:10px;">
+        <button class="cam-btn primary" type="button" onclick="openCamera()" dir="ltr">Open Camera</button>
+        <button class="cam-btn danger" type="button" onclick="closeCamera()" dir="ltr">Close Camera</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tab" id="tab-flicker">
+  <h2 style="color:#faae52; margin-bottom:6px;">Flicker Meter</h2>
+
+  <div class="tool-wrap">
+    <div class="tool-card">
+      <div class="tool-top">
+        <div class="tool-title">Flickering</div>
+        <div>
+          <span class="tool-readout" id="flk-pct">—</span><span class="tool-unit">%</span>
+        </div>
+      </div>
+      <div class="tool-sub">Estimated frequency: <b id="flk-hz">—</b> Hz</div>
+      <div class="tool-mini-note">המדידה מבוססת על תנודות בהירות בפריימים מהמצלמה (הערכה).</div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-title" style="margin-bottom:8px;">Live Preview</div>
+      <div class="tool-preview">
+        <canvas id="flk-preview" width="640" height="360"></canvas>
+        <div class="tool-overlay" id="flk-overlay" hidden>Too dark to make a reliable measurement</div>
+      </div>
+
+      <div class="cam-row" style="margin-top:10px;">
+        <button class="cam-btn primary" type="button" onclick="openCamera()" dir="ltr">Open Camera</button>
+        <button class="cam-btn danger" type="button" onclick="closeCamera()" dir="ltr">Close Camera</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tab" id="tab-spectrometer">
+  <h2 style="color:#faae52; margin-bottom:6px;">Light Spectrometer</h2>
+
+  <div class="tool-wrap">
+    <div class="tool-card">
+      <div class="tool-top">
+        <div class="tool-title">Dominant Wavelength</div>
+        <div>
+          <span class="tool-readout" id="sp-nm">—</span><span class="tool-unit">nm</span>
+        </div>
+      </div>
+      <div class="tool-sub">Color saturation: <b id="sp-sat">—</b>%</div>
+      <div class="tool-mini-note">מיפוי גוון (Hue) לגל אורך-גל משוער (לא ספקטרומטר אמיתי).</div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-title" style="margin-bottom:8px;">Live Preview</div>
+      <div class="tool-preview">
+        <canvas id="sp-preview" width="640" height="360"></canvas>
+        <div class="tool-overlay" id="sp-overlay" hidden>Too dark to make a reliable measurement</div>
+      </div>
+
+      <div class="cam-row" style="margin-top:10px;">
+        <button class="cam-btn primary" type="button" onclick="openCamera()" dir="ltr">Open Camera</button>
+        <button class="cam-btn danger" type="button" onclick="closeCamera()" dir="ltr">Close Camera</button>
+      </div>
+    </div>
+  </div>
 </section>
 
 
@@ -3625,12 +4109,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     </div>
   </details>
 </section>
-
-
-
-
-
-
 
 
 <!-- QA TAB -->
@@ -4185,6 +4663,9 @@ if(tab === 'simulation' && typeof runDualSimulation === 'function'){
       { label: 'Defect', tab: 'defect' }
     ],
     tools: [
+      { label: 'Color Temp', tab: 'colorTemp' },
+      { label: 'Flicker',    tab: 'flicker' },
+      { label: 'Spectrometer', tab: 'spectrometer' },
       { label: 'QA',          tab: 'qa'     },
       { label: 'Saved',       tab: 'saved'  },
       { label: 'Upload',      tab: 'upload' },
@@ -4285,13 +4766,32 @@ if(tab === 'simulation' && typeof runDualSimulation === 'function'){
     const b = +document.getElementById(`${prefix}-b`).value;
 
     const box = document.getElementById(`${prefix}-preview`);
-    box.style.background = `rgb(${r},${g},${b})`;
-    box.style.color = (r + g + b) / 3 < 128 ? '#fff' : '#000';
-    box.textContent = `RGB(${r},${g},${b})`;
+    if(box){
+      box.style.background = `rgb(${r},${g},${b})`;
+      box.style.color = (r + g + b) / 3 < 128 ? '#fff' : '#000';
+      box.textContent = `RGB(${r},${g},${b})`;
+    }
 
+    // Top mini preview (the one users actually look at)
     const mini = document.getElementById(`${prefix}-mini`);
+    const miniTxt = document.getElementById(`${prefix}-mini-text`);
     if(mini){
-      mini.style.background = `rgb(${r},${g},${b})`;
+      // store as base RGB so the transparency UI can safely switch between rgb/rgba
+      mini.dataset.baseR = String(r);
+      mini.dataset.baseG = String(g);
+      mini.dataset.baseB = String(b);
+
+      // keep inline color in sync (MutationObserver will also catch this)
+      mini.style.backgroundColor = `rgb(${r},${g},${b})`;
+    }
+    if(miniTxt){
+      const transparent = !!document.getElementById('transparent-toggle')?.checked;
+      if(transparent){
+        // UI-only alpha preview (same constant as the mini preview script)
+        miniTxt.textContent = `RGB(${r},${g},${b}) α.55`;
+      }else{
+        miniTxt.textContent = `RGB(${r},${g},${b})`;
+      }
     }
   }
 
@@ -4403,9 +4903,6 @@ function updateAll(prefix) {
       b: Math.max(0, Math.min(50, Math.round(b * 50 / 255))),
     };
   }
-
-
-
 
 
   function clampRgbToMax(r,g,b,maxVal){
@@ -4667,7 +5164,6 @@ if(tLabel){
 
     return { mode: 'chromatic', maxDelta: arr[0].v, secondDelta: arr[1].v, arr };
   }
-
 
 
   function updateSortingProgram() {
@@ -5214,9 +5710,6 @@ function computeAverageRGB(){
 }
 
 
-
-
-
 /* Upload handler */
 function attachCameraHandlers(){
   if(window.__cameraHandlersAttached) return;
@@ -5678,7 +6171,8 @@ if(capBtn) capBtn.disabled = false;
       const _old = window.switchTab;
       window.switchTab = function(tab){
         _old(tab);
-        if(tab !== 'camera') _closeCamera();
+        const keepCamTabs = new Set(['camera','colorTemp','flicker','spectrometer']);
+        if(!keepCamTabs.has(tab)) _closeCamera();
       };
     }
   });
@@ -6507,7 +7001,6 @@ function bind(){
 </script>
 
 
-
 <script>
 (function(){
   const $ = (id)=>document.getElementById(id);
@@ -7259,6 +7752,324 @@ document.addEventListener('DOMContentLoaded', ()=>{
       navigator.serviceWorker.register("./service-worker.js").catch(() => {});
     });
   }
+</script>
+
+
+<script>
+(() => {
+  const LS_INSTALL_HINT = "autopilot_install_hint_seen_v1";
+  const LS_INTRO_SEEN   = "autopilot_intro_seen_v1";
+
+  const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = () =>
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
+
+  const show = (id) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.classList.add('show');
+    el.setAttribute('aria-hidden','false');
+  };
+  const hide = (id) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.classList.remove('show');
+    el.setAttribute('aria-hidden','true');
+  };
+
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+  });
+
+  function installNow(){
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.finally(()=>{ deferredPrompt = null; });
+    }else{
+      // fallback instructions
+      const steps = document.getElementById('inst-steps');
+      if(steps){
+        steps.style.display = "block";
+        steps.textContent = isIOS()
+          ? "ב‑Safari: לחץ Share → Add to Home Screen → הוסף."
+          : "ב‑Chrome/Edge: פתח תפריט → <span dir="ltr">Install app</span> (או <span dir="ltr">Install</span>).";
+      }
+    }
+  }
+
+  function bindInstallHint(){
+    const close = document.getElementById('inst-close');
+    const skip  = document.getElementById('inst-skip');
+    const how   = document.getElementById('inst-how');
+    const ins   = document.getElementById('inst-install');
+    if(close) close.onclick = () => { hide('install-hint'); localStorage.setItem(LS_INSTALL_HINT,'1'); };
+    if(skip)  skip.onclick  = () => { hide('install-hint'); localStorage.setItem(LS_INSTALL_HINT,'1'); };
+    if(how)   how.onclick   = () => {
+      const steps = document.getElementById('inst-steps');
+      if(steps){
+        steps.style.display = "block";
+        steps.textContent = isIOS()
+          ? "ב‑Safari: לחץ Share → Add to Home Screen → הוסף."
+          : "ב‑Chrome/Edge: פתח תפריט → <span dir="ltr">Install app</span> (או <span dir="ltr">Install</span>).";
+      }
+    };
+    if(ins)   ins.onclick   = () => installNow();
+  }
+
+  function bindIntro(){
+    const x = document.getElementById('intro-close2');
+    const s = document.getElementById('intro-skip2');
+    const go = document.getElementById('intro-start');
+    const done = () => {
+      hide('app-intro');
+      localStorage.setItem(LS_INTRO_SEEN,'1');
+      // Always open Camera first
+      try{ if(typeof switchTab === 'function') switchTab('camera'); try{ if(typeof openCamera==='function') openCamera(); }catch(e){} }catch(e){}
+    };
+    if(x) x.onclick = done;
+    if(s) s.onclick = done;
+    if(go) go.onclick = done;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    bindInstallHint();
+    bindIntro();
+
+    // 1) If opened via link (web) -> show generic install hint once, and DO NOT show app intro.
+    if(!isStandalone()){
+      if(localStorage.getItem(LS_INSTALL_HINT) !== '1'){
+        setTimeout(()=>show('install-hint'), 500);
+      }
+      // Do not force camera here.
+      return;
+    }
+
+    // 2) If installed app -> show intro once, then go to camera
+    if(localStorage.getItem(LS_INTRO_SEEN) !== '1'){
+      setTimeout(()=>show('app-intro'), 350);
+    }else{
+      // Always start on camera
+      try{ if(typeof switchTab === 'function') switchTab('camera'); try{ if(typeof openCamera==='function') openCamera(); }catch(e){} }catch(e){}
+    }
+  });
+})();
+</script>
+
+
+<script>
+/* ===== Tools meters engine (ColorTemp / Flicker / Spectrometer) ===== */
+(function(){
+  const $ = (id)=>document.getElementById(id);
+
+  const samp = document.createElement('canvas');
+  const sctx = samp.getContext('2d', { willReadFrequently:true });
+
+  function sampleROI(video, w=80, h=80){
+    if(!video || video.readyState < 2) return null;
+    samp.width = w; samp.height = h;
+
+    const vw = video.videoWidth || 0;
+    const vh = video.videoHeight || 0;
+    if(!vw || !vh) return null;
+
+    const sx = Math.max(0, (vw - w) / 2);
+    const sy = Math.max(0, (vh - h) / 2);
+
+    sctx.drawImage(video, sx, sy, w, h, 0, 0, w, h);
+    const img = sctx.getImageData(0,0,w,h).data;
+
+    let r=0,g=0,b=0, y=0;
+    const n = w*h;
+    for(let i=0;i<img.length;i+=4){
+      const rr=img[i], gg=img[i+1], bb=img[i+2];
+      r+=rr; g+=gg; b+=bb;
+      y += 0.2126*rr + 0.7152*gg + 0.0722*bb;
+    }
+    return { r:r/n, g:g/n, b:b/n, lum:y/n };
+  }
+
+  function clamp(x,a,b){ return Math.max(a, Math.min(b,x)); }
+
+  function srgbToLinear(c){
+    c = c/255;
+    return (c <= 0.04045) ? (c/12.92) : Math.pow((c+0.055)/1.055, 2.4);
+  }
+
+  function rgbToCct(r,g,b){
+    const R=srgbToLinear(r), G=srgbToLinear(g), B=srgbToLinear(b);
+    const X = 0.4124*R + 0.3576*G + 0.1805*B;
+    const Y = 0.2126*R + 0.7152*G + 0.0722*B;
+    const Z = 0.0193*R + 0.1192*G + 0.9505*B;
+
+    const sum = X+Y+Z;
+    if(sum <= 1e-6) return null;
+    const x = X/sum;
+    const y = Y/sum;
+
+    const n = (x - 0.3320) / (0.1858 - y);
+    const cct = (-449*Math.pow(n,3)) + (3525*Math.pow(n,2)) - (6823.3*n) + 5520.33;
+    return clamp(cct, 1000, 12000);
+  }
+
+  function rgbToDuvProxy(r,g,b){
+    const duv = ((g - (r+b)/2) / 255) * 0.06;
+    return clamp(duv, -0.08, 0.08);
+  }
+
+  function rgbToHsv(r,g,b){
+    r/=255; g/=255; b/=255;
+    const max=Math.max(r,g,b), min=Math.min(r,g,b);
+    const d=max-min;
+    let h=0;
+    if(d===0) h=0;
+    else if(max===r) h=((g-b)/d)%6;
+    else if(max===g) h=(b-r)/d + 2;
+    else h=(r-g)/d + 4;
+    h = (h*60 + 360) % 360;
+    const s = (max===0)?0:d/max;
+    const v = max;
+    return {h,s,v};
+  }
+
+  function hueToWavelength(h){
+    const pts = [
+      {h:0, nm:650},
+      {h:60, nm:580},
+      {h:120, nm:530},
+      {h:180, nm:500},
+      {h:240, nm:460},
+      {h:300, nm:400},
+      {h:360, nm:650},
+    ];
+    for(let i=0;i<pts.length-1;i++){
+      const a=pts[i], b=pts[i+1];
+      if(h>=a.h && h<=b.h){
+        const t=(h-a.h)/(b.h-a.h || 1);
+        return a.nm + t*(b.nm-a.nm);
+      }
+    }
+    return 550;
+  }
+
+  const flick = [];
+  function flickerUpdate(lum, t){
+    flick.push({t, lum});
+    while(flick.length && (t - flick[0].t) > 2500) flick.shift();
+    if(flick.length < 15) return null;
+
+    let min=1e9, max=-1e9;
+    for(const p of flick){ min=Math.min(min,p.lum); max=Math.max(max,p.lum); }
+    const pct = (max+min>1e-6) ? ((max-min)/(max+min))*100 : 0;
+
+    const ys = flick.map(p=>p.lum);
+    const mean = ys.reduce((a,b)=>a+b,0)/ys.length;
+    const xs = ys.map(v=>v-mean);
+    const ts = flick.map(p=>p.t);
+    const dt = (ts[ts.length-1]-ts[0])/(ts.length-1 || 1);
+    if(!isFinite(dt) || dt<=0) return {pct, hz:null};
+
+    const N = xs.length;
+    let bestLag = 0;
+    let bestCorr = 0;
+    const maxLag = Math.floor(N/2);
+    for(let lag=2; lag<maxLag; lag++){
+      let c=0;
+      for(let i=0;i<N-lag;i++) c += xs[i]*xs[i+lag];
+      if(c > bestCorr){ bestCorr = c; bestLag = lag; }
+    }
+    const periodMs = bestLag ? (bestLag*dt) : null;
+    const hz = periodMs ? (1000/periodMs) : null;
+    return { pct, hz };
+  }
+
+  function drawPreview(video, canvas){
+    if(!canvas || !video || video.readyState < 2) return;
+    const ctx = canvas.getContext('2d');
+    const cw = canvas.width, ch = canvas.height;
+    const vw = video.videoWidth, vh = video.videoHeight;
+    if(!vw || !vh) return;
+
+    const cr = cw/ch, vr = vw/vh;
+    let sw=vw, sh=vh, sx=0, sy=0;
+    if(vr > cr){
+      sh = vh; sw = vh*cr; sx = (vw - sw)/2;
+    }else{
+      sw = vw; sh = vw/cr; sy = (vh - sh)/2;
+    }
+    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch);
+  }
+
+  function loop(){
+    const video = document.getElementById('live-video');
+    const active = document.querySelector('.tab.active')?.id || '';
+    const isCT = active === 'tab-colorTemp';
+    const isF  = active === 'tab-flicker';
+    const isSP = active === 'tab-spectrometer';
+
+    if(!(isCT || isF || isSP)){
+      requestAnimationFrame(loop);
+      return;
+    }
+
+    const roi = sampleROI(video, 96, 96);
+    const now = performance.now();
+    const dark = (!roi) || (roi.lum < 18);
+
+    if(isCT){
+      const c=$('ct-preview'); if(c) drawPreview(video,c);
+      const ov=$('ct-overlay'); if(ov) ov.hidden=!dark;
+      if(!dark && roi){
+        const cct = rgbToCct(roi.r, roi.g, roi.b);
+        const duv = rgbToDuvProxy(roi.r, roi.g, roi.b);
+        if(cct){
+          $('ct-kelvin').textContent = Math.round(cct).toString();
+          $('ct-duv').textContent = (duv>=0?'+':'') + duv.toFixed(3);
+          const pct = clamp((cct-2500)/(7500-2500),0,1)*100;
+          const needle=$('ct-needle'); if(needle) needle.style.left = pct.toFixed(1)+'%';
+        }
+      }else{
+        $('ct-kelvin').textContent='—';
+        $('ct-duv').textContent='—';
+      }
+    }
+
+    if(isF){
+      const c=$('flk-preview'); if(c) drawPreview(video,c);
+      const ov=$('flk-overlay'); if(ov) ov.hidden=!dark;
+      if(!dark && roi){
+        const res = flickerUpdate(roi.lum, now);
+        if(res){
+          $('flk-pct').textContent = clamp(res.pct,0,100).toFixed(0);
+          $('flk-hz').textContent  = res.hz ? res.hz.toFixed(0) : '—';
+        }
+      }else{
+        $('flk-pct').textContent='—';
+        $('flk-hz').textContent='—';
+      }
+    }
+
+    if(isSP){
+      const c=$('sp-preview'); if(c) drawPreview(video,c);
+      const ov=$('sp-overlay'); if(ov) ov.hidden=!dark;
+      if(!dark && roi){
+        const hsv = rgbToHsv(roi.r, roi.g, roi.b);
+        const nm = hueToWavelength(hsv.h);
+        $('sp-nm').textContent  = Math.round(clamp(nm,380,700)).toString();
+        $('sp-sat').textContent = Math.round(clamp(hsv.s,0,1)*100).toString();
+      }else{
+        $('sp-nm').textContent='—';
+        $('sp-sat').textContent='—';
+      }
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=>{ requestAnimationFrame(loop); });
+})();
 </script>
 
 </body>
