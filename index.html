@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="rtl">
 <head>
 <meta http-equiv="Permissions-Policy" content="camera=(self)">
 <meta charset="utf-8"/>
@@ -2306,22 +2306,103 @@ nav button.active::after{
 }
 .step-t{ font-size:12.5px; line-height:1.5; opacity:.92; }
 
+
+/* ===== RTL base (Hebrew) ===== */
+html[dir="rtl"] body{ direction: rtl; text-align: right; }
+
+/* ===== Simple floating onboarding ===== */
+#onboard-overlay{
+  position:fixed; inset:0;
+  z-index:99998;
+  display:none;               /* shown via JS */
+  align-items:center; justify-content:center;
+  padding:16px 12px;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+#onboard-overlay.show{ display:flex; }
+.onb-card{
+  width:min(720px, 100%);
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,0.12);
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.26));
+  box-shadow: 0 18px 50px rgba(0,0,0,0.55);
+  overflow:hidden;
+}
+.onb-head{
+  padding:14px 16px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.onb-brand{ display:flex; align-items:center; gap:12px; min-width:0; }
+.onb-logo{
+  width:66px; height:66px; border-radius:16px;
+  background: rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.14);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.onb-logo img{ width:92%; height:auto; display:block; }
+.onb-titlewrap{ min-width:0; }
+.onb-title{ font-weight:900; font-size:18px; line-height:1.15; }
+.onb-sub{ margin-top:4px; font-size:12px; opacity:.85; line-height:1.35; }
+.onb-close{
+  appearance:none; border:1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.20);
+  color:#fff; border-radius:12px;
+  padding:8px 10px; cursor:pointer;
+}
+.onb-body{ padding:14px 16px 16px; }
+.onb-body p{ margin:0; font-size:13px; line-height:1.65; opacity:.92; }
+.onb-actions{ display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+.onb-btn{
+  appearance:none; border-radius:12px;
+  border:1px solid rgba(255,255,255,0.14);
+  background: linear-gradient(180deg, rgba(255,255,255,0.09), rgba(0,0,0,0.22));
+  color:#fff; padding:10px 12px;
+  font-weight:900; font-size:12px;
+  cursor:pointer;
+}
+.onb-btn.primary{
+  border-color: rgba(250,174,82,0.55);
+  box-shadow: 0 0 0 2px rgba(250,174,82,0.14) inset;
+}
+
 </style>
 </head>
 
 <body>
-
-<!-- ===== Simple Welcome Overlay ===== -->
-<div id="onboard-overlay" aria-hidden="false" class="show">
+<!-- ===== Floating Welcome Overlay ===== -->
+<div id="onboard-overlay" aria-hidden="true">
   <div class="onb-card" role="dialog" aria-label="Welcome">
     <div class="onb-head">
       <div class="onb-brand">
         <div class="onb-logo"><img src="./assets/logo.png" alt="MANOR ENGINEERING"></div>
         <div class="onb-titlewrap">
           <div class="onb-title">ברוכים הבאים ל‑Autopilot</div>
-          <div class="onb-sub">פלטפורמת Cloud לניטור, שליטה ובקרה של מכונות מיון</div>
+          <div class="onb-sub">פלטפורמת Cloud לניטור, שליטה ובקרה של מכונות מיון אופטיות</div>
         </div>
       </div>
+      <button id="onb-close" class="onb-close" aria-label="Close">✕</button>
+    </div>
+    <div class="onb-body">
+      <p>
+        כדי לפשט את עבודת המפעיל ולאפשר תהליך עבודה ברור ואחיד,
+        <b>MANOR ENGINEERING</b> פיתחה את Autopilot.
+      </p>
+      <p style="margin-top:8px;">כדי להתחיל, בחר:</p>
+      <div class="onb-actions">
+        <button id="onb-go-valid" class="onb-btn primary">בחר גרגיר תקין (Valid)</button>
+        <button id="onb-go-defect" class="onb-btn">בחר גרגיר פגום (Defect)</button>
+        <button id="onb-skip" class="onb-btn">דלג והמשך</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
     </div>
     <div class="onb-body">
       <p style="font-size:13px; line-height:1.6; opacity:.9;">
@@ -7517,108 +7598,57 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 <script>
 (() => {
-  const LS_ONBOARD = "autopilot_onboard_seen_v1";
-  const LS_INSTALL = "autopilot_install_seen_v1";
-  let deferredPrompt = null;
+  const LS_ONBOARD = "
 
-  function isIOS(){
-    return /iphone|ipad|ipod/i.test(navigator.userAgent);
-  }
-  function isStandalone(){
-    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-  }
 
-  function show(el){
-    if(!el) return;
-    el.classList.add('show');
-    el.setAttribute('aria-hidden','false');
-  }
-  function hide(el){
-    if(!el) return;
-    el.classList.remove('show');
-    el.setAttribute('aria-hidden','true');
-  }
+<script>
+(() => {
+  const LS_ONBOARD = "autopilot_onboard_seen_v2";
 
-  function qs(id){ return document.getElementById(id); }
-
-  window.__showOnboard = function(){
-    const el = qs('onboard-overlay');
-    if(!el) return;
-    if(localStorage.getItem(LS_ONBOARD) === "1") return;
-    show(el);
+  const el = () => document.getElementById('onboard-overlay');
+  const show = () => {
+    const o = el(); if(!o) return;
+    if(localStorage.getItem(LS_ONBOARD)==="1") return;
+    o.classList.add('show');
+    o.setAttribute('aria-hidden','false');
+  };
+  const hide = () => {
+    const o = el(); if(!o) return;
+    o.classList.remove('show');
+    o.setAttribute('aria-hidden','true');
+    localStorage.setItem(LS_ONBOARD,"1");
   };
 
-  function showInstall(){
-    const el = qs('install-overlay');
-    if(!el) return;
-    // show relevant instructions
-    const a = qs('install-android');
-    const i = qs('install-ios');
-    if(isIOS()){
-      if(i) i.style.display = "block";
-      if(a) a.style.display = "none";
-    }else{
-      if(a) a.style.display = "block";
-      if(i) i.style.display = "none";
-    }
-    show(el);
-    localStorage.setItem(LS_INSTALL, "1");
-  }
-
-  // Capture install prompt (Android/Chrome/Edge)
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-  });
-
-  function runInstallPrompt(){
-    if(deferredPrompt){
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.finally(() => { deferredPrompt = null; });
-      return;
-    }
-    // If no prompt (iOS or unsupported), show instructions
-    showInstall();
+  function go(tab){
+    try{ if(typeof switchTab === "function") switchTab(tab); }catch(e){}
+    hide();
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    // Close buttons
-    const onb = qs('onboard-overlay');
-    const ins = qs('install-overlay');
-    const closeOnb = qs('onb-close');
-    const closeIns = qs('ins-close');
-    if(closeOnb) closeOnb.onclick = () => { hide(onb); localStorage.setItem(LS_ONBOARD,"1"); };
-    if(closeIns) closeIns.onclick = () => hide(ins);
+    const c = document.getElementById('onb-close');
+    const v = document.getElementById('onb-go-valid');
+    const d = document.getElementById('onb-go-defect');
+    const s = document.getElementById('onb-skip');
+    if(c) c.onclick = hide;
+    if(v) v.onclick = () => go('valid');
+    if(d) d.onclick = () => go('defect');
+    if(s) s.onclick = hide;
 
-    // Actions
-    const goValid = qs('onb-go-valid');
-    const goGran = qs('onb-go-granules');
-    const goAna  = qs('onb-go-analysis');
-    const goSim  = qs('onb-go-simulation');
-    const onbInstall = qs('onb-install');
+    // If splash exists, show after user clicks Skip. If no splash, show on load.
+    const splash = document.getElementById('intro-splash');
+    if(!splash) { setTimeout(show, 50); return; }
 
-    function finish(){ hide(onb); localStorage.setItem(LS_ONBOARD,"1"); }
-
-    if(goValid) goValid.onclick = () => { try{ switchTab('valid'); }catch(e){} finish(); };
-    if(goGran)  goGran.onclick  = () => { try{ /* family menu */ }catch(e){} finish(); };
-    if(goAna)   goAna.onclick   = () => { try{ switchTab('analysis'); }catch(e){} finish(); };
-    if(goSim)   goSim.onclick   = () => { try{ switchTab('simulation'); }catch(e){} finish(); };
-    if(onbInstall) onbInstall.onclick = () => runInstallPrompt();
-
-    // Install overlay buttons
-    const insInstall = qs('ins-install');
-    const insOk = qs('ins-ok');
-    if(insInstall) insInstall.onclick = () => runInstallPrompt();
-    if(insOk) insOk.onclick = () => hide(ins);
-
-    // Auto-show install help once (first visit) if not standalone
-    if(!isStandalone() && localStorage.getItem(LS_INSTALL) !== "1"){
-      // show after onboarding or if onboarding already seen
+    // Hook into existing splash skip button
+    const skipBtn = document.getElementById('intro-skip');
+    if(skipBtn){
+      const prev = skipBtn.onclick;
+      skipBtn.onclick = (e) => { if(prev) try{ prev.call(skipBtn,e);}catch(_){}; setTimeout(show, 50); };
+    } else {
+      // fallback if splash already hidden
       setTimeout(() => {
-        // don't interrupt if onboarding is visible
-        if(onb && onb.classList.contains('show')) return;
-        showInstall();
-      }, 1500);
+        const hidden = splash.classList.contains('hide') || splash.getAttribute('aria-hidden')==="true";
+        if(hidden) show();
+      }, 200);
     }
   });
 })();
