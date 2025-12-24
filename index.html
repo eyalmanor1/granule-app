@@ -2341,6 +2341,64 @@ html[dir="rtl"] body{ direction: rtl; text-align: right; }
   html, body{ overflow-x:hidden !important; }
 }
 
+
+/* ===== Granules UX redesign (mobile) ===== */
+@media (max-width: 520px){
+  /* keep preview strip on top - no change */
+  .fp-line{
+    display:grid !important;
+    grid-template-columns: 1fr auto !important;
+    grid-template-rows: auto auto !important;
+    gap: 8px 10px !important;
+    align-items:center !important;
+    padding: 10px 10px 12px !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(255,255,255,0.10) !important;
+    background: rgba(255,255,255,0.04) !important;
+    margin-top: 10px !important;
+  }
+  .fp-label{ grid-column:1; grid-row:1; font-weight:800 !important; opacity:.9 !important; }
+  .fp-val{
+    grid-column:2; grid-row:1;
+    justify-self:end;
+    min-width: 52px;
+    text-align:center !important;
+    padding: 4px 8px !important;
+    border-radius: 12px !important;
+    background: rgba(0,0,0,0.28) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+  }
+  .fp-sliderwrap{
+    grid-column:1 / 3 !important;
+    grid-row:2 !important;
+    display:grid !important;
+    grid-template-columns: 1fr 44px !important;
+    grid-template-rows: 1fr 1fr !important;
+    gap: 10px !important;
+    align-items:center !important;
+  }
+  .fp-sliderwrap input[type=range]{
+    grid-column:1 !important;
+    grid-row:1 / 3 !important;
+    width:100% !important;
+    min-width:0 !important;
+  }
+  .fp-sliderwrap .fp-step{
+    width:42px !important;
+    height:42px !important;
+    line-height:42px !important;
+    font-size:18px !important;
+    border-radius: 14px !important;
+    background: rgba(255,255,255,0.10) !important;
+  }
+  /* stack arrows on the right (plus on top, minus bottom) */
+  .fp-sliderwrap button.fp-step:first-child{ grid-column:2 !important; grid-row:2 !important; }
+  .fp-sliderwrap button.fp-step:last-child{  grid-column:2 !important; grid-row:1 !important; }
+
+  /* Prevent overlap + keep everything inside screen */
+  html, body{ overflow-x:hidden !important; }
+}
+
 </style>
 </head>
 
