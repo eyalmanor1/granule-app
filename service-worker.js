@@ -1,11 +1,10 @@
-const CACHE = "manor-autopilot-v15";
+const CACHE = "manor-autopilot-v4";
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
-  "./icons/icon-512.png",
-  "./assets/logo.png"
+  "./icons/icon-512.png"
 ];
 
 self.addEventListener("install", (event) => {
