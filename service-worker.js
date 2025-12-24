@@ -1,4 +1,4 @@
-const CACHE = "manor-autopilot-v11";
+const CACHE = "manor-autopilot-v12";
 const ASSETS = [
   "./",
   "./index.html",

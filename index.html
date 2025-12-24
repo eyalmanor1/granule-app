@@ -2308,6 +2308,11 @@ html[dir="rtl"] body{ direction: rtl; text-align: right; }
 .intro-body p{ margin:0; font-size:13px; line-height:1.65; opacity:.92; }
 .intro-actions{ display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
 
+
+/* ===== LTR helpers for English fragments ===== */
+.ltr, [dir="ltr"]{ direction:ltr; unicode-bidi:isolate; text-align:left; }
+.rtl, [dir="rtl"]{ direction:rtl; unicode-bidi:isolate; text-align:right; }
+
 </style>
 </head>
 
@@ -2325,7 +2330,7 @@ html[dir="rtl"] body{ direction: rtl; text-align: right; }
     <div class="inst-body">
       <p>כדי לעבוד בצורה נוחה ובמסך מלא, מומלץ להתקין את Autopilot כאפליקציה על המכשיר.</p>
       <div class="inst-actions">
-        <button id="inst-install" class="inst-btn primary">Install</button>
+        <button id="inst-install" class="inst-btn primary" dir="ltr" dir="ltr">Install</button>
         <button id="inst-how" class="inst-btn">איך מתקינים?</button>
         <button id="inst-skip" class="inst-btn">לא עכשיו</button>
       </div>
@@ -3678,9 +3683,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
       </div>
 
       <div class="cam-row" style="margin-top:10px;">
-        <button id="open-camera-btn" class="cam-btn primary" onclick="openCamera()" type="button">Open Camera</button>
-        <button id="capture-photo-btn" class="cam-btn" type="button" onclick="captureAndAnalyze()" disabled>Capture & Analyze</button>
-        <button id="close-camera-btn" class="cam-btn danger" type="button" onclick="closeCamera()" style="display:none;">Close Camera</button>
+        <button id="open-camera-btn" class="cam-btn primary" onclick="openCamera()" type="button" dir="ltr">Open Camera</button>
+        <button id="capture-photo-btn" class="cam-btn" type="button" onclick="captureAndAnalyze()" disabled dir="ltr">Capture & Analyze</button>
+        <button id="close-camera-btn" class="cam-btn danger" type="button" onclick="closeCamera()" style="display:none;" dir="ltr">Close Camera</button>
       </div>
              <div class="cam-row" style="margin-top:8px;">
 </div>
@@ -7493,7 +7498,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         steps.style.display = "block";
         steps.textContent = isIOS()
           ? "ב‑Safari: לחץ Share → Add to Home Screen → הוסף."
-          : "ב‑Chrome/Edge: פתח תפריט → Install app (או Install).";
+          : "ב‑Chrome/Edge: פתח תפריט → <span dir="ltr">Install app</span> (או <span dir="ltr">Install</span>).";
       }
     }
   }
@@ -7511,7 +7516,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         steps.style.display = "block";
         steps.textContent = isIOS()
           ? "ב‑Safari: לחץ Share → Add to Home Screen → הוסף."
-          : "ב‑Chrome/Edge: פתח תפריט → Install app (או Install).";
+          : "ב‑Chrome/Edge: פתח תפריט → <span dir="ltr">Install app</span> (או <span dir="ltr">Install</span>).";
       }
     };
     if(ins)   ins.onclick   = () => installNow();
@@ -7525,7 +7530,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       hide('app-intro');
       localStorage.setItem(LS_INTRO_SEEN,'1');
       // Always open Camera first
-      try{ if(typeof switchTab === 'function') switchTab('camera'); }catch(e){}
+      try{ if(typeof switchTab === 'function') switchTab('camera'); try{ if(typeof openCamera==='function') openCamera(); }catch(e){} }catch(e){}
     };
     if(x) x.onclick = done;
     if(s) s.onclick = done;
@@ -7550,7 +7555,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       setTimeout(()=>show('app-intro'), 350);
     }else{
       // Always start on camera
-      try{ if(typeof switchTab === 'function') switchTab('camera'); }catch(e){}
+      try{ if(typeof switchTab === 'function') switchTab('camera'); try{ if(typeof openCamera==='function') openCamera(); }catch(e){} }catch(e){}
     }
   });
 })();
