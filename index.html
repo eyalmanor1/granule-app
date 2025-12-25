@@ -604,7 +604,8 @@
   .fp-vwrap{position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:34px 6px; border:1px solid rgba(255,255,255,0.10); border-radius:16px; background:rgba(255,255,255,0.04); width:72px;}
   .fp-hline{display:grid; grid-template-columns:22px 1fr; gap:10px; align-items:center; min-width:0;}
   .fp-hlabel{font-size:12px; opacity:.85; text-align:center;}
-  .fp-hwrap{position:relative; display:flex; align-items:center; gap:6px; min-width:0;}
+  .fp-hwrap{position:relative; display:flex; align-items:center; min-width:0;}
+  .fp-hwrap{padding:0 44px;} /* keep thumb clear of inside arrows */
   .fp-range{appearance:none; -webkit-appearance:none; outline:none; border-radius:999px; background:rgba(255,255,255,0.16);}
   .fp-range.fp-horizontal{height:48px; width:100%; min-width:0;}
   .fp-range.fp-vertical{
@@ -650,11 +651,11 @@
   .fp-arrow:active{transform:scale(0.98);}
   .fp-vwrap .fp-arrow-up{top:8px; left:50%; transform:translateX(-50%);}
   .fp-vwrap .fp-arrow-down{bottom:8px; left:50%; transform:translateX(-50%);}
-  .fp-hwrap .fp-arrow-left{left:0; top:50%; transform:translateY(-50%);}
-  .fp-hwrap .fp-arrow-right{right:0; top:50%; transform:translateY(-50%);}
+  .fp-hwrap .fp-arrow-left{left:10px; top:50%; transform:translateY(-50%);}
+  .fp-hwrap .fp-arrow-right{right:10px; top:50%; transform:translateY(-50%);}
 
-  /* Provide room so arrows don't cover the range */
-  .fp-hwrap .fp-range{margin:0 38px;}
+  /* Arrows sit INSIDE the track */
+  .fp-hwrap .fp-range{margin:0;}
   .fp-vwrap .fp-range{margin:0;}
 
   /* Value bubble drawn on the slider itself */
@@ -685,14 +686,37 @@
   .fp-vline:nth-child(2) .fp-bubble{background:rgba(240,220,90,0.95); color:#111;}
 
   /* Mobile fit */
-  @media (max-width: 520px){
-    .fp-layout{grid-template-columns:1fr; gap:14px;}
-    .fp-hs{justify-content:center;}
-    .fp-vwrap{width:64px;}
-    .fp-range.fp-vertical{height:220px;}
-    .fp-range.fp-horizontal{height:52px;}
-    .fp-hline{grid-template-columns:16px 1fr; gap:8px;}
+  @media (max-width: 700px){
+    /* families as 2-column grid */
+    .fp-row{display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:stretch;}
+    .fp-swatch{width:100%; height:50px; border-radius:14px;}
+    .fp-swatch::after{left:10px; bottom:8px; font-size:13px;}
+
+    /* HS above RGB */
+    .fp-layout{display:flex; flex-direction:column; gap:14px;}
+    .fp-hs{order:1; justify-content:center; width:100%;}
+    .fp-rgb{order:2; width:100%; gap:14px;}
+
+    /* vertical sliders slightly shorter so everything fits */
+    .fp-vwrap{width:64px; padding:28px 6px;}
+    .fp-range.fp-vertical{width:44px; height:180px;}
+    .fp-range.fp-horizontal{height:54px;}
+
+    .fp-hline{grid-template-columns:18px 1fr; gap:8px;}
+    .fp-hlabel{font-size:12px;}
+
+    /* preview block more prominent on mobile */
+    .valid-mini-row{margin-top:6px;}
+    .mini-rgb-indicator{min-height:72px;}
   }
+
+  @media (max-width: 420px){
+    .fp-range.fp-vertical{height:160px;}
+    .fp-vwrap{width:58px;}
+    .fp-range.fp-horizontal{height:56px;}
+    .fp-arrow{width:32px; height:32px;}
+  }
+
 
 
   /* ===== QA TAB ===== */
@@ -2572,6 +2596,19 @@ html[dir="rtl"] body{ direction: rtl; text-align: right; }
   .fp-range.fp-vertical::-moz-range-track{height: 180px;}
 }
 
+
+/* ===== Engineer tools ===== */
+.eng-wrap{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;align-items:stretch}
+.eng-cam{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:10px}
+.eng-canvas{width:100%;height:auto;border-radius:14px;background:#000}
+.eng-note{opacity:.75;font-size:12px;margin-top:8px}
+.eng-panel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.eng-metric{display:flex;justify-content:space-between;gap:10px;padding:10px;border-radius:14px;background:rgba(0,0,0,.25)}
+.eng-metric b{color:#faae52}
+@media (max-width: 720px){
+  .eng-wrap{grid-template-columns:1fr;gap:12px}
+}
+
 </style>
 </head>
 
@@ -2948,7 +2985,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 <header></header>
 
 <!-- VALID TAB -->
-<section class="tab active" id="tab-valid">
+<section class="tab " id="tab-valid">
   <h2 class="tab-title solo-title">Valid Granule</h2>
 <div class="valid-mini-row">
   <div id="valid-mini" class="mini-rgb-indicator" title="Valid color">
@@ -3586,7 +3623,20 @@ document.addEventListener('DOMContentLoaded', ()=>{
       box-shadow: 0 0 26px rgba(35,255,156,0.10);
     }
 
-  </style>
+  
+/* ===== Engineer tools ===== */
+.eng-wrap{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;align-items:stretch}
+.eng-cam{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:10px}
+.eng-canvas{width:100%;height:auto;border-radius:14px;background:#000}
+.eng-note{opacity:.75;font-size:12px;margin-top:8px}
+.eng-panel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.eng-metric{display:flex;justify-content:space-between;gap:10px;padding:10px;border-radius:14px;background:rgba(0,0,0,.25)}
+.eng-metric b{color:#faae52}
+@media (max-width: 720px){
+  .eng-wrap{grid-template-columns:1fr;gap:12px}
+}
+
+</style>
 
   <script>
     (function(){
@@ -4028,7 +4078,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 <!-- CAMERA TAB -->
 
-<section class="tab" id="tab-camera">
+<section class="tab active" id="tab-camera">
   <h2 style="color:#faae52; margin-bottom:6px;">Camera</h2>
 
   <div class="cam-wrap">
@@ -4078,6 +4128,57 @@ document.addEventListener('DOMContentLoaded', ()=>{
       </div>
 </div>
 </section>
+
+
+<!-- ENGINEER: SPECTROMETER -->
+<section class="tab" id="tab-spectrometer">
+  <h2 class="tab-title solo-title">Spectrometer</h2>
+  <div class="eng-wrap">
+    <div class="eng-cam">
+      <canvas id="spec-canvas" class="eng-canvas" width="640" height="360"></canvas>
+      <div class="eng-note">Uses the live camera feed (no extra permission prompt).</div>
+    </div>
+    <div class="eng-panel">
+      <div class="eng-metric"><span>Dominant wavelength</span><b id="spec-nm">— nm</b></div>
+      <div class="eng-metric"><span>Approx. saturation</span><b id="spec-sat">— %</b></div>
+      <div class="eng-metric"><span>Too dark?</span><b id="spec-dark">—</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ENGINEER: COLOR TEMP -->
+<section class="tab" id="tab-colortemp">
+  <h2 class="tab-title solo-title">Color Temperature</h2>
+  <div class="eng-wrap">
+    <div class="eng-cam">
+      <canvas id="ct-canvas" class="eng-canvas" width="640" height="360"></canvas>
+      <div class="eng-note">Estimation from camera RGB (rough, for relative comparison).</div>
+    </div>
+    <div class="eng-panel">
+      <div class="eng-metric"><span>CCT</span><b id="ct-k">— K</b></div>
+      <div class="eng-metric"><span>Δuv</span><b id="ct-duv">—</b></div>
+      <div class="eng-metric"><span>Too dark?</span><b id="ct-dark">—</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ENGINEER: FLICKER -->
+<section class="tab" id="tab-flicker">
+  <h2 class="tab-title solo-title">Flicker Meter</h2>
+  <div class="eng-wrap">
+    <div class="eng-cam">
+      <canvas id="fl-canvas" class="eng-canvas" width="640" height="360"></canvas>
+      <div class="eng-note">Reads intensity changes over time from live feed.</div>
+    </div>
+    <div class="eng-panel">
+      <div class="eng-metric"><span>Flicker</span><b id="fl-pct">— %</b></div>
+      <div class="eng-metric"><span>Frequency</span><b id="fl-hz">— Hz</b></div>
+      <div class="eng-metric"><span>Too dark?</span><b id="fl-dark">—</b></div>
+    </div>
+  </div>
+</section>
+
+
 
 
 <section class="tab" id="tab-upload">
@@ -4694,6 +4795,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     <button type="button" class="menu-btn" data-family="analysis" data-tab="analysis">Analysis</button>
     <button type="button" class="menu-btn" data-family="simulation" data-tab="simulation">Simulation</button>
 <button type="button" class="menu-btn" data-family="tools">Tools</button>
+<button type="button" class="menu-btn" data-family="engineer">Engineer</button>
   </nav>
 </div>
 
@@ -4755,6 +4857,12 @@ if(tab === 'simulation' && typeof runDualSimulation === 'function'){
       { label: 'Valid',  tab: 'valid'  },
       { label: 'Defect', tab: 'defect' }
     ],
+    engineer: [
+      { label: 'Spectrometer', tab: 'spectrometer' },
+      { label: 'Color Temp',  tab: 'colortemp' },
+      { label: 'Flicker',     tab: 'flicker' }
+    ],
+
     tools: [
       { label: 'QA',          tab: 'qa'     },
       { label: 'Saved',       tab: 'saved'  },
@@ -7974,6 +8082,118 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
   });
 })();
+
+<script>
+/* ===== Engineer tools processing (lightweight) ===== */
+(function(){
+  function qs(id){ return document.getElementById(id); }
+  const video = ()=>document.getElementById('live-video');
+
+  function luminance(r,g,b){ return 0.2126*r + 0.7152*g + 0.0722*b; }
+
+  function analyzeFrame(){
+    const v = video();
+    if(!v || v.readyState < 2) return null;
+    // sample a small center crop for speed
+    const w = v.videoWidth|0, h = v.videoHeight|0;
+    if(!w || !h) return null;
+    const sw = Math.max(40, (w*0.15)|0), sh = Math.max(40, (h*0.15)|0);
+    const sx = ((w-sw)/2)|0, sy = ((h-sh)/2)|0;
+
+    // draw to an offscreen canvas
+    let off = analyzeFrame._off;
+    if(!off){
+      off = analyzeFrame._off = document.createElement('canvas');
+      off.width = 96; off.height = 96;
+      analyzeFrame._ctx = off.getContext('2d', { willReadFrequently:true });
+    }
+    const ctx = analyzeFrame._ctx;
+    ctx.drawImage(v, sx, sy, sw, sh, 0, 0, off.width, off.height);
+    const img = ctx.getImageData(0,0,off.width,off.height).data;
+
+    let r=0,g=0,b=0;
+    const n = off.width*off.height;
+    for(let i=0;i<img.length;i+=4){ r+=img[i]; g+=img[i+1]; b+=img[i+2]; }
+    r/=n; g/=n; b/=n;
+    const y = luminance(r,g,b);
+    return {r,g,b,y};
+  }
+
+  // very rough “dominant wavelength” proxy (not scientific) for UI feedback
+  function approxDominantNm(r,g,b){
+    // map hue-ish to nm in visible range
+    const max = Math.max(r,g,b), min = Math.min(r,g,b);
+    const d = max-min || 1;
+    let h;
+    if(max===r) h = ((g-b)/d)%6;
+    else if(max===g) h = (b-r)/d + 2;
+    else h = (r-g)/d + 4;
+    h = (h*60+360)%360;
+    // 380..700 nm approx mapping
+    return Math.round(380 + (1 - h/360)*320);
+  }
+
+  // Flicker: track luminance over time, estimate peak-to-peak %
+  const fl = {buf:[], t:[], maxN:90};
+  function updateFlicker(y, now){
+    fl.buf.push(y); fl.t.push(now);
+    if(fl.buf.length>fl.maxN){ fl.buf.shift(); fl.t.shift(); }
+    const min = Math.min(...fl.buf), max=Math.max(...fl.buf);
+    const pct = (max>0) ? ((max-min)/max)*100 : 0;
+    return {pct: Math.round(pct), hz: '—'};
+  }
+
+  function drawTo(canvasId){
+    const c = qs(canvasId);
+    const v = video();
+    if(!c || !v || v.readyState < 2) return;
+    const ctx = c.getContext('2d');
+    const cw=c.width, ch=c.height;
+    ctx.drawImage(v, 0,0, v.videoWidth, v.videoHeight, 0,0, cw, ch);
+  }
+
+  function loop(){
+    const a = analyzeFrame();
+    if(a){
+      const dark = a.y < 20; // threshold
+      // Spectrometer
+      if(document.getElementById('tab-spectrometer')?.classList.contains('active')){
+        drawTo('spec-canvas');
+        qs('spec-nm').textContent = approxDominantNm(a.r,a.g,a.b)+" nm";
+        qs('spec-sat').textContent = Math.round((Math.max(a.r,a.g,a.b)-Math.min(a.r,a.g,a.b))/Math.max(1,Math.max(a.r,a.g,a.b))*100)+" %";
+        qs('spec-dark').textContent = dark ? "Yes" : "No";
+      }
+      // Color temp (rough)
+      if(document.getElementById('tab-colortemp')?.classList.contains('active')){
+        drawTo('ct-canvas');
+        // crude CCT proxy: more blue -> higher K
+        const k = Math.round(2000 + (a.b/(a.r+a.g+a.b))*8000);
+        qs('ct-k').textContent = k+" K";
+        qs('ct-duv').textContent = ((a.g-a.r)/255).toFixed(3);
+        qs('ct-dark').textContent = dark ? "Yes" : "No";
+      }
+      // Flicker
+      if(document.getElementById('tab-flicker')?.classList.contains('active')){
+        drawTo('fl-canvas');
+        const res = updateFlicker(a.y, performance.now());
+        qs('fl-pct').textContent = res.pct+" %";
+        qs('fl-hz').textContent = res.hz;
+        qs('fl-dark').textContent = dark ? "Yes" : "No";
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    // Ensure camera starts immediately (even if user lands elsewhere)
+    try{
+      if(typeof openCamera==='function') openCamera();
+      if(typeof switchTab==='function') switchTab('camera');
+    }catch(e){}
+    requestAnimationFrame(loop);
+  });
+})();
+</script>
 </script>
 
 </body>
