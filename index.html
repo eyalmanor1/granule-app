@@ -588,129 +588,110 @@
   .fp-label{font-size:12px; opacity:.85;}
   .fp-val{font-size:12px; text-align:right; opacity:.9;}
   .fp-hint{font-size:11px; opacity:.7; margin-top:2px;}
-  /* ===== Valid/Defect layout: RGB horizontal + Hue/Sat vertical ===== */
-  .fp-controls.fp-layout{
-    margin-top:10px;
-    display:grid;
-    grid-template-columns: 1fr auto;
-    gap:12px;
-    align-items:stretch;
-  }
-  .fp-rgb-stack{display:flex; flex-direction:column; gap:10px;}
-  .fp-line.fp-rgb{grid-template-columns:36px 1fr; gap:10px;}
-  .fp-range-wrap{
-    position:relative;
-    display:flex;
-    align-items:center;
-    width:100%;
-  }
-  .fp-ontrack-val{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    font-weight:900;
-    font-size:12px;
-    padding:3px 8px;
-    border-radius:999px;
-    background:rgba(0,0,0,.35);
-    color:#fff;
-    text-shadow:0 2px 6px rgba(0,0,0,.6);
-    pointer-events:none;
-    z-index:2;
-  }
-  .fp-arrows{
-    position:absolute;
-    right:6px;
-    top:50%;
-    transform:translateY(-50%);
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-    z-index:3;
-  }
-  .fp-step{
-    width:34px;
-    height:26px;
-    border-radius:10px;
-    border:1px solid rgba(255,255,255,.16);
-    background:rgba(10,14,28,.55);
-    color:#fff;
-    font-weight:900;
-    line-height:1;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    touch-action:manipulation;
-  }
-  .fp-step:active{transform:scale(.98);}
-
-  .fp-hs-vert{
-    display:flex;
-    flex-direction:row;
-    gap:12px;
-    justify-content:flex-start;
-    align-items:stretch;
-    height:100%;
-  }
-  .fp-vert{
-    height:100%;
-    background:rgba(255,255,255,.05);
-    border:1px solid rgba(255,255,255,.10);
-    border-radius:14px;
-    padding:8px 6px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:6px;
-  }
-  .fp-vert-title{
-    font-size:12px;
-    opacity:.85;
-    font-weight:700;
-  }
-  .fp-vert-track{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:6px;
-  }
-  .fp-range-wrap.vertical{
-    width:64px;
-    height:100%;
-    min-height:220px;
-    position:relative;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-  input[type="range"].fp-range-vert{
-    transform:rotate(-90deg);
-    width:220px;
-  }
-  .fp-ontrack-val.vertical{
-    transform:translate(-50%,-50%) rotate(90deg);
-  }
-
-  
-  /* Android/narrow screens: stack HS under RGB and keep things readable */
-  @media (max-width: 720px){
-    .fp-controls.fp-layout{ grid-template-columns: 1fr; }
-    .fp-hs-vert{ justify-content:space-between; }
-    .fp-range-wrap.vertical{ min-height:180px; }
-    input[type="range"].fp-range-vert{ width:180px; }
-  }
-
-/* keep family picker swatches nicer on small screens */
-  @media (max-width: 520px){
-    .fp-controls.fp-layout{ grid-template-columns: 1fr 112px; }
-    .fp-range-wrap.vertical{ height:200px; }
-    input[type="range"].fp-range-vert{ width:200px; }
-  }
-
   @media (max-width: 520px){
     .fp-swatch{width:calc(50% - 5px);}
+  }
+
+
+
+  /* ===== Quick Family Picker v2 (Valid/Defect) ===== */
+  .fp-controls-v2{margin-top:10px;}
+  .fp-layout{display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:stretch;}
+  .fp-hs{display:flex; gap:12px; align-items:stretch;}
+  .fp-rgb{display:flex; flex-direction:column; gap:16px; justify-content:center; min-width:0;}
+  .fp-vline{display:flex; flex-direction:column; gap:8px; align-items:center;}
+  .fp-vlabel{font-size:12px; opacity:.85;}
+  .fp-vwrap{position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:34px 6px; border:1px solid rgba(255,255,255,0.10); border-radius:16px; background:rgba(255,255,255,0.04); width:72px;}
+  .fp-hline{display:grid; grid-template-columns:22px 1fr; gap:10px; align-items:center; min-width:0;}
+  .fp-hlabel{font-size:12px; opacity:.85; text-align:center;}
+  .fp-hwrap{position:relative; display:flex; align-items:center; gap:6px; min-width:0;}
+  .fp-range{appearance:none; -webkit-appearance:none; outline:none; border-radius:999px; background:rgba(255,255,255,0.16);}
+  .fp-range.fp-horizontal{height:48px; width:100%; min-width:0;}
+  .fp-range.fp-vertical{
+    width:48px; height:240px;
+    writing-mode: bt-lr; /* firefox */
+    -webkit-appearance: slider-vertical;
+    appearance: slider-vertical;
+    border-radius:16px;
+  }
+
+  /* Thick thumb for finger use */
+  .fp-range::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none;
+    width:34px; height:34px; border-radius:50%;
+    background: rgba(255,255,255,0.95);
+    border: 2px solid rgba(0,0,0,0.28);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+    cursor:pointer;
+  }
+  .fp-range::-moz-range-thumb{
+    width:34px; height:34px; border-radius:50%;
+    background: rgba(255,255,255,0.95);
+    border: 2px solid rgba(0,0,0,0.28);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+    cursor:pointer;
+  }
+  .fp-range::-moz-range-track{height:48px; border-radius:999px; background:rgba(255,255,255,0.16);}
+  .fp-range.fp-vertical::-moz-range-track{width:48px; height:240px; border-radius:16px;}
+
+  /* Arrow buttons inside slider area */
+  .fp-arrow{
+    position:absolute;
+    width:34px; height:34px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.14);
+    background:rgba(0,0,0,0.28);
+    color:rgba(255,255,255,0.92);
+    font-weight:900;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    user-select:none;
+  }
+  .fp-arrow:active{transform:scale(0.98);}
+  .fp-vwrap .fp-arrow-up{top:8px; left:50%; transform:translateX(-50%);}
+  .fp-vwrap .fp-arrow-down{bottom:8px; left:50%; transform:translateX(-50%);}
+  .fp-hwrap .fp-arrow-left{left:0; top:50%; transform:translateY(-50%);}
+  .fp-hwrap .fp-arrow-right{right:0; top:50%; transform:translateY(-50%);}
+
+  /* Provide room so arrows don't cover the range */
+  .fp-hwrap .fp-range{margin:0 38px;}
+  .fp-vwrap .fp-range{margin:0;}
+
+  /* Value bubble drawn on the slider itself */
+  .fp-bubble{
+    position:absolute;
+    top:50%;
+    transform:translate(-50%,-50%);
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:900;
+    letter-spacing:0.2px;
+    color:#0b0b0f;
+    background:rgba(255,255,255,0.92);
+    border:1px solid rgba(0,0,0,0.25);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+    pointer-events:none;
+    z-index:2;
+    white-space:nowrap;
+  }
+  .fp-bubble-v{left:50%; transform:translate(-50%,-50%);}
+
+  /* Color classes for bubbles (helps readability) */
+  .fp-hline.fp-r .fp-bubble{background:rgba(255,59,59,0.95); color:#111;}
+  .fp-hline.fp-g .fp-bubble{background:rgba(60,255,90,0.95); color:#111;}
+  .fp-hline.fp-b .fp-bubble{background:rgba(70,120,255,0.95); color:#111;}
+  .fp-vline .fp-bubble{background:rgba(255,185,90,0.95); color:#111;}
+  .fp-vline:nth-child(2) .fp-bubble{background:rgba(240,220,90,0.95); color:#111;}
+
+  /* Mobile fit */
+  @media (max-width: 520px){
+    .fp-layout{grid-template-columns:1fr; gap:14px;}
+    .fp-hs{justify-content:center;}
+    .fp-vwrap{width:64px;}
+    .fp-range.fp-vertical{height:220px;}
+    .fp-range.fp-horizontal{height:52px;}
+    .fp-hline{grid-template-columns:16px 1fr; gap:8px;}
   }
 
 
@@ -763,6 +744,7 @@
   .qa-btn-primary{ background:#faae52; border-color:#faae52; color:#101226; }
 
 .quick-map{display:none !important;}
+
 
 
 /* ===== QA TAB (Fix v2: scrollable + no overlap on Android) ===== */
@@ -1143,6 +1125,7 @@
 .qa2-kpi.qa2-score-hero .qa2-kvalue{ font-size:28px; }
 .qa2-scorebar{height:10px; border-radius:999px; background:rgba(255,255,255,.10); overflow:hidden; margin-top:6px;}
 .qa2-scorebar > div{height:100%; width:0%; background:#faae52;}
+
 
 
 /* QA Visual – compact & 3D */
@@ -1938,7 +1921,23 @@ nav button.active::after{
 }
 
 
-
+/* Mobile fine-adjust buttons on slider ends (no extra columns) */
+.fp-sliderwrap{position:relative; display:flex; align-items:center; gap:10px;}
+.fp-sliderwrap input[type=range]{flex:1;}
+.fp-step{
+  width:44px; height:44px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.18);
+  background:rgba(255,255,255,0.08);
+  color:#fff;
+  font-size:22px;
+  line-height:44px;
+  text-align:center;
+  user-select:none;
+  -webkit-user-select:none;
+  touch-action:manipulation;
+}
+.fp-step:active{transform:translateY(1px); background:rgba(255,255,255,0.14);}
 @media (min-width: 801px){
   .fp-step{width:34px;height:34px;line-height:34px;font-size:18px;border-radius:10px;}
 }
@@ -2082,48 +2081,30 @@ nav button.active::after{
 #tab-valid .fp-label, #tab-defect .fp-label{ font-size: 10.5px; }
 #tab-valid .fp-val, #tab-defect .fp-val{ font-size: 10.5px; }
 
-/* Make sliders finger-friendly (thick track + big round thumb)
-   NOTE: This intentionally overrides the earlier "ultra-compact" settings.
-*/
 #tab-valid .fp-line input[type=range], #tab-defect .fp-line input[type=range],
 #tab-valid .slider-row input[type=range], #tab-defect .slider-row input[type=range]{
-  height: 34px;
+  height: 18px;
 }
-/* Ensure the visible track is also thick (some browsers ignore input height) */
-#tab-valid .fp-line input[type=range]::-webkit-slider-runnable-track,
-#tab-defect .fp-line input[type=range]::-webkit-slider-runnable-track,
-#tab-valid .slider-row input[type=range]::-webkit-slider-runnable-track,
-#tab-defect .slider-row input[type=range]::-webkit-slider-runnable-track{
-  height: 12px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.18);
-}
-#tab-valid .fp-line input[type=range]::-moz-range-track,
-#tab-defect .fp-line input[type=range]::-moz-range-track,
-#tab-valid .slider-row input[type=range]::-moz-range-track,
-#tab-defect .slider-row input[type=range]::-moz-range-track{
-  height: 12px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.18);
-}
-#tab-valid .fp-line input[type=range]::-webkit-slider-thumb,
-#tab-defect .fp-line input[type=range]::-webkit-slider-thumb,
 #tab-valid .slider-row input[type=range]::-webkit-slider-thumb,
 #tab-defect .slider-row input[type=range]::-webkit-slider-thumb{
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
+  width: 30px;
+  height: 14px;
 }
-#tab-valid .fp-line input[type=range]::-moz-range-thumb,
-#tab-defect .fp-line input[type=range]::-moz-range-thumb,
 #tab-valid .slider-row input[type=range]::-moz-range-thumb,
 #tab-defect .slider-row input[type=range]::-moz-range-thumb{
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
+  width: 14px;
+  height: 14px;
 }
 
 /* RGB +/- buttons: smaller but still tappable */
+#tab-valid .fp-step, #tab-defect .fp-step{
+  width: 38px;
+  height: 38px;
+  line-height: 38px;
+  font-size: 20px;
+  border-radius: 11px;
+}
+
 /* Hint: keep but compact */
 #tab-valid .fp-hint, #tab-defect .fp-hint{
   font-size: 10.5px;
@@ -2142,6 +2123,7 @@ nav button.active::after{
   #valid-mini.mini-rgb-indicator, #defect-mini.mini-rgb-indicator{ height: 48px; }
 }
 /* ===== End Fit-on-one-screen pack ===== */
+
 
 
 /* ===== Video Manuals (Tools) – card list + large player modal ===== */
@@ -2488,77 +2470,36 @@ html[dir="rtl"] body{ direction: rtl; text-align: right; }
     background: rgba(0,0,0,0.28) !important;
     border: 1px solid rgba(255,255,255,0.12) !important;
   }
+  .fp-sliderwrap{
+    grid-column:1 / 3 !important;
+    grid-row:2 !important;
+    display:grid !important;
+    grid-template-columns: 1fr 44px !important;
+    grid-template-rows: 1fr 1fr !important;
+    gap: 10px !important;
+    align-items:center !important;
+  }
+  .fp-sliderwrap input[type=range]{
+    grid-column:1 !important;
+    grid-row:1 / 3 !important;
+    width:100% !important;
+    min-width:0 !important;
+  }
+  .fp-sliderwrap .fp-step{
+    width:42px !important;
+    height:42px !important;
+    line-height:42px !important;
+    font-size:18px !important;
+    border-radius: 14px !important;
+    background: rgba(255,255,255,0.10) !important;
+  }
   /* stack arrows on the right (plus on top, minus bottom) */
+  .fp-sliderwrap button.fp-step:first-child{ grid-column:2 !important; grid-row:2 !important; }
+  .fp-sliderwrap button.fp-step:last-child{  grid-column:2 !important; grid-row:1 !important; }
+
   /* Prevent overlap + keep everything inside screen */
   html, body{ overflow-x:hidden !important; }
 }
-
-
-  /* ===== Tools: Light meters (Color Temp / Flicker / Spectrometer) ===== */
-  .tool-wrap{ display:flex; flex-direction:column; gap:12px; }
-  .tool-card{
-    background:#161a2b;
-    border:1px solid #2f3350;
-    border-radius:12px;
-    padding:12px;
-    box-shadow:0 6px 18px rgba(0,0,0,0.25);
-  }
-  .tool-top{
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-  }
-  .tool-title{
-    font-size:15px; color:#faae52; font-weight:800;
-  }
-  .tool-readout{
-    font-size:44px; font-weight:900; color:#cbd5ff; letter-spacing:0.5px;
-    line-height:1;
-  }
-  .tool-unit{ font-size:14px; opacity:0.8; margin-right:6px; }
-  .tool-sub{ font-size:13px; opacity:0.85; margin-top:6px; color:#cbd5ff;}
-  .tool-preview{
-    position:relative;
-    width:100%;
-    aspect-ratio: 16 / 9;
-    background:#000;
-    border-radius:12px;
-    border:2px solid #2a2e48;
-    overflow:hidden;
-  }
-  .tool-preview canvas{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-  .tool-overlay{
-    position:absolute; inset:0;
-    display:flex; align-items:center; justify-content:center;
-    font-weight:900; font-size:22px;
-    color:#ff5b5b;
-    text-shadow:0 2px 8px rgba(0,0,0,0.8);
-    background:rgba(0,0,0,0.15);
-    padding:10px;
-    text-align:center;
-  }
-  .tool-scale{
-    margin-top:10px;
-    height:14px;
-    border-radius:999px;
-    border:1px solid #2a2e48;
-    background:linear-gradient(to right, #fca17d 0%, #fca17d 25%, #cbd5ff 55%, #7aa0ff 100%);
-    position:relative;
-    overflow:hidden;
-  }
-  .tool-needle{
-    position:absolute; top:-4px;
-    width:2px; height:22px;
-    background:#fff;
-    box-shadow:0 0 10px rgba(255,255,255,0.45);
-    transform:translateX(-1px);
-  }
-  .tool-scale-labels{
-    display:flex; justify-content:space-between;
-    font-size:11px; opacity:0.75; margin-top:6px;
-  }
-  .tool-mini-note{ font-size:12px; opacity:0.75; margin-top:8px; }
-
-
-  
 
 </style>
 </head>
@@ -2838,6 +2779,8 @@ function initFamilyPicker(prefix){
   function onSliders(){
     toneVal.textContent = toneEl.value;
     satVal.textContent  = satEl.value;
+    positionBubbleForRange(toneEl, toneVal);
+    positionBubbleForRange(satEl, satVal);
     
   updateToneSatFills(prefix);
 const sel = getSelected();
@@ -2852,12 +2795,67 @@ const sel = getSelected();
   // initialize values display
   toneVal.textContent = toneEl.value;
   satVal.textContent  = satEl.value;
+  positionBubbleForRange(toneEl, toneVal);
+  positionBubbleForRange(satEl, satVal);
+}
+
+
+function initArrowNudges(){
+  const stepFor = (id)=>{
+    if(id.endsWith('-r')||id.endsWith('-g')||id.endsWith('-b')) return 1;
+    return 1;
+  };
+
+  const nudge = (input, dir)=>{
+    if(!input) return;
+    const step = +(input.step || stepFor(input.id) || 1);
+    const min = +(input.min || 0);
+    const max = +(input.max || 100);
+    const next = clamp(+input.value + dir*step, min, max);
+    input.value = next;
+    input.dispatchEvent(new Event('input', {bubbles:true}));
+  };
+
+  const attachRepeat = (btn, dir)=>{
+    const targetId = btn.dataset.target;
+    const input = document.getElementById(targetId);
+    if(!input) return;
+
+    let t=null, i=null;
+
+    const start = ()=>{
+      nudge(input, dir);
+      t = setTimeout(()=>{
+        i = setInterval(()=>nudge(input, dir), 60);
+      }, 280);
+    };
+    const stop = ()=>{
+      if(t) clearTimeout(t);
+      if(i) clearInterval(i);
+      t=null; i=null;
+    };
+
+    btn.addEventListener('click', (e)=>{ e.preventDefault(); nudge(input, dir); });
+    btn.addEventListener('pointerdown', (e)=>{ e.preventDefault(); start(); });
+    btn.addEventListener('pointerup', stop);
+    btn.addEventListener('pointercancel', stop);
+    btn.addEventListener('pointerleave', stop);
+  };
+
+  document.querySelectorAll('.fp-vwrap .fp-arrow-up').forEach(b=>attachRepeat(b, +1));
+  document.querySelectorAll('.fp-vwrap .fp-arrow-down').forEach(b=>attachRepeat(b, -1));
+
+  // For horizontal, right arrow increases, left decreases (we use ▲ for inc on the right, ▼ for dec on the left)
+  document.querySelectorAll('.fp-hwrap .fp-arrow-right').forEach(b=>attachRepeat(b, +1));
+  document.querySelectorAll('.fp-hwrap .fp-arrow-left').forEach(b=>attachRepeat(b, -1));
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
   initFamilyPicker('valid');
   initFamilyPicker('defect');
+  initArrowNudges();
 });
+
 
 
 // ===== Mock IoT Dashboard =====
@@ -2904,138 +2902,86 @@ document.addEventListener('DOMContentLoaded', ()=>{
       <button type="button" class="fp-swatch" data-h="30" data-s="85"  data-name="כתומים" title="כתומים"></button>
       <button type="button" class="fp-swatch" data-h="0" data-s="85"   data-name="אדומים" title="אדומים"></button>
     </div>
-    <div class="fp-controls fp-layout">
-  <div class="fp-rgb-stack">
-    <div class="fp-line fp-rgb">
-      <div class="fp-label">R</div>
-      <div class="fp-range-wrap">
-        <input class="fp-range" id="valid-r" min="0" max="255" type="range" value="128"/>
-        <div class="fp-ontrack-val" data-for="valid-r"></div>
-        <div class="fp-arrows">
-          <button type="button" class="fp-step fp-step-up" data-for="valid-r" data-delta="1">▲</button>
-          <button type="button" class="fp-step fp-step-down" data-for="valid-r" data-delta="-1">▼</button>
+    <div class="fp-controls fp-controls-v2">
+      <div class="fp-layout">
+        <div class="fp-hs">
+          <div class="fp-vline">
+            <div class="fp-vlabel">גוון</div>
+            <div class="fp-vwrap">
+              <button type="button" class="fp-arrow fp-arrow-up" data-target="valid-tone" aria-label="Tone up">▲</button>
+              <input id="valid-tone" class="fp-range fp-vertical fp-tone" type="range" min="0" max="100" value="55" />
+              <button type="button" class="fp-arrow fp-arrow-down" data-target="valid-tone" aria-label="Tone down">▼</button>
+              <div class="fp-bubble fp-bubble-v" id="valid-tone-val">55</div>
+            </div>
+          </div>
+
+          <div class="fp-vline">
+            <div class="fp-vlabel">רוויה</div>
+            <div class="fp-vwrap">
+              <button type="button" class="fp-arrow fp-arrow-up" data-target="valid-sat" aria-label="Saturation up">▲</button>
+              <input id="valid-sat" class="fp-range fp-vertical fp-sat" type="range" min="0" max="100" value="65" />
+              <button type="button" class="fp-arrow fp-arrow-down" data-target="valid-sat" aria-label="Saturation down">▼</button>
+              <div class="fp-bubble fp-bubble-v" id="valid-sat-val">65</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fp-rgb">
+          <div class="fp-hline fp-r">
+            <div class="fp-hlabel">R</div>
+            <div class="fp-hwrap">
+              <button type="button" class="fp-arrow fp-arrow-left" data-target="valid-r" aria-label="R down">▼</button>
+              <input id="valid-r" class="fp-range fp-horizontal fp-r" min="0" max="255" type="range" value="128"/>
+              <button type="button" class="fp-arrow fp-arrow-right" data-target="valid-r" aria-label="R up">▲</button>
+              <div class="fp-bubble" id="valid-r-val">128</div>
+            </div>
+          </div>
+
+          <div class="fp-hline fp-g">
+            <div class="fp-hlabel">G</div>
+            <div class="fp-hwrap">
+              <button type="button" class="fp-arrow fp-arrow-left" data-target="valid-g" aria-label="G down">▼</button>
+              <input id="valid-g" class="fp-range fp-horizontal fp-g" min="0" max="255" type="range" value="128"/>
+              <button type="button" class="fp-arrow fp-arrow-right" data-target="valid-g" aria-label="G up">▲</button>
+              <div class="fp-bubble" id="valid-g-val">128</div>
+            </div>
+          </div>
+
+          <div class="fp-hline fp-b">
+            <div class="fp-hlabel">B</div>
+            <div class="fp-hwrap">
+              <button type="button" class="fp-arrow fp-arrow-left" data-target="valid-b" aria-label="B down">▼</button>
+              <input id="valid-b" class="fp-range fp-horizontal fp-b" min="0" max="255" type="range" value="128"/>
+              <button type="button" class="fp-arrow fp-arrow-right" data-target="valid-b" aria-label="B up">▲</button>
+              <div class="fp-bubble" id="valid-b-val">128</div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="fp-line fp-rgb">
-      <div class="fp-label">G</div>
-      <div class="fp-range-wrap">
-        <input class="fp-range" id="valid-g" min="0" max="255" type="range" value="128"/>
-        <div class="fp-ontrack-val" data-for="valid-g"></div>
-        <div class="fp-arrows">
-          <button type="button" class="fp-step fp-step-up" data-for="valid-g" data-delta="1">▲</button>
-          <button type="button" class="fp-step fp-step-down" data-for="valid-g" data-delta="-1">▼</button>
-        </div>
-      </div>
-    </div>
-    <div class="fp-line fp-rgb">
-      <div class="fp-label">B</div>
-      <div class="fp-range-wrap">
-        <input class="fp-range" id="valid-b" min="0" max="255" type="range" value="128"/>
-        <div class="fp-ontrack-val" data-for="valid-b"></div>
-        <div class="fp-arrows">
-          <button type="button" class="fp-step fp-step-up" data-for="valid-b" data-delta="1">▲</button>
-          <button type="button" class="fp-step fp-step-down" data-for="valid-b" data-delta="-1">▼</button>
-        </div>
-      </div>
+    </div></div>
+      <div class="fp-hint" id="valid-fp-hint">בחר משפחה ואז כוון גוון/רוויה — הסליידרים RGB יתעדכנו.</div>
     </div>
   </div>
 
-  
-  <div class="fp-hs-vert">
-    <div class="fp-vert">
-      <div class="fp-vert-title">גוון</div>
-      <div class="fp-vert-track">
-        <button type="button" class="fp-step fp-step-up" data-for="valid-tone" data-delta="1">▲</button>
-        <div class="fp-range-wrap vertical">
-          <input class="fp-range fp-range-vert" id="valid-tone" type="range" min="0" max="100" value="55" />
-          <div class="fp-ontrack-val vertical" data-for="valid-tone"></div>
-        </div>
-        <button type="button" class="fp-step fp-step-down" data-for="valid-tone" data-delta="-1">▼</button>
-      </div>
-      <div class="fp-val" id="valid-tone-val" style="display:none">55</div>
-    </div>
+  <div class="quick-map" id="valid-map"></div>
+  <div class="preview-box" id="valid-preview">RGB(128,128,128)</div>
+</div>
+</section>
 
-    <div class="fp-vert">
-      <div class="fp-vert-title">רוויה</div>
-      <div class="fp-vert-track">
-        <button type="button" class="fp-step fp-step-up" data-for="valid-sat" data-delta="1">▲</button>
-        <div class="fp-range-wrap vertical">
-          <input class="fp-range fp-range-vert" id="valid-sat" type="range" min="0" max="100" value="65" />
-          <div class="fp-ontrack-val vertical" data-for="valid-sat"></div>
-        </div>
-        <button type="button" class="fp-step fp-step-down" data-for="valid-sat" data-delta="-1">▼</button>
-      </div>
-      <div class="fp-val" id="valid-sat-val" style="display:none">65</div>
-    </div>
+<!-- DEFECT TAB -->
+<section class="tab" id="tab-defect">
+  <h2 class="tab-title solo-title">Defect Granule</h2>
+<div class="valid-mini-row">
+  <div id="defect-mini" class="mini-rgb-indicator" title="Defect color">
+<div class="mini-rgb-text mini-rgb-text-small" id="defect-mini-text">RGB(—)</div>
   </div>
+</div>
 
-
-<div class="fp-controls fp-layout">
-  <div class="fp-rgb-stack">
-    <div class="fp-line fp-rgb">
-      <div class="fp-label">R</div>
-      <div class="fp-range-wrap">
-        <input class="fp-range" id="defect-r" min="0" max="255" type="range" value="128"/>
-        <div class="fp-ontrack-val" data-for="defect-r"></div>
-        <div class="fp-arrows">
-          <button type="button" class="fp-step fp-step-up" data-for="defect-r" data-delta="1">▲</button>
-          <button type="button" class="fp-step fp-step-down" data-for="defect-r" data-delta="-1">▼</button>
-        </div>
-      </div>
-    </div>
-    <div class="fp-line fp-rgb">
-      <div class="fp-label">G</div>
-      <div class="fp-range-wrap">
-        <input class="fp-range" id="defect-g" min="0" max="255" type="range" value="128"/>
-        <div class="fp-ontrack-val" data-for="defect-g"></div>
-        <div class="fp-arrows">
-          <button type="button" class="fp-step fp-step-up" data-for="defect-g" data-delta="1">▲</button>
-          <button type="button" class="fp-step fp-step-down" data-for="defect-g" data-delta="-1">▼</button>
-        </div>
-      </div>
-    </div>
-    <div class="fp-line fp-rgb">
-      <div class="fp-label">B</div>
-      <div class="fp-range-wrap">
-        <input class="fp-range" id="defect-b" min="0" max="255" type="range" value="128"/>
-        <div class="fp-ontrack-val" data-for="defect-b"></div>
-        <div class="fp-arrows">
-          <button type="button" class="fp-step fp-step-up" data-for="defect-b" data-delta="1">▲</button>
-          <button type="button" class="fp-step fp-step-down" data-for="defect-b" data-delta="-1">▼</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="fp-hs-vert">
-    <div class="fp-vert">
-      <div class="fp-vert-title">גוון</div>
-      <div class="fp-vert-track">
-        <button type="button" class="fp-step fp-step-up" data-for="defect-tone" data-delta="1">▲</button>
-        <div class="fp-range-wrap vertical">
-          <input class="fp-range fp-range-vert" id="defect-tone" type="range" min="0" max="100" value="55" />
-          <div class="fp-ontrack-val vertical" data-for="defect-tone"></div>
-        </div>
-        <button type="button" class="fp-step fp-step-down" data-for="defect-tone" data-delta="-1">▼</button>
-      </div>
-      <div class="fp-val" id="defect-tone-val" style="display:none">0</div>
-    </div>
-
-    <div class="fp-vert">
-      <div class="fp-vert-title">רוויה</div>
-      <div class="fp-vert-track">
-        <button type="button" class="fp-step fp-step-up" data-for="defect-sat" data-delta="1">▲</button>
-        <div class="fp-range-wrap vertical">
-          <input class="fp-range fp-range-vert" id="defect-sat" type="range" min="0" max="100" value="65" />
-          <div class="fp-ontrack-val vertical" data-for="defect-sat"></div>
-        </div>
-        <button type="button" class="fp-step fp-step-down" data-for="defect-sat" data-delta="-1">▼</button>
-      </div>
-      <div class="fp-val" id="defect-sat-val" style="display:none">0</div>
-    </div>
-  </div>
-</div>data-h="0" data-s="8"  data-name="ניטרלים" title="ניטרלים"></button>
+<div class="family-picker" data-target="defect">
+    <div class="fp-title">בחירת צבע מהירה (Defect)</div>
+    <div class="fp-row">
+      <button type="button" class="fp-swatch" data-h="0" data-s="0"  data-name="לבן/אפור" title="לבן/אפור"></button>
+      <button type="button" class="fp-swatch" data-h="0" data-s="8"  data-name="ניטרלים" title="ניטרלים"></button>
       <button type="button" class="fp-swatch" data-h="270" data-s="60" data-name="סגולים" title="סגולים"></button>
       <button type="button" class="fp-swatch" data-h="210" data-s="75" data-name="כחולים" title="כחולים"></button>
       <button type="button" class="fp-swatch" data-h="120" data-s="65" data-name="ירוקים" title="ירוקים"></button>
@@ -3043,33 +2989,63 @@ document.addEventListener('DOMContentLoaded', ()=>{
       <button type="button" class="fp-swatch" data-h="30" data-s="85"  data-name="כתומים" title="כתומים"></button>
       <button type="button" class="fp-swatch" data-h="0" data-s="85"   data-name="אדומים" title="אדומים"></button>
     </div>
-    <div class="fp-controls">
-      <div class="fp-line">
-        <div class="fp-label">גוון</div>
-        <input id="defect-tone" type="range" min="0" max="100" value="55" />
-        <div class="fp-val" id="defect-tone-val">55</div>
+    <div class="fp-controls fp-controls-v2">
+      <div class="fp-layout">
+        <div class="fp-hs">
+          <div class="fp-vline">
+            <div class="fp-vlabel">גוון</div>
+            <div class="fp-vwrap">
+              <button type="button" class="fp-arrow fp-arrow-up" data-target="defect-tone" aria-label="Tone up">▲</button>
+              <input id="defect-tone" class="fp-range fp-vertical fp-tone" type="range" min="0" max="100" value="55" />
+              <button type="button" class="fp-arrow fp-arrow-down" data-target="defect-tone" aria-label="Tone down">▼</button>
+              <div class="fp-bubble fp-bubble-v" id="defect-tone-val">55</div>
+            </div>
+          </div>
+
+          <div class="fp-vline">
+            <div class="fp-vlabel">רוויה</div>
+            <div class="fp-vwrap">
+              <button type="button" class="fp-arrow fp-arrow-up" data-target="defect-sat" aria-label="Saturation up">▲</button>
+              <input id="defect-sat" class="fp-range fp-vertical fp-sat" type="range" min="0" max="100" value="65" />
+              <button type="button" class="fp-arrow fp-arrow-down" data-target="defect-sat" aria-label="Saturation down">▼</button>
+              <div class="fp-bubble fp-bubble-v" id="defect-sat-val">65</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fp-rgb">
+          <div class="fp-hline fp-r">
+            <div class="fp-hlabel">R</div>
+            <div class="fp-hwrap">
+              <button type="button" class="fp-arrow fp-arrow-left" data-target="defect-r" aria-label="R down">▼</button>
+              <input id="defect-r" class="fp-range fp-horizontal fp-r" min="0" max="255" type="range" value="128"/>
+              <button type="button" class="fp-arrow fp-arrow-right" data-target="defect-r" aria-label="R up">▲</button>
+              <div class="fp-bubble" id="defect-r-val">128</div>
+            </div>
+          </div>
+
+          <div class="fp-hline fp-g">
+            <div class="fp-hlabel">G</div>
+            <div class="fp-hwrap">
+              <button type="button" class="fp-arrow fp-arrow-left" data-target="defect-g" aria-label="G down">▼</button>
+              <input id="defect-g" class="fp-range fp-horizontal fp-g" min="0" max="255" type="range" value="128"/>
+              <button type="button" class="fp-arrow fp-arrow-right" data-target="defect-g" aria-label="G up">▲</button>
+              <div class="fp-bubble" id="defect-g-val">128</div>
+            </div>
+          </div>
+
+          <div class="fp-hline fp-b">
+            <div class="fp-hlabel">B</div>
+            <div class="fp-hwrap">
+              <button type="button" class="fp-arrow fp-arrow-left" data-target="defect-b" aria-label="B down">▼</button>
+              <input id="defect-b" class="fp-range fp-horizontal fp-b" min="0" max="255" type="range" value="128"/>
+              <button type="button" class="fp-arrow fp-arrow-right" data-target="defect-b" aria-label="B up">▲</button>
+              <div class="fp-bubble" id="defect-b-val">128</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="fp-line">
-        <div class="fp-label">רוויה</div>
-        <input id="defect-sat" type="range" min="0" max="100" value="65" />
-        <div class="fp-val" id="defect-sat-val">65</div>
-      </div>
-      
-<div class="fp-line fp-rgb">
-  <div class="fp-label">R</div>
-  <input id="defect-r" min="0" max="255" type="range" value="128"/>
-  <div class="fp-val" id="defect-r-val">128</div>
-</div>
-<div class="fp-line fp-rgb">
-  <div class="fp-label">G</div>
-  <input id="defect-g" min="0" max="255" type="range" value="128"/>
-  <div class="fp-val" id="defect-g-val">128</div>
-</div>
-<div class="fp-line fp-rgb">
-  <div class="fp-label">B</div>
-  <input id="defect-b" min="0" max="255" type="range" value="128"/>
-  <div class="fp-val" id="defect-b-val">128</div>
-</div>
+    </div></div>
       <div class="fp-hint" id="defect-fp-hint">בחר משפחה ואז כוון גוון/רוויה — הסליידרים RGB יתעדכנו.</div>
     </div>
   </div>
@@ -3755,6 +3731,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 </section>
 
 
+
 <!-- ANALYSIS TAB -->
 <section class="tab" id="tab-analysis">
   <h2>Analyze / Signal Settings</h2>
@@ -4032,104 +4009,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
 </section>
 
 
-<section class="tab" id="tab-colorTemp">
-  <h2 style="color:#faae52; margin-bottom:6px;">Color Temperature</h2>
-
-  <div class="tool-wrap">
-    <div class="tool-card">
-      <div class="tool-top">
-        <div class="tool-title">CCT</div>
-        <div>
-          <span class="tool-readout" id="ct-kelvin">—</span>
-          <span class="tool-unit">K</span>
-        </div>
-      </div>
-      <div class="tool-scale" aria-hidden="true">
-        <div class="tool-needle" id="ct-needle" style="left:25%;"></div>
-      </div>
-      <div class="tool-scale-labels">
-        <div>Warm White</div><div>Neutral</div><div>Cold White</div>
-      </div>
-      <div class="tool-sub">Δuv (Magenta/Green shift): <b id="ct-duv">—</b></div>
-      <div class="tool-mini-note">מדידה מקורבת מתוך המצלמה. לקבלת דיוק גבוה – יש להשתמש בחיישן ייעודי.</div>
-    </div>
-
-    <div class="tool-card">
-      <div class="tool-title" style="margin-bottom:8px;">Live Preview</div>
-      <div class="tool-preview">
-        <canvas id="ct-preview" width="640" height="360"></canvas>
-        <div class="tool-overlay" id="ct-overlay" hidden>Too dark to make a reliable measurement</div>
-      </div>
-
-      <div class="cam-row" style="margin-top:10px;">
-        <button class="cam-btn primary" type="button" onclick="openCamera()" dir="ltr">Open Camera</button>
-        <button class="cam-btn danger" type="button" onclick="closeCamera()" dir="ltr">Close Camera</button>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="tab" id="tab-flicker">
-  <h2 style="color:#faae52; margin-bottom:6px;">Flicker Meter</h2>
-
-  <div class="tool-wrap">
-    <div class="tool-card">
-      <div class="tool-top">
-        <div class="tool-title">Flickering</div>
-        <div>
-          <span class="tool-readout" id="flk-pct">—</span><span class="tool-unit">%</span>
-        </div>
-      </div>
-      <div class="tool-sub">Estimated frequency: <b id="flk-hz">—</b> Hz</div>
-      <div class="tool-mini-note">המדידה מבוססת על תנודות בהירות בפריימים מהמצלמה (הערכה).</div>
-    </div>
-
-    <div class="tool-card">
-      <div class="tool-title" style="margin-bottom:8px;">Live Preview</div>
-      <div class="tool-preview">
-        <canvas id="flk-preview" width="640" height="360"></canvas>
-        <div class="tool-overlay" id="flk-overlay" hidden>Too dark to make a reliable measurement</div>
-      </div>
-
-      <div class="cam-row" style="margin-top:10px;">
-        <button class="cam-btn primary" type="button" onclick="openCamera()" dir="ltr">Open Camera</button>
-        <button class="cam-btn danger" type="button" onclick="closeCamera()" dir="ltr">Close Camera</button>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="tab" id="tab-spectrometer">
-  <h2 style="color:#faae52; margin-bottom:6px;">Light Spectrometer</h2>
-
-  <div class="tool-wrap">
-    <div class="tool-card">
-      <div class="tool-top">
-        <div class="tool-title">Dominant Wavelength</div>
-        <div>
-          <span class="tool-readout" id="sp-nm">—</span><span class="tool-unit">nm</span>
-        </div>
-      </div>
-      <div class="tool-sub">Color saturation: <b id="sp-sat">—</b>%</div>
-      <div class="tool-mini-note">מיפוי גוון (Hue) לגל אורך-גל משוער (לא ספקטרומטר אמיתי).</div>
-    </div>
-
-    <div class="tool-card">
-      <div class="tool-title" style="margin-bottom:8px;">Live Preview</div>
-      <div class="tool-preview">
-        <canvas id="sp-preview" width="640" height="360"></canvas>
-        <div class="tool-overlay" id="sp-overlay" hidden>Too dark to make a reliable measurement</div>
-      </div>
-
-      <div class="cam-row" style="margin-top:10px;">
-        <button class="cam-btn primary" type="button" onclick="openCamera()" dir="ltr">Open Camera</button>
-        <button class="cam-btn danger" type="button" onclick="closeCamera()" dir="ltr">Close Camera</button>
-      </div>
-    </div>
-  </div>
-</section>
-
-
 <section class="tab" id="tab-upload">
   <h2 style="color:#faae52; margin-bottom:6px;">Upload</h2>
 
@@ -4246,6 +4125,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
     </div>
   </details>
 </section>
+
+
+
+
+
+
 
 
 <!-- QA TAB -->
@@ -4800,9 +4685,6 @@ if(tab === 'simulation' && typeof runDualSimulation === 'function'){
       { label: 'Defect', tab: 'defect' }
     ],
     tools: [
-      { label: 'Color Temp', tab: 'colorTemp' },
-      { label: 'Flicker',    tab: 'flicker' },
-      { label: 'Spectrometer', tab: 'spectrometer' },
       { label: 'QA',          tab: 'qa'     },
       { label: 'Saved',       tab: 'saved'  },
       { label: 'Upload',      tab: 'upload' },
@@ -4920,45 +4802,72 @@ if(tab === 'simulation' && typeof runDualSimulation === 'function'){
     const max = +(el.max || 100);
     const val = +el.value;
     const pct = (max === min) ? 0 : ((val - min) / (max - min)) * 100;
-    el.style.background = `linear-gradient(to right, ${color} 0%, ${color} ${pct}%, rgba(255,255,255,0.18) ${pct}%, rgba(255,255,255,0.18) 100%)`;
+
+    const isVertical = el.classList && el.classList.contains('fp-vertical');
+    const dir = isVertical ? 'to top' : 'to right';
+
+    el.style.background = `linear-gradient(${dir}, ${color} 0%, ${color} ${pct}%, rgba(255,255,255,0.18) ${pct}%, rgba(255,255,255,0.18) 100%)`;
     // also color the thumb (works in modern browsers)
     el.style.accentColor = color;
   }
   function updateSliderFills(prefix){
-    const colors = {
-      r: 'rgb(255, 59, 59)',
-      g: 'rgb(60, 255, 90)',
-      b: 'rgb(70, 120, 255)',
-      tone: 'rgb(250, 174, 82)',   // warm/orange
-      sat:  'rgb(250, 220, 90)'    // yellow
-    };
+    const colors = { r: 'rgb(255, 59, 59)', g: 'rgb(60, 255, 90)', b: 'rgb(70, 120, 255)' };
     ['r','g','b'].forEach(ch => {
       const el = document.getElementById(`${prefix}-${ch}`);
       setRangeFill(el, colors[ch]);
     });
-    // vertical sliders (0-100)
-    const toneEl = document.getElementById(`${prefix}-tone`);
-    const satEl  = document.getElementById(`${prefix}-sat`);
-    setRangeFill(toneEl, colors.tone);
-    setRangeFill(satEl, colors.sat);
-  }
-);
   }
 
   function updateToneSatFills(prefix){
   const toneEl = document.getElementById(prefix+'-tone');
   const satEl  = document.getElementById(prefix+'-sat');
   // Use non-RGB colors so it won't clash with R/G/B sliders
-  if(toneEl) setRangeFill(toneEl, 'rgba(255, 185, 90, 0.95)');   // warm amber
-  if(satEl)  setRangeFill(satEl,  'rgba(190, 140, 255, 0.90)');  // violet
+  if(toneEl) setRangeFill(toneEl, 'rgba(255, 170, 70, 0.95)');   // hue (orange)
+  if(satEl)  setRangeFill(satEl,  'rgba(240, 220, 90, 0.95)');  // saturation (yellow)
 }
 
 
-  function updateRgbValPills(prefix){
+  function positionBubbleForRange(el, bubble){
+  if(!el || !bubble) return;
+  const min = +(el.min || 0);
+  const max = +(el.max || 100);
+  const val = +el.value;
+  const pct = (max === min) ? 0 : ((val - min) / (max - min));
+  const isVertical = el.classList && el.classList.contains('fp-vertical');
+
+  // Bubble position within its wrapper
+  const wrap = bubble.parentElement;
+  if(!wrap) return;
+
+  if(isVertical){
+    // 0 at bottom, 1 at top (since we use 'to top')
+    const y = (1 - pct) * (wrap.clientHeight - 24) + 12;
+    bubble.style.top = `${y}px`;
+    bubble.style.left = `50%`;
+  }else{
+    const x = pct * (wrap.clientWidth - 24) + 12;
+    bubble.style.left = `${x}px`;
+    bubble.style.top = `50%`;
+  }
+}
+
+function updateRgbValPills(prefix){
   ['r','g','b'].forEach(ch=>{
     const el = document.getElementById(`${prefix}-${ch}`);
     const valEl = document.getElementById(`${prefix}-${ch}-val`);
-    if(el && valEl) valEl.textContent = el.value;
+    if(el && valEl){
+      valEl.textContent = el.value;
+      positionBubbleForRange(el, valEl);
+    }
+  });
+  // Tone/Sat bubbles
+  ['tone','sat'].forEach(k=>{
+    const el = document.getElementById(`${prefix}-${k}`);
+    const valEl = document.getElementById(`${prefix}-${k}-val`);
+    if(el && valEl){
+      valEl.textContent = el.value;
+      positionBubbleForRange(el, valEl);
+    }
   });
 }
 
@@ -5034,6 +4943,9 @@ function updateAll(prefix) {
       b: Math.max(0, Math.min(50, Math.round(b * 50 / 255))),
     };
   }
+
+
+
 
 
   function clampRgbToMax(r,g,b,maxVal){
@@ -5295,6 +5207,7 @@ if(tLabel){
 
     return { mode: 'chromatic', maxDelta: arr[0].v, secondDelta: arr[1].v, arr };
   }
+
 
 
   function updateSortingProgram() {
@@ -5841,6 +5754,9 @@ function computeAverageRGB(){
 }
 
 
+
+
+
 /* Upload handler */
 function attachCameraHandlers(){
   if(window.__cameraHandlersAttached) return;
@@ -6302,8 +6218,7 @@ if(capBtn) capBtn.disabled = false;
       const _old = window.switchTab;
       window.switchTab = function(tab){
         _old(tab);
-        const keepCamTabs = new Set(['camera','colorTemp','flicker','spectrometer']);
-        if(!keepCamTabs.has(tab)) _closeCamera();
+        if(tab !== 'camera') _closeCamera();
       };
     }
   });
@@ -7132,6 +7047,7 @@ function bind(){
 </script>
 
 
+
 <script>
 (function(){
   const $ = (id)=>document.getElementById(id);
@@ -7688,69 +7604,83 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
 })();
 
-
-/* ===== Finger-friendly slider arrows + value on slider ===== */
+/* Mobile slider fine adjust: inject +/- buttons around each range */
 (function(){
-  function updateVal(id){
-    var el = document.getElementById(id);
-    if(!el) return;
-    var val = el.value;
-    document.querySelectorAll('.fp-ontrack-val[data-for="'+id+'"]').forEach(function(n){
-      n.textContent = val;
-    });
-    // keep legacy hidden val nodes updated (tone/sat)
-    var legacy = document.getElementById(id+'-val');
-    if(legacy) legacy.textContent = val;
-  }
+  function injectSteppers(scopeId){
+    var scope = document.getElementById(scopeId);
+    if(!scope) return;
+    var lines = scope.querySelectorAll('.fp-line');
+    lines.forEach(function(line){
+      // already injected?
+      if(line.querySelector('.fp-sliderwrap')) return;
+      var rng = line.querySelector('input[type="range"]');
+      if(!rng) return;
 
-  function hook(id){
-    var el = document.getElementById(id);
-    if(!el) return;
-    el.addEventListener('input', function(){ updateVal(id); }, {passive:true});
-    updateVal(id);
-  }
+      var wrap = document.createElement('div');
+      wrap.className = 'fp-sliderwrap';
 
-  function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+      var minus = document.createElement('button');
+      minus.type = 'button';
+      minus.className = 'fp-step';
+      minus.textContent = '−';
 
-  document.addEventListener('DOMContentLoaded', function(){
-    [
-      'valid-r','valid-g','valid-b','valid-tone','valid-sat',
-      'defect-r','defect-g','defect-b','defect-tone','defect-sat'
-    ].forEach(hook);
+      var plus = document.createElement('button');
+      plus.type = 'button';
+      plus.className = 'fp-step';
+      plus.textContent = '+';
 
-    document.querySelectorAll('.fp-step[data-for]').forEach(function(btn){
-      var id = btn.dataset.for;
-      var delta = parseFloat(btn.dataset.delta || '0');
-      var rng = document.getElementById(id);
-      if(!rng || !delta) return;
+      // Move range into wrap
+      rng.parentNode.insertBefore(wrap, rng);
+      wrap.appendChild(minus);
+      wrap.appendChild(rng);
+      wrap.appendChild(plus);
 
-      var step = parseFloat(rng.step || '1') || 1;
-      var min = rng.min !== '' ? parseFloat(rng.min) : 0;
-      var max = rng.max !== '' ? parseFloat(rng.max) : 100;
-
-      function apply(){
-        var v = parseFloat(rng.value || '0');
-        v = clamp(v + delta*step, min, max);
-        rng.value = v;
-        rng.dispatchEvent(new Event('input', {bubbles:true}));
+      function step(delta){
+        var v = Number(rng.value||0);
+        var min = rng.min===''?0:Number(rng.min);
+        var max = rng.max===''?100:Number(rng.max);
+        var nv = Math.max(min, Math.min(max, v+delta));
+        if(nv !== v){
+          rng.value = nv;
+          rng.dispatchEvent(new Event('input', {bubbles:true}));
+          rng.dispatchEvent(new Event('change', {bubbles:true}));
+        }
       }
 
-      var timer = null;
-      btn.addEventListener('pointerdown', function(e){
-        e.preventDefault();
-        apply();
-        timer = setInterval(apply, 120);
-      });
-      ['pointerup','pointercancel','pointerleave'].forEach(function(ev){
-        btn.addEventListener(ev, function(){
-          if(timer){ clearInterval(timer); timer = null; }
-        });
-      });
-      btn.addEventListener('click', function(e){ e.preventDefault(); });
+      function attach(btn, delta){
+        var timer=null;
+        var start = function(e){
+          e.preventDefault();
+          step(delta);
+          timer = setInterval(function(){ step(delta); }, 120);
+        };
+        var stop = function(){
+          if(timer){ clearInterval(timer); timer=null; }
+        };
+        btn.addEventListener('pointerdown', start);
+        btn.addEventListener('pointerup', stop);
+        btn.addEventListener('pointercancel', stop);
+        btn.addEventListener('pointerleave', stop);
+        btn.addEventListener('click', function(e){ e.preventDefault(); }); // prevent double-step on click
+      }
+
+      attach(minus, -1);
+      attach(plus, +1);
     });
+  }
+
+  // inject on load
+  document.addEventListener('DOMContentLoaded', function(){
+    injectSteppers('tab-valid');
+    injectSteppers('tab-defect');
   });
+
+  // also inject when tabs shown (in case DOM is lazy)
+  window.__injectSteppers = function(){
+    injectSteppers('tab-valid');
+    injectSteppers('tab-defect');
+  };
 })();
-;
 
 </script>
 
@@ -7972,220 +7902,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
       try{ if(typeof switchTab === 'function') switchTab('camera'); try{ if(typeof openCamera==='function') openCamera(); }catch(e){} }catch(e){}
     }
   });
-})();
-</script>
-
-
-<script>
-/* ===== Tools meters engine (ColorTemp / Flicker / Spectrometer) ===== */
-(function(){
-  const $ = (id)=>document.getElementById(id);
-
-  const samp = document.createElement('canvas');
-  const sctx = samp.getContext('2d', { willReadFrequently:true });
-
-  function sampleROI(video, w=80, h=80){
-    if(!video || video.readyState < 2) return null;
-    samp.width = w; samp.height = h;
-
-    const vw = video.videoWidth || 0;
-    const vh = video.videoHeight || 0;
-    if(!vw || !vh) return null;
-
-    const sx = Math.max(0, (vw - w) / 2);
-    const sy = Math.max(0, (vh - h) / 2);
-
-    sctx.drawImage(video, sx, sy, w, h, 0, 0, w, h);
-    const img = sctx.getImageData(0,0,w,h).data;
-
-    let r=0,g=0,b=0, y=0;
-    const n = w*h;
-    for(let i=0;i<img.length;i+=4){
-      const rr=img[i], gg=img[i+1], bb=img[i+2];
-      r+=rr; g+=gg; b+=bb;
-      y += 0.2126*rr + 0.7152*gg + 0.0722*bb;
-    }
-    return { r:r/n, g:g/n, b:b/n, lum:y/n };
-  }
-
-  function clamp(x,a,b){ return Math.max(a, Math.min(b,x)); }
-
-  function srgbToLinear(c){
-    c = c/255;
-    return (c <= 0.04045) ? (c/12.92) : Math.pow((c+0.055)/1.055, 2.4);
-  }
-
-  function rgbToCct(r,g,b){
-    const R=srgbToLinear(r), G=srgbToLinear(g), B=srgbToLinear(b);
-    const X = 0.4124*R + 0.3576*G + 0.1805*B;
-    const Y = 0.2126*R + 0.7152*G + 0.0722*B;
-    const Z = 0.0193*R + 0.1192*G + 0.9505*B;
-
-    const sum = X+Y+Z;
-    if(sum <= 1e-6) return null;
-    const x = X/sum;
-    const y = Y/sum;
-
-    const n = (x - 0.3320) / (0.1858 - y);
-    const cct = (-449*Math.pow(n,3)) + (3525*Math.pow(n,2)) - (6823.3*n) + 5520.33;
-    return clamp(cct, 1000, 12000);
-  }
-
-  function rgbToDuvProxy(r,g,b){
-    const duv = ((g - (r+b)/2) / 255) * 0.06;
-    return clamp(duv, -0.08, 0.08);
-  }
-
-  function rgbToHsv(r,g,b){
-    r/=255; g/=255; b/=255;
-    const max=Math.max(r,g,b), min=Math.min(r,g,b);
-    const d=max-min;
-    let h=0;
-    if(d===0) h=0;
-    else if(max===r) h=((g-b)/d)%6;
-    else if(max===g) h=(b-r)/d + 2;
-    else h=(r-g)/d + 4;
-    h = (h*60 + 360) % 360;
-    const s = (max===0)?0:d/max;
-    const v = max;
-    return {h,s,v};
-  }
-
-  function hueToWavelength(h){
-    const pts = [
-      {h:0, nm:650},
-      {h:60, nm:580},
-      {h:120, nm:530},
-      {h:180, nm:500},
-      {h:240, nm:460},
-      {h:300, nm:400},
-      {h:360, nm:650},
-    ];
-    for(let i=0;i<pts.length-1;i++){
-      const a=pts[i], b=pts[i+1];
-      if(h>=a.h && h<=b.h){
-        const t=(h-a.h)/(b.h-a.h || 1);
-        return a.nm + t*(b.nm-a.nm);
-      }
-    }
-    return 550;
-  }
-
-  const flick = [];
-  function flickerUpdate(lum, t){
-    flick.push({t, lum});
-    while(flick.length && (t - flick[0].t) > 2500) flick.shift();
-    if(flick.length < 15) return null;
-
-    let min=1e9, max=-1e9;
-    for(const p of flick){ min=Math.min(min,p.lum); max=Math.max(max,p.lum); }
-    const pct = (max+min>1e-6) ? ((max-min)/(max+min))*100 : 0;
-
-    const ys = flick.map(p=>p.lum);
-    const mean = ys.reduce((a,b)=>a+b,0)/ys.length;
-    const xs = ys.map(v=>v-mean);
-    const ts = flick.map(p=>p.t);
-    const dt = (ts[ts.length-1]-ts[0])/(ts.length-1 || 1);
-    if(!isFinite(dt) || dt<=0) return {pct, hz:null};
-
-    const N = xs.length;
-    let bestLag = 0;
-    let bestCorr = 0;
-    const maxLag = Math.floor(N/2);
-    for(let lag=2; lag<maxLag; lag++){
-      let c=0;
-      for(let i=0;i<N-lag;i++) c += xs[i]*xs[i+lag];
-      if(c > bestCorr){ bestCorr = c; bestLag = lag; }
-    }
-    const periodMs = bestLag ? (bestLag*dt) : null;
-    const hz = periodMs ? (1000/periodMs) : null;
-    return { pct, hz };
-  }
-
-  function drawPreview(video, canvas){
-    if(!canvas || !video || video.readyState < 2) return;
-    const ctx = canvas.getContext('2d');
-    const cw = canvas.width, ch = canvas.height;
-    const vw = video.videoWidth, vh = video.videoHeight;
-    if(!vw || !vh) return;
-
-    const cr = cw/ch, vr = vw/vh;
-    let sw=vw, sh=vh, sx=0, sy=0;
-    if(vr > cr){
-      sh = vh; sw = vh*cr; sx = (vw - sw)/2;
-    }else{
-      sw = vw; sh = vw/cr; sy = (vh - sh)/2;
-    }
-    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch);
-  }
-
-  function loop(){
-    const video = document.getElementById('live-video');
-    const active = document.querySelector('.tab.active')?.id || '';
-    const isCT = active === 'tab-colorTemp';
-    const isF  = active === 'tab-flicker';
-    const isSP = active === 'tab-spectrometer';
-
-    if(!(isCT || isF || isSP)){
-      requestAnimationFrame(loop);
-      return;
-    }
-
-    const roi = sampleROI(video, 96, 96);
-    const now = performance.now();
-    const dark = (!roi) || (roi.lum < 18);
-
-    if(isCT){
-      const c=$('ct-preview'); if(c) drawPreview(video,c);
-      const ov=$('ct-overlay'); if(ov) ov.hidden=!dark;
-      if(!dark && roi){
-        const cct = rgbToCct(roi.r, roi.g, roi.b);
-        const duv = rgbToDuvProxy(roi.r, roi.g, roi.b);
-        if(cct){
-          $('ct-kelvin').textContent = Math.round(cct).toString();
-          $('ct-duv').textContent = (duv>=0?'+':'') + duv.toFixed(3);
-          const pct = clamp((cct-2500)/(7500-2500),0,1)*100;
-          const needle=$('ct-needle'); if(needle) needle.style.left = pct.toFixed(1)+'%';
-        }
-      }else{
-        $('ct-kelvin').textContent='—';
-        $('ct-duv').textContent='—';
-      }
-    }
-
-    if(isF){
-      const c=$('flk-preview'); if(c) drawPreview(video,c);
-      const ov=$('flk-overlay'); if(ov) ov.hidden=!dark;
-      if(!dark && roi){
-        const res = flickerUpdate(roi.lum, now);
-        if(res){
-          $('flk-pct').textContent = clamp(res.pct,0,100).toFixed(0);
-          $('flk-hz').textContent  = res.hz ? res.hz.toFixed(0) : '—';
-        }
-      }else{
-        $('flk-pct').textContent='—';
-        $('flk-hz').textContent='—';
-      }
-    }
-
-    if(isSP){
-      const c=$('sp-preview'); if(c) drawPreview(video,c);
-      const ov=$('sp-overlay'); if(ov) ov.hidden=!dark;
-      if(!dark && roi){
-        const hsv = rgbToHsv(roi.r, roi.g, roi.b);
-        const nm = hueToWavelength(hsv.h);
-        $('sp-nm').textContent  = Math.round(clamp(nm,380,700)).toString();
-        $('sp-sat').textContent = Math.round(clamp(hsv.s,0,1)*100).toString();
-      }else{
-        $('sp-nm').textContent='—';
-        $('sp-sat').textContent='—';
-      }
-    }
-
-    requestAnimationFrame(loop);
-  }
-
-  document.addEventListener('DOMContentLoaded', ()=>{ requestAnimationFrame(loop); });
 })();
 </script>
 
