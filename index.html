@@ -592,16 +592,6 @@
     .fp-swatch{width:calc(50% - 5px);}
   }
 
-  /* Compact granules controls for small screens (no scroll) */
-  @media (max-width: 520px){
-    .family-picker{ padding:8px; }
-    .fp-title{ font-size:11px; margin-bottom:6px; }
-    .fp-controls-v2{ margin-top:8px; }
-    .fp-hint{ display:none; }
-    .preview-box{ padding:10px; font-size:13px; }
-    .tab-title.solo-title{ margin-top:10px; margin-bottom:6px; font-size:18px; }
-  }
-
 
 
   /* ===== Quick Family Picker v2 (Valid/Defect) ===== */
@@ -694,7 +684,6 @@
   .fp-hline.fp-b .fp-bubble{background:rgba(70,120,255,0.95); color:#111;}
   .fp-vline .fp-bubble{background:rgba(255,185,90,0.95); color:#111;}
   .fp-vline:nth-child(2) .fp-bubble{background:rgba(240,220,90,0.95); color:#111;}
-  .fp-vline:nth-child(3) .fp-bubble{background:rgba(120,255,170,0.95); color:#111;}
 
   /* Mobile fit */
   @media (max-width: 700px){
@@ -2550,11 +2539,11 @@ html[dir="rtl"] body{ direction: rtl; text-align: right; }
     width: 100%;
   }
   .fp-vwrap{
-    width: 58px;
+    width: 62px;
   }
   .fp-range.fp-vertical{
-    width: 40px;
-    height: min(150px, 24vh);
+    width: 44px;
+    height: 200px;
   }
   .fp-range.fp-vertical::-moz-range-track{
     width: 44px;
@@ -2572,15 +2561,15 @@ html[dir="rtl"] body{ direction: rtl; text-align: right; }
     gap: 6px;
   }
   .fp-range.fp-horizontal{
-    height: 40px;
+    height: 44px;
   }
   .fp-range::-moz-range-track{
     height: 44px;
   }
   .fp-arrow{
-    width: 34px;
-    height: 34px;
-    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
   }
   .fp-bubble{
     font-size: 14px;
@@ -2603,7 +2592,7 @@ html[dir="rtl"] body{ direction: rtl; text-align: right; }
 }
 @media (max-width: 420px){
   .fp-swatch{flex: 1 1 calc(50% - 10px);}
-  .fp-range.fp-vertical{height: min(130px, 22vh);}
+  .fp-range.fp-vertical{height: 180px;}
   .fp-range.fp-vertical::-moz-range-track{height: 180px;}
 }
 
@@ -2618,6 +2607,93 @@ html[dir="rtl"] body{ direction: rtl; text-align: right; }
 .eng-metric b{color:#faae52}
 @media (max-width: 720px){
   .eng-wrap{grid-template-columns:1fr;gap:12px}
+}
+
+
+/* ===== Granules Mobile Redesign (no-scroll, Quick/Advanced) ===== */
+.family-picker{ --navH: 74px; }
+.fp-mode{
+  display:flex;
+  gap:8px;
+  margin:8px 0 6px;
+}
+.fp-mode-btn{
+  flex:1 1 0;
+  border-radius:12px;
+  padding:10px 10px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(0,0,0,0.18);
+  color:rgba(255,255,255,0.9);
+  font-weight:900;
+}
+.fp-mode-btn.active{
+  background:rgba(250,174,82,0.22);
+  border-color:rgba(250,174,82,0.55);
+  color:#f7d3a6;
+}
+
+.family-picker.mode-quick .fp-hs{display:none;}
+.family-picker.mode-quick .fp-advanced{display:none;}
+.family-picker.mode-advanced .fp-row{display:none;}
+.family-picker.mode-advanced .fp-row{display:none;}
+.family-picker.mode-advanced .fp-hint{display:none;}
+
+@media (max-width: 520px){
+  /* Make Granules tabs fit exactly one screen */
+  #tab-valid, #tab-defect{
+    padding: 10px;
+    padding-bottom: calc(82px + env(safe-area-inset-bottom));
+    height: calc(100vh - 74px - env(safe-area-inset-bottom));
+    overflow: hidden;
+  }
+
+  #tab-valid .solo-title, #tab-defect .solo-title{ display:none; }
+
+  .mini-rgb-indicator{
+    min-height: 58px;
+    border-radius: 14px;
+  }
+  .mini-rgb-text-small{ font-size: 14px; }
+
+  .fp-title{ font-size: 13px; margin: 0 0 2px; }
+  .fp-controls-v2{ margin-top: 6px; }
+
+  /* Swatches become a compact 4x2 grid */
+  .fp-row{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .fp-swatch{
+    width: auto !important;
+    height: 34px;
+    border-radius: 10px;
+  }
+  .fp-swatch::after{
+    font-size: 11px;
+    bottom: 5px;
+    right: 8px;
+  }
+
+  /* Shorter sliders */
+  .fp-layout{ gap: 10px; }
+  .fp-vwrap{ width: 56px; padding: 22px 6px; border-radius: 14px; }
+  .fp-range.fp-vertical{ width: 40px; height: 132px; }
+  .fp-range.fp-horizontal{ height: 46px; }
+  .fp-arrow{ width: 30px; height: 30px; border-radius: 10px; }
+  .fp-bubble{ font-size: 13px; padding: 5px 8px; min-width: 40px; }
+  .fp-bubble-v{ top: 50%; }
+
+  /* Hide helper text + legacy preview to save space */
+  .fp-hint{ display:none; }
+  .preview-box{ display:none; }
+}
+
+/* Extra-tight phones (short screens) */
+@media (max-width: 520px) and (max-height: 740px){
+  .fp-range.fp-vertical{ height: 118px; }
+  .fp-vwrap{ padding: 20px 6px; }
+  .fp-swatch{ height: 32px; }
 }
 
 </style>
@@ -2834,8 +2910,11 @@ function hslToRgb(h,s,l){
 function applyFamilyTo(prefix, family){
   const toneEl = document.getElementById(prefix+'-tone');
   const satEl  = document.getElementById(prefix+'-sat');
+  const scaleEl= document.getElementById(prefix+'-scale');
+
   const tone = +toneEl.value;
-  const sat = +satEl.value;
+  const sat  = +satEl.value;
+  const scale = scaleEl ? (+scaleEl.value) : 100;
 
   // "Tone" maps to lightness; keep mid around 55
   const l = clamp(tone, 0, 100);
@@ -2848,16 +2927,11 @@ function applyFamilyTo(prefix, family){
     rgb = hslToRgb(family.h, s, l);
   }
 
-
-  // Scale (brightness) — preserves hue by uniform scaling of RGB
-  const scaleEl = document.getElementById(prefix+'-scale');
-  const scale = scaleEl ? clamp(+scaleEl.value, 0, 100) : 100;
-  const k = scale / 100;
-  rgb = {
-    r: clamp(Math.round(rgb.r * k), 0, 255),
-    g: clamp(Math.round(rgb.g * k), 0, 255),
-    b: clamp(Math.round(rgb.b * k), 0, 255)
-  };
+  // Scale = uniform brightness multiplier (0..100)
+  const k = clamp(scale, 0, 100) / 100;
+  rgb = { r: clamp(Math.round(rgb.r * k), 0, 255),
+          g: clamp(Math.round(rgb.g * k), 0, 255),
+          b: clamp(Math.round(rgb.b * k), 0, 255) };
 
   const rEl = document.getElementById(prefix+'-r');
   const gEl = document.getElementById(prefix+'-g');
@@ -2880,56 +2954,69 @@ function initFamilyPicker(prefix){
   const picker = document.querySelector(`.family-picker[data-target="${prefix}"]`);
   if(!picker) return;
 
+  // default mode
+  picker.classList.add('mode-quick');
+
+  const modeBtns = Array.from(picker.querySelectorAll('.fp-mode-btn'));
+  function setMode(mode){
+    picker.classList.toggle('mode-quick', mode === 'quick');
+    picker.classList.toggle('mode-advanced', mode === 'advanced');
+    modeBtns.forEach(b=>b.classList.toggle('active', b.dataset.mode === mode));
+  }
+  modeBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=> setMode(btn.dataset.mode || 'quick'));
+  });
+
   const swatches = Array.from(picker.querySelectorAll('.fp-swatch'));
   const toneEl = document.getElementById(prefix+'-tone');
   const satEl  = document.getElementById(prefix+'-sat');
+  const scaleEl= document.getElementById(prefix+'-scale');
+
   const toneVal= document.getElementById(prefix+'-tone-val');
   const satVal = document.getElementById(prefix+'-sat-val');
+  const scaleVal = document.getElementById(prefix+'-scale-val');
 
-    const scaleEl = document.getElementById(prefix+'-scale');
-  const scaleVal= document.getElementById(prefix+'-scale-val');
-// paint swatches as family previews
+  // paint swatches as family previews
   swatches.forEach(btn=>{
     const h = +btn.dataset.h;
     const s = +btn.dataset.s;
     const name = btn.dataset.name || '';
     if(s===0){
-      btn.style.background = 'linear-gradient(90deg, rgb(30,30,40), rgb(200,200,205))';
+      btn.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.20), rgba(255,255,255,0.08))';
     }else{
-      btn.style.background = `linear-gradient(90deg, hsl(${h}, ${Math.max(35,s)}%, 35%), hsl(${h}, ${Math.max(45,s)}%, 65%))`;
+      btn.style.background = `linear-gradient(135deg, hsla(${h}, 85%, 60%, .95), hsla(${h}, 85%, 38%, .85))`;
     }
-    btn.addEventListener('click', ()=>{
-      swatches.forEach(x=>x.classList.remove('active'));
-      btn.classList.add('active');
-      // preset saturation slider to family default (unless grayscale)
-      if(s===0){
-        satEl.value = 0;
-      }else{
-        satEl.value = clamp(s,0,100);
-      }
-      satVal.textContent = satEl.value;
-
-      picker.dataset.selected = JSON.stringify({h, s, name});
-      applyFamilyTo(prefix, {h, s, name});
-    });
+    btn.setAttribute('aria-label', name);
   });
 
+  function setSelected(family){
+    picker.dataset.selected = JSON.stringify(family);
+    swatches.forEach(b=>b.classList.toggle('active', b===family._btn));
+  }
   function getSelected(){
     try{
       return picker.dataset.selected ? JSON.parse(picker.dataset.selected) : null;
     }catch(e){ return null; }
   }
 
-  function onSliders(){
-    toneVal.textContent = toneEl.value;
-    satVal.textContent  = satEl.value;
-    positionBubbleForRange(toneEl, toneVal);
-    positionBubbleForRange(satEl, satVal);
+  swatches.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const family = { h:+btn.dataset.h, s:+btn.dataset.s, name:btn.dataset.name||'' };
+      family._btn = btn;
+      setSelected(family);
+      applyFamilyTo(prefix, family);
+      updateToneSatFills(prefix);
+    });
+  });
 
-    if(scaleEl && scaleVal){
-      scaleVal.textContent = scaleEl.value;
-      positionBubbleForRange(scaleEl, scaleVal);
-    }
+  function onSliders(){
+    if(toneVal)  toneVal.textContent  = toneEl.value;
+    if(satVal)   satVal.textContent   = satEl.value;
+    if(scaleEl && scaleVal) scaleVal.textContent = scaleEl.value;
+
+    if(toneVal) positionBubbleForRange(toneEl, toneVal);
+    if(satVal)  positionBubbleForRange(satEl, satVal);
+    if(scaleEl && scaleVal) positionBubbleForRange(scaleEl, scaleVal);
 
     updateToneSatFills(prefix);
     const sel = getSelected();
@@ -2938,21 +3025,16 @@ function initFamilyPicker(prefix){
     updateToneSatFills(prefix);
   }
 
-  toneEl.addEventListener('input', onSliders);
-  satEl.addEventListener('input', onSliders);
+  toneEl?.addEventListener('input', onSliders);
+  satEl?.addEventListener('input', onSliders);
+  scaleEl?.addEventListener('input', onSliders);
 
-  
-  if(scaleEl) scaleEl.addEventListener('input', onSliders);
-// initialize values display
-  toneVal.textContent = toneEl.value;
-  satVal.textContent  = satEl.value;
-  positionBubbleForRange(toneEl, toneVal);
-  positionBubbleForRange(satEl, satVal);
-  if(scaleEl && scaleVal){
-    scaleVal.textContent = scaleEl.value;
-    positionBubbleForRange(scaleEl, scaleVal);
-    updateToneSatFills(prefix);
-  }
+  // initialize values display
+  if(toneVal){ toneVal.textContent = toneEl.value; positionBubbleForRange(toneEl, toneVal); }
+  if(satVal){  satVal.textContent  = satEl.value;  positionBubbleForRange(satEl, satVal); }
+  if(scaleEl && scaleVal){ scaleVal.textContent = scaleEl.value; positionBubbleForRange(scaleEl, scaleVal); }
+
+  setMode('quick');
 }
 
 
@@ -3048,6 +3130,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 <div class="family-picker" data-target="valid">
     <div class="fp-title">בחירת צבע מהירה (Valid)</div>
+    <div class="fp-mode" role="tablist" aria-label="Granule mode">
+      <button type="button" class="fp-mode-btn active" data-mode="quick">מהיר</button>
+      <button type="button" class="fp-mode-btn" data-mode="advanced">מדויק (RGB)</button>
+    </div>
     <div class="fp-row">
       <button type="button" class="fp-swatch" data-h="0" data-s="0"  data-name="לבן/אפור" title="לבן/אפור"></button>
       <button type="button" class="fp-swatch" data-h="0" data-s="8"  data-name="ניטרלים" title="ניטרלים"></button>
@@ -3080,7 +3166,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
               <div class="fp-bubble fp-bubble-v" id="valid-sat-val">65</div>
             </div>
           </div>
-
           <div class="fp-vline">
             <div class="fp-vlabel">סקייל</div>
             <div class="fp-vwrap">
@@ -3090,9 +3175,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
               <div class="fp-bubble fp-bubble-v" id="valid-scale-val">100</div>
             </div>
           </div>
-
         </div>
-        <div class="fp-rgb">
+
+        <div class="fp-advanced"><div class="fp-rgb">
           <div class="fp-hline fp-r">
             <div class="fp-hlabel">R</div>
             <div class="fp-hwrap">
@@ -3123,6 +3208,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
             </div>
           </div>
         </div>
+        </div>
       </div>
     </div></div>
       <div class="fp-hint" id="valid-fp-hint">בחר משפחה ואז כוון גוון/רוויה — הסליידרים RGB יתעדכנו.</div>
@@ -3145,6 +3231,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 <div class="family-picker" data-target="defect">
     <div class="fp-title">בחירת צבע מהירה (Defect)</div>
+    <div class="fp-mode" role="tablist" aria-label="Granule mode">
+      <button type="button" class="fp-mode-btn active" data-mode="quick">מהיר</button>
+      <button type="button" class="fp-mode-btn" data-mode="advanced">מדויק (RGB)</button>
+    </div>
     <div class="fp-row">
       <button type="button" class="fp-swatch" data-h="0" data-s="0"  data-name="לבן/אפור" title="לבן/אפור"></button>
       <button type="button" class="fp-swatch" data-h="0" data-s="8"  data-name="ניטרלים" title="ניטרלים"></button>
@@ -3177,7 +3267,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
               <div class="fp-bubble fp-bubble-v" id="defect-sat-val">65</div>
             </div>
           </div>
-
           <div class="fp-vline">
             <div class="fp-vlabel">סקייל</div>
             <div class="fp-vwrap">
@@ -3187,9 +3276,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
               <div class="fp-bubble fp-bubble-v" id="defect-scale-val">100</div>
             </div>
           </div>
-
         </div>
-        <div class="fp-rgb">
+
+        <div class="fp-advanced"><div class="fp-rgb">
           <div class="fp-hline fp-r">
             <div class="fp-hlabel">R</div>
             <div class="fp-hwrap">
@@ -3219,6 +3308,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
               <div class="fp-bubble" id="defect-b-val">128</div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div></div>
@@ -3767,6 +3857,93 @@ document.addEventListener('DOMContentLoaded', ()=>{
   display: block;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+
+/* ===== Granules Mobile Redesign (no-scroll, Quick/Advanced) ===== */
+.family-picker{ --navH: 74px; }
+.fp-mode{
+  display:flex;
+  gap:8px;
+  margin:8px 0 6px;
+}
+.fp-mode-btn{
+  flex:1 1 0;
+  border-radius:12px;
+  padding:10px 10px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(0,0,0,0.18);
+  color:rgba(255,255,255,0.9);
+  font-weight:900;
+}
+.fp-mode-btn.active{
+  background:rgba(250,174,82,0.22);
+  border-color:rgba(250,174,82,0.55);
+  color:#f7d3a6;
+}
+
+.family-picker.mode-quick .fp-hs{display:none;}
+.family-picker.mode-quick .fp-advanced{display:none;}
+.family-picker.mode-advanced .fp-row{display:none;}
+.family-picker.mode-advanced .fp-row{display:none;}
+.family-picker.mode-advanced .fp-hint{display:none;}
+
+@media (max-width: 520px){
+  /* Make Granules tabs fit exactly one screen */
+  #tab-valid, #tab-defect{
+    padding: 10px;
+    padding-bottom: calc(82px + env(safe-area-inset-bottom));
+    height: calc(100vh - 74px - env(safe-area-inset-bottom));
+    overflow: hidden;
+  }
+
+  #tab-valid .solo-title, #tab-defect .solo-title{ display:none; }
+
+  .mini-rgb-indicator{
+    min-height: 58px;
+    border-radius: 14px;
+  }
+  .mini-rgb-text-small{ font-size: 14px; }
+
+  .fp-title{ font-size: 13px; margin: 0 0 2px; }
+  .fp-controls-v2{ margin-top: 6px; }
+
+  /* Swatches become a compact 4x2 grid */
+  .fp-row{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .fp-swatch{
+    width: auto !important;
+    height: 34px;
+    border-radius: 10px;
+  }
+  .fp-swatch::after{
+    font-size: 11px;
+    bottom: 5px;
+    right: 8px;
+  }
+
+  /* Shorter sliders */
+  .fp-layout{ gap: 10px; }
+  .fp-vwrap{ width: 56px; padding: 22px 6px; border-radius: 14px; }
+  .fp-range.fp-vertical{ width: 40px; height: 132px; }
+  .fp-range.fp-horizontal{ height: 46px; }
+  .fp-arrow{ width: 30px; height: 30px; border-radius: 10px; }
+  .fp-bubble{ font-size: 13px; padding: 5px 8px; min-width: 40px; }
+  .fp-bubble-v{ top: 50%; }
+
+  /* Hide helper text + legacy preview to save space */
+  .fp-hint{ display:none; }
+  .preview-box{ display:none; }
+}
+
+/* Extra-tight phones (short screens) */
+@media (max-width: 520px) and (max-height: 740px){
+  .fp-range.fp-vertical{ height: 118px; }
+  .fp-vwrap{ padding: 20px 6px; }
+  .fp-swatch{ height: 32px; }
 }
 
 </style>
@@ -5134,13 +5311,11 @@ if(tab === 'simulation' && typeof runDualSimulation === 'function'){
   const toneEl  = document.getElementById(prefix+'-tone');
   const satEl   = document.getElementById(prefix+'-sat');
   const scaleEl = document.getElementById(prefix+'-scale');
-
   // Use non-RGB colors so it won't clash with R/G/B sliders
   if(toneEl)  setRangeFill(toneEl,  'rgba(255, 170, 70, 0.95)');   // tone (orange)
   if(satEl)   setRangeFill(satEl,   'rgba(240, 220, 90, 0.95)');   // saturation (yellow)
-  if(scaleEl) setRangeFill(scaleEl, 'rgba(120, 255, 170, 0.95)');  // scale (mint)
+  if(scaleEl) setRangeFill(scaleEl, 'rgba(120, 220, 255, 0.95)');  // scale (cyan)
 }
-
 
 
   function positionBubbleForRange(el, bubble){
@@ -5177,7 +5352,7 @@ function updateRgbValPills(prefix){
     }
   });
   // Tone/Sat bubbles
-  ['tone','sat','scale'].forEach(k=>{
+  ['tone','sat'].forEach(k=>{
     const el = document.getElementById(`${prefix}-${k}`);
     const valEl = document.getElementById(`${prefix}-${k}-val`);
     if(el && valEl){
