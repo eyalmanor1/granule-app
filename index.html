@@ -3712,6 +3712,94 @@ document.addEventListener('DOMContentLoaded', ()=>{
   -webkit-overflow-scrolling: touch;
 }
 
+
+/* === Mobile/Tablet "one-screen" responsive overrides (no-SW build) === */
+@media (max-width: 900px){
+  .tab{padding:12px !important; padding-bottom: calc(86px + env(safe-area-inset-bottom)) !important;}
+  .tab-title.solo-title{font-size:24px !important; margin: 6px 0 10px !important;}
+  .mini-rgb-indicator{min-height:64px !important; border-radius:16px !important;}
+  .mini-rgb-text{font-size:14px !important;}
+  .fp-title{font-size:13px !important; margin-bottom:6px !important;}
+  .fp-row{
+    display:grid !important;
+    grid-template-columns: repeat(4, minmax(0,1fr)) !important;
+    gap:8px !important;
+    align-items:stretch !important;
+  }
+  .fp-swatch{width:100% !important; height:38px !important; border-radius:12px !important;}
+  .fp-swatch::after{font-size:12px !important; left:8px !important; bottom:6px !important;}
+
+  /* Put HS + RGB in compact grid: HS (2 vertical) + RGB (3 vertical) */
+  .fp-layout{
+    display:grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .fp-hs{
+    display:flex !important;
+    justify-content:center !important;
+    gap: 12px !important;
+  }
+  .fp-vwrap{width:56px !important; padding:22px 4px !important;}
+  .fp-range.fp-vertical{width:40px !important; height:150px !important;}
+
+  /* RGB becomes 3 vertical sliders in one row */
+  .fp-rgb{
+    display:grid !important;
+    grid-template-columns: repeat(3, minmax(0,1fr)) !important;
+    gap: 10px !important;
+    align-items:end !important;
+  }
+  .fp-hline{
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:center !important;
+    gap:6px !important;
+    background: rgba(255,255,255,0.03) !important;
+    border: 1px solid rgba(255,255,255,0.06) !important;
+    border-radius: 14px !important;
+    padding: 10px 8px !important;
+  }
+  .fp-hlabel{font-size:12px !important; opacity:.9 !important;}
+  .fp-hwrap{
+    padding: 0 !important;
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:center !important;
+    width:100% !important;
+  }
+
+  /* turn horizontal ranges into vertical on mobile */
+  .fp-range.fp-horizontal{
+    width:40px !important;
+    height:150px !important;
+    writing-mode: bt-lr !important;
+    -webkit-appearance: slider-vertical !important;
+    appearance: slider-vertical !important;
+    border-radius: 14px !important;
+  }
+
+  /* hide step arrows for RGB (save space) */
+  .fp-rgb .fp-arrow{display:none !important;}
+
+  /* bubble becomes below slider (no absolute overlap) */
+  .fp-rgb .fp-bubble{
+    position: static !important;
+    transform: none !important;
+    margin-top: 8px !important;
+  }
+
+  /* soften labels row */
+  .fp-help{font-size:12px !important; opacity:.75 !important;}
+}
+
+/* Extra-small phones */
+@media (max-width: 420px){
+  .fp-range.fp-vertical, .fp-range.fp-horizontal{height:135px !important;}
+  .fp-vwrap{width:52px !important;}
+  .fp-row{grid-template-columns: repeat(3, minmax(0,1fr)) !important;}
+}
+
 </style>
 
   <script>
