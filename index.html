@@ -592,6 +592,16 @@
     .fp-swatch{width:calc(50% - 5px);}
   }
 
+  /* Compact granules controls for small screens (no scroll) */
+  @media (max-width: 520px){
+    .family-picker{ padding:8px; }
+    .fp-title{ font-size:11px; margin-bottom:6px; }
+    .fp-controls-v2{ margin-top:8px; }
+    .fp-hint{ display:none; }
+    .preview-box{ padding:10px; font-size:13px; }
+    .tab-title.solo-title{ margin-top:10px; margin-bottom:6px; font-size:18px; }
+  }
+
 
 
   /* ===== Quick Family Picker v2 (Valid/Defect) ===== */
@@ -684,6 +694,7 @@
   .fp-hline.fp-b .fp-bubble{background:rgba(70,120,255,0.95); color:#111;}
   .fp-vline .fp-bubble{background:rgba(255,185,90,0.95); color:#111;}
   .fp-vline:nth-child(2) .fp-bubble{background:rgba(240,220,90,0.95); color:#111;}
+  .fp-vline:nth-child(3) .fp-bubble{background:rgba(120,255,170,0.95); color:#111;}
 
   /* Mobile fit */
   @media (max-width: 700px){
@@ -2539,11 +2550,11 @@ html[dir="rtl"] body{ direction: rtl; text-align: right; }
     width: 100%;
   }
   .fp-vwrap{
-    width: 62px;
+    width: 58px;
   }
   .fp-range.fp-vertical{
-    width: 44px;
-    height: 200px;
+    width: 40px;
+    height: min(150px, 24vh);
   }
   .fp-range.fp-vertical::-moz-range-track{
     width: 44px;
@@ -2561,15 +2572,15 @@ html[dir="rtl"] body{ direction: rtl; text-align: right; }
     gap: 6px;
   }
   .fp-range.fp-horizontal{
-    height: 44px;
+    height: 40px;
   }
   .fp-range::-moz-range-track{
     height: 44px;
   }
   .fp-arrow{
-    width: 40px;
-    height: 40px;
-    border-radius: 14px;
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
   }
   .fp-bubble{
     font-size: 14px;
@@ -2592,7 +2603,7 @@ html[dir="rtl"] body{ direction: rtl; text-align: right; }
 }
 @media (max-width: 420px){
   .fp-swatch{flex: 1 1 calc(50% - 10px);}
-  .fp-range.fp-vertical{height: 180px;}
+  .fp-range.fp-vertical{height: min(130px, 22vh);}
   .fp-range.fp-vertical::-moz-range-track{height: 180px;}
 }
 
@@ -2610,6 +2621,18 @@ html[dir="rtl"] body{ direction: rtl; text-align: right; }
 }
 
 </style>
+
+<script>
+(function(){
+  function setAppVh(){
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--app-vh', vh + 'px');
+  }
+  window.addEventListener('resize', setAppVh, {passive:true});
+  window.addEventListener('orientationchange', setAppVh, {passive:true});
+  setAppVh();
+})();
+</script>
 </head>
 
 <body>
@@ -2825,6 +2848,17 @@ function applyFamilyTo(prefix, family){
     rgb = hslToRgb(family.h, s, l);
   }
 
+
+  // Scale (brightness) — preserves hue by uniform scaling of RGB
+  const scaleEl = document.getElementById(prefix+'-scale');
+  const scale = scaleEl ? clamp(+scaleEl.value, 0, 100) : 100;
+  const k = scale / 100;
+  rgb = {
+    r: clamp(Math.round(rgb.r * k), 0, 255),
+    g: clamp(Math.round(rgb.g * k), 0, 255),
+    b: clamp(Math.round(rgb.b * k), 0, 255)
+  };
+
   const rEl = document.getElementById(prefix+'-r');
   const gEl = document.getElementById(prefix+'-g');
   const bEl = document.getElementById(prefix+'-b');
@@ -2852,7 +2886,9 @@ function initFamilyPicker(prefix){
   const toneVal= document.getElementById(prefix+'-tone-val');
   const satVal = document.getElementById(prefix+'-sat-val');
 
-  // paint swatches as family previews
+    const scaleEl = document.getElementById(prefix+'-scale');
+  const scaleVal= document.getElementById(prefix+'-scale-val');
+// paint swatches as family previews
   swatches.forEach(btn=>{
     const h = +btn.dataset.h;
     const s = +btn.dataset.s;
@@ -2889,9 +2925,14 @@ function initFamilyPicker(prefix){
     satVal.textContent  = satEl.value;
     positionBubbleForRange(toneEl, toneVal);
     positionBubbleForRange(satEl, satVal);
-    
-  updateToneSatFills(prefix);
-const sel = getSelected();
+
+    if(scaleEl && scaleVal){
+      scaleVal.textContent = scaleEl.value;
+      positionBubbleForRange(scaleEl, scaleVal);
+    }
+
+    updateToneSatFills(prefix);
+    const sel = getSelected();
     if(!sel) return;
     applyFamilyTo(prefix, sel);
     updateToneSatFills(prefix);
@@ -2900,11 +2941,18 @@ const sel = getSelected();
   toneEl.addEventListener('input', onSliders);
   satEl.addEventListener('input', onSliders);
 
-  // initialize values display
+  
+  if(scaleEl) scaleEl.addEventListener('input', onSliders);
+// initialize values display
   toneVal.textContent = toneEl.value;
   satVal.textContent  = satEl.value;
   positionBubbleForRange(toneEl, toneVal);
   positionBubbleForRange(satEl, satVal);
+  if(scaleEl && scaleVal){
+    scaleVal.textContent = scaleEl.value;
+    positionBubbleForRange(scaleEl, scaleVal);
+    updateToneSatFills(prefix);
+  }
 }
 
 
@@ -3032,8 +3080,18 @@ document.addEventListener('DOMContentLoaded', ()=>{
               <div class="fp-bubble fp-bubble-v" id="valid-sat-val">65</div>
             </div>
           </div>
-        </div>
 
+          <div class="fp-vline">
+            <div class="fp-vlabel">סקייל</div>
+            <div class="fp-vwrap">
+              <button type="button" class="fp-arrow fp-arrow-up" data-target="valid-scale" aria-label="Scale up">▲</button>
+              <input id="valid-scale" class="fp-range fp-vertical fp-scale" type="range" min="0" max="100" value="100" />
+              <button type="button" class="fp-arrow fp-arrow-down" data-target="valid-scale" aria-label="Scale down">▼</button>
+              <div class="fp-bubble fp-bubble-v" id="valid-scale-val">100</div>
+            </div>
+          </div>
+
+        </div>
         <div class="fp-rgb">
           <div class="fp-hline fp-r">
             <div class="fp-hlabel">R</div>
@@ -3119,8 +3177,18 @@ document.addEventListener('DOMContentLoaded', ()=>{
               <div class="fp-bubble fp-bubble-v" id="defect-sat-val">65</div>
             </div>
           </div>
-        </div>
 
+          <div class="fp-vline">
+            <div class="fp-vlabel">סקייל</div>
+            <div class="fp-vwrap">
+              <button type="button" class="fp-arrow fp-arrow-up" data-target="defect-scale" aria-label="Scale up">▲</button>
+              <input id="defect-scale" class="fp-range fp-vertical fp-scale" type="range" min="0" max="100" value="100" />
+              <button type="button" class="fp-arrow fp-arrow-down" data-target="defect-scale" aria-label="Scale down">▼</button>
+              <div class="fp-bubble fp-bubble-v" id="defect-scale-val">100</div>
+            </div>
+          </div>
+
+        </div>
         <div class="fp-rgb">
           <div class="fp-hline fp-r">
             <div class="fp-hlabel">R</div>
@@ -3634,6 +3702,71 @@ document.addEventListener('DOMContentLoaded', ()=>{
 .eng-metric b{color:#faae52}
 @media (max-width: 720px){
   .eng-wrap{grid-template-columns:1fr;gap:12px}
+}
+
+
+/* ===== Mobile layout fixes (v15) ===== */
+:root{
+  --app-vh: 1vh;
+}
+
+/* Use dynamic viewport height on mobile (fixes address-bar / notch issues) */
+.tab{
+  height: calc(var(--app-vh, 1vh) * 100 - 60px);
+}
+
+/* Improve tap targets + readability on small screens */
+@media (max-width: 520px){
+  .tab{ padding: 10px; padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
+  .tab-title, .solo-title{ font-size: 22px; line-height: 1.2; }
+
+  /* Make the mini indicator + text readable */
+  .mini-rgb-indicator{ width: 100% !important; max-width: 520px; }
+  .mini-rgb-text{ font-size: 13px; }
+  .mini-rgb-text-small{ font-size: 12px; }
+
+  /* Family picker becomes a clean vertical flow */
+  .family-picker{ padding: 12px; border-radius: 14px; }
+  .fp-title{ font-size: 13px; }
+  .fp-row{ gap: 8px; }
+  .fp-swatch{
+    width: calc(50% - 4px) !important;
+    height: 56px;
+    border-radius: 12px;
+  }
+  .fp-swatch::after{
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(4px);
+  }
+
+  /* Sliders: bigger, less cramped */
+  .fp-controls, .fp-controls-v2{ gap: 10px; }
+  .fp-line{ grid-template-columns: 44px 1fr 40px; gap: 8px; }
+  .fp-label, .fp-val{ font-size: 13px; }
+  .fp-hint{ font-size: 12px; }
+  input[type="range"].fp-range{ height: 34px; }
+  .fp-arrow{ width: 40px; height: 34px; border-radius: 10px; }
+  .fp-bubble{ font-size: 12px; }
+
+  /* Prevent controls from overflowing horizontally */
+  .fp-layout{ display: flex; flex-direction: column; gap: 12px; }
+  .fp-hs{ width: 100%; }
+  .fp-rgb{ width: 100%; }
+  .fp-hline{ width: 100%; }
+  .fp-vline{ min-width: 0; }
+  .fp-vwrap{ width: 100%; }
+}
+
+/* If any tables exist in tabs, keep them usable on mobile */
+.tab table{
+  width: 100%;
+  max-width: 100%;
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 </style>
@@ -4998,12 +5131,16 @@ if(tab === 'simulation' && typeof runDualSimulation === 'function'){
   }
 
   function updateToneSatFills(prefix){
-  const toneEl = document.getElementById(prefix+'-tone');
-  const satEl  = document.getElementById(prefix+'-sat');
+  const toneEl  = document.getElementById(prefix+'-tone');
+  const satEl   = document.getElementById(prefix+'-sat');
+  const scaleEl = document.getElementById(prefix+'-scale');
+
   // Use non-RGB colors so it won't clash with R/G/B sliders
-  if(toneEl) setRangeFill(toneEl, 'rgba(255, 170, 70, 0.95)');   // hue (orange)
-  if(satEl)  setRangeFill(satEl,  'rgba(240, 220, 90, 0.95)');  // saturation (yellow)
+  if(toneEl)  setRangeFill(toneEl,  'rgba(255, 170, 70, 0.95)');   // tone (orange)
+  if(satEl)   setRangeFill(satEl,   'rgba(240, 220, 90, 0.95)');   // saturation (yellow)
+  if(scaleEl) setRangeFill(scaleEl, 'rgba(120, 255, 170, 0.95)');  // scale (mint)
 }
+
 
 
   function positionBubbleForRange(el, bubble){
@@ -5040,7 +5177,7 @@ function updateRgbValPills(prefix){
     }
   });
   // Tone/Sat bubbles
-  ['tone','sat'].forEach(k=>{
+  ['tone','sat','scale'].forEach(k=>{
     const el = document.getElementById(`${prefix}-${k}`);
     const valEl = document.getElementById(`${prefix}-${k}-val`);
     if(el && valEl){
