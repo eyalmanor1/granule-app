@@ -2501,6 +2501,77 @@ html[dir="rtl"] body{ direction: rtl; text-align: right; }
   html, body{ overflow-x:hidden !important; }
 }
 
+
+
+/* ===== Mobile Responsive Fix for Valid/Defect sliders ===== */
+@media (max-width: 700px){
+  .fp-layout{
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .fp-hs{
+    justify-content: center;
+    gap: 14px;
+    width: 100%;
+  }
+  .fp-vwrap{
+    width: 62px;
+  }
+  .fp-range.fp-vertical{
+    width: 44px;
+    height: 200px;
+  }
+  .fp-range.fp-vertical::-moz-range-track{
+    width: 44px;
+    height: 200px;
+  }
+  .fp-rgb{
+    width: 100%;
+    gap: 14px;
+  }
+  .fp-hline{
+    grid-template-columns: 18px 1fr;
+    gap: 8px;
+  }
+  .fp-hwrap{
+    gap: 6px;
+  }
+  .fp-range.fp-horizontal{
+    height: 44px;
+  }
+  .fp-range::-moz-range-track{
+    height: 44px;
+  }
+  .fp-arrow{
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+  }
+  .fp-bubble{
+    font-size: 14px;
+    padding: 6px 10px;
+    min-width: 44px;
+  }
+  .fp-bubble-v{
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .fp-row{
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .fp-swatch{
+    height: 46px;
+    min-width: 92px;
+    flex: 1 1 calc(33.33% - 10px);
+  }
+}
+@media (max-width: 420px){
+  .fp-swatch{flex: 1 1 calc(50% - 10px);}
+  .fp-range.fp-vertical{height: 180px;}
+  .fp-range.fp-vertical::-moz-range-track{height: 180px;}
+}
+
 </style>
 </head>
 
