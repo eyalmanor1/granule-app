@@ -592,7 +592,7 @@
   .fp-controls.fp-layout{
     margin-top:10px;
     display:grid;
-    grid-template-columns: 1fr 118px;
+    grid-template-columns: 1fr auto;
     gap:12px;
     align-items:stretch;
   }
@@ -647,12 +647,14 @@
 
   .fp-hs-vert{
     display:flex;
-    flex-direction:column;
+    flex-direction:row;
     gap:12px;
     justify-content:flex-start;
     align-items:stretch;
+    height:100%;
   }
   .fp-vert{
+    height:100%;
     background:rgba(255,255,255,.05);
     border:1px solid rgba(255,255,255,.10);
     border-radius:14px;
@@ -668,6 +670,7 @@
     font-weight:700;
   }
   .fp-vert-track{
+    flex:1;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -675,7 +678,8 @@
   }
   .fp-range-wrap.vertical{
     width:64px;
-    height:220px;
+    height:100%;
+    min-height:220px;
     position:relative;
     display:flex;
     align-items:center;
@@ -689,7 +693,16 @@
     transform:translate(-50%,-50%) rotate(90deg);
   }
 
-  /* keep family picker swatches nicer on small screens */
+  
+  /* Android/narrow screens: stack HS under RGB and keep things readable */
+  @media (max-width: 720px){
+    .fp-controls.fp-layout{ grid-template-columns: 1fr; }
+    .fp-hs-vert{ justify-content:space-between; }
+    .fp-range-wrap.vertical{ min-height:180px; }
+    input[type="range"].fp-range-vert{ width:180px; }
+  }
+
+/* keep family picker swatches nicer on small screens */
   @media (max-width: 520px){
     .fp-controls.fp-layout{ grid-template-columns: 1fr 112px; }
     .fp-range-wrap.vertical{ height:200px; }
@@ -2928,6 +2941,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     </div>
   </div>
 
+  
   <div class="fp-hs-vert">
     <div class="fp-vert">
       <div class="fp-vert-title">גוון</div>
@@ -2939,7 +2953,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         </div>
         <button type="button" class="fp-step fp-step-down" data-for="valid-tone" data-delta="-1">▼</button>
       </div>
-      <div class="fp-val" id="valid-tone-val" style="display:none">0</div>
+      <div class="fp-val" id="valid-tone-val" style="display:none">55</div>
     </div>
 
     <div class="fp-vert">
@@ -2947,7 +2961,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
       <div class="fp-vert-track">
         <button type="button" class="fp-step fp-step-up" data-for="valid-sat" data-delta="1">▲</button>
         <div class="fp-range-wrap vertical">
-          <input class="fp-ran<div class="fp-controls fp-layout">
+          <input class="fp-range fp-range-vert" id="valid-sat" type="range" min="0" max="100" value="65" />
+          <div class="fp-ontrack-val vertical" data-for="valid-sat"></div>
+        </div>
+        <button type="button" class="fp-step fp-step-down" data-for="valid-sat" data-delta="-1">▼</button>
+      </div>
+      <div class="fp-val" id="valid-sat-val" style="display:none">65</div>
+    </div>
+  </div>
+
+
+<div class="fp-controls fp-layout">
   <div class="fp-rgb-stack">
     <div class="fp-line fp-rgb">
       <div class="fp-label">R</div>
@@ -4901,11 +4925,24 @@ if(tab === 'simulation' && typeof runDualSimulation === 'function'){
     el.style.accentColor = color;
   }
   function updateSliderFills(prefix){
-    const colors = { r: 'rgb(255, 59, 59)', g: 'rgb(60, 255, 90)', b: 'rgb(70, 120, 255)' };
+    const colors = {
+      r: 'rgb(255, 59, 59)',
+      g: 'rgb(60, 255, 90)',
+      b: 'rgb(70, 120, 255)',
+      tone: 'rgb(250, 174, 82)',   // warm/orange
+      sat:  'rgb(250, 220, 90)'    // yellow
+    };
     ['r','g','b'].forEach(ch => {
       const el = document.getElementById(`${prefix}-${ch}`);
       setRangeFill(el, colors[ch]);
     });
+    // vertical sliders (0-100)
+    const toneEl = document.getElementById(`${prefix}-tone`);
+    const satEl  = document.getElementById(`${prefix}-sat`);
+    setRangeFill(toneEl, colors.tone);
+    setRangeFill(satEl, colors.sat);
+  }
+);
   }
 
   function updateToneSatFills(prefix){
