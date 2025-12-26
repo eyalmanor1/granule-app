@@ -1,5 +1,5 @@
 /* Manor Engineering PWA Service Worker */
-const CACHE_NAME = 'manor-tools-v5';
+const CACHE_NAME = 'manor-tools-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
