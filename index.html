@@ -5696,10 +5696,10 @@ details.acc[open] summary{ filter:brightness(1.02); }
 </div>
 <div id="bottomMenu">
 <nav aria-label="Main navigation" class="legacy-nav main-menu">
-<button class="menu-btn" data-tab="granules" type="button">Granules</button>
-<button class="menu-btn" data-tab="analysis" type="button">Analysis</button>
-<button class="menu-btn" data-tab="calibration" type="button">Calibration</button>
-<button class="menu-btn" data-tab="tools" type="button">Tools</button>
+<button class="menu-btn" data-tab="granules" onclick="try{ switchTab('granules'); }catch(e){}; return false;" type="button">Granules</button>
+<button class="menu-btn" data-tab="analysis" onclick="try{ switchTab('analysis'); }catch(e){}; return false;" type="button">Analysis</button>
+<button class="menu-btn" data-tab="calibration" onclick="try{ switchTab('calibration'); }catch(e){}; return false;" type="button">Calibration</button>
+<button class="menu-btn" data-tab="tools" onclick="try{ switchTab('tools'); }catch(e){}; return false;" type="button">Tools</button>
 </nav>
 </div>
 </div>
@@ -11540,6 +11540,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 })();
 </script>
-
-</body>
+<script>
+/* ===== Fallback tab navigation (delegated) ===== */
+document.addEventListener('click', (e)=>{
+  const b = e.target.closest('#bottomMenu .menu-btn[data-tab]');
+  if(!b) return;
+  e.preventDefault();
+  const tab = b.getAttribute('data-tab');
+  try{ if(typeof switchTab==='function') switchTab(tab); }catch(err){}
+}, true);
+</script></body>
 </html>
