@@ -3281,6 +3281,9 @@ details.acc[open] summary{ filter:brightness(1.02); }
 .install-btn.ghost{
   background: transparent;
 }
+
+#intro-splash{pointer-events:auto;}
+#intro-splash *{pointer-events:auto;}
 </style>
 <style id="modern-shell">
   :root{
@@ -5005,5 +5008,43 @@ document.addEventListener('click', (e)=>{
 </div><div class="install-fab" hidden="" id="installFab">
 <button class="install-fab-btn" id="installFabBtn" type="button">Install App</button>
 </div>
-</div></div></details></div></div></section></div></div></body>
+</div></div></details></div></div></section></div></div><script>/* ===== Splash controller (Fix v4): always exit splash ===== */
+(function(){
+  function hideSplash(){
+    const splash = document.getElementById('intro-splash');
+    if(!splash) return;
+    splash.style.display = 'none';
+    splash.style.visibility = 'hidden';
+    splash.setAttribute('aria-hidden','true');
+    splash.classList.add('hidden');
+  }
+  function enterApp(){
+    try{
+      if(typeof switchTab === 'function') switchTab('calibration');
+      else {
+        const b=document.querySelector('#bottomMenu .menu-btn[data-tab="calibration"]');
+        if(b) b.click();
+      }
+    }catch(e){}
+  }
+
+  window.addEventListener('load', ()=>{
+    // auto-exit splash quickly
+    setTimeout(()=>{ hideSplash(); enterApp(); }, 900);
+  });
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const skip = document.getElementById('intro-skip');
+    if(skip){
+      const go = (e)=>{
+        try{ e.preventDefault(); e.stopPropagation(); }catch(err){}
+        hideSplash(); enterApp();
+        return false;
+      };
+      skip.addEventListener('click', go, {capture:true});
+      skip.addEventListener('pointerup', go, {capture:true});
+      skip.addEventListener('touchend', go, {capture:true});
+    }
+  });
+})();</script></body>
 </html>
