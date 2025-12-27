@@ -2298,6 +2298,11 @@ button.active, .btn.active, .pill.active, .toggle.on{ background: var(--accent) 
 .cal-back button{ padding: 10px 12px; border-radius: 12px; }
 
   /* Calibration tool buttons (same interaction language as Granules actions) */
+
+/* Calibration: no Back buttons (fullscreen toggles in/out) */
+#tab-calibration .cal-back-btn,
+#tab-calibration [data-calback],
+#tab-calibration .cal-fs-back{display:none !important;}
   .cal-shell{ display:block; }
   .cal-sub{ margin: 2px 0 12px; color: var(--muted); font-weight: 700; }
   .cal-btn-grid{ display:flex; flex-direction:column; gap:12px; }
@@ -2771,6 +2776,10 @@ details.acc[open] summary{ filter:brightness(1.02); }
 }
 
 /* Calibration full-screen mode */
+
+/* Fullscreen: hide per-tool fullscreen buttons; use header toggle only */
+.cal-tool-view.is-fullscreen .cal-fs-btn{display:none !important;}
+.cal-tool-view.is-fullscreen .cam-fs-btn{display:none !important;}
 .cal-tool-view.is-fullscreen{
   position:fixed !important;
   inset:0 !important;
@@ -6429,15 +6438,15 @@ function initCalibrationNav(){
   };
 
   function showHome(){
-    if(calHome) calHome.hidden = false;
-    Object.values(views).forEach(v=>{ if(v) v.hidden = true; });
+    if(calHome) calHome.hidden = false; calHome.style.display = 'block';
+    Object.values(views).forEach(v=>{ if(v) v.hidden = true; v.style.display = 'none'; });
     // scroll to top so sticky header aligns nicely
     const tab = document.getElementById('tab-calibration');
     if(tab) tab.scrollTop = 0;
   }
   function showTool(key){
     if(!views[key]) return;
-    if(calHome) calHome.hidden = true;
+    if(calHome) calHome.hidden = true; calHome.style.display = 'none';
     Object.entries(views).forEach(([k,v])=>{ if(v) v.hidden = (k!==key); });
     const tab = document.getElementById('tab-calibration');
     if(tab) tab.scrollTop = 0;
@@ -6530,7 +6539,6 @@ function initCalibrationNav(){
     hdr.className = 'cal-fs-header';
     hdr.innerHTML = `
       <div class="cal-fs-left">
-        <button type="button" class="cal-fs-back" aria-label="Back">‹ Back</button>
         <div class="cal-fs-title"></div>
       </div>
       <div class="cal-fs-actions">
@@ -6587,33 +6595,31 @@ function initCalibrationNav(){
       return;
     }
 
+    // Back buttons removed in Calibration (use fullscreen toggle to exit)
     if(fsHdrBack || backBtn){
-      // Always exit fullscreen if active; then go back to calibration home
-      const view = (fsHdrBack || backBtn).closest('.cal-tool-view');
-      const fs = view && view.classList.contains('is-fullscreen');
-      if(view && fs){
-        toggleFullscreenFor(view); // also calls showHome()
-      }else{
-        if(window.__calShowHome) window.__calShowHome();
-      }
       e.preventDefault();
       e.stopPropagation();
       return;
+    }
+
     }
 
     if(closeBtn){
       const info = closeBtn.closest('.lux-info, .ct-info, .fl-info, .spec-info');
       if(info){
-        info.hidden = true;
+        info.hidden = true; info.style.display = 'none';
+        info.style.display = 'none';
+        info.classList.remove('open','show','visible','active');
       }
       e.preventDefault();
       e.stopPropagation();
       return;
+
     }
 
     // Tap on the dim background closes info (but not when tapping inside the card)
     if(infoOverlay && (e.target === infoOverlay)){
-      infoOverlay.hidden = true;
+      infoOverlay.hidden = true; infoOverlay.style.display = 'none';
       e.preventDefault();
       e.stopPropagation();
       return;
@@ -10209,10 +10215,10 @@ function setFill(goodEl, badEl, goodFrac, badFrac, totalKg, pelletMg, goodLblId,
     const items = CONTEXT[state.main] || [];
     inner.innerHTML = '';
     if(items.length === 0){
-      ctx.hidden = true;
+      ctx.hidden = true; ctx.style.display = 'none';
       return;
     }
-    ctx.hidden = false;
+    ctx.hidden = false; ctx.style.display = 'block';
 
     for(const item of items){
       const btn = document.createElement('button');
@@ -10266,14 +10272,14 @@ function openCalibrationTool(which){
     btn.disabled = false;
   }
   function openGate(){
-    gate.hidden = false;
+    gate.hidden = false; gate.style.display = 'block';
     scrollBox.scrollTop = 0;
     if(chk) chk.checked = false;
     update();
   }
   function closeGate(){
     try{ localStorage.setItem(INTRO_KEY,'yes'); }catch(e){}
-    gate.hidden = true;
+    gate.hidden = true; gate.style.display = 'none';
     // Go straight to Calibration after intro
     try{ if(typeof window.switchTab==='function') window.switchTab('calibration'); }catch(e){}
 }
@@ -10402,10 +10408,10 @@ btn.addEventListener('click', closeGate);
       "<h2>" + label + "</h2>" +
       "<p>No predefined help was found for this tab key: <code>" + key + "</code>.</p>"
     );
-    overlay.hidden = false;
+    overlay.hidden = false; overlay.style.display = 'block';
     btnEl.onclick = () => {
       try{ localStorage.setItem('tab_help_'+key,'seen'); }catch(e){}
-      overlay.hidden = true;
+      overlay.hidden = true; overlay.style.display = 'none';
     };
   }
   // (disabled) tab click auto-help handled by AV24
@@ -10476,7 +10482,7 @@ btn.addEventListener('click', closeGate);
   // Lux slider help buttons: tap the small 'i' to jump to the relevant section inside Info
   function openLuxInfoAndScroll(targetId){
     if(!info) return;
-    info.hidden = false;
+    info.hidden = false; info.style.display = 'block';
     requestAnimationFrame(() => {
       const card = info.querySelector('.lux-info-card');
       const target = document.getElementById(targetId);
@@ -10748,8 +10754,8 @@ btn.addEventListener('click', closeGate);
   saveBtn && saveBtn.addEventListener('click', saveFrame);
   switchBtn && switchBtn.addEventListener('click', switchCamera);
 
-  infoBtn && infoBtn.addEventListener('click', () => { info.hidden = false; });
-  infoClose && infoClose.addEventListener('click', () => { info.hidden = true; });
+  infoBtn && infoBtn.addEventListener('click', () => { info.hidden = false; info.style.display = 'block'; });
+  infoClose && infoClose.addEventListener('click', () => { info.hidden = true; info.style.display = 'none'; });
 
   updateSimUI();
 
@@ -10924,7 +10930,7 @@ btn.addEventListener('click', closeGate);
     }
     if(video) video.srcObject = null;
     setStatus("Camera: idle");
-    if(overlay) overlay.hidden = true;
+    if(overlay) overlay.hidden = true; overlay.style.display = 'none';
   }
 
   function toggleFreeze(){
@@ -10969,8 +10975,8 @@ btn.addEventListener('click', closeGate);
   if(saveBtn) saveBtn.addEventListener('click', saveFrame);
   if(switchBtn) switchBtn.addEventListener('click', switchCamera);
 
-  if(infoBtn) infoBtn.addEventListener('click', () => { info.hidden = false; });
-  if(infoClose) infoClose.addEventListener('click', () => { info.hidden = true; });
+  if(infoBtn) infoBtn.addEventListener('click', () => { info.hidden = false; info.style.display = 'block'; });
+  if(infoClose) infoClose.addEventListener('click', () => { info.hidden = true; info.style.display = 'none'; });
 
 })();
 </script>
@@ -11132,7 +11138,7 @@ btn.addEventListener('click', closeGate);
     }
     if(video) video.srcObject = null;
     setStatus("Camera: idle");
-    if(overlay) overlay.hidden = true;
+    if(overlay) overlay.hidden = true; overlay.style.display = 'none';
   }
 
   function toggleFreeze(){
@@ -11166,8 +11172,8 @@ btn.addEventListener('click', closeGate);
 
   if(freezeBtn) freezeBtn.addEventListener('click', toggleFreeze);
   if(switchBtn) switchBtn.addEventListener('click', switchCamera);
-  if(infoBtn) infoBtn.addEventListener('click', () => { if(info) info.hidden = false; });
-  if(infoClose) infoClose.addEventListener('click', () => { if(info) info.hidden = true; });
+  if(infoBtn) infoBtn.addEventListener('click', () => { if(info) info.hidden = false; info.style.display = 'block'; });
+  if(infoClose) infoClose.addEventListener('click', () => { if(info) info.hidden = true; info.style.display = 'none'; });
 
 })();
 </script>
@@ -11350,7 +11356,7 @@ btn.addEventListener('click', closeGate);
     }
     if(video) video.srcObject = null;
     setStatus("Camera: idle");
-    if(overlay) overlay.hidden = true;
+    if(overlay) overlay.hidden = true; overlay.style.display = 'none';
   }
 
   function toggleFreeze(){
@@ -11395,8 +11401,8 @@ btn.addEventListener('click', closeGate);
   if(freezeBtn) freezeBtn.addEventListener('click', toggleFreeze);
   if(switchBtn) switchBtn.addEventListener('click', switchCamera);
   if(saveBtn) saveBtn.addEventListener('click', saveSnapshot);
-  if(infoBtn) infoBtn.addEventListener('click', () => { if(info) info.hidden = false; });
-  if(infoClose) infoClose.addEventListener('click', () => { if(info) info.hidden = true; });
+  if(infoBtn) infoBtn.addEventListener('click', () => { if(info) info.hidden = false; info.style.display = 'block'; });
+  if(infoClose) infoClose.addEventListener('click', () => { if(info) info.hidden = true; info.style.display = 'none'; });
 
 })();
 </script>
@@ -11451,7 +11457,7 @@ document.addEventListener('DOMContentLoaded', () => {
       splash.style.pointerEvents = 'none';
     }
     if(gate){
-      gate.hidden = true;
+      gate.hidden = true; gate.style.display = 'none';
       gate.style.display = 'none';
       gate.style.pointerEvents = 'none';
     }
@@ -11717,7 +11723,7 @@ document.addEventListener('DOMContentLoaded', () => {
       splash.style.pointerEvents='none';
     }
     if(gate){
-      gate.hidden = true;
+      gate.hidden = true; gate.style.display = 'none';
       gate.style.display='none';
       gate.style.pointerEvents='none';
     }
@@ -12306,13 +12312,13 @@ document.addEventListener('DOMContentLoaded', () => {
       `<h2>${label}</h2><p>No help content defined yet for: <code>${key}</code>.</p>`
     );
 
-    overlay.hidden = false;
+    overlay.hidden = false; overlay.style.display = 'block';
     overlay.style.display = 'flex';
     overlay.style.pointerEvents = 'auto';
 
     contBtn.onclick = () => {
       try{ localStorage.setItem(SEEN_PREFIX + key, 'seen'); }catch(e){}
-      overlay.hidden = true;
+      overlay.hidden = true; overlay.style.display = 'none';
       overlay.style.display = 'none';
       overlay.style.pointerEvents = 'none';
     };
@@ -12459,11 +12465,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let deferredPrompt = null;
 
   function $(id){ return document.getElementById(id); }
-  function showOverlay(){ const ov=$('installOverlay'); if(ov){ ov.hidden=false; ov.style.display='flex'; } }
+  function showOverlay(){ const ov=$('installOverlay'); if(ov){ ov.hidden = false; ov.style.display = 'block'; ov.style.display='flex'; } }
   function hideOverlay(){
     const ov=$('installOverlay');
     if(ov){
-      ov.hidden=true;
+      ov.hidden = true; ov.style.display = 'none';
       ov.style.display='none';
     }
   }
@@ -12568,7 +12574,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Fallback: no native prompt → show hint + simulate progress anyway
-        if(hint) hint.hidden = false;
+        if(hint) hint.hidden = false; hint.style.display = 'block';
         await simulateInstall(15000);
         hideOverlay();
         enterApp();
@@ -12637,7 +12643,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(infoClose){
       e.preventDefault();
       const panel = infoClose.closest('.cal-info-panel');
-      if(panel) panel.hidden = true;
+      if(panel) panel.hidden = true; panel.style.display = 'none';
       document.body.classList.remove('cal-info-open');
       return;
     }
@@ -12647,7 +12653,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(infoPanel){
       // only close when clicking the panel itself (not its children)
       if(e.target === infoPanel){
-        infoPanel.hidden = true;
+        infoPanel.hidden = true; infoPanel.style.display = 'none';
         document.body.classList.remove('cal-info-open');
       }
       return;
@@ -12700,7 +12706,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
         if(panel){
-          panel.hidden = false;
+          panel.hidden = false; panel.style.display = 'block';
           document.body.classList.add('cal-info-open');
           // focus close for accessibility
           const c = panel.querySelector('.cal-info-close');
@@ -12736,4 +12742,24 @@ document.addEventListener('DOMContentLoaded', () => {
 </style>
 
 </body>
-</html>
+</html
+/* Info Close button: sticky at bottom inside the translucent card */
+.cal-info-close-row{
+  position: sticky;
+  bottom: 0;
+  padding: 12px;
+  margin-top: 14px;
+  background: linear-gradient(to top, rgba(10,12,20,.98), rgba(10,12,20,.75));
+  border-top: 1px solid rgba(255,255,255,.10);
+}
+.cal-info-close{
+  width: 100%;
+  border-radius: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: #e9ecff;
+  font-weight: 700;
+}
+
+>
