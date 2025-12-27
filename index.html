@@ -3980,6 +3980,103 @@ body.cal-fs-active nav.main-menu{display:none !important;}
   box-shadow: 0 0 0 1px rgba(0,0,0,.12) inset;
 }
 </style>
+<style id="ctm-style">
+
+/* ===== Manor CCT module (embedded) ===== */
+#caltool-ct .ct-ui{ padding:14px !important; }
+#caltool-ct .ctm-topbar{
+  display:flex; align-items:center; gap:10px; margin-bottom:10px;
+}
+#caltool-ct .ctm-sun{width:26px;height:26px;display:grid;place-items:center;color:var(--accent,#ffb85a);}
+#caltool-ct .ctm-title{
+  flex:1; color:var(--accent,#ffb85a); font-size:18px; font-weight:650;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; direction:ltr;
+}
+#caltool-ct .ctm-icons{display:flex; gap:8px; align-items:center;}
+#caltool-ct .ctm-iconbtn{
+  width:36px; height:36px; border-radius:10px; display:grid; place-items:center;
+  background:rgba(58,60,63,1);
+  border:1px solid rgba(0,0,0,.15);
+  box-shadow: 0 8px 12px rgba(0,0,0,.35);
+  cursor:pointer; user-select:none;
+  color:#b8bbc0; font-size:18px;
+}
+#caltool-ct .ctm-iconbtn:active{ transform: translateY(1px); }
+#caltool-ct .ctm-card{
+  background: rgba(59,61,64,1);
+  border-radius: 18px;
+  box-shadow: 0 10px 16px rgba(0,0,0,.45);
+  border:1px solid rgba(0,0,0,.18);
+  padding:14px 14px 12px;
+}
+#caltool-ct .ctm-chiprow{display:flex; gap:10px; justify-content:flex-start; direction:ltr; margin-bottom:10px;}
+#caltool-ct .ctm-chip{
+  height:26px; padding:0 10px; border-radius:14px; background:rgba(58,60,63,1);
+  border:1px solid rgba(0,0,0,.15); display:inline-flex; align-items:center; gap:6px;
+  color:#b8bbc0; font-size:12px; font-weight:650;
+}
+#caltool-ct .ctm-gaugeWrap{position:relative; aspect-ratio: 1.8/1; width:100%;}
+#caltool-ct canvas#ctm-gauge{width:100%; height:100%; display:block;}
+#caltool-ct .ctm-center{position:absolute; inset:0; display:grid; place-items:center; pointer-events:none; direction:ltr;}
+#caltool-ct .ctm-k{font-size:44px; font-weight:750; letter-spacing:-.5px; line-height:1; color:#b7bac0; text-align:center;}
+#caltool-ct .ctm-kelvin{margin-top:2px; font-size:16px; color:#8f949b; font-weight:600; text-align:center;}
+#caltool-ct .ctm-warmcold{margin-top:6px; display:flex; justify-content:space-between; font-size:12px; color:#b6bac0; line-height:1.1; direction:ltr;}
+#caltool-ct .ctm-row{margin-top:10px; display:flex; align-items:center; gap:10px; direction:ltr;}
+#caltool-ct .ctm-row .label{font-size:12px; color:#9ea3aa; white-space:nowrap;}
+#caltool-ct .ctm-row .spacer{flex:1}
+#caltool-ct .ctm-row .val{font-size:12px; color:#9ea3aa; font-variant-numeric: tabular-nums;}
+#caltool-ct .ctm-sliderWrap{margin-top:8px; direction:ltr;}
+#caltool-ct .ctm-gradTrack{
+  height:18px; border-radius:10px;
+  background: linear-gradient(90deg, #b455ff 0%, #5f66ff 45%, #39d07a 100%);
+  position:relative; overflow:hidden; border:1px solid rgba(0,0,0,.20);
+}
+#caltool-ct input[type="range"].ctm-range{
+  -webkit-appearance:none; appearance:none; width:100%; height:18px; background:transparent; margin:0;
+}
+#caltool-ct input[type="range"].ctm-range::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none; width:16px;height:16px;border-radius:50%;
+  background: #2b2d2f; border:2px solid rgba(0,0,0,.25);
+  box-shadow: 0 2px 6px rgba(0,0,0,.45); cursor:pointer; margin-top:1px;
+}
+#caltool-ct input[type="range"].ctm-range::-moz-range-thumb{
+  width:16px;height:16px;border-radius:50%;
+  background: #2b2d2f; border:2px solid rgba(0,0,0,.25);
+  box-shadow: 0 2px 6px rgba(0,0,0,.45); cursor:pointer;
+}
+#caltool-ct .ctm-sliderLabels{margin-top:6px; display:flex; justify-content:space-between; font-size:11px; color:#9ea3aa;}
+#caltool-ct .ctm-cie{margin-top:10px; font-size:12px; color:#8e939a; direction:ltr; text-align:left;}
+
+#caltool-ct .ctm-camCard{
+  background: rgba(59,61,64,1);
+  border-radius: 18px;
+  box-shadow: 0 10px 16px rgba(0,0,0,.45);
+  border:1px solid rgba(0,0,0,.18);
+  padding:10px;
+  margin-top:14px;
+}
+#caltool-ct .ctm-preview{border-radius:16px; overflow:hidden; position:relative; aspect-ratio: 16/9; background:#1f2022;}
+#caltool-ct video#ctm-video{width:100%; height:100%; object-fit:cover; display:block;}
+#caltool-ct .ctm-overlay{
+  position:absolute; inset:0; background:rgba(0,0,0,.35);
+  display:none; padding:12px; align-items:flex-start; justify-content:flex-start; gap:10px; direction:ltr;
+}
+#caltool-ct .ctm-overlay.show{display:flex}
+#caltool-ct .ctm-warn{font-size:22px; color:#ff4d4d; line-height:1;}
+#caltool-ct .ctm-overlayText{color:#ff4d4d; font-size:14px; font-weight:800; white-space:pre-line;}
+
+#caltool-ct canvas#ctm-work{display:none}
+
+#caltool-ct.is-fullscreen .ct-ui{
+  height: calc(100vh - 56px); /* leave your calibration topbar space */
+  overflow:auto;
+}
+@media (max-width:380px){
+  #caltool-ct .ctm-k{font-size:40px}
+  #caltool-ct .ctm-title{font-size:16px}
+}
+
+</style>
 </head>
 <body>
 <div class="intro-overlay" hidden="" id="introGate">
@@ -4598,87 +4695,71 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 <div class="cal-tool-badge">CAL</div>
 </div>
 <div class="cal-tool-body">
+
 <div class="soft-card ct-ui">
-<div class="ct-top">
-<div class="ct-title">Color Temperature</div>
-<div class="ct-icons">
-<button class="lux-icon" id="ctInfoBtn" title="Info" type="button">i</button>
-<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-<button class="lux-icon" id="ctSwitchBtn" title="Switch Camera" type="button">⟳</button>
-<button class="lux-icon" id="ctSaveBtn" title="Save" type="button">💾</button>
-</div>
-</div>
-<div class="ct-gauge-wrap">
-<div class="ct-gauge">
-<div class="ct-needle" id="ctNeedle"></div>
-<div class="ct-center">
-<div class="ct-label">Color Temperature</div>
-<div class="ct-big" id="ctKelvin">----</div>
-<div class="ct-unit">Kelvin</div>
-</div>
-<div class="ct-arc"></div>
-<div class="ct-labels">
-<span style="left:12%">3000</span>
-<span style="left:32%">4000</span>
-<span style="left:52%">5000</span>
-<span style="left:72%">6000</span>
-<span style="left:90%">7000</span>
-</div>
-<div class="ct-sides">
-<div class="ct-side ct-warm">Warm<br/>White</div>
-<div class="ct-side ct-cold">Cold<br/>White</div>
-</div>
-</div>
-</div>
-<div class="ct-bars">
-<div class="ct-bar">
-<div class="ct-bar-h">Δuv · Magenta/Green shift</div>
-<div class="ct-bar-track">
-<div class="ct-bar-mid"></div>
-<div class="ct-bar-knob" id="ctDuvKnob"></div>
-</div>
-<div class="ct-bar-v" id="ctDuvVal">--</div>
-</div>
-<div class="ct-bar">
-<div class="ct-bar-h">CIE 1931 xy</div>
-<div class="ct-bar-v" id="ctXY">(---, ---)</div>
-</div>
-</div>
-<div class="ct-camera">
-<div class="lux-camera-head">
-<div class="lux-camera-title">Rear Camera · CCT estimate</div>
-<div class="lux-camera-actions">
-<button class="lux-btn" id="ctFreezeBtn" type="button">Freeze</button>
-</div>
-</div>
-<div class="lux-video-wrap ct-video">
-<video autoplay="" id="ctVideo" muted="" playsinline=""></video>
-<canvas height="165" id="ctCanvas" style="display:none" width="220"></canvas>
-<div class="spec-overlay" hidden="" id="ctOverlay">
-<div class="spec-overlay-card">
-<div class="spec-overlay-row">
-<span class="spec-warn">⚠</span>
-<span id="ctWarnText">Too dark to make a reliable measurement</span>
-</div>
-</div>
-</div>
-<div class="lux-video-overlay">
-<div class="lux-dot"></div>
-<div class="lux-small" id="ctStatus">Camera: idle</div>
-</div>
-</div>
-</div>
-<div class="lux-info" hidden="" id="ctInfo">
-<div class="lux-info-card">
-<div class="lux-info-h">Color Temperature (Preview)</div>
-<div class="lux-info-p">
-      Browser approximation: CCT is estimated from average RGB (relative).
-      Use for alignment and workflow checks, not lab calibration.
+  <div class="ctm-topbar">
+    <div class="ctm-sun" aria-hidden="true">☀︎</div>
+    <div class="ctm-title">Color Temperature ...</div>
+    <div class="ctm-icons">
+      <button class="ctm-iconbtn" id="ctmInfoBtn" title="Info" type="button">ⓘ</button>
+      <button class="ctm-iconbtn cal-fs-btn" id="ctmFsBtn" title="Full Screen" type="button">⛶</button>
+      <button class="ctm-iconbtn" id="ctmSwitchBtn" title="Switch Camera" type="button">⟳</button>
+      <button class="ctm-iconbtn" id="ctmSaveBtn" title="Save" type="button">💾</button>
     </div>
-<button class="lux-btn lux-btn-accent" id="ctInfoClose" type="button">Got it</button>
+  </div>
+
+  <div class="ctm-card">
+    <div class="ctm-chiprow">
+      <div style="flex:1"></div>
+      <div class="ctm-chip">⟡ Full CTO</div>
+      <div class="ctm-chip" title="Settings" aria-label="Settings">⚙︎</div>
+    </div>
+
+    <div class="ctm-gaugeWrap">
+      <canvas id="ctm-gauge"></canvas>
+      <div class="ctm-center">
+        <div>
+          <div class="ctm-k" id="ctmKVal">2800</div>
+          <div class="ctm-kelvin">Kelvin</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ctm-warmcold">
+      <div>Warm<br/>White</div>
+      <div>Cold<br/>White</div>
+    </div>
+
+    <div class="ctm-row">
+      <div class="label">Δuv - Magenta/Green shift</div>
+      <div class="spacer"></div>
+      <div class="val" id="ctmDuvVal">-0.030</div>
+    </div>
+
+    <div class="ctm-sliderWrap">
+      <div class="ctm-gradTrack">
+        <input id="ctmDuvSlider" class="ctm-range" type="range" min="0" max="1" step="0.001" value="0.35" aria-label="Δuv slider"/>
+      </div>
+      <div class="ctm-sliderLabels"><div>-0.05</div><div>0.0</div><div>+0.05</div></div>
+    </div>
+
+    <div class="ctm-cie" id="ctmCieVal">CIE 1931 xy (0.410, 0.329)</div>
+  </div>
+
+  <div class="ctm-camCard">
+    <div class="ctm-preview">
+      <video id="ctm-video" playsinline autoplay muted></video>
+      <div class="ctm-overlay" id="ctmDarkOverlay">
+        <div class="ctm-warn">⚠︎</div>
+        <div class="ctm-overlayText">Too dark to make a
+reliable measurement</div>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="ctm-work"></canvas>
 </div>
-</div>
-</div>
+
 </div>
 </div></div></details><details class="acc" data-caltool="flicker"><summary><div><div class="acc-title">Flicker Meter</div><div class="acc-sub">Frequency / flicker level</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="cal-tool-view" id="caltool-flicker">
 <div class="cal-tool-topbar">
@@ -4979,47 +5060,6 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 }
 #lspectroHost .saveBtn:active{transform:scale(.98)}
 #lspectroHost .saveBtn span{font-size:12px; font-weight:700; color:rgba(95,168,255,.95);}
-
-#lspectroHost .fsBtn{
-  position:absolute;
-  left:10px;
-  bottom:10px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:6px;
-  padding:10px 10px 8px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.16);
-  background:rgba(0,0,0,.25);
-  color:rgba(255,255,255,.85);
-  cursor:pointer;
-  user-select:none;
-  backdrop-filter: blur(6px);
-  min-width:56px;
-}
-#lspectroHost .fsBtn:active{transform:scale(.98)}
-#lspectroHost .fsBtn span{
-  font-size:12px;
-  font-weight:700;
-  color:rgba(255,255,255,.80);
-}
-#lspectroHost.ls-fullscreen{
-  position:fixed;
-  inset:0;
-  z-index:9999;
-  width:100vw;
-  height:100vh;
-  max-width:none;
-  background: var(--bg);
-  padding: 0;
-  overflow:auto;
-}
-#lspectroHost.ls-fullscreen .wrap{
-  width: min(720px, 100%);
-  margin: 0 auto;
-  padding: clamp(12px, 3vw, 20px);
-}
 #lspectroHost .row{display:flex; gap:10px; margin-top:10px;}
 #lspectroHost .pill{
   flex:1;
@@ -5118,17 +5158,6 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
           </svg>
         </div>
         <div class="txt">Too dark to make a<br/>reliable measurement</div>
-      </div>
-
-      
-      <div class="fsBtn" id="ls7-fsBtn" title="Full screen">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <path d="M9 3H5a2 2 0 0 0-2 2v4" stroke="rgba(255,255,255,.85)" stroke-width="1.7" stroke-linecap="round"/>
-          <path d="M15 3h4a2 2 0 0 1 2 2v4" stroke="rgba(255,255,255,.85)" stroke-width="1.7" stroke-linecap="round"/>
-          <path d="M9 21H5a2 2 0 0 1-2-2v-4" stroke="rgba(255,255,255,.85)" stroke-width="1.7" stroke-linecap="round"/>
-          <path d="M15 21h4a2 2 0 0 0 2-2v-4" stroke="rgba(255,255,255,.85)" stroke-width="1.7" stroke-linecap="round"/>
-        </svg>
-        <span id="ls7-fsLbl">Full</span>
       </div>
 
       <div class="saveBtn" id="ls7-saveBtn" title="Save">
@@ -5437,43 +5466,6 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
     if(video) video.srcObject = null;
     camStatus.textContent = 'Stopped';
   }
-
-
-  // Fullscreen toggle (keeps host inside existing accordion, but can go fullscreen and back)
-  const fsBtn = $('#ls7-fsBtn');
-  const fsLbl = $('#ls7-fsLbl');
-
-  function updateFsUI(){
-    const isFs = document.fullscreenElement === root;
-    root.classList.toggle('ls-fullscreen', isFs);
-    if(fsLbl) fsLbl.textContent = isFs ? 'Back' : 'Full';
-    if(fsBtn) fsBtn.title = isFs ? 'Back' : 'Full screen';
-    // Re-apply slider marker positions after layout changes
-    requestAnimationFrame(() => { try{ applyStdUI(); }catch(e){} });
-  }
-
-  if(fsBtn){
-    fsBtn.addEventListener('click', async () => {
-      try{
-        if(document.fullscreenElement === root){
-          await document.exitFullscreen();
-        }else if(root.requestFullscreen){
-          await root.requestFullscreen();
-        }else{
-          // Fallback: pseudo-fullscreen via CSS (iOS Safari can be limited)
-          root.classList.toggle('ls-fullscreen');
-          if(fsLbl) fsLbl.textContent = root.classList.contains('ls-fullscreen') ? 'Back' : 'Full';
-          requestAnimationFrame(() => { try{ applyStdUI(); }catch(e){} });
-        }
-      }catch(e){
-        // last-resort fallback
-        root.classList.toggle('ls-fullscreen');
-        if(fsLbl) fsLbl.textContent = root.classList.contains('ls-fullscreen') ? 'Back' : 'Full';
-        requestAnimationFrame(() => { try{ applyStdUI(); }catch(e){} });
-      }
-    });
-  }
-  document.addEventListener('fullscreenchange', updateFsUI);
 
   // Save snapshot + JSON
   $('#ls7-saveBtn').addEventListener('click', () => {
@@ -13435,6 +13427,328 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   setInterval(tick, 250);
 })();
+</script>
+<script id="ctm-script">
+
+/* ===== Manor CCT module (embedded) ===== */
+(function(){
+  const root = document.getElementById('caltool-ct');
+  if(!root) return;
+
+  // Elements
+  const gauge = root.querySelector('#ctm-gauge');
+  const gctx = gauge.getContext('2d');
+  const video = root.querySelector('#ctm-video');
+  const work = root.querySelector('#ctm-work');
+  const wctx = work.getContext('2d', { willReadFrequently:true });
+
+  const darkOverlay = root.querySelector('#ctmDarkOverlay');
+  const kVal = root.querySelector('#ctmKVal');
+  const duvVal = root.querySelector('#ctmDuvVal');
+  const cieVal = root.querySelector('#ctmCieVal');
+  const duvSlider = root.querySelector('#ctmDuvSlider');
+
+  const fsBtn = root.querySelector('#ctmFsBtn');
+  const switchBtn = root.querySelector('#ctmSwitchBtn');
+  const saveBtn = root.querySelector('#ctmSaveBtn');
+
+  let stream = null;
+  let rafId = null;
+  let facing = 'environment'; // 'environment' or 'user'
+
+  let smooth = {cct:2800, duv:-0.03, x:0.410, y:0.329};
+
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+
+  // ==== color science helpers ====
+  function srgbToLinear(c){
+    c /= 255;
+    return (c <= 0.04045) ? (c/12.92) : Math.pow((c+0.055)/1.055, 2.4);
+  }
+  function rgbToXyz(r,g,b){
+    const rl = srgbToLinear(r), gl = srgbToLinear(g), bl = srgbToLinear(b);
+    const X = 0.4124564*rl + 0.3575761*gl + 0.1804375*bl;
+    const Y = 0.2126729*rl + 0.7151522*gl + 0.0721750*bl;
+    const Z = 0.0193339*rl + 0.1191920*gl + 0.9503041*bl;
+    return {X,Y,Z};
+  }
+  function xyzToXy(X,Y,Z){
+    const d = X+Y+Z;
+    if(!d) return {x:0,y:0};
+    return {x:X/d, y:Y/d};
+  }
+  function xyToCct(x,y){
+    const n = (x - 0.3320) / (y - 0.1858);
+    return 449*Math.pow(n,3) + 3525*Math.pow(n,2) + 6823.3*n + 5520.33;
+  }
+  function xyToUv1960(x,y){
+    const d = (-2*x + 12*y + 3);
+    if(!d) return {u:0,v:0};
+    return {u:(4*x)/d, v:(6*y)/d};
+  }
+  function planckianUv1960(T){
+    T = Math.min(25000, Math.max(1667, T));
+    let x;
+    if(T <= 4000){
+      x = (-0.2661239e9)/(T*T*T) - (0.2343580e6)/(T*T) + (0.8776956e3)/T + 0.179910;
+    }else{
+      x = (-3.0258469e9)/(T*T*T) + (2.1070379e6)/(T*T) + (0.2226347e3)/T + 0.240390;
+    }
+    let y;
+    if(T <= 2222){
+      y = -1.1063814*Math.pow(x,3) - 1.34811020*Math.pow(x,2) + 2.18555832*x - 0.20219683;
+    }else if(T <= 4000){
+      y = -0.9549476*Math.pow(x,3) - 1.37418593*Math.pow(x,2) + 2.09137015*x - 0.16748867;
+    }else{
+      y = 3.0817580*Math.pow(x,3) - 5.87338670*Math.pow(x,2) + 3.75112997*x - 0.37001483;
+    }
+    return xyToUv1960(x,y);
+  }
+  function estimateDuv(x,y,cct){
+    const uv = xyToUv1960(x,y);
+    const bb = planckianUv1960(cct || 6500);
+    const du = uv.u - bb.u, dv = uv.v - bb.v;
+    const dist = Math.sqrt(du*du + dv*dv);
+    return dist * (uv.v >= bb.v ? 1 : -1);
+  }
+
+  // ==== gauge drawing ====
+  function drawGauge(valueK){
+    if(!gauge) return;
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const rect = gauge.getBoundingClientRect();
+    gauge.width = Math.round(rect.width * dpr);
+    gauge.height = Math.round(rect.height * dpr);
+    gctx.setTransform(dpr,0,0,dpr,0,0);
+
+    const w = rect.width, h = rect.height;
+    const cx = w/2;
+    const cy = h*0.92;
+    const r = Math.min(w,h)*0.70;
+    const start = Math.PI;
+    const sweep = Math.PI;
+
+    gctx.clearRect(0,0,w,h);
+
+    // background arc
+    gctx.lineWidth = 14;
+    gctx.lineCap = 'round';
+    gctx.strokeStyle = '#5a5d62';
+    gctx.beginPath();
+    gctx.arc(cx,cy,r,start,start+sweep,false);
+    gctx.stroke();
+
+    // warm overlay
+    let gradWarm = gctx.createLinearGradient(cx-r, cy, cx, cy);
+    gradWarm.addColorStop(0, '#ffb36a');
+    gradWarm.addColorStop(1, 'rgba(96,96,96,0)');
+    gctx.strokeStyle = gradWarm;
+    gctx.beginPath();
+    gctx.arc(cx,cy,r,start,start+sweep*0.5,false);
+    gctx.stroke();
+
+    // cold overlay
+    let gradCold = gctx.createLinearGradient(cx, cy, cx+r, cy);
+    gradCold.addColorStop(0, 'rgba(96,96,96,0)');
+    gradCold.addColorStop(1, '#7ea7ff');
+    gctx.strokeStyle = gradCold;
+    gctx.beginPath();
+    gctx.arc(cx,cy,r,start+sweep*0.5,start+sweep,false);
+    gctx.stroke();
+
+    // ticks
+    const minK = 2500, maxK = 7500;
+    const tickCount = 28;
+    gctx.strokeStyle = '#b7bac0';
+    for(let i=0;i<=tickCount;i++){
+      const t = i/tickCount;
+      const ang = start + sweep*t;
+      const major = (i%7===0);
+      const inner = r - (major ? 20 : 14);
+      const outer = r - 6;
+
+      gctx.lineWidth = major ? 2.0 : 1.2;
+      gctx.beginPath();
+      gctx.moveTo(cx + inner*Math.cos(ang), cy + inner*Math.sin(ang));
+      gctx.lineTo(cx + outer*Math.cos(ang), cy + outer*Math.sin(ang));
+      gctx.stroke();
+
+      if(major){
+        const k = Math.round(minK + (maxK-minK)*t);
+        gctx.fillStyle = '#b7bac0';
+        gctx.font = '600 11px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+        const label = String(k);
+        const tw = gctx.measureText(label).width;
+        const lr = r - 34;
+        const lx = cx + lr*Math.cos(ang);
+        const ly = cy + lr*Math.sin(ang);
+        gctx.fillText(label, lx - tw/2, ly + 4);
+      }
+    }
+
+    // pointer
+    const tv = clamp((valueK - minK)/(maxK - minK), 0, 1);
+    const ang = start + sweep*tv;
+    const tipR = r - 2;
+    const baseR = r - 28;
+    const tip = {x: cx + tipR*Math.cos(ang), y: cy + tipR*Math.sin(ang)};
+    const left = {x: cx + baseR*Math.cos(ang - 0.07), y: cy + baseR*Math.sin(ang - 0.07)};
+    const right= {x: cx + baseR*Math.cos(ang + 0.07), y: cy + baseR*Math.sin(ang + 0.07)};
+    gctx.fillStyle = '#ffb36a';
+    gctx.beginPath();
+    gctx.moveTo(tip.x, tip.y);
+    gctx.lineTo(left.x, left.y);
+    gctx.lineTo(right.x, right.y);
+    gctx.closePath();
+    gctx.fill();
+  }
+
+  // ==== camera helpers ====
+  async function stopCamera(){
+    if(rafId){ cancelAnimationFrame(rafId); rafId=null; }
+    if(stream){
+      stream.getTracks().forEach(t=>t.stop());
+      stream = null;
+    }
+    if(video) video.srcObject = null;
+  }
+
+  async function startCamera(){
+    await stopCamera();
+    const constraints = {
+      video: {
+        facingMode: { ideal: facing },
+        width: { ideal: 1280 },
+        height:{ ideal: 720 }
+      },
+      audio:false
+    };
+    stream = await navigator.mediaDevices.getUserMedia(constraints);
+    video.srcObject = stream;
+    await video.play();
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function sampleCenterROI(){
+    const vw = video.videoWidth || 0;
+    const vh = video.videoHeight || 0;
+    if(!vw || !vh) return null;
+
+    const roiScale = 0.22;
+    const rw = Math.max(24, Math.floor(vw*roiScale));
+    const rh = Math.max(24, Math.floor(vh*roiScale));
+    const x0 = Math.floor((vw - rw)/2);
+    const y0 = Math.floor((vh - rh)/2);
+
+    const ds = 6;
+    const tw = Math.max(6, Math.floor(rw/ds));
+    const th = Math.max(6, Math.floor(rh/ds));
+    work.width = tw;
+    work.height = th;
+
+    wctx.drawImage(video, x0, y0, rw, rh, 0, 0, tw, th);
+    const img = wctx.getImageData(0,0,tw,th).data;
+
+    let sumR=0,sumG=0,sumB=0,sumY=0,n=0;
+    for(let i=0;i<img.length;i+=4){
+      const r=img[i], g=img[i+1], b=img[i+2];
+      sumR+=r; sumG+=g; sumB+=b;
+      sumY += 0.2126*r + 0.7152*g + 0.0722*b;
+      n++;
+    }
+    const meanY = sumY / Math.max(1,n);
+    return {r:sumR/n, g:sumG/n, b:sumB/n, meanY};
+  }
+
+  function loop(){
+    const s = sampleCenterROI();
+    if(s){
+      const tooDark = s.meanY < 22;
+      darkOverlay.classList.toggle('show', tooDark);
+
+      if(!tooDark){
+        const {X,Y,Z} = rgbToXyz(s.r, s.g, s.b);
+        const {x,y} = xyzToXy(X,Y,Z);
+
+        let cct = xyToCct(x,y);
+        if(!Number.isFinite(cct)) cct = smooth.cct;
+        cct = clamp(cct, 1000, 20000);
+
+        let duv = estimateDuv(x,y,cct);
+        if(!Number.isFinite(duv)) duv = smooth.duv;
+
+        const a = 0.18;
+        smooth.cct = smooth.cct*(1-a) + cct*a;
+        smooth.duv = smooth.duv*(1-a) + duv*a;
+        smooth.x   = smooth.x*(1-a) + x*a;
+        smooth.y   = smooth.y*(1-a) + y*a;
+
+        kVal.textContent = String(Math.round(smooth.cct));
+        duvVal.textContent = smooth.duv.toFixed(3);
+        cieVal.textContent = `CIE 1931 xy (${smooth.x.toFixed(3)}, ${smooth.y.toFixed(3)})`;
+
+        const slider = clamp((smooth.duv + 0.05) / 0.10, 0, 1);
+        duvSlider.value = slider.toFixed(3);
+
+        drawGauge(smooth.cct);
+      } else {
+        drawGauge(smooth.cct);
+      }
+    }
+    rafId = requestAnimationFrame(loop);
+  }
+
+  // ==== fullscreen behaviour (keep proportions) ====
+  function refreshAfterLayout(){
+    // small delay so layout settles
+    setTimeout(()=>drawGauge(smooth.cct), 80);
+    setTimeout(()=>drawGauge(smooth.cct), 220);
+  }
+  function toggleFullscreen(){
+    root.classList.toggle('is-fullscreen');
+    document.body.classList.toggle('no-scroll', root.classList.contains('is-fullscreen'));
+    refreshAfterLayout();
+  }
+
+  // ==== wire events ====
+  window.addEventListener('resize', ()=>drawGauge(smooth.cct), {passive:true});
+  window.addEventListener('orientationchange', refreshAfterLayout, {passive:true});
+
+  if(fsBtn) fsBtn.addEventListener('click', toggleFullscreen);
+  if(switchBtn) switchBtn.addEventListener('click', async ()=>{
+    facing = (facing === 'environment') ? 'user' : 'environment';
+    try{ await startCamera(); }catch(e){ console.error(e); }
+  });
+  if(saveBtn) saveBtn.addEventListener('click', ()=>{
+    const data = { kelvin: Math.round(smooth.cct), duv: +smooth.duv.toFixed(4), x:+smooth.x.toFixed(4), y:+smooth.y.toFixed(4), ts:new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `cct_${data.kelvin}K_${data.ts.replaceAll(':','-')}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  // Start/stop based on accordion open/close if possible
+  const details = root.closest('details.acc[data-caltool="ct"]');
+  if(details){
+    const onToggle = async ()=>{
+      if(details.open){
+        try{ drawGauge(smooth.cct); await startCamera(); refreshAfterLayout(); }catch(e){ console.error(e); }
+      }else{
+        await stopCamera();
+      }
+    };
+    details.addEventListener('toggle', onToggle);
+    // if already open on load
+    if(details.open) { setTimeout(onToggle, 50); }
+  }else{
+    // fallback: start immediately
+    setTimeout(async ()=>{ try{ drawGauge(smooth.cct); await startCamera(); }catch(e){ console.error(e); } }, 150);
+  }
+
+})();
+
 </script>
 </body>
 </html>
