@@ -6564,7 +6564,65 @@ function initCalibrationNav(){
     }
   }
 
-  // ESC exits fullscreen (desktop)
+  
+  // Expose navigation helpers (some other scripts rely on window.showHome/showTool)
+  window.showHome = showHome;
+  window.showTool = showTool;
+
+  // Expose a robust fullscreen toggle for delegated handlers (⛶ button)
+  // - Enter: go full-screen
+  // - Exit : return to the accordion position (e.g., Camera accordion)
+  window.toggleFullscreenFor = function(view){
+    if(!view) return;
+
+    const tabEl = document.getElementById('tab-calibration');
+    const entering = !view.classList.contains('is-fullscreen');
+
+    if(entering){
+      // Remember where we came from inside the accordion
+      try{
+        const det = view.closest('details.acc');
+        if(det){
+          view.dataset.fsAcc = det.getAttribute('data-acc') || det.id || '';
+        }else{
+          view.dataset.fsAcc = '';
+        }
+        view.dataset.fsScroll = String(tabEl ? tabEl.scrollTop : 0);
+      }catch(_){}
+      setFullscreen(view, true);
+      return;
+    }
+
+    // Exiting fullscreen
+    setFullscreen(view, false);
+
+    // Restore accordion context (prefer scrolling to the same accordion summary)
+    try{
+      const key = (view.dataset.fsAcc || '').trim();
+      let det = null;
+
+      if(key){
+        // key is usually a simple token like "camera"
+        det = document.querySelector('#tab-calibration details.acc[data-acc="'+ key +'"]')
+           || document.getElementById(key);
+      }
+      if(!det){
+        det = view.closest('details.acc');
+      }
+
+      if(det){
+        det.open = true;
+        const sum = det.querySelector('summary');
+        if(sum) sum.scrollIntoView({block:'start', behavior:'smooth'});
+      }else if(tabEl && view.dataset.fsScroll){
+        tabEl.scrollTop = parseInt(view.dataset.fsScroll, 10) || 0;
+      }
+    }catch(_){
+      try{ if(tabEl) tabEl.scrollTop = 0; }catch(__){}
+    }
+  };
+
+// ESC exits fullscreen (desktop)
   document.addEventListener('keydown', (e)=>{
     if(e.key === 'Escape'){
       const fs = document.querySelector('.cal-tool-view.is-fullscreen');
