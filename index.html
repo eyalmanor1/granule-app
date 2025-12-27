@@ -2783,22 +2783,84 @@ details.acc[open] summary{ filter:brightness(1.02); }
 }
 
 
-/* Full-screen scaling: shrink tool UI to fit one viewport (no page scroll)
-   NOTE: do NOT expand width/height (causes overlap on iOS); just scale the card. */
-.cal-tool-view.is-fullscreen{ --cal-fs-scale: .62; }
-@media (max-width: 420px){
-  .cal-tool-view.is-fullscreen{ --cal-fs-scale: .56; }
+/* Full-screen: compact & proportional (NO transform scaling; avoid overlaps) */
+.cal-tool-view.is-fullscreen{
+  /* Slightly smaller typography in full-screen so everything fits without scroll */
+  font-size: 14px;
 }
-.cal-tool-view.is-fullscreen .cal-tool-body > .soft-card,
-.cal-tool-view.is-fullscreen .cal-tool-body > .ct-ui,
-.cal-tool-view.is-fullscreen .cal-tool-body > .fl-ui,
-.cal-tool-view.is-fullscreen .cal-tool-body > .spec-ui,
-.cal-tool-view.is-fullscreen .cal-tool-body > .lux-ui{
-  transform: scale(var(--cal-fs-scale));
-  transform-origin: top center;
-  margin:0 auto !important;
+.cal-tool-view.is-fullscreen .cal-tool-topbar{
+  padding: 8px 10px !important;
+}
+.cal-tool-view.is-fullscreen .cal-tool-body{
+  padding: 0 !important;
 }
 
+/* Info panels: show as an overlay with its own scroll (so full-screen itself stays non-scrollable) */
+.cal-tool-view.is-fullscreen .lux-info{
+  position: fixed !important;
+  left: 12px; right: 12px;
+  top: 64px; bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 10000 !important;
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Shared camera region sizing for CT / Flicker / Spectrum */
+.cal-tool-view.is-fullscreen .ct-camera,
+.cal-tool-view.is-fullscreen .fl-camera,
+.cal-tool-view.is-fullscreen .spec-camera{
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+.cal-tool-view.is-fullscreen .ct-video,
+.cal-tool-view.is-fullscreen .fl-video,
+.cal-tool-view.is-fullscreen .spec-video{
+  height: clamp(140px, 28vh, 200px) !important;
+}
+
+/* Color Temperature full-screen: keep gauge + bars compact and prevent collision */
+.cal-tool-view.is-fullscreen .ct-ui{
+  padding: 10px !important;
+  gap: 10px !important;
+}
+.cal-tool-view.is-fullscreen .ct-gauge-wrap{
+  flex: 0 0 auto !important;
+  padding: 6px !important;
+}
+.cal-tool-view.is-fullscreen .ct-gauge{
+  width: clamp(190px, 62vw, 280px) !important;
+  height: clamp(190px, 62vw, 280px) !important;
+}
+.cal-tool-view.is-fullscreen .ct-bars{
+  flex: 0 0 auto !important;
+  gap: 8px !important;
+}
+.cal-tool-view.is-fullscreen .ct-bar-h{ font-size: 12px !important; }
+.cal-tool-view.is-fullscreen .ct-bar-v{ font-size: 12px !important; }
+
+/* Flicker full-screen: compact gauge + keep strip visible */
+.cal-tool-view.is-fullscreen .fl-ui{
+  padding: 10px !important;
+  gap: 10px !important;
+}
+.cal-tool-view.is-fullscreen .fl-gauge-wrap{
+  flex: 0 0 auto !important;
+  padding: 6px !important;
+}
+.cal-tool-view.is-fullscreen .fl-gauge{
+  width: clamp(190px, 62vw, 280px) !important;
+  height: clamp(190px, 62vw, 280px) !important;
+}
+.cal-tool-view.is-fullscreen .fl-strip{ padding: 6px 2px !important; }
+
+/* Light Spectrum full-screen: compact plot + camera */
+.cal-tool-view.is-fullscreen .spec-ui{
+  padding: 10px !important;
+  gap: 10px !important;
+}
+.cal-tool-view.is-fullscreen .spec-plot{
+  height: clamp(120px, 20vh, 190px) !important;
+}
 
 /* === vFS2: strict no-overlap layout inside full-screen tools (mobile first) === */
 .cal-tool-view.is-fullscreen .ct-gauge-wrap,
@@ -6265,7 +6327,6 @@ function initCalibrationNav(){
       // return to accordion/home view when exiting fullscreen
       showHome();
     }
-  }
   }
 
   // button inside each tool header
