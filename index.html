@@ -2782,6 +2782,63 @@ details.acc[open] summary{ filter:brightness(1.02); }
   flex-direction:column !important;
 }
 
+
+/* Full-screen scaling: shrink tool UI to fit one viewport (no page scroll)
+   NOTE: do NOT expand width/height (causes overlap on iOS); just scale the card. */
+.cal-tool-view.is-fullscreen{ --cal-fs-scale: .62; }
+@media (max-width: 420px){
+  .cal-tool-view.is-fullscreen{ --cal-fs-scale: .56; }
+}
+.cal-tool-view.is-fullscreen .cal-tool-body > .soft-card,
+.cal-tool-view.is-fullscreen .cal-tool-body > .ct-ui,
+.cal-tool-view.is-fullscreen .cal-tool-body > .fl-ui,
+.cal-tool-view.is-fullscreen .cal-tool-body > .spec-ui,
+.cal-tool-view.is-fullscreen .cal-tool-body > .lux-ui{
+  transform: scale(var(--cal-fs-scale));
+  transform-origin: top center;
+  margin:0 auto !important;
+}
+
+
+/* === vFS2: strict no-overlap layout inside full-screen tools (mobile first) === */
+.cal-tool-view.is-fullscreen .ct-gauge-wrap,
+.cal-tool-view.is-fullscreen .fl-gauge-wrap,
+.cal-tool-view.is-fullscreen .spec-gauge-wrap{
+  padding:6px !important;
+}
+.cal-tool-view.is-fullscreen .ct-gauge,
+.cal-tool-view.is-fullscreen .fl-gauge,
+.cal-tool-view.is-fullscreen .spec-gauge{
+  width:clamp(200px, 70vw, 360px) !important;
+  height:clamp(200px, 70vw, 360px) !important;
+}
+.cal-tool-view.is-fullscreen .ct-bars,
+.cal-tool-view.is-fullscreen .fl-strip,
+.cal-tool-view.is-fullscreen .spec-metrics{
+  margin-top:8px !important;
+}
+.cal-tool-view.is-fullscreen .ct-camera,
+.cal-tool-view.is-fullscreen .fl-camera,
+.cal-tool-view.is-fullscreen .spec-camera,
+.cal-tool-view.is-fullscreen .lux-camera{
+  margin-top:8px !important;
+  position:relative !important;
+}
+.cal-tool-view.is-fullscreen .ct-camera video,
+.cal-tool-view.is-fullscreen .fl-camera video,
+.cal-tool-view.is-fullscreen .spec-camera video,
+.cal-tool-view.is-fullscreen .lux-camera video{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  display:block !important;
+}
+/* Prevent any absolute elements from escaping and stacking on top of controls */
+.cal-tool-view.is-fullscreen .ct-ui *, 
+.cal-tool-view.is-fullscreen .fl-ui *,
+.cal-tool-view.is-fullscreen .spec-ui *{
+  max-width:100% !important;
+}
 /* Full-screen calibration: keep everything within one viewport (no scrolling) */
 .cal-tool-view.is-fullscreen .cal-tool-topbar{flex:0 0 auto;}
 .cal-tool-view.is-fullscreen .cal-tool-body{
@@ -3878,8 +3935,8 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 <div aria-label="Start menu" class="home-card" role="dialog">
 <div class="home-head">
 <div>
-<div class="home-title">בחר פעולה</div>
-<div class="home-sub">כדי שלא תצטרך “לצוד” טאבים – בחר לאן להיכנס, and the screen will switch automatically.</div>
+<div class="home-title">Choose an action</div>
+<div class="home-sub">No need to hunt for tabs — choose where to go and the screen will switch automatically.</div>
 </div>
 <div aria-label="Close" class="home-close" id="home-close">×</div>
 </div>
@@ -3981,7 +4038,7 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 </div>
 </div>
 <div class="hsv-card" data-prefix="valid">
-<div class="hsv-title">בחירת צבע (Valid)</div>
+<div class="hsv-title">Select Color (Valid)</div>
 <div class="hsv-picker" data-prefix="valid">
 <div class="hsv-sv-wrap">
 <canvas aria-label="Saturation Value" class="hsv-sv" height="320" id="valid-sv" width="520"></canvas>
@@ -4017,7 +4074,7 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 </div>
 </div>
 <div class="hsv-card" data-prefix="defect">
-<div class="hsv-title">בחירת צבע (Defect)</div>
+<div class="hsv-title">Select Color (Defect)</div>
 <div class="hsv-picker" data-prefix="defect">
 <div class="hsv-sv-wrap">
 <canvas aria-label="Saturation Value" class="hsv-sv" height="320" id="defect-sv" width="520"></canvas>
@@ -4386,40 +4443,7 @@ body.cal-fs-active nav.main-menu{display:none !important;}
   </div>
 </div>
 <div class="lux-info" hidden="" id="luxInfo">
-<div class="lux-info-card">
-<div class="lux-info-h">Lux Meter (Preview)</div>
-<div class="lux-info-p">
-      
-<p><b>מה הכלי עושה?</b><br/>
-Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lux</b> (וגם <b>Foot‑candles</b>) מתוך תמונת המצלמה בזמן אמת.
-המדידה כאן היא <b>הערכה המבוססת על בהירות התמונה</b> (Preview בדפדפן) ונועדה בעיקר ליישור/השוואה במהלך כיול.</p>
-
-<p><b>מה אתה רואה במסך?</b></p>
-<ul style="margin:6px 0 10px 18px;">
-  <li><b>Exposure Value (EV)</b> – מספר לוגאריתמי שמייצג “כמה אור” הגיע לחיישן ביחס להגדרות צילום.</li>
-  <li><b>Lux / fc</b> – המרה משוערת מתוך בהירות הפריים (לשימוש כיול יחסי, לא כמד‑אור מעבדתי).</li>
-  <li><b>וידאו</b> – תצוגת מצלמה חיה שממנה מחושב הערך.</li>
-</ul>
-
-<p><b>הסליידרים (השפעה על EV וההמרה):</b></p>
-<ul style="margin:6px 0 10px 18px;">
-  <li id="luxInfoAperture"><b>Aperture (צמצם)</b> – ערך f/ (למשל f/2.8). מספר קטן יותר = צמצם פתוח יותר = יותר אור = EV “גבוה” יותר.</li>
-  <li id="luxInfoSpeed"><b>Speed / Shutter (מהירות תריס)</b> – זמן חשיפה. זמן ארוך יותר = יותר אור. הערכים מוצגים בסגנון 1/60, 1/125 וכו’.</li>
-  <li id="luxInfoISO"><b>ISO</b> – הגברה/רגישות. כאן זה <b>סימולציה</b> שמדמה שינוי Gain לצורך בדיקת זרימת עבודה.</li>
-</ul>
-
-<p><b>כפתורים:</b></p>
-<ul style="margin:6px 0 0 18px;">
-  <li><b>i (Info)</b> – פותח את ההסבר הזה.</li>
-  <li><b>⛶ Full Screen</b> – הופך את הכלי למסך מלא (כמו תת‑אפליקציה). לחיצה נוספת יוצאת חזרה לאקורדיון.</li>
-  <li><b>⟳ Switch Camera</b> – מעבר בין מצלמה קדמית/אחורית.</li>
-  <li><b>Freeze</b> – “מקפיא” את הקריאה על הפריים הנוכחי (נוח להשוואה).</li>
-  <li><b>Save</b> – שומר Snapshot של הערכים (לוג/תיעוד בתוך האפליקציה).</li>
-</ul>
-
-    </div>
-<button class="lux-btn lux-btn-accent" id="luxInfoClose" data-closeinfo="luxInfo" type="button">Close</button>
-</div>
+<div class="lux-info-card"><div class="lux-info-h">Lux Meter (Preview)</div><div class="lux-info-p"><p><b>What this tool does</b><br/>Lux Meter estimates <b>Exposure Value (EV)</b> and a <b>relative illuminance</b> (<b>lux</b> and <b>foot‑candles</b>) from the live camera preview. This is a <b>browser-based approximation</b> for <b>calibration and comparison</b> (not a lab-grade light meter).</p><p><b>What you see</b></p><ul style="margin-top:6px"><li><b>Live camera preview</b> – source used to compute readings.</li><li><b>EV</b> – logarithmic light level relative to exposure parameters.</li><li><b>Lux / fc</b> – estimated conversion from preview brightness (relative).</li></ul><p><b>Sliders</b></p><ul style="margin-top:6px"><li><b>Aperture (f‑number)</b>: smaller f = more light.</li><li><b>Shutter speed</b>: longer time = more light.</li><li><b>ISO</b>: higher gain = brighter image (more noise).</li></ul><p><b>Buttons</b></p><ul style="margin-top:6px"><li><b>Info</b>: open help.</li><li><b>⛶ Full Screen</b>: toggle full-screen mode.</li><li><b>Switch Camera</b>: rear/front toggle.</li><li><b>Freeze</b>: hold current frame/values.</li><li><b>Save</b>: store a snapshot of current readings.</li></ul><p style="opacity:.85"><b>Tip:</b> Keep the phone steady; avoid auto-exposure swings.</p></div></div>
 </div>
 </div>
 </div>
@@ -4501,14 +4525,7 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 </div>
 </div>
 <div class="lux-info" hidden="" id="ctInfo">
-<div class="lux-info-card">
-<div class="lux-info-h">Color Temperature (Preview)</div>
-<div class="lux-info-p">
-      Browser approximation: CCT is estimated from average RGB (relative).
-      Use for alignment and workflow checks, not lab calibration.
-    </div>
-<button class="lux-btn lux-btn-accent" id="ctInfoClose" type="button">Got it</button>
-</div>
+<div class="lux-info-card"><div class="lux-info-h">Color Temperature (Preview)</div><div class="lux-info-p"><p><b>What this tool does</b><br/>Estimates <b>CCT (Kelvin)</b>, <b>CIE 1931 x/y</b> and <b>Δuv</b> from the live camera preview (approximation for calibration/trending).</p><p><b>Warm vs. Cool</b></p><ul style="margin-top:6px"><li><b>Warm White</b> (≈2700–3500K): yellow/orange tint.</li><li><b>Neutral White</b> (≈3500–4500K): balanced white.</li><li><b>Cool White</b> (≈5000–6500K+): bluish/daylight.</li></ul><p><b>Metrics explained</b></p><ul style="margin-top:6px"><li><b>CCT</b>: warm/cool along the black-body curve.</li><li><b>CIE x/y</b>: chromaticity coordinates.</li><li><b>Δuv</b>: distance from black-body locus (often +green / −magenta).</li></ul><p><b>Buttons</b></p><ul style="margin-top:6px"><li><b>Info</b>: open help.</li><li><b>⛶ Full Screen</b>: toggle full-screen.</li><li><b>Switch Camera</b>: rear/front toggle.</li><li><b>Freeze</b>: hold current frame/values.</li><li><b>Save</b>: store a snapshot.</li></ul><p style="opacity:.85"><b>Tip:</b> Aim at a neutral matte surface to reduce bias.</p></div></div>
 </div>
 </div>
 </div>
@@ -4583,14 +4600,7 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 </div>
 </div>
 <div class="lux-info" hidden="" id="flInfo">
-<div class="lux-info-card">
-<div class="lux-info-h">Flicker Meter (Preview)</div>
-<div class="lux-info-p">
-      Flicker percentage is estimated from short-term brightness variation in the video stream.
-      Frequency is best-effort and may show as unknown depending on device/frame rate.
-    </div>
-<button class="lux-btn lux-btn-accent" id="flInfoClose" type="button">Got it</button>
-</div>
+<div class="lux-info-card"><div class="lux-info-h">Flicker Meter (Preview)</div><div class="lux-info-p"><p><b>What this tool does</b><br/>Estimates <b>flicker %</b> and <b>dominant frequency (Hz)</b> from brightness changes in the live preview.</p><p><b>What you see</b></p><ul style="margin-top:6px"><li><b>Flicker %</b>: oscillation amplitude indicator.</li><li><b>Frequency</b>: main detected rate.</li><li><b>Color scale</b>: quick severity cue.</li><li><b>Waveform</b>: brightness-over-time trace.</li></ul><p><b>Buttons</b></p><ul style="margin-top:6px"><li><b>Info</b>: open help.</li><li><b>⛶ Full Screen</b>: toggle full-screen.</li><li><b>Switch Camera</b>: rear/front toggle.</li><li><b>Freeze</b>: hold trace/values.</li><li><b>Save</b>: store a snapshot.</li></ul><p style="opacity:.85"><b>Note:</b> Frame rate/auto exposure can affect readings.</p></div></div>
 </div>
 </div>
 </div>
@@ -4667,36 +4677,7 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 </div>
 </div>
 <div class="lux-info" hidden="" id="specInfo">
-<div class="lux-info-card">
-<div class="lux-info-h">Light Spectrum</div>
-<div class="lux-info-p">
-
-<p><b>מה הכלי עושה?</b><br/>
-<b>Light Spectrum</b> מציג הערכה של פרופיל צבע/ספקטרום מתוך נתוני RGB של המצלמה (Proxy), כדי להשוות בין מקורות אור ולזהות סטיות.
-זו <b>אינדיקציה תפעולית</b> – לא ספקטרומטר פיזיקלי.</p>
-
-<p><b>מה אתה רואה במסך?</b></p>
-<ul style="margin:6px 0 10px 18px">
-  <li><b>גרף/עמודות</b> – אנרגיה יחסית לפי תחומי צבע.</li>
-  <li><b>Dominant</b> – צבע/תחום דומיננטי בתמונה.</li>
-  <li><b>Balance</b> – איזון כללי (Warm/Neutral/Cold).</li>
-</ul>
-
-<p><b>כפתורים</b></p>
-<ul style="margin:6px 0 10px 18px">
-  <li><b>i (Info)</b> – מסך הסבר.</li>
-  <li><b>⛶ (Full Screen)</b> – מצב מסך מלא. לחיצה נוספת יוצאת חזרה לאקורדיון.</li>
-  <li><b>⟳ (Switch Camera)</b> – מעבר בין מצלמה קדמית/אחורית.</li>
-  <li><b>Freeze</b> – הקפאת הקריאה על הפריים הנוכחי (נוח להשוואה).</li>
-  <li><b>💾 (Save)</b> – שמירה/תיעוד.</li>
-</ul>
-
-<p><b>טיפ</b><br/>
-כדי להשוות בין מקורות אור – השאר את המרחק והזווית קבועים וצפה בשינויי הגרף והמדדים.</p>
-
-</div>
-<button class="lux-btn lux-btn-accent" id="specInfoClose" data-closeinfo="specInfo" type="button">Close</button>
-</div>
+<div class="lux-info-card"><div class="lux-info-h">Light Spectrum (Preview)</div><div class="lux-info-p"><p><b>What this tool does</b><br/>Shows a <b>relative</b> spectral profile derived from the live preview (qualitative, for trending).</p><p><b>How to read it</b></p><ul style="margin-top:6px"><li><b>Shape/peaks</b>: relative distribution across channels.</li><li><b>Balance</b>: compare sources and detect shifts.</li></ul><p><b>Buttons</b></p><ul style="margin-top:6px"><li><b>Info</b>: open help.</li><li><b>⛶ Full Screen</b>: toggle full-screen.</li><li><b>Switch Camera</b>: rear/front toggle.</li><li><b>Freeze</b>: hold plot/values.</li><li><b>Save</b>: store a snapshot.</li></ul><p style="opacity:.85"><b>Tip:</b> Avoid clipping/saturation for best shape.</p></div></div>
 </div>
 </div>
 </div>
@@ -5506,7 +5487,7 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 <h2 style="color:var(--accent); margin:0 0 10px;">QA Calculations and Reports</h2>
 <!-- QA Guide (clickable help) -->
 <div style="display:flex; justify-content:flex-start; gap:10px; margin:0 0 10px;">
-<button class="qa2-btn" id="qa_doc_btn" title="מדריך QA – הסברים ומתודולוגיה" type="button">📘 מדריך QA</button>
+<button class="qa2-btn" id="qa_doc_btn" title="QA Guide — explanations and methodology" type="button">📘 QA Guide</button>
 </div>
 <div class="qa2-wrap">
 <div class="qa2-topbar">
@@ -5517,64 +5498,64 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 <!-- INPUTS -->
 <div class="qa2-pane active" id="qa2-pane-inputs">
 <div class="qa2-card">
-<div class="qa2-card-title">הזנת נתונים</div>
+<div class="qa2-card-title">Inputs</div>
 <div class="qa2-grid">
 <div class="qa2-field">
-<label>משקל גרגיר ממוצע <span class="qa2-unit">mg</span></label>
+<label>Average pellet weight <span class="qa2-unit">mg</span></label>
 <input id="qa2_pelletMg" step="0.001" type="number" value="12.5"/>
 </div>
 <div class="qa2-field">
-<label>Feed (נכנס) <span class="qa2-unit">kg</span></label>
+<label>Feed (in) <span class="qa2-unit">kg</span></label>
 <input id="qa2_wInKg" step="0.001" type="number" value="3.6"/>
 </div>
 <div class="qa2-field">
-<label>Accept (טוב) <span class="qa2-unit">kg</span></label>
+<label>Accept (good) <span class="qa2-unit">kg</span></label>
 <input id="qa2_wGoodKg" step="0.001" type="number" value="6.8"/>
 </div>
 <div class="qa2-field">
-<label>Reject (רע) <span class="qa2-unit">kg</span></label>
+<label>Reject (bad) <span class="qa2-unit">kg</span></label>
 <input id="qa2_wBadKg" step="0.001" type="number" value="0.8"/>
 </div>
 <div class="qa2-field">
-<label>דגימה מהטוב <span class="qa2-unit">g</span></label>
+<label>Accept sample <span class="qa2-unit">g</span></label>
 <input id="qa2_sampleGoodG" step="0.1" type="number" value="100"/>
 </div>
 <div class="qa2-field">
-<label>פגומים שנמצאו בדגימה</label>
+<label>Defects found in sample</label>
 <input id="qa2_defectsInSample" step="1" type="number" value="25"/>
 </div>
 <div class="qa2-field">
-<label>דגימה מהרע <span class="qa2-unit">g</span></label>
+<label>Reject sample <span class="qa2-unit">g</span></label>
 <input id="qa2_sampleBadG" step="0.1" type="number" value="100"/>
-<div class="qa2-hint">אופציונלי: אם דוגמים Reject, אפשר לחשב “טובים ברע” במקום הנחה.</div>
+<div class="qa2-hint">Optional: If you sample Reject, the tool can estimate “good-in-reject” instead of using the default assumption.</div>
 </div>
 <div class="qa2-field">
-<label>טובים שנמצאו בדגימת Reject (ספירה)</label>
+<label>Good pellets found in Reject sample (count)</label>
 <input id="qa2_goodsInBadSample" step="1" type="number" value="22"/>
 </div>
 <div class="qa2-field">
-<label>α — חשיבות “בריחת פגום”</label>
+<label>α — Severity of defect escape</label>
 <select id="qa2_alpha">
-<option value="2">1 · נמוך (×2)</option>
-<option value="5">2 · בינוני (×5)</option>
-<option selected="" value="10">3 · גבוה (×10)</option>
-<option value="20">4 · קריטי (×20)</option>
-<option value="50">5 · קטסטרופלי (×50)</option>
+<option value="2">1 · Low (×2)</option>
+<option value="5">2 · Medium (×5)</option>
+<option selected="" value="10">3 · High (×10)</option>
+<option value="20">4 · Critical (×20)</option>
+<option value="50">5 · Catastrophic (×50)</option>
 </select>
 </div>
 <div class="qa2-field">
-<label>β — כאב “איבוד טוב”</label>
+<label>β — Good-loss pain</label>
 <select id="qa2_beta">
-<option value="0.5">1 · נמוך (×0.5)</option>
-<option selected="" value="1">2 · בינוני (×1)</option>
-<option value="2">3 · גבוה (×2)</option>
-<option value="3">4 · קריטי (×3)</option>
-<option value="5">5 · קטסטרופלי (×5)</option>
+<option value="0.5">1 · Low (×0.5)</option>
+<option selected="" value="1">2 · Medium (×1)</option>
+<option value="2">3 · High (×2)</option>
+<option value="3">4 · Critical (×3)</option>
+<option value="5">5 · Catastrophic (×5)</option>
 </select>
 </div>
 </div>
 <div class="qa2-hint">
-          טיפ: אפשר להזין רק מה שיש לכם בפועל. כל השאר מחושב אוטומטית ומופיע ב‑KPIs וב‑Visual.
+          Tip: Enter only what you have. Everything else is calculated automatically and shown in the KPIs and Visuals.
         </div>
 <div class="qa2-actions">
 <button class="qa2-btn" id="qa2_reset" type="button">Reset</button>
@@ -5585,10 +5566,10 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 <!-- VISUAL -->
 <div class="qa2-pane" id="qa2-pane-visual">
 <div class="qa2-card">
-<div class="qa2-card-title">המחשה</div>
+<div class="qa2-card-title">Visualization</div>
 <div class="qa2-legend">
-<span class="qa2-dot good"></span><span class="qa2-legtxt">טוב</span>
-<span class="qa2-dot bad"></span><span class="qa2-legtxt">פגום</span>
+<span class="qa2-dot good"></span><span class="qa2-legtxt">Good</span>
+<span class="qa2-dot bad"></span><span class="qa2-legtxt">Defect</span>
 </div>
 <div class="qa2-cylgrid">
 <div class="qa2-cylcard">
@@ -5600,7 +5581,7 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 <div class="qa2-cylmeta" id="qa2_feed_meta">—</div>
 </div>
 <div class="qa2-cylcard">
-<div class="qa2-cylhdr">Accept (טוב)</div>
+<div class="qa2-cylhdr">Accept (good)</div>
 <div aria-label="Accept cylinder" class="qa2-cyl">
 <div class="qa2-fill good" id="qa2_acc_good"></div>
 <div class="qa2-fill bad" id="qa2_acc_bad"></div>
@@ -5608,7 +5589,7 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 <div class="qa2-cylmeta" id="qa2_acc_meta">—</div>
 </div>
 <div class="qa2-cylcard">
-<div class="qa2-cylhdr">Reject (רע)</div>
+<div class="qa2-cylhdr">Reject (bad)</div>
 <div aria-label="Reject cylinder" class="qa2-cyl">
 <div class="qa2-fill good" id="qa2_rej_good"></div>
 <div class="qa2-fill bad" id="qa2_rej_bad"></div>
@@ -5619,14 +5600,14 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 <div class="qa2-mini">
 <div class="qa2-minirow">
 <div class="qa2-minikpi">
-<div class="qa2-minilab">פגומים שברחו ל‑Accept (משוער)</div>
+<div class="qa2-minilab">Defects escaped into Accept (estimated)</div>
 <div class="qa2-minival" id="qa2_escape_est">—</div>
 </div>
 <button class="qa2-info" data-qa2-explain="escape" type="button">ⓘ</button>
 </div>
 <div class="qa2-minirow">
 <div class="qa2-minikpi">
-<div class="qa2-minilab">איבוד טוב ל‑Reject (משוער)</div>
+<div class="qa2-minilab">Good loss to Reject (estimated)</div>
 <div class="qa2-minival" id="qa2_goodloss_est">—</div>
 </div>
 <button class="qa2-info" data-qa2-explain="goodloss" type="button">ⓘ</button>
@@ -5643,33 +5624,33 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 </div>
 <div class="qa2-kpig qa2-kpig-compact">
 <div class="qa2-kpi qa2-wide qa2-score-hero">
-<div class="qa2-klabel">Score משוקלל (התוצאה הסופית)</div>
+<div class="qa2-klabel">Weighted score (final)</div>
 <div class="qa2-kvalue" id="qa2_score">—</div>
 <div aria-label="Score bar" class="qa2-scorebar"><div id="qa2_scorebar"></div></div>
 <button class="qa2-info" data-qa2-explain="score" type="button">ⓘ</button>
 </div>
 <div class="qa2-kpi">
-<div class="qa2-klabel">N_in (מס׳ גרגירים ב‑Feed)</div>
+<div class="qa2-klabel">N_in (pellets in Feed)</div>
 <div class="qa2-kvalue" id="qa2_nin">—</div>
 <button class="qa2-info" data-qa2-explain="nin" type="button">ⓘ</button>
 </div>
 <div class="qa2-kpi">
-<div class="qa2-klabel">Purity ב‑Accept</div>
+<div class="qa2-klabel">Purity in Accept</div>
 <div class="qa2-kvalue qa2-good" id="qa2_purity">—</div>
 <button class="qa2-info" data-qa2-explain="purity" type="button">ⓘ</button>
 </div>
 <div class="qa2-kpi">
-<div class="qa2-klabel">Escape rate (פגומים שנשארו ב‑Accept)</div>
+<div class="qa2-klabel">Escape rate (defects remaining in Accept)</div>
 <div class="qa2-kvalue qa2-bad" id="qa2_escape_rate">—</div>
 <button class="qa2-info" data-qa2-explain="escape" type="button">ⓘ</button>
 </div>
 <div class="qa2-kpi qa2-wide">
-<div class="qa2-klabel">Good loss (טובים שנזרקו ל‑Reject)</div>
+<div class="qa2-klabel">Good loss (good thrown to Reject)</div>
 <div class="qa2-kvalue" id="qa2_goodloss_rate">—</div>
 <button class="qa2-info" data-qa2-explain="goodloss" type="button">ⓘ</button>
 </div>
 </div>
-<div class="qa2-note" id="qa2_note"><b>הערה:</b> Escape rate ו‑C<sub>A</sub> מחושבים מדגימת Accept. Good loss מחושב מדגימת Reject (אם הוזנה) או מערך ברירת מחדל/הנחה.</div>
+<div class="qa2-note" id="qa2_note"><b>Note:</b> Escape rate and C_A are computed from the Accept sample. Good loss is computed from the Reject sample (if provided) or a default assumption.</div>
 </div>
 </div>
 </div>
@@ -5678,7 +5659,7 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 <div class="qa2-modal-backdrop" data-qa2-close="1"></div>
 <div aria-labelledby="qa2_modal_title" aria-modal="true" class="qa2-modal-card" role="dialog">
 <div class="qa2-modal-h">
-<div class="qa2-modal-title" id="qa2_modal_title">הסבר</div>
+<div class="qa2-modal-title" id="qa2_modal_title">Explanation</div>
 <button class="qa2-modal-x" data-qa2-close="1" type="button">✕</button>
 </div>
 <div class="qa2-modal-b" id="qa2_modal_body"></div>
@@ -5692,200 +5673,11 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 <div class="qa2-modal-backdrop" data-qa-doc-close="1"></div>
 <div aria-labelledby="qa_doc_modal_title" aria-modal="true" class="qa2-modal-card" role="dialog">
 <div class="qa2-modal-h">
-<div class="qa2-modal-title" id="qa_doc_modal_title">מדריך QA – בדיקת איכות מיון גרגירי פלסטיק (Pellet Sorting)</div>
+<div class="qa2-modal-title" id="qa_doc_modal_title">QA Guide — Pellet Sorting Quality Check</div>
 <button class="qa2-modal-x" data-qa-doc-close="1" type="button">✕</button>
 </div>
 <div class="qa2-modal-b" id="qa_doc_modal_body">
-<div style="max-height:70vh; overflow:auto; padding-left:4px;">
-<div style="color:#cbd5ff; font-size:13px; line-height:1.55;">
-<p><b>מסמך זה נועד לשמש מדריך מקצועי, תפעולי וברור</b> לביצוע בדיקות QA למכונות מיון גרגירי פלסטיק (PE / PP / סיליקונים), בדגש על שקופים עם פגמים (כתמים שחורים/חומים).</p>
-<div style="margin:10px 0 14px;">
-<div><b>המסמך מתאים:</b></div>
-<ul style="margin:6px 0 0 18px;">
-<li>למהנדסי איכות</li>
-<li>לספקי מכונות מיון</li>
-<li>ללקוחות קצה</li>
-<li>לצרכי FAT / SAT / קבלה תעשייתית</li>
-</ul>
-</div>
-<h3 style="margin:14px 0 6px; color:var(--accent);">1. מטרת ה‑QA</h3>
-<p>מטרת בדיקת ה‑QA היא לענות על שאלה אחת מרכזית:</p>
-<blockquote style="margin:8px 0; padding:8px 10px; border-right:3px solid rgba(250,174,82,.7); background:var(--accentSoft); border-radius:10px;">
-              כמה פגומים באמת נשארים בחומר הטוב שמגיע ללקוח, וכמה טובים נזרקים בטעות?
-            </blockquote>
-<p>כלומר:</p>
-<ul>
-<li><b>זיהום החומר הטוב (Defect Escape)</b></li>
-<li><b>איבוד חומר טוב (Good Loss)</b></li>
-</ul>
-<p>ה‑QA לא נועד “להוכיח 99%” באופן שיווקי, אלא לתת <b>מדד אמיתי, מדיד, והשוואתי</b>.</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">2. הגדרות בסיסיות (זרמים)</h3>
-<p>במערכת מיון קיימים שלושה זרמים עיקריים:</p>
-<h4 style="margin:10px 0 4px;">2.1 Feed – הזנה</h4>
-<p>כל החומר שנכנס למכונה.</p>
-<ul>
-<li>משקל כולל (ק״ג)</li>
-<li>אחוז פגומים משוער או ידוע</li>
-</ul>
-<h4 style="margin:10px 0 4px;">2.2 Accept – חומר טוב</h4>
-<p>החומר שאמור להגיע ללקוח. כאן הקריטריון הוא <b>כמה פגומים נשארו</b>.</p>
-<h4 style="margin:10px 0 4px;">2.3 Reject – חומר רע</h4>
-<p>החומר שנפסל. כאן הקריטריון הוא <b>כמה טובים נזרקו בטעות</b>.</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">3. למה עובדים עם דגימות (Sampling)</h3>
-<p>בפועל, לא ניתן לספור מיליוני גרגירים אחד־אחד. לכן, בתעשייה מקובל לעבוד בשיטת <b>דגימה סטטיסטית</b>:</p>
-<ul>
-<li>שוקלים כמות קטנה (לרוב 50–200 גרם)</li>
-<li>סופרים ידנית פגומים או טובים</li>
-<li>משליכים את היחס על כל הזרם</li>
-</ul>
-<p>זו שיטה מקובלת בתעשיית הפלסטיק, מזון, פארמה, ויז’ן תעשייתי.</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">4. דגימה מה‑Accept (החומר הטוב)</h3>
-<h4 style="margin:10px 0 4px;">4.1 מה מודדים</h4>
-<ul>
-<li>משקל הדגימה (גרם)</li>
-<li>מספר פגומים שנמצאו בדגימה</li>
-</ul>
-<h4 style="margin:10px 0 4px;">4.2 חישוב</h4>
-<ol>
-<li>חישוב מספר גרגירים בדגימה:</li>
-</ol>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">N_sample = (משקל דגימה [g] × 1000) / משקל גרגיר [mg]</pre>
-<ol start="2">
-<li>חישוב שיעור פגומים ב‑Accept:</li>
-</ol>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Escape Rate = פגומים בדגימה / N_sample</pre>
-<ol start="3">
-<li>חישוב זיהום ב‑Accept:</li>
-</ol>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">מספר פגומים לק״ג = Escape Rate × (1,000,000 / משקל גרגיר [mg])</pre>
-<p><b>זהו המדד החשוב ביותר ללקוח.</b></p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">5. דגימה מה‑Reject (החומר הרע)</h3>
-<h4 style="margin:10px 0 4px;">5.1 למה זה חשוב</h4>
-<blockquote style="margin:8px 0; padding:8px 10px; border-right:3px solid rgba(250,174,82,.7); background:var(--accentSoft); border-radius:10px;">
-              בלי דגימה מה‑Reject, אין דרך אמיתית לדעת כמה חומר טוב נזרק לפח.
-            </blockquote>
-<h4 style="margin:10px 0 4px;">5.2 מה מודדים</h4>
-<ul>
-<li>משקל דגימה מה‑Reject (גרם)</li>
-<li>מספר <b>טובים</b> שנמצאו בדגימה</li>
-</ul>
-<h4 style="margin:10px 0 4px;">5.3 חישוב</h4>
-<ol>
-<li>מספר גרגירים בדגימת Reject:</li>
-</ol>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">N_rej_sample = (משקל דגימה [g] × 1000) / משקל גרגיר [mg]</pre>
-<ol start="2">
-<li>אחוז טובים ב‑Reject:</li>
-</ol>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Good-in-Reject = טובים בדגימה / N_rej_sample</pre>
-<ol start="3">
-<li>איבוד חומר טוב:</li>
-</ol>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Good Loss = Good-in-Reject × משקל Reject</pre>
-<h3 style="margin:14px 0 6px; color:var(--accent);">6. המרה ממשקל למספר גרגירים</h3>
-<p>מאחר וגרגירים הם יחידות בדידות, רוב החישובים נעשים בפועל <b>במספר גרגירים</b>, לא בק״ג.</p>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">גרגירים לק״ג = 1,000,000 / משקל גרגיר [mg]</pre>
-<p>לדוגמה: גרגיר 12.5 mg → 80,000 גרגירים לק״ג</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">7. מדדי KPI עיקריים</h3>
-<h4 style="margin:10px 0 4px;">7.1 Purity (ניקיון Accept)</h4>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Purity = 1 − Escape Rate</pre>
-<h4 style="margin:10px 0 4px;">7.2 Escape Rate</h4>
-<p>כמה פגומים נשארו בחומר הטוב (הכי חשוב ללקוח).</p>
-<h4 style="margin:10px 0 4px;">7.3 Good Loss</h4>
-<p>כמה חומר טוב נזרק ל‑Reject.</p>
-<h4 style="margin:10px 0 4px;">7.4 Recall (של פגומים)</h4>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Recall = פגומים שנתפסו / סך הפגומים ב‑Feed</pre>
-<h3 style="margin:14px 0 6px; color:var(--accent);">8. למה לא מספיק להגיד “99% הצלחה”</h3>
-<p>ברוב המקרים, יצרן מתכוון ל‑<b>Recall</b>: מתוך כל הפגומים – כמה נתפסו.</p>
-<p>אבל זה <b>לא אומר</b>:</p>
-<ul>
-<li>כמה פגומים נשארו ב‑Accept</li>
-<li>כמה טובים נזרקו</li>
-</ul>
-<p>לכן QA אמיתי תמיד בודק <b>שני צדדים</b>.</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">9. α (Alpha) – חומרת פגום שברח</h3>
-<p>α מגדיר: כמה חמור פגום אחד שהגיע ללקוח, יחסית לזריקת גרגיר טוב אחד.</p>
-<div style="overflow:auto;">
-<table style="width:100%; border-collapse:collapse; font-size:13px;">
-<thead>
-<tr>
-<th style="text-align:right; padding:6px; border-bottom:1px solid rgba(255,255,255,.10);">רמה</th>
-<th style="text-align:right; padding:6px; border-bottom:1px solid rgba(255,255,255,.10);">משמעות</th>
-<th style="text-align:right; padding:6px; border-bottom:1px solid rgba(255,255,255,.10);">α פנימי</th>
-</tr>
-</thead>
-<tbody>
-<tr><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">1</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">נסבל</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">2</td></tr>
-<tr><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">2</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">לא רצוי</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">5</td></tr>
-<tr><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">3</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">בעייתי</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">10</td></tr>
-<tr><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">4</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">חמור</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">20</td></tr>
-<tr><td style="padding:6px;">5</td><td style="padding:6px;">קריטי</td><td style="padding:6px;">50</td></tr>
-</tbody>
-</table>
-</div>
-<h3 style="margin:14px 0 6px; color:var(--accent);">10. β (Beta) – כאב של איבוד חומר טוב</h3>
-<p>β מגדיר את העלות/כאב של זריקת חומר טוב. גם כאן סקאלה 1–5, עם ערכים פנימיים שונים.</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">11. Score משוקלל – המדד הסופי</h3>
-<p>ה‑Score משלב: פגומים שברחו × α, טובים שנזרקו × β.</p>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Score = 1 − (α × Escape + β × Good Loss)</pre>
-<p>זה <b>לא תקן</b>, אלא מדד השוואתי פנימי להשוואת מכונות / הגדרות / ריצות.</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">12. ויזואליזציה (גלילים)</h3>
-<p>הגלילים מציגים בצורה אינטואיטיבית Feed / Accept / Reject, כולל משקל (ק״ג), כמות גרגירים, ואחוז יחסי.</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">13. מה מקובל בתעשייה</h3>
-<ul>
-<li>✔ עבודה בדגימות</li>
-<li>✔ הפרדה בין Accept / Reject</li>
-<li>✔ מדידה במספר יחידות (pellets)</li>
-<li>✔ הבחנה בין Recall לבין Purity</li>
-<li>✔ שימוש במדדי QA ולא רק אחוז שיווקי</li>
-</ul>
-<h3 style="margin:14px 0 6px; color:var(--accent);">14. המחלוקת המקצועית בתעשייה – מה באמת אומר "99%"</h3>
-<h4 style="margin:10px 0 4px;">14.1 גישת היצרן / הספק – Recall של פגומים</h4>
-<p>בדרך כלל “99% הצלחה” = מתוך כלל הפגומים שנכנסו – 99% זוהו והוצאו ל‑Reject (Recall).</p>
-<p><b>יתרונות:</b> קל למדידה, מחמיא לאלגוריתם, מתאים להשוואת טכנולוגיות.<br/>
-<b>חסרונות:</b> לא אומר מה נשאר אצל הלקוח, לא מתחשב בטוב שנזרק, לא משקף סיכון תפעולי.</p>
-<h4 style="margin:10px 0 4px;">14.2 גישת הלקוח / האיכות – Purity ו‑Escape</h4>
-<p>מבחינת הלקוח: כמה פגומים נשארו בחומר הטוב שאני מקבל? (Purity / Escape rate)</p>
-<p><b>יתרונות:</b> משקף סיכון אמיתי, מדבר בשפת איכות, ניתן לבדיקה בדגימות פשוטות.<br/>
-<b>חסרונות:</b> לבדו לא מספר כמה טוב נזרק.</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">15. הגשר בין הגישות – למה צריך מודל משוקלל</h3>
-<p>מערכת מיון טובה נמדדת בשלושה צירים:</p>
-<ol>
-<li>כמה פגומים הצלחנו להוציא (Recall)</li>
-<li>כמה פגומים נשארו אצל הלקוח (Escape / Purity)</li>
-<li>כמה חומר טוב נזרק (Good Loss)</li>
-</ol>
-<p>מדידה חד‑צדדית תמיד תטעה, לכן נדרש מודל משוקלל.</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">16. α (Alpha) ו‑β (Beta) – תרגום איכות לשיקול עסקי</h3>
-<h4 style="margin:10px 0 4px;">16.1 Alpha – חומרת פגום שברח</h4>
-<p>תרגום של תלונות/החזרות/עצירת קו/פגיעה במוניטין. Alpha הוא פרמטר מדיניות (לא מספר פיזיקלי).</p>
-<h4 style="margin:10px 0 4px;">16.2 Beta – כאב של איבוד חומר טוב</h4>
-<p>תלוי במחיר חומר, זמינות, ואפשרות מיחזור. גם כאן – סקאלה תפעולית.</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">17. Score משוקלל – למה זה המדד הנכון</h3>
-<p>ה‑Score נועד להיות מדד השוואתי, יציב, מובן, ולא אקדמי:</p>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Score = 1 − (α × Escape + β × GoodLoss)</pre>
-<h3 style="margin:14px 0 6px; color:var(--accent);">18. למה זה המודל המומלץ</h3>
-<ul>
-<li>✔ משלב את שתי נקודות המבט (ספק + לקוח)</li>
-<li>✔ מבוסס על מדידות אמיתיות (דגימות)</li>
-<li>✔ ניתן להסבר פשוט</li>
-<li>✔ ניתן להשוואה בין מכונות / הגדרות / ריצות / ספקים</li>
-</ul>
-<p><b>והכי חשוב:</b> הוא מדבר בשפה שהלקוח, האיכות וההנהלה מבינים.</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">19. שימוש במסמך זה</h3>
-<ul>
-<li>קישור מתוך אפליקציית ה‑QA</li>
-<li>נספח להסכם / FAT</li>
-<li>בסיס לדיון מקצועי, לא שיווקי</li>
-</ul>
-<p>מומלץ להציג אותו כ‑reference ולא כדרישה רגולטורית.</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">20. Final summary</h3>
-<blockquote style="margin:8px 0; padding:8px 10px; border-right:3px solid rgba(250,174,82,.7); background:var(--accentSoft); border-radius:10px;">
-              Real QA doesn’t ask “what is the machine’s success rate?”, it asks “what is my risk as a customer, and what is my cost as a manufacturer?”
-            </blockquote>
-<p>This model was built specifically to answer that question.</p>
-</div>
-</div>
+<div style="max-height:70vh; overflow:auto; padding-left:4px;"><div style="color:#cbd5ff; font-size:13px; line-height:1.55;"><p><b>This panel is a practical guide for checking pellet‑sorting quality</b> using sampling and weight inputs.</p><p><b>Inputs</b></p><ul><li><b>Average pellet weight (mg)</b>: converts mass to pellet counts.</li><li><b>Feed / Accept / Reject</b>: stream masses.</li><li><b>Accept sample + defects</b>: estimate defect escape.</li><li><b>Reject sample + good count (optional)</b>: estimate good loss.</li><li><b>α / β</b>: weighting factors for defect escape vs. good loss.</li></ul><p><b>Outputs</b></p><ul><li><b>Purity</b>, <b>Escape rate</b>, <b>Good loss</b>, <b>Weighted score</b>.</li></ul><p style="opacity:.85"><b>Notes</b>: Estimates depend on representative sampling.</p></div></div>
 </div>
 <div class="qa2-modal-f">
 <button class="qa2-btn qa2-btn-primary" data-qa-doc-close="1" type="button">Close</button>
@@ -5962,7 +5754,7 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 </div></div></details><details class="acc" data-acc="manuals"><summary><div><div class="acc-title">Video Manuals</div><div class="acc-sub">Training &amp; operation videos</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="tool-tab" id="tab-manuals">
 <h2 style="color:var(--accent); margin-bottom:6px;">Video Manuals</h2>
 <p class="hint" style="margin-top:0;">
-    בחר סרטון הדרכה כדי לפתוח אותו במסך גדול.
+    Select a tutorial video to open it in a larger view.
   </p>
 <div aria-label="Video manuals list" class="manuals-list" id="manuals-list"></div>
 <!-- Player Modal -->
@@ -6428,20 +6220,52 @@ function initCalibrationNav(){
   // Full-screen toggle for calibration tools (acts like a mini "sub-app" mode)
   function toggleFullscreenFor(view){
     if(!view) return;
+
+    // Portal the fullscreen view to <body> so iOS fixed positioning works reliably
+    const portalIn = (v)=>{
+      if(!v) return;
+      if(!toggleFullscreenFor._portal) toggleFullscreenFor._portal = new Map();
+      const map = toggleFullscreenFor._portal;
+      if(map.has(v)) return;
+      const parent = v.parentNode;
+      const placeholder = document.createComment('cal-fs-placeholder');
+      parent.insertBefore(placeholder, v);
+      map.set(v, { parent, placeholder });
+      document.body.appendChild(v);
+    };
+    const portalOut = (v)=>{
+      if(!v) return;
+      const map = toggleFullscreenFor._portal;
+      if(!map || !map.has(v)) return;
+      const st = map.get(v);
+      st.parent.insertBefore(v, st.placeholder);
+      st.placeholder.remove();
+      map.delete(v);
+    };
+
     const on = !view.classList.contains('is-fullscreen');
-    // turn off any other fullscreen tool
+
+    // turn off any other fullscreen tool (and de-portal it)
     document.querySelectorAll('#tab-calibration .cal-tool-view.is-fullscreen').forEach(v=>{
-      if(v !== view) v.classList.remove('is-fullscreen');
+      if(v !== view){
+        v.classList.remove('is-fullscreen');
+        portalOut(v);
+      }
     });
-    view.classList.toggle('is-fullscreen', on);
-    document.body.classList.toggle('cal-fs-active', on);
+
     if(on){
+      portalIn(view);
+      view.classList.add('is-fullscreen');
+      document.body.classList.add('cal-fs-active');
       view.scrollTop = 0;
     }else{
+      view.classList.remove('is-fullscreen');
+      document.body.classList.remove('cal-fs-active');
+      portalOut(view);
       // return to accordion/home view when exiting fullscreen
       showHome();
-      document.body.classList.remove('cal-fs-active');
     }
+  }
   }
 
   // button inside each tool header
@@ -6457,9 +6281,7 @@ function initCalibrationNav(){
     if(e.key === 'Escape'){
       const fs = document.querySelector('#tab-calibration .cal-tool-view.is-fullscreen');
       if(fs){
-        fs.classList.remove('is-fullscreen');
-        document.body.classList.remove('cal-fs-active');
-        showHome();
+        toggleFullscreenFor(fs);
       }
     }
   });
@@ -9225,29 +9047,29 @@ function bind(){
 
   // Explanation texts
   const EXPL = {
-    nin: `N_in מחושב מתוך משקל ה‑Feed והמשקל הממוצע לגרגיר:
-          <br><b>N_in = (kg · 1,000,000 mg/kg) / (mg לגרגיר)</b>.`,
-    purity: `Purity ב‑Accept מתאר כמה מהגרגירים בזרם ה“טוב” הם באמת טובים.
-             <br><b>Purity = 1 − p(defect|Accept)</b> (מהדגימה).`,
-    ca: `C_A הוא אומדן לכמה פגומים נכנסו ל‑Accept (כמות/מס׳):
+    nin: `N_in is computed from Feed mass and the average pellet weight:
+          <br><b>N_in = (kg · 1,000,000 mg/kg) / (mg per pellet)</b>.`,
+    purity: `Purity in Accept describes how many pellets in the “good” stream are actually good.
+             <br><b>Purity = 1 − p(defect|Accept)</b> (from the sample).`,
+    ca: `C_A is an estimate of how many defects entered Accept (count):
          <br><b>C_A ≈ p(defect|Accept) · N_accept</b>.`,
-    defkg: `Defects/kg הוא אומדן כמות פגומים פר ק״ג ב‑Accept:
+    defkg: `Defects/kg is an estimate of defects per kg in Accept:
             <br><b>defects/kg ≈ (p(defect|Accept) · N_accept) / (kg_accept)</b>.`,
-    recall: `Recall כאן הוא “כמה מהפגומים הצלחנו לתפוס ל‑Reject”.
-             בהיעדר דגימת Feed אמיתית, זו הערכה נגזרת מהדגימה והמסות.`,
-    escape: `Escape_est הוא אומדן כמות פגומים שהגיעו ל‑Accept:
+    recall: `Recall here is “how many defects we managed to catch into Reject”.
+             If missing a real Feed sample, this is an estimate derived from the sample and masses.`,
+    escape: `Escape_est is an estimate of how many defects reached Accept:
              <br><b>Escape_est ≈ p(defect|Accept) · N_accept</b>.`,
-    escape_rate: `Escape rate הוא שיעור הפגומים בתוך ה‑Accept (לא מתוך כלל הפגומים שהיו ב‑Feed):
-                  <br><b>Escape rate = p(defect|Accept)</b> (מהדגימה).`,
-    goodloss: `איבוד טוב ל‑Reject תלוי בכמה חומר טוב נופל לזרם ה“רע”.
-              אם אין דגימה/ספירה מה‑Reject, חייבים הנחה.
-              <br>כאן מוצג כאומדן גס: חלק מה‑Reject שהוא טוב × N_reject.`,
-    goodloss_rate: `Good loss rate נמדד אידאלית מדגימה מה‑Reject:
+    escape_rate: `Escape rate is the fraction of defects within Accept (not out of all defects that were in Feed):
+                  <br><b>Escape rate = p(defect|Accept)</b> (from the sample).`,
+    goodloss: `Good loss to Reject depends on how much good material falls into the “bad” stream.
+              If there is no Reject sample/count, an assumption is required.
+              <br>Shown as a rough estimate: (good fraction in Reject) × N_reject.`,
+    goodloss_rate: `Good loss rate is ideally measured from a Reject sample:`,
                     <br><b>p(good|Reject) ≈ good_in_reject_sample / N_reject_sample</b>.
-                    <br>אם אין דגימה מה‑Reject — זה נשאר “הערכה”.`,
-    score: `Score משוקלל נותן עדיפות גבוהה ל“בריחת פגום ללקוח” (α) לעומת “איבוד טוב” (β):
+                    <br>If there is no Reject sample, this remains an estimate.`,
+    score: `Weighted score prioritizes “defect escape to the customer” (α) over “good loss” (β):
             <br><b>Score = 100 − ( α·Escape_rate  +  β·GoodLoss_rate )·100</b>
-            <br>זה לא “מדד מדעי אוניברסלי”, אלא כלי החלטה/QA להשוואה בין סט‑אפים/מכונות.`
+            <br>This is not a universal scientific metric; it’s a QA decision tool for comparing setups/machines.`
   };
 
   function showExplain(key){
@@ -9335,8 +9157,8 @@ function bind(){
       sb.style.width = sPct.toFixed(1) + '%';
     }
 
-    $('qa2_escape_est').textContent = fmtInt(escapeEst) + ' גרגירים';
-    $('qa2_goodloss_est').textContent = fmtInt(goodLossEst) + ' גרגירים';
+    $('qa2_escape_est').textContent = fmtInt(escapeEst) + ' pellets';
+    $('qa2_goodloss_est').textContent = fmtInt(goodLossEst) + ' pellets';
 
     // visuals - show composition by weight (normalized within each cylinder)
     // Feed composition unknown => show relative sizes of streams by weight, and within streams show defect fraction estimate.
@@ -9400,9 +9222,9 @@ function setFill(goodEl, badEl, goodFrac, badFrac, totalKg, pelletMg, goodLblId,
     setFill($('qa2_rej_good'), $('qa2_rej_bad'), pGoodInRej, 1-pGoodInRej, wBadKg, pelletMg, 'qa2_rej_good_lbl','qa2_rej_bad_lbl');
 
     // metadata lines
-    $('qa2_feed_meta').innerHTML = `${fmtNum(wInKg,3)} kg · ${fmtInt(Nin)} גרגירים (≈ ${fmtPct(1-pDefInFeed)} טוב / ${fmtPct(pDefInFeed)} פגום)`;
-    $('qa2_acc_meta').innerHTML  = `${fmtNum(wGoodKg,3)} kg · ${fmtInt(Nacc)} גרגירים (≈ ${fmtPct(purity)} טוב / ${fmtPct(1-purity)} פגום)`;
-    $('qa2_rej_meta').innerHTML  = `${fmtNum(wBadKg,3)} kg · ${fmtInt(Nrej)} גרגירים (הנחה: ${fmtPct(pGoodInRej)} טוב / ${fmtPct(1-pGoodInRej)} פגום)`;
+    $('qa2_feed_meta').innerHTML = `${fmtNum(wInKg,3)} kg · ${fmtInt(Nin)} pellets (≈ ${fmtPct(1-pDefInFeed)} good / ${fmtPct(pDefInFeed)} defect)`;
+    $('qa2_acc_meta').innerHTML  = `${fmtNum(wGoodKg,3)} kg · ${fmtInt(Nacc)} pellets (≈ ${fmtPct(purity)} good / ${fmtPct(1-purity)} defect)`;
+    $('qa2_rej_meta').innerHTML  = `${fmtNum(wBadKg,3)} kg · ${fmtInt(Nrej)} pellets (assumption: ${fmtPct(pGoodInRej)} good / ${fmtPct(1-pGoodInRej)} defect)`;
 
     // on small screens, keep the UI in one screen: if user edits inputs, auto-switch to Visual quickly? no, keep as is.
   }
