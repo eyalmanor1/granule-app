@@ -12310,5 +12310,131 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
+
+<script>
+/* === Calibration: Robust Fullscreen + Info Close (Final14) === */
+(function(){
+  // Event delegation for fullscreen button to avoid missing bindings
+  function closestToolView(el){
+    return el ? el.closest('#tab-calibration .cal-tool-view') : null;
+  }
+
+  // Ensure toggleFullscreenFor exists
+  if(typeof window.toggleFullscreenFor !== 'function'){
+    // fallback minimal toggler (shouldn't happen)
+    window.toggleFullscreenFor = function(view){
+      if(!view) return;
+      view.classList.toggle('is-fullscreen');
+      document.body.classList.toggle('cal-fs-active', view.classList.contains('is-fullscreen'));
+    };
+  }
+
+  document.addEventListener('click', function(e){
+    const fsBtn = e.target.closest('#tab-calibration .cal-fs-btn');
+    if(fsBtn){
+      e.preventDefault();
+      const view = closestToolView(fsBtn);
+      window.toggleFullscreenFor(view);
+      return;
+    }
+
+    const backBtn = e.target.closest('#tab-calibration .cal-back');
+    if(backBtn){
+      e.preventDefault();
+      const view = closestToolView(backBtn);
+      if(view && view.classList.contains('is-fullscreen')){
+        window.toggleFullscreenFor(view);
+      }else if(typeof window.showHome === 'function'){
+        window.showHome();
+      }
+      return;
+    }
+
+    const infoClose = e.target.closest('#tab-calibration .cal-info-close');
+    if(infoClose){
+      e.preventDefault();
+      const panel = infoClose.closest('.cal-info-panel');
+      if(panel) panel.hidden = true;
+      document.body.classList.remove('cal-info-open');
+      return;
+    }
+  }, {passive:false});
+
+  // Inject close buttons into any calibration info panels that lack one
+  function enhanceInfoPanels(){
+    const panels = document.querySelectorAll('#tab-calibration .lux-info, #tab-calibration .ct-info, #tab-calibration .flicker-info, #tab-calibration .spec-info, #tab-calibration .cal-info-panel, #tab-calibration [id$="Info"]');
+    panels.forEach(p=>{
+      // mark as panel if it's a DIV with hidden capability and contains explanatory text
+      if(!p.classList.contains('cal-info-panel')) p.classList.add('cal-info-panel');
+      // add close button if missing
+      if(!p.querySelector('.cal-info-close')){
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'cal-info-close';
+        btn.textContent = 'Close';
+        // put at top
+        p.insertBefore(btn, p.firstChild);
+      }
+      // make panel scroll internally even when fullscreen disables page scroll
+      p.style.overflow = 'auto';
+      p.style.webkitOverflowScrolling = 'touch';
+      p.style.maxHeight = '85vh';
+    });
+
+    // Hook existing "Info" buttons to open the nearest panel
+    document.querySelectorAll('#tab-calibration button[title="Info"], #tab-calibration .lux-icon[title="Info"], #tab-calibration .ct-icon[title="Info"], #tab-calibration .qa2-info').forEach(btn=>{
+      if(btn.dataset._infoBound) return;
+      btn.dataset._infoBound = "1";
+      btn.addEventListener('click', ()=>{
+        // Try common ids first
+        const view = closestToolView(btn) || btn.closest('#tab-calibration');
+        let panel = null;
+        if(view){
+          panel = view.querySelector('.cal-info-panel, .lux-info, .ct-info, .flicker-info, .spec-info');
+        }
+        if(!panel){
+          // last resort by id convention: luxInfo / ctInfo / flickerInfo / specInfo
+          const map = ['luxInfo','ctInfo','flickerInfo','specInfo'];
+          for(const id of map){
+            const el = document.getElementById(id);
+            if(el){ panel = el; break; }
+          }
+        }
+        if(panel){
+          panel.hidden = false;
+          document.body.classList.add('cal-info-open');
+          // focus close for accessibility
+          const c = panel.querySelector('.cal-info-close');
+          if(c) c.focus();
+        }
+      }, {passive:true});
+    });
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', enhanceInfoPanels);
+  }else{
+    enhanceInfoPanels();
+  }
+})();
+</script>
+<style>
+/* Close button styling (consistent, visible) */
+#tab-calibration .cal-info-close{
+  position: sticky;
+  top: 0;
+  width: 100%;
+  border: 1px solid #2b3156;
+  background: #0b0f1f;
+  color: #cbd5ff;
+  font-weight: 900;
+  padding: 10px 12px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  z-index: 5;
+}
+#tab-calibration .cal-info-panel[hidden]{ display:none !important; }
+</style>
+
 </body>
 </html>
