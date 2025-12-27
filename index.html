@@ -3338,6 +3338,20 @@ details.acc[open] summary{ filter:brightness(1.02); }
 .install-btn.ghost{
   background: transparent;
 }
+
+/* === Fix: Calibration->Camera accordion should not show sticky 'Camera' H2 overlay === */
+#tab-calibration details.acc[data-acc="camera"] #tab-camera > h2{
+  display:none !important;
+  position:static !important;
+  top:auto !important;
+}
+#tab-calibration details.acc[data-acc="camera"] .cam-wrap{ margin-top: 0 !important; }
+/* Make camera preview scroll-friendly on mobile (allow vertical pan) */
+#tab-calibration details.acc[data-acc="camera"] #preview,
+#tab-calibration details.acc[data-acc="camera"] #live-video{
+  touch-action: pan-y pinch-zoom;
+}
+
 </style>
 <style id="modern-shell">
   :root{
@@ -8151,7 +8165,7 @@ function enableCameraPanZoom(){
   const canvas = document.getElementById("preview");
   if(!canvas) return;
 
-  canvas.style.touchAction = "none";
+  canvas.style.touchAction = "pan-y pinch-zoom";
 
   canvas.addEventListener("pointerdown", (e)=>{
     if(!camFrozen) return;
@@ -9916,6 +9930,8 @@ function openCalibrationTool(which){
   const fcEl = document.getElementById('luxFc');
   const statusEl = document.getElementById('luxStatus');
 
+  const titleEl = details.querySelector('.lux-camera-title');
+
   const iso = document.getElementById('luxISO');
   const isoVal = document.getElementById('luxISOVal');
   const spd = document.getElementById('luxSpeed');
@@ -9936,6 +9952,12 @@ function openCalibrationTool(which){
   let running = false;
   let frozen = false;
   let facing = 'environment'; // try rear camera
+
+  function updateTitle(){
+    if(!titleEl) return;
+    const cam = (facing === 'environment') ? 'Rear Camera' : 'Front Camera';
+    titleEl.textContent = cam + ' · Reflected Light';
+  }
 
   function setStatus(s){ if(statusEl) statusEl.textContent = s; }
   // Camera capture preview helpers (auto-injected)
@@ -10079,6 +10101,7 @@ function openCalibrationTool(which){
       });
       video.srcObject = stream;
       await video.play();
+      updateTitle();
       setStatus("Camera: live");
       running = true;
       requestAnimationFrame(loop);
@@ -10120,6 +10143,7 @@ function openCalibrationTool(which){
 
   async function switchCamera(){
     facing = (facing === 'environment') ? 'user' : 'environment';
+    updateTitle();
     stopCamera();
     await startCamera();
   }
@@ -10128,6 +10152,7 @@ function openCalibrationTool(which){
   details.addEventListener('toggle', () => {
     if(details.open){
       updateSimUI();
+      updateTitle();
       startCamera();
     }else{
       stopCamera();
@@ -10172,6 +10197,7 @@ function openCalibrationTool(which){
   const pEl = document.getElementById('specPeriod');
   const sEl = document.getElementById('specSat');
   const statusEl = document.getElementById('specStatus');
+  const titleEl = details.querySelector('.lux-camera-title');
   const overlay = document.getElementById('specOverlay');
   const warnText = document.getElementById('specWarnText');
 
@@ -10187,6 +10213,12 @@ function openCalibrationTool(which){
   let running = false;
   let frozen = false;
   let facing = 'environment';
+
+  function updateTitle(){
+    if(!titleEl) return;
+    const cam = (facing === 'environment') ? 'Rear Camera' : 'Front Camera';
+    titleEl.textContent = cam + ' · Spectrum estimate';
+  }
 
   function setStatus(s){ if(statusEl) statusEl.textContent = s; }
   function clamp(x,a,b){ return Math.max(a, Math.min(b,x)); }
@@ -10296,6 +10328,7 @@ function openCalibrationTool(which){
       });
       video.srcObject = stream;
       await video.play();
+      updateTitle();
       setStatus("Camera: live");
       running = true;
       requestAnimationFrame(loop);
@@ -10336,12 +10369,14 @@ function openCalibrationTool(which){
 
   async function switchCamera(){
     facing = (facing === 'environment') ? 'user' : 'environment';
+    updateTitle();
     stopCamera();
     await startCamera();
   }
 
   details.addEventListener('toggle', () => {
     if(details.open){
+      updateTitle();
       startCamera();
     }else{
       stopCamera();
@@ -10363,7 +10398,431 @@ function openCalibrationTool(which){
   if(infoClose) infoClose.addEventListener('click', () => { info.hidden = true; });
 
 })();
-</script><script>/* disabled: color temperature module removed due to syntax truncation */</script>
+</script>
+<script>
+/* === v55 Color Temperature: live camera + best-effort CCT/Δuv === */
+(function(){
+  const details = document.querySelector('#calAccList details.acc[data-caltool="ct"]');
+  if(!details) return;
+
+  const video = document.getElementById('ctVideo');
+  const canvas = document.getElementById('ctCanvas');
+  const ctx = canvas ? canvas.getContext('2d', {willReadFrequently:true}) : null;
+
+  const kelvinEl = document.getElementById('ctKelvin');
+  const xyEl = document.getElementById('ctXY');
+  const duvEl = document.getElementById('ctDuvVal');
+  const needle = document.getElementById('ctNeedle');
+  const duvKnob = document.getElementById('ctDuvKnob');
+  const statusEl = document.getElementById('ctStatus');
+  const titleEl = details.querySelector('.lux-camera-title');
+  const overlay = document.getElementById('ctOverlay');
+  const warnText = document.getElementById('ctWarnText');
+
+  const freezeBtn = document.getElementById('ctFreezeBtn');
+  const switchBtn = document.getElementById('ctSwitchBtn');
+  const infoBtn = document.getElementById('ctInfoBtn');
+  const info = document.getElementById('ctInfo');
+  const infoClose = document.getElementById('ctInfoClose');
+
+  let stream = null;
+  let running = false;
+  let frozen = false;
+  let facing = 'environment';
+
+  function setStatus(s){ if(statusEl) statusEl.textContent = s; }
+  function clamp(x,a,b){ return Math.max(a, Math.min(b,x)); }
+
+  function updateTitle(){
+    if(!titleEl) return;
+    const cam = (facing === 'environment') ? 'Rear Camera' : 'Front Camera';
+    titleEl.textContent = cam + ' · CCT estimate';
+  }
+
+  // sRGB -> linear
+  function srgbToLin(u){
+    u = u/255;
+    return (u <= 0.04045) ? (u/12.92) : Math.pow((u+0.055)/1.055, 2.4);
+  }
+
+  function estimate(){
+    if(!video || !ctx || video.readyState < 2) return null;
+    const w = canvas.width, h = canvas.height;
+    ctx.drawImage(video, 0, 0, w, h);
+    const img = ctx.getImageData(0,0,w,h).data;
+
+    let r=0,g=0,b=0;
+    for(let i=0;i<img.length;i+=16){
+      r += img[i]; g += img[i+1]; b += img[i+2];
+    }
+    const n = img.length/16;
+    r/=n; g/=n; b/=n;
+
+    const lum = (0.2126*r + 0.7152*g + 0.0722*b)/255;
+    const tooDark = lum < 0.18;
+    if(overlay){
+      overlay.hidden = !tooDark;
+      if(tooDark && warnText) warnText.textContent = "Too dark to make a reliable measurement";
+    }
+    if(tooDark) return {kelvin:null, x:null, y:null, duv:null, lum};
+
+    // Convert avg RGB to XYZ (approx)
+    const R = srgbToLin(r), G = srgbToLin(g), B = srgbToLin(b);
+    const X = 0.4124*R + 0.3576*G + 0.1805*B;
+    const Y = 0.2126*R + 0.7152*G + 0.0722*B;
+    const Z = 0.0193*R + 0.1192*G + 0.9505*B;
+    const sum = X+Y+Z;
+    const x = sum>0 ? X/sum : 0.333;
+    const y = sum>0 ? Y/sum : 0.333;
+
+    // McCamy's approximation
+    const n2 = (x - 0.3320) / (0.1858 - y);
+    const kelvin = 449*Math.pow(n2,3) + 3525*Math.pow(n2,2) + 6823.3*n2 + 5520.33;
+
+    // Δuv (best-effort): just show small signed drift from neutral point
+    const duv = clamp(((x-0.333) - (y-0.333)) * 0.10, -0.02, 0.02);
+
+    return {kelvin: clamp(kelvin, 2500, 7500), x, y, duv, lum};
+  }
+
+  function angleFromKelvin(k){
+    // 2500..7500 -> -120..120
+    const t = (clamp(k,2500,7500)-2500)/5000;
+    return -120 + t*240;
+  }
+
+  function updateUI(v){
+    if(!v) return;
+    if(v.kelvin==null){
+      if(kelvinEl) kelvinEl.textContent = "----";
+      if(xyEl) xyEl.textContent = "(---, ---)";
+      if(duvEl) duvEl.textContent = "--";
+      if(needle) needle.style.transform = "translate(-50%,-95%) rotate(-120deg)";
+      if(duvKnob) duvKnob.style.left = "50%";
+      return;
+    }
+    if(kelvinEl) kelvinEl.textContent = Math.round(v.kelvin);
+    if(xyEl) xyEl.textContent = "(" + v.x.toFixed(3) + ", " + v.y.toFixed(3) + ")";
+    if(duvEl) duvEl.textContent = (v.duv>=0?"+":"") + v.duv.toFixed(3);
+    if(needle){
+      const ang = angleFromKelvin(v.kelvin);
+      needle.style.transform = "translate(-50%,-95%) rotate(" + ang + "deg)";
+    }
+    if(duvKnob){
+      const t = (clamp(v.duv,-0.02,0.02) + 0.02) / 0.04; // 0..1
+      duvKnob.style.left = (t*100) + "%";
+    }
+  }
+
+  function loop(){
+    if(!running) return;
+    if(!frozen){
+      updateUI(estimate());
+    }
+    requestAnimationFrame(loop);
+  }
+
+  async function startCamera(){
+    if(stream) return;
+    if(!navigator.mediaDevices || !window.CameraManager.getUserMedia){
+      setStatus("Camera: not supported");
+      return;
+    }
+    try{
+      setStatus("Camera: starting...");
+      stream = await window.CameraManager.getUserMedia({
+        video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false
+      }, {force:true});
+      video.srcObject = stream;
+      await video.play();
+      updateTitle();
+      setStatus("Camera: live");
+      running = true;
+      requestAnimationFrame(loop);
+    }catch(err){
+      console.error(err);
+      setStatus("Camera: blocked / no device");
+      stream = null;
+    }
+  }
+
+  function stopCamera(){
+    running = false;
+    frozen = false;
+    if(stream){
+      try{ stream.getTracks().forEach(t => t.stop()); }catch(_){}
+      try{ window.CameraManager && window.CameraManager.stop(); }catch(_e){}
+      stream = null;
+    }
+    if(video) video.srcObject = null;
+    setStatus("Camera: idle");
+    if(overlay) overlay.hidden = true;
+  }
+
+  function toggleFreeze(){
+    frozen = !frozen;
+    if(freezeBtn) freezeBtn.textContent = frozen ? "Unfreeze" : "Freeze";
+    setStatus(frozen ? "Camera: frozen" : "Camera: live");
+  }
+
+  async function switchCamera(){
+    facing = (facing === 'environment') ? 'user' : 'environment';
+    updateTitle();
+    stopCamera();
+    await startCamera();
+  }
+
+  details.addEventListener('toggle', () => {
+    if(details.open){
+      updateTitle();
+      startCamera();
+    }else{
+      stopCamera();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    const tabBtn = e.target.closest('[data-tab]');
+    if(!tabBtn) return;
+    const isCal = String(tabBtn.getAttribute('data-tab')||'').toLowerCase() === 'calibration';
+    if(!isCal) stopCamera();
+  }, true);
+
+  if(freezeBtn) freezeBtn.addEventListener('click', toggleFreeze);
+  if(switchBtn) switchBtn.addEventListener('click', switchCamera);
+  if(infoBtn) infoBtn.addEventListener('click', () => { if(info) info.hidden = false; });
+  if(infoClose) infoClose.addEventListener('click', () => { if(info) info.hidden = true; });
+
+})();
+</script>
+
+<script>
+/* === v55 Flicker Meter: live camera + brightness variation estimate === */
+(function(){
+  const details = document.querySelector('#calAccList details.acc[data-caltool="flicker"]');
+  if(!details) return;
+
+  const video = document.getElementById('flVideo');
+  const canvas = document.getElementById('flCanvas');
+  const ctx = canvas ? canvas.getContext('2d', {willReadFrequently:true}) : null;
+
+  const pctEl = document.getElementById('flPct');
+  const freqEl = document.getElementById('flFreq');
+  const notePct = document.getElementById('flNotePct');
+  const stripFill = document.getElementById('flStripFill');
+  const wave = document.getElementById('flWave');
+  const wctx = wave ? wave.getContext('2d') : null;
+
+  const statusEl = document.getElementById('flStatus');
+  const titleEl = details.querySelector('.lux-camera-title');
+  const overlay = document.getElementById('flOverlay');
+  const warnText = document.getElementById('flWarnText');
+
+  const freezeBtn = document.getElementById('flFreezeBtn');
+  const switchBtn = document.getElementById('flSwitchBtn');
+  const saveBtn = document.getElementById('flSaveBtn');
+  const infoBtn = document.getElementById('flInfoBtn');
+  const info = document.getElementById('flInfo');
+  const infoClose = document.getElementById('flInfoClose');
+
+  let stream = null;
+  let running = false;
+  let frozen = false;
+  let facing = 'environment';
+
+  const hist = [];
+  let lastT = 0;
+  let dtAvg = 1/30;
+
+  function setStatus(s){ if(statusEl) statusEl.textContent = s; }
+  function clamp(x,a,b){ return Math.max(a, Math.min(b,x)); }
+
+  function updateTitle(){
+    if(!titleEl) return;
+    const cam = (facing === 'environment') ? 'Rear Camera' : 'Front Camera';
+    titleEl.textContent = cam + ' · Flicker estimate';
+  }
+
+  function sampleBrightness(){
+    if(!video || !ctx || video.readyState < 2) return null;
+    const w = canvas.width, h = canvas.height;
+    ctx.drawImage(video, 0, 0, w, h);
+    const img = ctx.getImageData(0,0,w,h).data;
+    let sum=0;
+    for(let i=0;i<img.length;i+=32){
+      const r=img[i], g=img[i+1], b=img[i+2];
+      sum += (0.2126*r + 0.7152*g + 0.0722*b);
+    }
+    const n = img.length/32;
+    return (sum/n)/255; // 0..1
+  }
+
+  function estimateFlicker(){
+    if(hist.length < 15) return {pct:0, freq:null};
+    const N = Math.min(hist.length, 90);
+    const slice = hist.slice(-N);
+    let mn=1, mx=0;
+    for(const v of slice){ mn=Math.min(mn,v); mx=Math.max(mx,v); }
+    const pct = (mx>1e-6) ? ((mx-mn)/mx)*100 : 0;
+
+    // Autocorrelation peak to estimate frequency (best-effort)
+    let bestLag = 0, bestCorr = 0;
+    const maxLag = Math.min(30, slice.length-2);
+    for(let lag=2; lag<=maxLag; lag++){
+      let c=0;
+      for(let i=0;i<slice.length-lag;i++){
+        c += slice[i]*slice[i+lag];
+      }
+      if(c>bestCorr){ bestCorr=c; bestLag=lag; }
+    }
+    const freq = (bestLag>0 && dtAvg>0) ? (1/(bestLag*dtAvg)) : null;
+    return {pct: clamp(pct,0,100), freq: (freq && isFinite(freq)) ? freq : null, mx, mn};
+  }
+
+  function drawWave(){
+    if(!wave || !wctx) return;
+    const W = wave.width, H = wave.height;
+    wctx.clearRect(0,0,W,H);
+    const N = Math.min(hist.length, 120);
+    const slice = hist.slice(-N);
+    if(slice.length < 2) return;
+    wctx.beginPath();
+    for(let i=0;i<slice.length;i++){
+      const x = (i/(slice.length-1))*W;
+      const y = H - slice[i]*H;
+      if(i===0) wctx.moveTo(x,y); else wctx.lineTo(x,y);
+    }
+    wctx.stroke();
+  }
+
+  function updateUI(est){
+    if(!pctEl) return;
+    pctEl.textContent = est.pct.toFixed(0) + "%";
+    if(notePct) notePct.textContent = est.pct.toFixed(0);
+    if(stripFill) stripFill.style.width = clamp(est.pct,0,100) + "%";
+    if(freqEl){
+      if(est.freq && est.freq>0){
+        freqEl.textContent = est.freq.toFixed(1) + " Hz";
+      }else{
+        freqEl.textContent = "--";
+      }
+    }
+    drawWave();
+  }
+
+  function loop(t){
+    if(!running) return;
+    if(!lastT) lastT = t;
+    const dt = (t-lastT)/1000;
+    lastT = t;
+    if(dt>0 && dt<0.2){
+      dtAvg = dtAvg*0.9 + dt*0.1;
+    }
+
+    if(!frozen){
+      const b = sampleBrightness();
+      if(b!=null){
+        hist.push(b);
+        if(hist.length>240) hist.shift();
+        const tooDark = b < 0.12;
+        if(overlay){
+          overlay.hidden = !tooDark;
+          if(tooDark && warnText) warnText.textContent = "Too dark to make a reliable measurement";
+        }
+        updateUI(estimateFlicker());
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+
+  async function startCamera(){
+    if(stream) return;
+    if(!navigator.mediaDevices || !window.CameraManager.getUserMedia){
+      setStatus("Camera: not supported");
+      return;
+    }
+    try{
+      setStatus("Camera: starting...");
+      stream = await window.CameraManager.getUserMedia({
+        video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false
+      }, {force:true});
+      video.srcObject = stream;
+      await video.play();
+      updateTitle();
+      setStatus("Camera: live");
+      running = true;
+      lastT = 0;
+      requestAnimationFrame(loop);
+    }catch(err){
+      console.error(err);
+      setStatus("Camera: blocked / no device");
+      stream = null;
+    }
+  }
+
+  function stopCamera(){
+    running = false;
+    frozen = false;
+    if(stream){
+      try{ stream.getTracks().forEach(t => t.stop()); }catch(_){}
+      try{ window.CameraManager && window.CameraManager.stop(); }catch(_e){}
+      stream = null;
+    }
+    if(video) video.srcObject = null;
+    setStatus("Camera: idle");
+    if(overlay) overlay.hidden = true;
+  }
+
+  function toggleFreeze(){
+    frozen = !frozen;
+    if(freezeBtn) freezeBtn.textContent = frozen ? "Unfreeze" : "Freeze";
+    setStatus(frozen ? "Camera: frozen" : "Camera: live");
+  }
+
+  async function switchCamera(){
+    facing = (facing === 'environment') ? 'user' : 'environment';
+    updateTitle();
+    stopCamera();
+    await startCamera();
+  }
+
+  function saveSnapshot(){
+    if(!canvas || !ctx || !video || video.readyState < 2) return;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const a = document.createElement('a');
+    a.download = 'flicker_meter_frame.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+    try{ showToast('Flicker snapshot saved ✓','success'); flashSaved(document.getElementById('flSaveBtn')); }catch(_){}
+  }
+
+  details.addEventListener('toggle', () => {
+    if(details.open){
+      updateTitle();
+      startCamera();
+    }else{
+      stopCamera();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    const tabBtn = e.target.closest('[data-tab]');
+    if(!tabBtn) return;
+    const isCal = String(tabBtn.getAttribute('data-tab')||'').toLowerCase() === 'calibration';
+    if(!isCal) stopCamera();
+  }, true);
+
+  if(freezeBtn) freezeBtn.addEventListener('click', toggleFreeze);
+  if(switchBtn) switchBtn.addEventListener('click', switchCamera);
+  if(saveBtn) saveBtn.addEventListener('click', saveSnapshot);
+  if(infoBtn) infoBtn.addEventListener('click', () => { if(info) info.hidden = false; });
+  if(infoClose) infoClose.addEventListener('click', () => { if(info) info.hidden = true; });
+
+})();
+</script>
+
 <script>
 /* === AV12: Intro gate enable "Got it, continue" reliably === */
 document.addEventListener('DOMContentLoaded', () => {
@@ -10533,7 +10992,7 @@ document.addEventListener('DOMContentLoaded', () => {
     starting: null,
     lastError: null,
     sinks() {
-      const ids = ['live-video','luxVideo','ctVideo','flVideo','specVideo'];
+      const ids = ['live-video'];
       return ids.map(id=>document.getElementById(id)).filter(Boolean);
     },
     statusEl() { return document.getElementById('cam-status'); },
@@ -10988,12 +11447,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
       camPointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
       if(camPointers.size===1){
         // start drag
-        canvas.style.touchAction = "none"; // only while interacting (prevents scroll-jank)
+        canvas.style.touchAction = "pan-y pinch-zoom"; // only while interacting (prevents scroll-jank)
       }else if(camPointers.size===2){
         const pts=[...camPointers.values()];
         camBaseDist = Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
         camBaseScale = camScale;
-        canvas.style.touchAction = "none";
+        canvas.style.touchAction = "pan-y pinch-zoom";
       }
     }, {passive:false});
 
