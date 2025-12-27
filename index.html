@@ -3748,7 +3748,242 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 }
 
 </style>
-<link href="manifest.webmanifest" rel="manifest"/><meta content="#0b0f18" name="theme-color"/><link href="icons/icon-180.png" rel="apple-touch-icon"/></head>
+<link href="manifest.webmanifest" rel="manifest"/><meta content="#0b0f18" name="theme-color"/><link href="icons/icon-180.png" rel="apple-touch-icon"/>
+<style id="v59_calibration_reference_screens">
+/* ============================================================
+   v59 — Calibration Fullscreen "Instrument Screen" (Reference-like)
+   Goal:
+   - In fullscreen: show a phone-sized instrument screen (gauge + readouts + camera)
+   - Fix "only the arc is visible" by allowing internal scroll if needed
+   - Make ticks look professional: black tick marks inside colored arcs
+   ============================================================ */
+
+/* Fullscreen layout: center a phone-sized card on desktop, fill on mobile */
+#tab-calibration .cal-tool-view.is-fullscreen{
+  padding:10px !important;
+}
+
+#tab-calibration .cal-tool-view.is-fullscreen .cal-tool-topbar,
+#tab-calibration .cal-tool-view.is-fullscreen .cal-tool-body{
+  max-width:460px !important;
+  width:min(460px, calc(100vw - 20px)) !important;
+  margin:0 auto !important;
+}
+
+#tab-calibration .cal-tool-view.is-fullscreen .cal-tool-body{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+}
+
+/* IMPORTANT: allow the *card* to scroll (prevents "missing camera" / "only arc") */
+#tab-calibration .cal-tool-view.is-fullscreen .soft-card{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  overflow:auto !important;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable both-edges;
+  padding-bottom:14px;
+}
+
+/* Keep the internal tool headers visible like an app topbar */
+#tab-calibration .cal-tool-view.is-fullscreen .lux-top,
+#tab-calibration .cal-tool-view.is-fullscreen .ct-top,
+#tab-calibration .cal-tool-view.is-fullscreen .fl-top,
+#tab-calibration .cal-tool-view.is-fullscreen .spec-top{
+  position:sticky;
+  top:0;
+  z-index:5;
+  background:inherit;
+  padding-top:12px;
+}
+
+/* Camera blocks: consistent height feel */
+#tab-calibration .cal-tool-view.is-fullscreen .lux-video-wrap.ct-video,
+#tab-calibration .cal-tool-view.is-fullscreen .lux-video-wrap.fl-video,
+#tab-calibration .cal-tool-view.is-fullscreen .lux-video-wrap.spec-video,
+#tab-calibration .cal-tool-view.is-fullscreen .lux-video-wrap.lux-cam{
+  height:220px !important;
+  border-radius:16px !important;
+  overflow:hidden !important;
+}
+#tab-calibration .cal-tool-view.is-fullscreen .lux-video-wrap video{
+  height:100% !important;
+  width:100% !important;
+  object-fit:cover !important;
+}
+
+/* Gauge sizing consistency (match reference app proportions) */
+#tab-calibration .cal-tool-view.is-fullscreen#caltool-ct .ct-gauge,
+#tab-calibration .cal-tool-view.is-fullscreen#caltool-flicker .fl-gauge,
+#tab-calibration .cal-tool-view.is-fullscreen#caltool-spectrum .spec-gauge{
+  width:320px !important;
+  height:250px !important;
+  margin:0 auto !important;
+}
+
+/* Slightly "instrument" panel look */
+#tab-calibration #caltool-ct .ct-gauge,
+#tab-calibration #caltool-flicker .fl-gauge,
+#tab-calibration #caltool-spectrum .spec-gauge{
+  background:radial-gradient(circle at 50% 35%, rgba(255,255,255,.10) 0%, rgba(18,22,36,.92) 58%, rgba(10,12,22,.96) 100%) !important;
+}
+
+/* ============================================================
+   Black ticks INSIDE arcs — like the reference screenshots
+   (Layer repeating conic gradients on top of the color arc)
+   ============================================================ */
+
+/* CT arc: warm→cold, with black ticks */
+#tab-calibration #caltool-ct .ct-arc{
+  background:
+    repeating-conic-gradient(from 220deg,
+      rgba(0,0,0,.75) 0 2deg, transparent 2deg 30deg),
+    repeating-conic-gradient(from 220deg,
+      rgba(0,0,0,.55) 0 1deg, transparent 1deg 6deg),
+    conic-gradient(from 220deg,
+      #ffb07a 0deg, #ffd7b0 45deg, #ffffff 90deg, #cfe1ff 140deg, #8bb6ff 210deg, #7aa0ff 280deg) !important;
+  -webkit-mask:radial-gradient(circle, transparent 0 58%, #000 59%) !important;
+          mask:radial-gradient(circle, transparent 0 58%, #000 59%) !important;
+  opacity:1 !important;
+}
+
+/* Flicker arc: green→yellow→red, with black ticks */
+#tab-calibration #caltool-flicker .fl-arc{
+  background:
+    repeating-conic-gradient(from 220deg,
+      rgba(0,0,0,.75) 0 2deg, transparent 2deg 30deg),
+    repeating-conic-gradient(from 220deg,
+      rgba(0,0,0,.55) 0 1deg, transparent 1deg 6deg),
+    conic-gradient(from 220deg,
+      #38d47a 0deg, #b7ff00 90deg, #ffd000 150deg, #ff7a00 210deg, #ff2e2e 280deg) !important;
+  -webkit-mask:radial-gradient(circle, transparent 0 58%, #000 59%) !important;
+          mask:radial-gradient(circle, transparent 0 58%, #000 59%) !important;
+  opacity:1 !important;
+}
+
+/* Spectrum arc: blue→red, with black ticks */
+#tab-calibration #caltool-spectrum .spec-arc{
+  background:
+    repeating-conic-gradient(from 220deg,
+      rgba(0,0,0,.75) 0 2deg, transparent 2deg 30deg),
+    repeating-conic-gradient(from 220deg,
+      rgba(0,0,0,.55) 0 1deg, transparent 1deg 6deg),
+    conic-gradient(from 220deg,
+      #2e5bff 0deg, #1fb6ff 30deg, #00ffb3 70deg, #b7ff00 110deg,
+      #ffd000 150deg, #ff7a00 190deg, #ff2e2e 240deg, #ff2e2e 280deg) !important;
+  -webkit-mask:radial-gradient(circle, transparent 0 58%, #000 59%) !important;
+          mask:radial-gradient(circle, transparent 0 58%, #000 59%) !important;
+  opacity:1 !important;
+}
+
+/* Needles: more "instrument" (neutral, not neon) */
+#tab-calibration #caltool-ct .ct-needle,
+#tab-calibration #caltool-flicker .fl-needle,
+#tab-calibration #caltool-spectrum .spec-needle{
+  background:linear-gradient(#666,#111) !important;
+  box-shadow:none !important;
+  opacity:.85;
+}
+
+/* Center readouts: pill like the reference app */
+#tab-calibration #caltool-ct .ct-center,
+#tab-calibration #caltool-flicker .fl-center,
+#tab-calibration #caltool-spectrum .spec-center{
+  background:rgba(0,0,0,.25) !important;
+  border:1px solid rgba(255,255,255,.14) !important;
+  border-radius:18px !important;
+  padding:12px 16px !important;
+  backdrop-filter:blur(10px);
+}
+
+/* Big numbers: consistent emphasis */
+#tab-calibration #caltool-ct .ct-big{font-size:56px !important;}
+#tab-calibration #caltool-spectrum .spec-big{font-size:64px !important;}
+#tab-calibration #caltool-flicker .fl-big{font-size:58px !important;}
+
+/* Spectrum: make saturation look like the small bar under the arc */
+#tab-calibration #caltool-spectrum .spec-metrics{
+  margin-top:10px !important;
+}
+#tab-calibration #caltool-spectrum .spec-metric{
+  padding:10px 12px !important;
+}
+
+/* Flicker: make strip look like a compact colored bar */
+#tab-calibration #caltool-flicker .fl-strip-track{
+  height:10px !important;
+  border-radius:8px !important;
+}
+#tab-calibration #caltool-flicker .fl-strip-fill{
+  border-radius:8px !important;
+}
+
+/* Fullscreen: keep tool content spaced like a single app screen */
+#tab-calibration .cal-tool-view.is-fullscreen .ct-ui,
+#tab-calibration .cal-tool-view.is-fullscreen .fl-ui,
+#tab-calibration .cal-tool-view.is-fullscreen .spec-ui,
+#tab-calibration .cal-tool-view.is-fullscreen .lux-ui{
+  gap:12px !important;
+}
+
+/* Prevent weird scaling of internal icons/buttons */
+#tab-calibration .lux-icon{width:34px !important;height:34px !important;}
+</style>
+
+
+<style id="v60_spectrum_satstrip">
+/* v60 — Light Spectrometer saturation strip under the arc */
+#tab-calibration #caltool-spectrum .spec-satstrip{
+  margin: 0 14px 2px;
+  padding: 8px 10px 10px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+}
+#tab-calibration #caltool-spectrum .spec-satstrip-label{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  font-weight:900;
+  color: rgba(235,240,255,.92);
+  margin-bottom:8px;
+}
+#tab-calibration #caltool-spectrum #specSatPct{
+  font-weight:900;
+  opacity:.92;
+}
+#tab-calibration #caltool-spectrum .spec-satstrip-track{
+  position:relative;
+  height: 12px;
+  border-radius: 999px;
+  overflow:hidden;
+  background: rgba(0,0,0,.28);
+  border: 1px solid rgba(255,255,255,.08);
+}
+#tab-calibration #caltool-spectrum .spec-satstrip-track::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    repeating-linear-gradient(to right,
+      rgba(0,0,0,.55) 0 2px,
+      transparent 2px 10%);
+  opacity:.55;
+  pointer-events:none;
+}
+#tab-calibration #caltool-spectrum .spec-satstrip-fill{
+  height:100%;
+  width:0%;
+  border-radius:999px;
+  background: linear-gradient(90deg, #2e5bff 0%, #00ffb3 30%, #b7ff00 55%, #ffd000 70%, #ff7a00 85%, #ff2e2e 100%);
+  box-shadow: 0 0 0 1px rgba(0,0,0,.12) inset;
+}
+</style>
+
+</head>
 <body>
 <div class="intro-overlay" hidden="" id="introGate">
 <div aria-modal="true" class="intro-card" role="dialog">
@@ -4213,9 +4448,6 @@ body.cal-fs-active nav.main-menu{display:none !important;}
   <div class="cal-inline-title">Camera</div>
   <div class="cal-inline-actions">
     <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-    <button class="lux-icon cam-torch-btn" title="Torch" type="button" aria-pressed="false"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M9 2h6v3H9V2Zm1 5h4v2h1c.6 0 1 .4 1 1v3.2c0 .3.1.6.3.8l1.9 2.3c.5.6.1 1.5-.7 1.5H6.5c-.8 0-1.2-.9-.7-1.5l1.9-2.3c.2-.2.3-.5.3-.8V10c0-.6.4-1 1-1h1V7Zm0 5.2v1.1c0 .8-.3 1.5-.8 2.1L8 16h8l-1.2-1.6c-.5-.6-.8-1.3-.8-2.1v-1.1H10Z"/>
-</svg></button>
   </div>
 </div>
 <div class="cam-wrap">
@@ -4269,9 +4501,6 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 <div class="lux-icons">
 <button class="lux-icon" id="luxInfoBtn" title="Info" type="button">i</button>
 <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-    <button class="lux-icon cam-torch-btn" title="Torch" type="button" aria-pressed="false"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M9 2h6v3H9V2Zm1 5h4v2h1c.6 0 1 .4 1 1v3.2c0 .3.1.6.3.8l1.9 2.3c.5.6.1 1.5-.7 1.5H6.5c-.8 0-1.2-.9-.7-1.5l1.9-2.3c.2-.2.3-.5.3-.8V10c0-.6.4-1 1-1h1V7Zm0 5.2v1.1c0 .8-.3 1.5-.8 2.1L8 16h8l-1.2-1.6c-.5-.6-.8-1.3-.8-2.1v-1.1H10Z"/>
-</svg></button>
 <button class="lux-icon" id="luxSwitchBtn" title="Switch Camera" type="button">⟳</button>
 </div>
 </div>
@@ -4383,9 +4612,6 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 <div class="ct-icons">
 <button class="lux-icon" id="ctInfoBtn" title="Info" type="button">i</button>
 <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-    <button class="lux-icon cam-torch-btn" title="Torch" type="button" aria-pressed="false"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M9 2h6v3H9V2Zm1 5h4v2h1c.6 0 1 .4 1 1v3.2c0 .3.1.6.3.8l1.9 2.3c.5.6.1 1.5-.7 1.5H6.5c-.8 0-1.2-.9-.7-1.5l1.9-2.3c.2-.2.3-.5.3-.8V10c0-.6.4-1 1-1h1V7Zm0 5.2v1.1c0 .8-.3 1.5-.8 2.1L8 16h8l-1.2-1.6c-.5-.6-.8-1.3-.8-2.1v-1.1H10Z"/>
-</svg></button>
 <button class="lux-icon" id="ctSwitchBtn" title="Switch Camera" type="button">⟳</button>
 <button class="lux-icon" id="ctSaveBtn" title="Save" type="button">💾</button>
 </div>
@@ -4475,9 +4701,6 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 <div class="fl-icons">
 <button class="lux-icon" id="flInfoBtn" title="Info" type="button">i</button>
 <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-    <button class="lux-icon cam-torch-btn" title="Torch" type="button" aria-pressed="false"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M9 2h6v3H9V2Zm1 5h4v2h1c.6 0 1 .4 1 1v3.2c0 .3.1.6.3.8l1.9 2.3c.5.6.1 1.5-.7 1.5H6.5c-.8 0-1.2-.9-.7-1.5l1.9-2.3c.2-.2.3-.5.3-.8V10c0-.6.4-1 1-1h1V7Zm0 5.2v1.1c0 .8-.3 1.5-.8 2.1L8 16h8l-1.2-1.6c-.5-.6-.8-1.3-.8-2.1v-1.1H10Z"/>
-</svg></button>
 <button class="lux-icon" id="flSwitchBtn" title="Switch Camera" type="button">⟳</button>
 <button class="lux-icon" id="flSaveBtn" title="Save" type="button">💾</button>
 </div>
@@ -4560,9 +4783,6 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 <div class="spec-icons">
 <button class="lux-icon" id="specInfoBtn" title="Info" type="button">i</button>
 <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-    <button class="lux-icon cam-torch-btn" title="Torch" type="button" aria-pressed="false"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M9 2h6v3H9V2Zm1 5h4v2h1c.6 0 1 .4 1 1v3.2c0 .3.1.6.3.8l1.9 2.3c.5.6.1 1.5-.7 1.5H6.5c-.8 0-1.2-.9-.7-1.5l1.9-2.3c.2-.2.3-.5.3-.8V10c0-.6.4-1 1-1h1V7Zm0 5.2v1.1c0 .8-.3 1.5-.8 2.1L8 16h8l-1.2-1.6c-.5-.6-.8-1.3-.8-2.1v-1.1H10Z"/>
-</svg></button>
 <button class="lux-icon" id="specSwitchBtn" title="Switch Camera" type="button">⟳</button>
 </div>
 </div>
@@ -4583,6 +4803,17 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 </div>
 </div>
 </div>
+
+<!-- v60: saturation strip under the arc (reference-like) -->
+<div class="spec-satstrip" aria-label="Color saturation">
+  <div class="spec-satstrip-label">
+    Color Saturation <span id="specSatPct">--%</span>
+  </div>
+  <div class="spec-satstrip-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <div class="spec-satstrip-fill" id="specSatFill" style="width:0%"></div>
+  </div>
+</div>
+
 <div class="spec-metrics">
 <div class="spec-metric">
 <div class="spec-m-h">Frequency</div>
@@ -12311,90 +12542,26 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 
-<style id="v50_torch_constructive">
-/* v50 — Torch button (SVG) uses existing .lux-icon sizing. */
-.cam-torch-btn .icon-svg{
-  width:18px; height:18px; display:block;
-  fill: currentColor;
-}
-.cam-torch-btn[disabled]{ opacity:.45; cursor:not-allowed; }
-.cam-torch-btn.is-on,
-.cam-torch-btn[aria-pressed="true"]{
-  border-color: rgba(255,193,77,.9) !important;
-  background: rgba(255,193,77,.14) !important;
-  color: rgba(255,233,194,.98) !important;
-  box-shadow: 0 0 0 2px rgba(255,193,77,.18), 0 0 14px rgba(255,193,77,.25);
-}
-</style>
-
-
-<script id="v50_torch_manager">
+<script id="v60_spectrum_satstrip_sync">
+/* v60 — Sync saturation strip under Light Spectrometer */
 (function(){
-  const state = { on:false };
+  const src = document.getElementById('specSat');
+  const fill = document.getElementById('specSatFill');
+  const pct = document.getElementById('specSatPct');
+  const track = document.querySelector('#tab-calibration #caltool-spectrum .spec-satstrip-track');
+  if(!src || !fill || !pct || !track) return;
 
-  function getActiveTrack(){
-    const vids = [
-      document.querySelector('#tab-calibration #tab-camera video'),
-      document.querySelector('#tab-camera video'),
-      ...Array.from(document.querySelectorAll('video'))
-    ].filter(Boolean);
-    for(const v of vids){
-      const s = v.srcObject;
-      if(s && s.getVideoTracks && s.getVideoTracks().length) return s.getVideoTracks()[0];
-    }
-    return null;
+  function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+  function tick(){
+    const m = (src.textContent || '').match(/([0-9]+(?:\.[0-9]+)?)/);
+    const v = m ? clamp(parseFloat(m[1]), 0, 100) : 0;
+    fill.style.width = v.toFixed(1) + '%';
+    pct.textContent = Math.round(v) + '%';
+    track.setAttribute('aria-valuenow', String(Math.round(v)));
+    requestAnimationFrame(tick);
   }
-
-  function setButtonsStatus(){
-    const track = getActiveTrack();
-    let supported = false;
-    if(track && track.getCapabilities){
-      const caps = track.getCapabilities();
-      supported = !!caps && ('torch' in caps);
-    }
-    document.querySelectorAll('.cam-torch-btn').forEach(btn=>{
-      // If camera not started: keep enabled but explain
-      if(!track){
-        btn.disabled = false;
-        btn.title = 'Start camera first';
-        btn.setAttribute('aria-pressed', state.on ? 'true':'false');
-        btn.classList.toggle('is-on', state.on);
-        return;
-      }
-      btn.disabled = !supported;
-      btn.title = supported ? (state.on ? 'Torch: ON' : 'Torch: OFF') : 'Torch not supported on this device';
-      btn.setAttribute('aria-pressed', state.on ? 'true':'false');
-      btn.classList.toggle('is-on', state.on);
-    });
-  }
-
-  async function toggleTorch(){
-    const track = getActiveTrack();
-    if(!track) throw new Error('Start camera first');
-    const caps = track.getCapabilities ? track.getCapabilities() : {};
-    if(!caps || !('torch' in caps)) throw new Error('Torch not supported');
-    state.on = !state.on;
-    await track.applyConstraints({advanced:[{torch: state.on}]});
-    setButtonsStatus();
-  }
-
-  document.addEventListener('click', async (e)=>{
-    const btn = e.target.closest('.cam-torch-btn');
-    if(!btn) return;
-    e.preventDefault();
-    e.stopPropagation();
-    try{
-      await toggleTorch();
-    }catch(err){
-      const msg = err?.message || 'Torch failed';
-      if(typeof window.toast === 'function') window.toast(msg);
-      else console.warn(msg);
-      setButtonsStatus();
-    }
-  }, {capture:true});
-
-  // Keep status in sync when camera starts/stops
-  setInterval(setButtonsStatus, 800);
+  tick();
 })();
 </script>
 
