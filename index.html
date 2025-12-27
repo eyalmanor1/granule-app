@@ -2769,6 +2769,31 @@ details.acc[open] summary{ filter:brightness(1.02); }
   width:34px;height:34px;border-radius:10px;border:1px solid #34406a;
   background:#22294a;color:#cbd5ff;font-weight:900;cursor:pointer;
 }
+
+/* Calibration full-screen mode */
+.cal-tool-view.is-fullscreen{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:9999 !important;
+  background:var(--app-bg, #0b0e18) !important;
+  overflow:auto !important;
+  padding:12px 12px 24px !important;
+}
+body.cal-fs-active{
+  overflow:hidden !important;
+  touch-action:none;
+}
+body.cal-fs-active #bottomMenu{display:none !important;}
+body.cal-fs-active .tabs-nav,
+body.cal-fs-active .top-nav,
+body.cal-fs-active nav.main-menu{display:none !important;}
+/* Make the tool card fill nicely */
+.cal-tool-view.is-fullscreen .cal-tool-body{max-width:980px;margin:0 auto;}
+.cal-tool-view.is-fullscreen .soft-card{box-shadow:none !important;}
+/* Ensure video regions don't block vertical scrolling */
+#tab-calibration .cal-tool-view.is-fullscreen video{
+  touch-action:pan-y;
+}
 .lux-icon:hover{filter:brightness(1.1)}
 
 .lux-gauge-wrap{display:flex;justify-content:center;padding:10px 0 6px}
@@ -4231,6 +4256,7 @@ details.acc[open] summary{ filter:brightness(1.02); }
 <div class="fl-title">Flicker Meter</div>
 <div class="fl-icons">
 <button class="lux-icon" id="flInfoBtn" title="Info" type="button">i</button>
+<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
 <button class="lux-icon" id="flSwitchBtn" title="Switch Camera" type="button">⟳</button>
 <button class="lux-icon" id="flSaveBtn" title="Save" type="button">💾</button>
 </div>
@@ -6102,6 +6128,49 @@ function initCalibrationNav(){
   });
   document.querySelectorAll('#tab-calibration [data-calback]').forEach(btn=>{
     btn.addEventListener('click', showHome);
+  });
+
+  // expose for other handlers (e.g., full-screen exit)
+  window.__calShowHome = showHome;
+  window.__calShowTool = showTool;
+
+  // Full-screen toggle for calibration tools (acts like a mini "sub-app" mode)
+  function toggleFullscreenFor(view){
+    if(!view) return;
+    const on = !view.classList.contains('is-fullscreen');
+    // turn off any other fullscreen tool
+    document.querySelectorAll('#tab-calibration .cal-tool-view.is-fullscreen').forEach(v=>{
+      if(v !== view) v.classList.remove('is-fullscreen');
+    });
+    view.classList.toggle('is-fullscreen', on);
+    document.body.classList.toggle('cal-fs-active', on);
+    if(on){
+      view.scrollTop = 0;
+    }else{
+      // return to accordion/home view when exiting fullscreen
+      showHome();
+      document.body.classList.remove('cal-fs-active');
+    }
+  }
+
+  // button inside each tool header
+  document.querySelectorAll('#tab-calibration .cal-fs-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const view = btn.closest('.cal-tool-view');
+      toggleFullscreenFor(view);
+    });
+  });
+
+  // ESC exits fullscreen (desktop)
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape'){
+      const fs = document.querySelector('#tab-calibration .cal-tool-view.is-fullscreen');
+      if(fs){
+        fs.classList.remove('is-fullscreen');
+        document.body.classList.remove('cal-fs-active');
+        showHome();
+      }
+    }
   });
 
   // default state
