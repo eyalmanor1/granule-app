@@ -6463,7 +6463,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const b = e.target.closest('.acc-btn');
       if(!b) return;
       const item = b.closest('.acc-item');
-      const = item.classList.contains('open');
+      const open = item.classList.contains('open');
 
       // close all
       acc.querySelectorAll('.acc-item.open').forEach(it => {
