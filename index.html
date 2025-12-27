@@ -3352,6 +3352,9 @@ details.acc[open] summary{ filter:brightness(1.02); }
   touch-action: pan-y pinch-zoom;
 }
 
+
+/* Ensure HF chromatic outputs are visible */
+#hfColorOrderBox, #hfCannotUseBox{ font-weight:600; }
 </style>
 <style id="modern-shell">
   :root{
@@ -3556,7 +3559,7 @@ details.acc[open] summary{ filter:brightness(1.02); }
 <div aria-modal="true" class="intro-card" role="dialog">
 <div class="intro-head">
 <div class="intro-title">Welcome — Read Before Use</div>
-<div class="intro-sub">First run only. You must scroll to the bottom and confirm.</div>
+<div class="intro-sub">First run only. Tap Skip to continue.</div>
 </div>
 <div class="intro-scroll" id="introGateScroll">
 <h2>Overview</h2>
@@ -3584,12 +3587,8 @@ details.acc[open] summary{ filter:brightness(1.02); }
 <div class="intro-spacer"></div>
 <div class="intro-end">End of introduction.</div>
 </div>
-<div class="intro-confirm">
-<label class="intro-check">
-<input id="introGateChk" type="checkbox"/>
-<span>I have read and understood the introduction.</span>
-</label>
-<button class="intro-btn" disabled="" id="introGateBtn" type="button">Got it / Continue</button>
+<div class="intro-confirm" style="justify-content:flex-end">
+<button class="intro-btn" id="introGateBtn" type="button">Skip</button>
 </div>
 </div>
 </div>
@@ -3601,7 +3600,7 @@ details.acc[open] summary{ filter:brightness(1.02); }
 </div>
 <div class="intro-scroll" id="tabHelpBody"></div>
 <div class="intro-confirm" style="justify-content:flex-end">
-<button class="intro-btn" id="tabHelpContinue" type="button">Got it / Continue</button>
+<button class="intro-btn" id="tabHelpContinue" type="button">Skip</button>
 </div>
 </div>
 </div>
@@ -9740,18 +9739,20 @@ function openCalibrationTool(which){
     return (scrollBox.scrollTop + scrollBox.clientHeight) >= (scrollBox.scrollHeight - 2);
   }
   function update(){
-    btn.disabled = !(atBottom() && chk.checked);
+    btn.disabled = false;
   }
   function openGate(){
     gate.hidden = false;
     scrollBox.scrollTop = 0;
-    chk.checked = false;
+    if(chk) chk.checked = false;
     update();
   }
   function closeGate(){
     try{ localStorage.setItem(INTRO_KEY,'yes'); }catch(e){}
     gate.hidden = true;
-  }
+    // Go straight to Calibration after intro
+    try{ if(typeof window.switchTab==='function') window.switchTab('calibration'); }catch(e){}
+}
 
   let accepted = false;
   try{ accepted = localStorage.getItem(INTRO_KEY) === 'yes'; }catch(e){ accepted = false; }
@@ -9784,8 +9785,8 @@ function openCalibrationTool(which){
   }
 
   scrollBox.addEventListener('scroll', update, {passive:true});
-  chk.addEventListener('change', update);
-  btn.addEventListener('click', closeGate);
+  if(chk) chk.addEventListener('change', update);
+btn.addEventListener('click', closeGate);
 
 /* === v44 Detailed per-tab help overlay: once per tab, keyed by real label/data-tab. === */
 (function(){
@@ -11997,6 +11998,21 @@ document.addEventListener('DOMContentLoaded', () => {
       }, {capture:true});
     }
   });
+})();
+</script>
+
+
+<script>
+/* Ensure Analysis accordion content refreshes when opened (e.g., Sorting HF extras) */
+(function(){
+  document.addEventListener('toggle', (e)=>{
+    const d = e.target;
+    if(!d || d.tagName !== 'DETAILS') return;
+    if(!d.closest('#tab-analysis')) return;
+    if(typeof window.updateAnalysis === 'function'){
+      setTimeout(()=>{ try{ window.updateAnalysis(); }catch(err){} }, 0);
+    }
+  }, true);
 })();
 </script>
 
