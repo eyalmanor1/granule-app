@@ -2778,7 +2778,7 @@ details.acc[open] summary{ filter:brightness(1.02); }
 /* Calibration full-screen mode */
 
 /* Fullscreen: hide per-tool fullscreen buttons; use header toggle only */
-.cal-tool-view.is-fullscreen .cal-fs-btn{display:none !important;}
+.cal-tool-view.is-fullscreen .cal-fs-btn{display:inline-flex !important;}
 .cal-tool-view.is-fullscreen .cam-fs-btn{display:none !important;}
 .cal-tool-view.is-fullscreen{
   position:fixed !important;
@@ -2791,6 +2791,34 @@ details.acc[open] summary{ filter:brightness(1.02); }
   flex-direction:column !important;
 }
 
+
+
+/* Camera tool: true full-bleed fullscreen + always-visible toggle */
+#tab-camera.is-fullscreen .cal-inline-topbar{
+  position:fixed !important;
+  top:12px !important;
+  left:12px !important;
+  right:12px !important;
+  z-index:10020 !important;
+  background: linear-gradient(180deg, rgba(10,12,22,0.78), rgba(10,12,22,0.20)) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  backdrop-filter: blur(10px);
+}
+#tab-camera.is-fullscreen .cam-wrap{ flex:1 !important; min-height:0 !important; display:flex !important; }
+#tab-camera.is-fullscreen .cam-pane,
+#tab-camera.is-fullscreen .cam-card,
+#tab-camera.is-fullscreen .cam-view,
+#tab-camera.is-fullscreen .cam-frame{
+  flex:1 !important;
+  min-height:0 !important;
+}
+#tab-camera.is-fullscreen video{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  display:block !important;
+}
+#tab-camera.is-fullscreen h3{ display:none !important; }
 
 /* Full-screen: compact & proportional (NO transform scaling; avoid overlaps) */
 .cal-tool-view.is-fullscreen{
@@ -6429,6 +6457,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 // ===== Calibration navigation =====
 function initCalibrationNav(){
+  const tab = document.getElementById('tab-calibration');
+  if(!tab) return;
+
+  // Optional legacy "home/tool view" navigation (kept for backward-compatibility if elements exist)
   const calHome = document.getElementById('cal-home');
   const views = {
     lux: document.getElementById('caltool-lux'),
@@ -6438,205 +6470,180 @@ function initCalibrationNav(){
   };
 
   function showHome(){
-    if(calHome) calHome.hidden = false; calHome.style.display = 'block';
-    Object.values(views).forEach(v=>{ if(v) v.hidden = true; v.style.display = 'none'; });
-    // scroll to top so sticky header aligns nicely
-    const tab = document.getElementById('tab-calibration');
-    if(tab) tab.scrollTop = 0;
+    if(calHome){
+      calHome.hidden = false;
+      calHome.style.display = 'block';
+    }
+    Object.values(views).forEach(v=>{
+      if(!v) return;
+      v.hidden = true;
+      v.style.display = 'none';
+    });
+    // Keep UX consistent
+    tab.scrollTop = 0;
   }
   function showTool(key){
-    if(!views[key]) return;
-    if(calHome) calHome.hidden = true; calHome.style.display = 'none';
-    Object.entries(views).forEach(([k,v])=>{ if(v) v.hidden = (k!==key); });
-    const tab = document.getElementById('tab-calibration');
-    if(tab) tab.scrollTop = 0;
+    const view = views[key];
+    if(!view) return;
+    if(calHome){
+      calHome.hidden = true;
+      calHome.style.display = 'none';
+    }
+    Object.entries(views).forEach(([k,v])=>{
+      if(!v) return;
+      v.hidden = (k !== key);
+      v.style.display = (k !== key) ? 'none' : '';
+    });
+    tab.scrollTop = 0;
   }
 
-  document.querySelectorAll('#tab-calibration [data-caltool]').forEach(btn=>{
+  tab.querySelectorAll('[data-caltool]').forEach(btn=>{
     btn.addEventListener('click', ()=> showTool(btn.getAttribute('data-caltool')));
   });
-  document.querySelectorAll('#tab-calibration [data-calback]').forEach(btn=>{
-    btn.addEventListener('click', showHome);
-  });
 
-  // expose for other handlers (e.g., full-screen exit)
-  window.__calShowHome = showHome;
-  window.__calShowTool = showTool;
+  // ===== Fullscreen: one toggle button (⛶) only. No Back. =====
+  const portalMap = new Map();
 
-  // Full-screen toggle for calibration tools (acts like a mini "sub-app" mode)
-  function toggleFullscreenFor(view){
+  function portalIn(view){
+    if(!view || portalMap.has(view)) return;
+    const parent = view.parentNode;
+    if(!parent) return;
+    const placeholder = document.createComment('cal-fs-placeholder');
+    parent.insertBefore(placeholder, view);
+    portalMap.set(view, { parent, placeholder });
+    document.body.appendChild(view);
+  }
+
+  function portalOut(view){
+    const st = portalMap.get(view);
+    if(!st) return;
+    st.parent.insertBefore(view, st.placeholder);
+    st.placeholder.remove();
+    portalMap.delete(view);
+  }
+
+  function setFsButtonState(view, on){
+    const btn = view ? view.querySelector('.cal-inline-topbar .cal-fs-btn') : null;
+    if(!btn) return;
+    btn.setAttribute('aria-label', on ? 'Exit full screen' : 'Full screen');
+    btn.title = on ? 'Exit full screen' : 'Full screen';
+    // Keep the same glyph, but you can swap if you want different icons.
+    btn.textContent = '⛶';
+  }
+
+  function setFullscreen(view, on){
     if(!view) return;
 
-    // Portal the fullscreen view to <body> so iOS fixed positioning works reliably
-    const portalIn = (v)=>{
-      if(!v) return;
-      if(!toggleFullscreenFor._portal) toggleFullscreenFor._portal = new Map();
-      const map = toggleFullscreenFor._portal;
-      if(map.has(v)) return;
-      const parent = v.parentNode;
-      const placeholder = document.createComment('cal-fs-placeholder');
-      parent.insertBefore(placeholder, v);
-      map.set(v, { parent, placeholder });
-      document.body.appendChild(v);
-    };
-    const portalOut = (v)=>{
-      if(!v) return;
-      const map = toggleFullscreenFor._portal;
-      if(!map || !map.has(v)) return;
-      const st = map.get(v);
-      st.parent.insertBefore(v, st.placeholder);
-      st.placeholder.remove();
-      map.delete(v);
-    };
-
-    const on = !view.classList.contains('is-fullscreen');
-
-    // turn off any other fullscreen tool (and de-portal it)
-    document.querySelectorAll('#tab-calibration .cal-tool-view.is-fullscreen').forEach(v=>{
+    // close any other fullscreen tool first
+    document.querySelectorAll('.cal-tool-view.is-fullscreen').forEach(v=>{
       if(v !== view){
         v.classList.remove('is-fullscreen');
-        portalOut(v);
+        setFsButtonState(v, false);
+        try { portalOut(v); } catch(_) {}
       }
     });
 
+    const isCamera = (view.id === 'tab-camera');
+
     if(on){
-      portalIn(view);
+      // Portal breaks some iOS interactions for the Camera tool; keep it in-place.
+      if(!isCamera){
+        portalIn(view);
+      }
       view.classList.add('is-fullscreen');
       document.body.classList.add('cal-fs-active');
       view.scrollTop = 0;
+      setFsButtonState(view, true);
     }else{
       view.classList.remove('is-fullscreen');
       document.body.classList.remove('cal-fs-active');
-      portalOut(view);
-      // return to accordion/home view when exiting fullscreen
-      showHome();
+      setFsButtonState(view, false);
+      try { if(!isCamera) portalOut(view); } catch(_) {}
+      // Return to the calibration accordion context
+      tab.scrollTop = 0;
     }
   }
-
-  // button inside each tool header
-  document.querySelectorAll('#tab-calibration .cal-fs-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const view = btn.closest('.cal-tool-view');
-      toggleFullscreenFor(view);
-    });
-  });
 
   // ESC exits fullscreen (desktop)
   document.addEventListener('keydown', (e)=>{
     if(e.key === 'Escape'){
-      const fs = document.querySelector('#tab-calibration .cal-tool-view.is-fullscreen');
-      if(fs){
-        toggleFullscreenFor(fs);
-      }
+      const fs = document.querySelector('.cal-tool-view.is-fullscreen');
+      if(fs) setFullscreen(fs, false);
     }
   });
-  // --- Calibration UX hardening: unified fullscreen header + info close + remove Save buttons ---
-  function ensureFsHeader(view){
-    if(!view || view.querySelector('.cal-fs-header')) return;
-    const titleEl = view.querySelector('.cal-tool-h') || view.querySelector('.cal-inline-title') || view.querySelector('.lux-title') || view.querySelector('.ct-title') || view.querySelector('.fl-title') || view.querySelector('.spec-title');
-    const title = titleEl ? (titleEl.textContent || '').trim() : 'Calibration';
-    const hdr = document.createElement('div');
-    hdr.className = 'cal-fs-header';
-    hdr.innerHTML = `
-      <div class="cal-fs-left">
-        <div class="cal-fs-title"></div>
-      </div>
-      <div class="cal-fs-actions">
-        <button type="button" class="cal-fs-toggle" aria-label="Exit full screen">⛶</button>
-      </div>
-    `;
-    hdr.querySelector('.cal-fs-title').textContent = title;
-    view.insertBefore(hdr, view.firstChild);
-  }
 
-  function addInfoCloseButtons(){
-    const infos = document.querySelectorAll('#tab-calibration .lux-info, #tab-calibration .ct-info, #tab-calibration .fl-info, #tab-calibration .spec-info');
+  // ===== Info sheets: always have a working Close at the bottom =====
+  function ensureInfoCloseButtons(){
+    const infos = tab.querySelectorAll('.lux-info, .ct-info, .fl-info, .spec-info');
     infos.forEach(info=>{
       const card = info.querySelector('.lux-info-card, .ct-info-card, .fl-info-card, .spec-info-card') || info.firstElementChild;
       if(!card) return;
       if(card.querySelector('.cal-info-close')) return;
       const row = document.createElement('div');
       row.className = 'cal-info-close-row';
-      row.innerHTML = `<button type="button" class="cal-info-close">Close</button>`;
+      row.innerHTML = '<button type="button" class="cal-info-close">Close</button>';
       card.appendChild(row);
     });
   }
 
+  // Remove Save buttons inside Calibration (per request)
   function removeCalibrationSaveButtons(){
-    document.querySelectorAll('#tab-calibration button').forEach(b=>{
-      const t = (b.textContent||'').trim().toLowerCase();
-      const ti = (b.getAttribute('title')||'').trim().toLowerCase();
+    tab.querySelectorAll('button').forEach(b=>{
+      const t = (b.textContent || '').trim().toLowerCase();
+      const ti = (b.getAttribute('title') || '').trim().toLowerCase();
       if(t === 'save' || ti === 'save' || ti.includes('save')){
-        // Keep non-calibration saves elsewhere; here we only target within Calibration tab.
         b.style.display = 'none';
         b.setAttribute('aria-hidden','true');
       }
     });
   }
 
-  // Event delegation: works even after portaling to body in fullscreen
-  document.addEventListener('click', (e)=>{
-    const fsBtn = e.target.closest('#tab-calibration .cal-fs-btn');
-    const fsHdrToggle = e.target.closest('#tab-calibration .cal-fs-toggle');
-    const fsHdrBack = e.target.closest('#tab-calibration .cal-fs-back');
-    const backBtn = e.target.closest('#tab-calibration [data-calback], #tab-calibration .cal-back-btn');
-    const closeBtn = e.target.closest('#tab-calibration .cal-info-close');
-    const infoOverlay = e.target.closest('#tab-calibration .lux-info, #tab-calibration .ct-info, #tab-calibration .fl-info, #tab-calibration .spec-info');
+  ensureInfoCloseButtons();
+  removeCalibrationSaveButtons();
 
-    if(fsBtn || fsHdrToggle){
-      const btn = fsBtn || fsHdrToggle;
-      const view = btn.closest('.cal-tool-view');
+  // ===== Event delegation (works even after portaling to <body>) =====
+  document.addEventListener('click', (e)=>{
+    // Fullscreen toggle (works in normal + fullscreen)
+    const fsBtn = e.target.closest('.cal-fs-btn');
+    if(fsBtn){
+      const view = fsBtn.closest('.cal-tool-view');
       if(view){
-        ensureFsHeader(view);
-        toggleFullscreenFor(view);
+        const on = !view.classList.contains('is-fullscreen');
+        setFullscreen(view, on);
       }
       e.preventDefault();
       e.stopPropagation();
       return;
     }
 
-    // Back buttons removed in Calibration (use fullscreen toggle to exit)
-    if(fsHdrBack || backBtn){
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-
-    }
-
+    // Close button inside Info overlays
+    const closeBtn = e.target.closest('.cal-info-close');
     if(closeBtn){
       const info = closeBtn.closest('.lux-info, .ct-info, .fl-info, .spec-info');
       if(info){
-        info.hidden = true; info.style.display = 'none';
+        info.hidden = true;
         info.style.display = 'none';
-        info.classList.remove('open','show','visible','active');
       }
       e.preventDefault();
       e.stopPropagation();
       return;
-
     }
 
-    // Tap on the dim background closes info (but not when tapping inside the card)
-    if(infoOverlay && (e.target === infoOverlay)){
-      infoOverlay.hidden = true; infoOverlay.style.display = 'none';
+    // Tap on the dimmed overlay background closes Info
+    const overlay = e.target.closest('.lux-info, .ct-info, .fl-info, .spec-info');
+    if(overlay && e.target === overlay){
+      overlay.hidden = true;
+      overlay.style.display = 'none';
       e.preventDefault();
       e.stopPropagation();
       return;
     }
-  }, { passive:false });
+  });
 
-  // Ensure Info panels have Close buttons + remove Save buttons
-  addInfoCloseButtons();
-  removeCalibrationSaveButtons();
-
-  // Also ensure headers exist for all tool views (so fullscreen always has Back)
-  document.querySelectorAll('#tab-calibration .cal-tool-view').forEach(v=>ensureFsHeader(v));
-
-
-  // default state
+  // Default to accordion/home view
   showHome();
 }
+
 
 // ===== Mock IoT Dashboard =====
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -12739,6 +12746,32 @@ document.addEventListener('DOMContentLoaded', () => {
   z-index: 5;
 }
 #tab-calibration .cal-info-panel[hidden]{ display:none !important; }
+
+/* Fullscreen: keep the inline topbar as the only control strip */
+.cal-tool-view.is-fullscreen{ padding-top: 76px !important; }
+.cal-tool-view.is-fullscreen .cal-inline-topbar{
+  position:fixed !important;
+  top:12px !important; left:12px !important; right:12px !important;
+  z-index:10001 !important;
+  background: rgba(16,20,40,.78) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border:1px solid rgba(255,255,255,.12) !important;
+  border-radius:14px !important;
+  padding:10px 12px !important;
+}
+.cal-tool-view.is-fullscreen .cal-inline-actions{gap:10px !important;}
+.cal-tool-view.is-fullscreen .cal-inline-actions .cal-fs-btn{min-width:40px; height:40px; border-radius:12px;}
+
+/* Camera fullscreen: true full-bleed preview */
+#tab-camera.is-fullscreen .cam-wrap{ height: calc(100vh - 92px) !important; }
+#tab-camera.is-fullscreen .cam-pane,
+#tab-camera.is-fullscreen .cam-card{ height:100% !important; }
+#tab-camera.is-fullscreen .cam-card{ display:flex !important; flex-direction:column !important; }
+#tab-camera.is-fullscreen .cam-view{ flex:1 1 auto !important; min-height:0 !important; }
+#tab-camera.is-fullscreen .cam-frame{ height:100% !important; }
+#tab-camera.is-fullscreen video{ width:100% !important; height:100% !important; object-fit:cover !important; }
+
 </style>
 
 </body>
