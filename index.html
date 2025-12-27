@@ -3814,6 +3814,94 @@ body.cal-fs-active nav.main-menu{display:none !important;}
   margin: 0 0 10px 0;
 }
 
+
+/* === Calibration Fullscreen: unified header to avoid duplicate buttons & ensure Back works === */
+.cal-tool-view .cal-fs-header{
+  display:none;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 12px;
+  background: rgba(12,16,28,.92);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  position: sticky;
+  top: 0;
+  z-index: 10050;
+  backdrop-filter: blur(10px);
+}
+.cal-tool-view.is-fullscreen .cal-fs-header{display:flex;}
+.cal-tool-view.is-fullscreen .cal-tool-topbar,
+.cal-tool-view.is-fullscreen .cal-inline-topbar{display:none !important;}
+
+.cal-fs-header .cal-fs-left{display:flex;align-items:center;gap:10px;min-width:0;}
+.cal-fs-header .cal-fs-title{font-weight:700;font-size:14px;opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cal-fs-header .cal-fs-actions{display:flex;align-items:center;gap:8px;}
+.cal-fs-header button{
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color:#e9ecff;
+  padding:8px 10px;
+  border-radius:10px;
+  line-height:1;
+  touch-action:manipulation;
+}
+.cal-fs-header button:active{transform: translateY(1px);}
+
+/* Info sheets: close button at the bottom */
+.cal-info-close-row{
+  display:flex;
+  justify-content:flex-end;
+  padding: 12px;
+  border-top: 1px solid rgba(255,255,255,.10);
+  margin-top: 10px;
+}
+.cal-info-close-row .cal-info-close{
+  width:100%;
+  border:1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.08);
+  color:#e9ecff;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  touch-action: manipulation;
+}
+.cal-info-close-row .cal-info-close:active{transform: translateY(1px);}
+
+/* Prevent overlaps in fullscreen by constraining key canvases/videos */
+.cal-tool-view.is-fullscreen .ct-ui,
+.cal-tool-view.is-fullscreen .fl-ui,
+.cal-tool-view.is-fullscreen .spec-ui,
+.cal-tool-view.is-fullscreen .lux-ui{
+  max-height: calc(100vh - 62px - env(safe-area-inset-bottom));
+}
+.cal-tool-view.is-fullscreen .ct-gauge,
+.cal-tool-view.is-fullscreen .fl-gauge,
+.cal-tool-view.is-fullscreen .spec-gauge,
+.cal-tool-view.is-fullscreen .lux-gauge{
+  width: clamp(200px, 60vw, 320px) !important;
+  height: clamp(200px, 60vw, 320px) !important;
+}
+.cal-tool-view.is-fullscreen .ct-camera,
+.cal-tool-view.is-fullscreen .fl-camera,
+.cal-tool-view.is-fullscreen .spec-camera,
+.cal-tool-view.is-fullscreen .lux-video{
+  max-height: 32vh !important;
+}
+
+
+/* Make Calibration info blocks behave like true overlays (tap background to close) */
+#tab-calibration .lux-info,
+#tab-calibration .ct-info,
+#tab-calibration .fl-info,
+#tab-calibration .spec-info{
+  background: rgba(0,0,0,.45);
+  padding: 14px;
+}
+#tab-calibration .lux-info[hidden],
+#tab-calibration .ct-info[hidden],
+#tab-calibration .fl-info[hidden],
+#tab-calibration .spec-info[hidden]{display:none !important;}
+
 </style>
 <style id="modern-shell">
   :root{
@@ -6433,6 +6521,112 @@ function initCalibrationNav(){
       }
     }
   });
+  // --- Calibration UX hardening: unified fullscreen header + info close + remove Save buttons ---
+  function ensureFsHeader(view){
+    if(!view || view.querySelector('.cal-fs-header')) return;
+    const titleEl = view.querySelector('.cal-tool-h') || view.querySelector('.cal-inline-title') || view.querySelector('.lux-title') || view.querySelector('.ct-title') || view.querySelector('.fl-title') || view.querySelector('.spec-title');
+    const title = titleEl ? (titleEl.textContent || '').trim() : 'Calibration';
+    const hdr = document.createElement('div');
+    hdr.className = 'cal-fs-header';
+    hdr.innerHTML = `
+      <div class="cal-fs-left">
+        <button type="button" class="cal-fs-back" aria-label="Back">‹ Back</button>
+        <div class="cal-fs-title"></div>
+      </div>
+      <div class="cal-fs-actions">
+        <button type="button" class="cal-fs-toggle" aria-label="Exit full screen">⛶</button>
+      </div>
+    `;
+    hdr.querySelector('.cal-fs-title').textContent = title;
+    view.insertBefore(hdr, view.firstChild);
+  }
+
+  function addInfoCloseButtons(){
+    const infos = document.querySelectorAll('#tab-calibration .lux-info, #tab-calibration .ct-info, #tab-calibration .fl-info, #tab-calibration .spec-info');
+    infos.forEach(info=>{
+      const card = info.querySelector('.lux-info-card, .ct-info-card, .fl-info-card, .spec-info-card') || info.firstElementChild;
+      if(!card) return;
+      if(card.querySelector('.cal-info-close')) return;
+      const row = document.createElement('div');
+      row.className = 'cal-info-close-row';
+      row.innerHTML = `<button type="button" class="cal-info-close">Close</button>`;
+      card.appendChild(row);
+    });
+  }
+
+  function removeCalibrationSaveButtons(){
+    document.querySelectorAll('#tab-calibration button').forEach(b=>{
+      const t = (b.textContent||'').trim().toLowerCase();
+      const ti = (b.getAttribute('title')||'').trim().toLowerCase();
+      if(t === 'save' || ti === 'save' || ti.includes('save')){
+        // Keep non-calibration saves elsewhere; here we only target within Calibration tab.
+        b.style.display = 'none';
+        b.setAttribute('aria-hidden','true');
+      }
+    });
+  }
+
+  // Event delegation: works even after portaling to body in fullscreen
+  document.addEventListener('click', (e)=>{
+    const fsBtn = e.target.closest('#tab-calibration .cal-fs-btn');
+    const fsHdrToggle = e.target.closest('#tab-calibration .cal-fs-toggle');
+    const fsHdrBack = e.target.closest('#tab-calibration .cal-fs-back');
+    const backBtn = e.target.closest('#tab-calibration [data-calback], #tab-calibration .cal-back-btn');
+    const closeBtn = e.target.closest('#tab-calibration .cal-info-close');
+    const infoOverlay = e.target.closest('#tab-calibration .lux-info, #tab-calibration .ct-info, #tab-calibration .fl-info, #tab-calibration .spec-info');
+
+    if(fsBtn || fsHdrToggle){
+      const btn = fsBtn || fsHdrToggle;
+      const view = btn.closest('.cal-tool-view');
+      if(view){
+        ensureFsHeader(view);
+        toggleFullscreenFor(view);
+      }
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+
+    if(fsHdrBack || backBtn){
+      // Always exit fullscreen if active; then go back to calibration home
+      const view = (fsHdrBack || backBtn).closest('.cal-tool-view');
+      const fs = view && view.classList.contains('is-fullscreen');
+      if(view && fs){
+        toggleFullscreenFor(view); // also calls showHome()
+      }else{
+        if(window.__calShowHome) window.__calShowHome();
+      }
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+
+    if(closeBtn){
+      const info = closeBtn.closest('.lux-info, .ct-info, .fl-info, .spec-info');
+      if(info){
+        info.hidden = true;
+      }
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+
+    // Tap on the dim background closes info (but not when tapping inside the card)
+    if(infoOverlay && (e.target === infoOverlay)){
+      infoOverlay.hidden = true;
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+  }, { passive:false });
+
+  // Ensure Info panels have Close buttons + remove Save buttons
+  addInfoCloseButtons();
+  removeCalibrationSaveButtons();
+
+  // Also ensure headers exist for all tool views (so fullscreen always has Back)
+  document.querySelectorAll('#tab-calibration .cal-tool-view').forEach(v=>ensureFsHeader(v));
+
 
   // default state
   showHome();
