@@ -10,46 +10,8 @@
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="AI Sorting" name="apple-mobile-web-app-title"/>
-
-
-
-<link href="manifest.webmanifest" rel="manifest"/><meta content="#0b0f18" name="theme-color"/><link href="icons/icon-180.png" rel="apple-touch-icon"/><style id="css-architecture-v29">
-/* =======================================================================
-   MANOR ENGINEERING — Single-file (v29) — Constructive CSS Architecture
-   Generated: 2025-12-27 17:58
-   Principles:
-     - Single stylesheet (no scattered <style> tags)
-     - Preserve original rule order to keep behavior identical
-     - Clearly separated layers/sections for maintainability
-     - Explicit visibility rules for overlays ([hidden] safety)
-   ======================================================================= */
-
-@layer tokens, base, layout, components, utilities, states;
-
-/* ------------------------ TOKENS ------------------------------------- */
-@layer tokens {
-  /* keep existing :root tokens from original styles (preserved below) */
-}
-
-/* ------------------------ BASE --------------------------------------- */
-@layer base {
-  /* Safety: ensure HTML hidden attribute always wins */
-  [hidden]{ display:none !important; }
-}
-
-/* ------------------------ LAYOUT ------------------------------------- */
-@layer layout {
-  /* Layout scaffolding is defined in original CSS (preserved below) */
-}
-
-/* ------------------------ COMPONENTS --------------------------------- */
-/* NOTE: The following CSS is a verbatim concatenation of the original
-   <style> blocks (in the same order) wrapped in @layer components,
-   so behavior should remain identical while structure becomes maintainable. */
-@layer components {
-
-/* ---- Original style block #1 ---- */
-body {
+<style>
+  body {
     background: #121212;
     color: var(--muted);
     font-family: 'Segoe UI', sans-serif;
@@ -3588,9 +3550,9 @@ body.cal-fs-active nav.main-menu{display:none !important;}
   height:auto !important;
   max-height:50vh;
 }
-
-/* ---- Original style block #2 (id="modern-shell") ---- */
-:root{
+</style>
+<style id="modern-shell">
+  :root{
     --shell-max: 980px;
 
     /* Measured at runtime (fallback values below) */
@@ -3728,8 +3690,9 @@ body.cal-fs-active nav.main-menu{display:none !important;}
   pointer-events: auto;
 }
 
-/* ---- Original style block #3 (id="fix-sticky-headers-v14") ---- */
-/* ===== Fix v14 (patched in v20): DO NOT let the whole tab scroll. =====
+</style>
+<style id="fix-sticky-headers-v14">
+  /* ===== Fix v14 (patched in v20): DO NOT let the whole tab scroll. =====
      In Granules we want: fixed tab head + internal scroller (.tab-scroll).
      The old v14 made #tab-valid/#tab-defect the scroller (overflow-y:auto),
      which caused the "Valid Granule" / "Defect Granule" headers and previews to move out of view.
@@ -3784,425 +3747,8 @@ body.cal-fs-active nav.main-menu{display:none !important;}
   pointer-events: auto;
 }
 
-/* ---- Original style block #4 ---- */
-/* Factory Live (tab-iot) – mobile-first, one-screen layout */
-
-    /* ---- Factory Live: robust scrolling on mobile ---- */
-    /* Use ONE scroll container: the inner viewport. Prevent the outer .tab from stealing scroll. */
-    #tab-iot.tab.active{
-      display:flex;
-      flex-direction:column;
-      overflow:hidden;                 /* outer tab does not scroll */
-    }
-    #tab-iot.tab{
-      padding: 14px;
-      box-sizing:border-box;
-    }
-    #tab-iot .iot-shell{
-      flex: 1 1 auto;
-      min-height: 0;                   /* critical */
-      display:flex;
-      flex-direction:column;
-    }
-    #tab-iot .iot-viewport{
-      flex: 1 1 auto;
-      min-height: 0;                   /* critical */
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
-      max-height: none !important;
-      overscroll-behavior: contain;
-    }
-
-    /* Sticky view tabs inside the scrollable viewport */
-    #tab-iot .iot-sticky-tabs{
-      position: sticky;
-      top: 0;
-      z-index: 5;
-      padding: 8px 0 10px 0;
-      /* subtle backdrop so content doesn't bleed through while scrolling */
-      background: linear-gradient(to bottom, rgba(31,31,47,0.96), rgba(31,31,47,0.70) 65%, rgba(31,31,47,0));
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-    }
-    #tab-iot .iot-sticky-tabs .iot-inner-tabs{
-      margin: 0 0 2px 0;
-    }
-    #tab-iot{ padding: 14px; }
-/* Make tab-iot a flex column so the inner viewport can scroll consistently */
-    
-#tab-iot .iot-shell{
-      max-width: 980px;
-      margin: 0 auto;
-      display:flex;
-      flex-direction:column;
-      min-height:0;
-      gap:12px;
-    }
-    #tab-iot .iot-top{
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap:12px;
-    }
-    #tab-iot .iot-title-main{
-      font-weight: 900;
-      letter-spacing: 0.2px;
-      font-size: 18px;
-    }
-    #tab-iot .iot-title-sub{
-      margin-top: 2px;
-      opacity: 0.78;
-      font-size: 12px;
-    }
-    #tab-iot .iot-status{
-      display:flex; align-items:center; gap:8px;
-      padding:8px 10px;
-      border-radius: 14px;
-      background: rgba(0,0,0,0.28);
-      border: 1px solid rgba(40,217,255,0.18);
-    }
-    #tab-iot .dot-live{
-      width:10px;height:10px;border-radius:50%;
-      background: rgba(35,255,156,0.9);
-      box-shadow: 0 0 18px rgba(35,255,156,0.35);
-    }
-    #tab-iot .iot-status-text{
-      font-weight: 900;
-      font-size: 12px;
-      letter-spacing: 0.6px;
-    }
-
-    #tab-iot .iot-inner-tabs{
-      display:flex;
-      gap:8px;
-      padding: 6px;
-      border-radius: 18px;
-      background: rgba(0,0,0,0.22);
-      border: 1px solid rgba(179,166,255,0.10);
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset;
-    }
-    #tab-iot .iot-pill{
-      flex:1;
-      border: 1px solid rgba(240,248,255,0.10);
-      background: rgba(255,255,255,0.06);
-      color: rgba(240,248,255,0.92);
-      border-radius: 14px;
-      padding: 10px 10px;
-      font-weight: 900;
-      font-size: 13px;
-      letter-spacing: 0.2px;
-    }
-    #tab-iot .iot-pill.is-active{
-      border-color: rgba(40,217,255,0.28);
-      background: linear-gradient(180deg, rgba(40,217,255,0.12), rgba(0,0,0,0.22));
-      box-shadow: 0 0 24px rgba(40,217,255,0.12);
-    }
-
-    /* Viewport: flexible, always-scroll container (works with locked body scroll) */
-    #tab-iot .iot-viewport{
-      border-radius: 18px;
-      background: rgba(0,0,0,0.22);
-      border: 1px solid rgba(240,248,255,0.08);
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.03) inset;
-      padding: 12px;
-
-      /* Let the viewport take the remaining height and scroll reliably */
-      flex: 1 1 auto;
-      min-height: 0;                 /* critical for nested scrolling in flex layouts */
-      height: auto;
-      max-height: none;
-
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-    }
-    #tab-iot .iot-view{ display:none; }
-    #tab-iot .iot-view.is-active{ display:block; }
-
-    #tab-iot .iot-cards{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap:10px;
-    }
-    #tab-iot .iot-card{
-      border-radius: 16px;
-      padding: 12px 12px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(240,248,255,0.08);
-      min-height: 84px;
-    }
-    #tab-iot .iot-card-k{ opacity:0.80; font-size: 12px; font-weight: 800; }
-    #tab-iot .iot-card-v{ margin-top: 6px; font-size: 20px; font-weight: 950; letter-spacing: 0.2px; }
-    #tab-iot .iot-unit{ opacity:0.82; font-size: 12px; font-weight: 900; margin-left: 6px; }
-    #tab-iot .iot-card-s{ margin-top: 4px; opacity:0.70; font-size: 11px; }
-
-    #tab-iot .iot-wide{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-      align-items:stretch;
-    }
-    #tab-iot .iot-wide-left{
-      border-radius: 16px;
-      padding: 12px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(240,248,255,0.08);
-    }
-    #tab-iot .iot-wide-title{ font-weight: 950; font-size: 13px; opacity:0.92; margin-bottom: 8px; }
-    #tab-iot .iot-wide-row{ display:flex; justify-content:space-between; gap:10px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
-    #tab-iot .iot-wide-row:last-child{ border-bottom: none; }
-    #tab-iot .iot-l{ opacity:0.78; font-weight: 800; font-size: 12px; }
-    #tab-iot .iot-r{ font-weight: 950; font-size: 12px; }
-
-    #tab-iot .iot-wide-right{
-      border-radius: 16px;
-      padding: 10px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(240,248,255,0.08);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-    #tab-iot canvas{ width:100%; height:auto; display:block; }
-
-    /* Charts view */
-    #tab-iot .iot-chart-card{
-      border-radius: 16px;
-      padding: 12px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(240,248,255,0.08);
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    #tab-iot .iot-chart-head{
-      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
-    }
-    #tab-iot .iot-chart-title{ font-weight: 950; font-size: 13px; }
-    #tab-iot .iot-chart-sub{ opacity:0.74; font-size: 11px; margin-top: 2px; }
-    #tab-iot .iot-chip{
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-weight: 950;
-      font-size: 11px;
-      background: rgba(0,0,0,0.24);
-      border: 1px solid rgba(40,217,255,0.16);
-      opacity: 0.92;
-    }
-
-    /* Events */
-    #tab-iot .iot-events{ display:flex; flex-direction:column; gap:10px; }
-    #tab-iot .iot-event{
-      display:flex; align-items:center; gap:10px;
-      padding: 10px 10px;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(240,248,255,0.08);
-    }
-    #tab-iot .iot-evt-dot{
-      width: 10px; height: 10px; border-radius: 50%;
-      box-shadow: 0 0 18px rgba(40,217,255,0.12);
-      flex: 0 0 auto;
-    }
-    #tab-iot .iot-evt-dot.ok{ background: rgba(35,255,156,0.9); box-shadow: 0 0 18px rgba(35,255,156,0.25); }
-    #tab-iot .iot-evt-dot.warn{ background: rgba(255,205,80,0.95); box-shadow: 0 0 18px rgba(255,205,80,0.22); }
-    #tab-iot .iot-evt-dot.err{ background: rgba(255,46,104,0.95); box-shadow: 0 0 18px rgba(255,46,104,0.22); }
-    #tab-iot .iot-evt-title{ font-weight: 950; font-size: 12.5px; }
-    #tab-iot .iot-evt-sub{ opacity:0.74; font-size: 11px; margin-top: 2px; }
-
-    @media (max-width: 380px){
-      #tab-iot .iot-card-v{ font-size: 18px; }
-}
-    @media (min-width: 860px){
-      #tab-iot .iot-cards{ grid-template-columns: repeat(4, minmax(0,1fr)); }
-      #tab-iot .iot-wide{ grid-template-columns: 1.2fr 0.8fr; }
-      #tab-iot .iot-viewport{ max-height: none; }
-    }
-
-
-    /* --- Neon / Hi-Tech upgrade (v3) --- */
-    #tab-iot .iot-inner-tabs{
-      position:relative;
-      background: linear-gradient(180deg, rgba(8,12,26,0.62), rgba(0,0,0,0.18));
-      border: 1px solid rgba(40,217,255,0.22);
-      box-shadow:
-        0 0 0 1px rgba(179,166,255,0.10) inset,
-        0 18px 60px rgba(0,0,0,0.55),
-        0 0 40px rgba(40,217,255,0.10);
-      overflow:hidden;
-    }
-    #tab-iot .iot-inner-tabs::before{
-      content:"";
-      position:absolute; inset:-2px;
-      background: radial-gradient(1200px 260px at 20% 0%, rgba(40,217,255,0.18), rgba(0,0,0,0) 60%),
-                  radial-gradient(900px 240px at 85% 110%, rgba(179,166,255,0.14), rgba(0,0,0,0) 55%);
-      pointer-events:none;
-      opacity: 0.9;
-    }
-    #tab-iot .iot-inner-tabs::after{
-      content:"";
-      position:absolute; left:-30%; top:-40%;
-      width: 60%; height: 220%;
-      background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.12), rgba(255,255,255,0));
-      transform: rotate(18deg);
-      animation: iotSweep 3.6s linear infinite;
-      pointer-events:none;
-      opacity: 0.35;
-      mix-blend-mode: screen;
-    }
-    @keyframes iotSweep{
-      0%{ transform: translateX(-60%) rotate(18deg); }
-      100%{ transform: translateX(240%) rotate(18deg); }
-    }
-
-    #tab-iot .iot-pill{
-      position:relative;
-      border: 1px solid rgba(240,248,255,0.10);
-      background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(0,0,0,0.20));
-      box-shadow:
-        0 0 0 1px rgba(255,255,255,0.04) inset,
-        0 10px 22px rgba(0,0,0,0.35);
-      transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease, background 140ms ease;
-    }
-    #tab-iot .iot-pill::after{
-      content:"";
-      position:absolute; left:14px; right:14px; bottom:6px;
-      height:2px; border-radius:999px;
-      background: rgba(40,217,255,0.0);
-      box-shadow: 0 0 0 rgba(40,217,255,0.0);
-      transition: all 160ms ease;
-    }
-    #tab-iot .iot-pill:active{ transform: scale(0.99); }
-
-    #tab-iot .iot-pill.is-active{
-      border-color: rgba(40,217,255,0.42);
-      background: linear-gradient(180deg, rgba(40,217,255,0.14), rgba(0,0,0,0.26));
-      box-shadow:
-        0 0 0 1px rgba(40,217,255,0.14) inset,
-        0 16px 34px rgba(0,0,0,0.40),
-        0 0 32px rgba(40,217,255,0.12);
-    }
-    #tab-iot .iot-pill.is-active::after{
-      background: linear-gradient(90deg, rgba(40,217,255,0), rgba(40,217,255,0.95), rgba(179,166,255,0.55), rgba(40,217,255,0));
-      box-shadow: 0 0 18px rgba(40,217,255,0.42);
-    }
-
-    /* viewport feels more "console" */
-    #tab-iot .iot-viewport{
-      background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.06));
-      border: 1px solid rgba(40,217,255,0.12);
-      box-shadow:
-        0 0 0 1px rgba(179,166,255,0.06) inset,
-        0 26px 80px rgba(0,0,0,0.55);
-      position:relative;
-      overflow-y:auto;
-      overflow-x:hidden;
-      -webkit-overflow-scrolling: touch;
-    }
-    #tab-iot .iot-viewport::before{
-      content:"";
-      position:absolute; inset:0;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0)),
-        repeating-linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.03) 1px, rgba(0,0,0,0) 8px, rgba(0,0,0,0) 16px);
-      opacity: 0.08;
-      pointer-events:none;
-    }
-    #tab-iot .iot-card, #tab-iot .iot-wide-left, #tab-iot .iot-wide-right, #tab-iot .iot-chart-card, #tab-iot .iot-event{
-      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.18));
-      border-color: rgba(240,248,255,0.10);
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.03) inset, 0 14px 42px rgba(0,0,0,0.38);
-    }
-    #tab-iot .iot-card-v{
-      text-shadow: 0 0 18px rgba(40,217,255,0.10);
-    }
-    #tab-iot .iot-status{
-      background: linear-gradient(180deg, rgba(0,0,0,0.30), rgba(0,0,0,0.18));
-      border-color: rgba(35,255,156,0.16);
-      box-shadow: 0 0 26px rgba(35,255,156,0.10);
-    }
-
-  
-/* ===== Tab visibility hard-fix (prevents inactive tabs from leaking) ===== */
-.tab{ display:none !important; }
-.tab.active{ display:block !important; }
-#tab-qa.active{ display:flex !important; flex-direction:column; }
-
-/* Fixed header + internal scroll (like Tools tab) */
-.tab-scroll{
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-#tab-valid, #tab-defect, #tab-analysis, #tab-calibration{
-  height: 100%;
-  overflow: hidden;
-}
-#tab-valid.active, #tab-defect.active, #tab-analysis.active, #tab-calibration.active{
-  display: flex !important;
-  flex-direction: column;
-}
-
-#tab-camera.active{ display:block !important; }
-#tab-upload.active{ display:block !important; }
-#tab-manuals.active{ display:block !important; }
-#tab-saved.active{ display:block !important; }
-/* if any tab forces display/flex, the rules above keep it hidden unless .active */
-
-
-/* ================================
-   TOOLS – SCROLL EXACTLY LIKE ANALYSIS
-   ================================ */
-#tab-tools {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  height: 100%;
-}
-#tab-tools .tab-scroll {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-#tab-tools .acc-body,
-#tab-tools .accordion-body {
-  overflow: visible !important;
-  max-height: none !important;
-}
-
-
-/* ================================
-   FORCE SCROLL: release wheel from camera/canvas
-   ================================ */
-#tab-tools .camera-controls,
-#tab-tools button {
-  pointer-events: auto;
-}
-
-}}
-
-/* ------------------------ UTILITIES ---------------------------------- */
-@layer utilities{
-  /* reserved for future refactors (spacing helpers, typography utils, etc.) */
-}
-
-/* ------------------------ STATES/OVERRIDES ---------------------------- */
-@layer states{
-  /* Guarantee install overlay stays hidden when not active */
-  .install-overlay[hidden]{ display:none !important; }
-
-  /* Calibration tool fullscreen — keep close/back accessible */
-  .cal-tool-topbar, .cal-fs-header{ pointer-events:auto; }
-}
 </style>
-
-</head>
+<link href="manifest.webmanifest" rel="manifest"/><meta content="#0b0f18" name="theme-color"/><link href="icons/icon-180.png" rel="apple-touch-icon"/></head>
 <body>
 <div class="intro-overlay" hidden="" id="introGate">
 <div aria-modal="true" class="intro-card" role="dialog">
@@ -4667,6 +4213,9 @@ body.cal-fs-active nav.main-menu{display:none !important;}
   <div class="cal-inline-title">Camera</div>
   <div class="cal-inline-actions">
     <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+    <button class="lux-icon cam-torch-btn" title="Torch" type="button" aria-pressed="false"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M9 2h6v3H9V2Zm1 5h4v2h1c.6 0 1 .4 1 1v3.2c0 .3.1.6.3.8l1.9 2.3c.5.6.1 1.5-.7 1.5H6.5c-.8 0-1.2-.9-.7-1.5l1.9-2.3c.2-.2.3-.5.3-.8V10c0-.6.4-1 1-1h1V7Zm0 5.2v1.1c0 .8-.3 1.5-.8 2.1L8 16h8l-1.2-1.6c-.5-.6-.8-1.3-.8-2.1v-1.1H10Z"/>
+</svg></button>
   </div>
 </div>
 <div class="cam-wrap">
@@ -4720,6 +4269,9 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 <div class="lux-icons">
 <button class="lux-icon" id="luxInfoBtn" title="Info" type="button">i</button>
 <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+    <button class="lux-icon cam-torch-btn" title="Torch" type="button" aria-pressed="false"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M9 2h6v3H9V2Zm1 5h4v2h1c.6 0 1 .4 1 1v3.2c0 .3.1.6.3.8l1.9 2.3c.5.6.1 1.5-.7 1.5H6.5c-.8 0-1.2-.9-.7-1.5l1.9-2.3c.2-.2.3-.5.3-.8V10c0-.6.4-1 1-1h1V7Zm0 5.2v1.1c0 .8-.3 1.5-.8 2.1L8 16h8l-1.2-1.6c-.5-.6-.8-1.3-.8-2.1v-1.1H10Z"/>
+</svg></button>
 <button class="lux-icon" id="luxSwitchBtn" title="Switch Camera" type="button">⟳</button>
 </div>
 </div>
@@ -4831,6 +4383,9 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 <div class="ct-icons">
 <button class="lux-icon" id="ctInfoBtn" title="Info" type="button">i</button>
 <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+    <button class="lux-icon cam-torch-btn" title="Torch" type="button" aria-pressed="false"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M9 2h6v3H9V2Zm1 5h4v2h1c.6 0 1 .4 1 1v3.2c0 .3.1.6.3.8l1.9 2.3c.5.6.1 1.5-.7 1.5H6.5c-.8 0-1.2-.9-.7-1.5l1.9-2.3c.2-.2.3-.5.3-.8V10c0-.6.4-1 1-1h1V7Zm0 5.2v1.1c0 .8-.3 1.5-.8 2.1L8 16h8l-1.2-1.6c-.5-.6-.8-1.3-.8-2.1v-1.1H10Z"/>
+</svg></button>
 <button class="lux-icon" id="ctSwitchBtn" title="Switch Camera" type="button">⟳</button>
 <button class="lux-icon" id="ctSaveBtn" title="Save" type="button">💾</button>
 </div>
@@ -4920,6 +4475,9 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 <div class="fl-icons">
 <button class="lux-icon" id="flInfoBtn" title="Info" type="button">i</button>
 <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+    <button class="lux-icon cam-torch-btn" title="Torch" type="button" aria-pressed="false"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M9 2h6v3H9V2Zm1 5h4v2h1c.6 0 1 .4 1 1v3.2c0 .3.1.6.3.8l1.9 2.3c.5.6.1 1.5-.7 1.5H6.5c-.8 0-1.2-.9-.7-1.5l1.9-2.3c.2-.2.3-.5.3-.8V10c0-.6.4-1 1-1h1V7Zm0 5.2v1.1c0 .8-.3 1.5-.8 2.1L8 16h8l-1.2-1.6c-.5-.6-.8-1.3-.8-2.1v-1.1H10Z"/>
+</svg></button>
 <button class="lux-icon" id="flSwitchBtn" title="Switch Camera" type="button">⟳</button>
 <button class="lux-icon" id="flSaveBtn" title="Save" type="button">💾</button>
 </div>
@@ -5002,6 +4560,9 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 <div class="spec-icons">
 <button class="lux-icon" id="specInfoBtn" title="Info" type="button">i</button>
 <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+    <button class="lux-icon cam-torch-btn" title="Torch" type="button" aria-pressed="false"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M9 2h6v3H9V2Zm1 5h4v2h1c.6 0 1 .4 1 1v3.2c0 .3.1.6.3.8l1.9 2.3c.5.6.1 1.5-.7 1.5H6.5c-.8 0-1.2-.9-.7-1.5l1.9-2.3c.2-.2.3-.5.3-.8V10c0-.6.4-1 1-1h1V7Zm0 5.2v1.1c0 .8-.3 1.5-.8 2.1L8 16h8l-1.2-1.6c-.5-.6-.8-1.3-.8-2.1v-1.1H10Z"/>
+</svg></button>
 <button class="lux-icon" id="specSwitchBtn" title="Switch Camera" type="button">⟳</button>
 </div>
 </div>
@@ -5194,7 +4755,408 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 </div>
 </div>
 </div>
+<style>
+    /* Factory Live (tab-iot) – mobile-first, one-screen layout */
 
+    /* ---- Factory Live: robust scrolling on mobile ---- */
+    /* Use ONE scroll container: the inner viewport. Prevent the outer .tab from stealing scroll. */
+    #tab-iot.tab.active{
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;                 /* outer tab does not scroll */
+    }
+    #tab-iot.tab{
+      padding: 14px;
+      box-sizing:border-box;
+    }
+    #tab-iot .iot-shell{
+      flex: 1 1 auto;
+      min-height: 0;                   /* critical */
+      display:flex;
+      flex-direction:column;
+    }
+    #tab-iot .iot-viewport{
+      flex: 1 1 auto;
+      min-height: 0;                   /* critical */
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      max-height: none !important;
+      overscroll-behavior: contain;
+    }
+
+    /* Sticky view tabs inside the scrollable viewport */
+    #tab-iot .iot-sticky-tabs{
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      padding: 8px 0 10px 0;
+      /* subtle backdrop so content doesn't bleed through while scrolling */
+      background: linear-gradient(to bottom, rgba(31,31,47,0.96), rgba(31,31,47,0.70) 65%, rgba(31,31,47,0));
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    #tab-iot .iot-sticky-tabs .iot-inner-tabs{
+      margin: 0 0 2px 0;
+    }
+    #tab-iot{ padding: 14px; }
+/* Make tab-iot a flex column so the inner viewport can scroll consistently */
+    
+#tab-iot .iot-shell{
+      max-width: 980px;
+      margin: 0 auto;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+      gap:12px;
+    }
+    #tab-iot .iot-top{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+    }
+    #tab-iot .iot-title-main{
+      font-weight: 900;
+      letter-spacing: 0.2px;
+      font-size: 18px;
+    }
+    #tab-iot .iot-title-sub{
+      margin-top: 2px;
+      opacity: 0.78;
+      font-size: 12px;
+    }
+    #tab-iot .iot-status{
+      display:flex; align-items:center; gap:8px;
+      padding:8px 10px;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(40,217,255,0.18);
+    }
+    #tab-iot .dot-live{
+      width:10px;height:10px;border-radius:50%;
+      background: rgba(35,255,156,0.9);
+      box-shadow: 0 0 18px rgba(35,255,156,0.35);
+    }
+    #tab-iot .iot-status-text{
+      font-weight: 900;
+      font-size: 12px;
+      letter-spacing: 0.6px;
+    }
+
+    #tab-iot .iot-inner-tabs{
+      display:flex;
+      gap:8px;
+      padding: 6px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(179,166,255,0.10);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset;
+    }
+    #tab-iot .iot-pill{
+      flex:1;
+      border: 1px solid rgba(240,248,255,0.10);
+      background: rgba(255,255,255,0.06);
+      color: rgba(240,248,255,0.92);
+      border-radius: 14px;
+      padding: 10px 10px;
+      font-weight: 900;
+      font-size: 13px;
+      letter-spacing: 0.2px;
+    }
+    #tab-iot .iot-pill.is-active{
+      border-color: rgba(40,217,255,0.28);
+      background: linear-gradient(180deg, rgba(40,217,255,0.12), rgba(0,0,0,0.22));
+      box-shadow: 0 0 24px rgba(40,217,255,0.12);
+    }
+
+    /* Viewport: flexible, always-scroll container (works with locked body scroll) */
+    #tab-iot .iot-viewport{
+      border-radius: 18px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(240,248,255,0.08);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.03) inset;
+      padding: 12px;
+
+      /* Let the viewport take the remaining height and scroll reliably */
+      flex: 1 1 auto;
+      min-height: 0;                 /* critical for nested scrolling in flex layouts */
+      height: auto;
+      max-height: none;
+
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    #tab-iot .iot-view{ display:none; }
+    #tab-iot .iot-view.is-active{ display:block; }
+
+    #tab-iot .iot-cards{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:10px;
+    }
+    #tab-iot .iot-card{
+      border-radius: 16px;
+      padding: 12px 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(240,248,255,0.08);
+      min-height: 84px;
+    }
+    #tab-iot .iot-card-k{ opacity:0.80; font-size: 12px; font-weight: 800; }
+    #tab-iot .iot-card-v{ margin-top: 6px; font-size: 20px; font-weight: 950; letter-spacing: 0.2px; }
+    #tab-iot .iot-unit{ opacity:0.82; font-size: 12px; font-weight: 900; margin-left: 6px; }
+    #tab-iot .iot-card-s{ margin-top: 4px; opacity:0.70; font-size: 11px; }
+
+    #tab-iot .iot-wide{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      align-items:stretch;
+    }
+    #tab-iot .iot-wide-left{
+      border-radius: 16px;
+      padding: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(240,248,255,0.08);
+    }
+    #tab-iot .iot-wide-title{ font-weight: 950; font-size: 13px; opacity:0.92; margin-bottom: 8px; }
+    #tab-iot .iot-wide-row{ display:flex; justify-content:space-between; gap:10px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    #tab-iot .iot-wide-row:last-child{ border-bottom: none; }
+    #tab-iot .iot-l{ opacity:0.78; font-weight: 800; font-size: 12px; }
+    #tab-iot .iot-r{ font-weight: 950; font-size: 12px; }
+
+    #tab-iot .iot-wide-right{
+      border-radius: 16px;
+      padding: 10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(240,248,255,0.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    #tab-iot canvas{ width:100%; height:auto; display:block; }
+
+    /* Charts view */
+    #tab-iot .iot-chart-card{
+      border-radius: 16px;
+      padding: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(240,248,255,0.08);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    #tab-iot .iot-chart-head{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    }
+    #tab-iot .iot-chart-title{ font-weight: 950; font-size: 13px; }
+    #tab-iot .iot-chart-sub{ opacity:0.74; font-size: 11px; margin-top: 2px; }
+    #tab-iot .iot-chip{
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 950;
+      font-size: 11px;
+      background: rgba(0,0,0,0.24);
+      border: 1px solid rgba(40,217,255,0.16);
+      opacity: 0.92;
+    }
+
+    /* Events */
+    #tab-iot .iot-events{ display:flex; flex-direction:column; gap:10px; }
+    #tab-iot .iot-event{
+      display:flex; align-items:center; gap:10px;
+      padding: 10px 10px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(240,248,255,0.08);
+    }
+    #tab-iot .iot-evt-dot{
+      width: 10px; height: 10px; border-radius: 50%;
+      box-shadow: 0 0 18px rgba(40,217,255,0.12);
+      flex: 0 0 auto;
+    }
+    #tab-iot .iot-evt-dot.ok{ background: rgba(35,255,156,0.9); box-shadow: 0 0 18px rgba(35,255,156,0.25); }
+    #tab-iot .iot-evt-dot.warn{ background: rgba(255,205,80,0.95); box-shadow: 0 0 18px rgba(255,205,80,0.22); }
+    #tab-iot .iot-evt-dot.err{ background: rgba(255,46,104,0.95); box-shadow: 0 0 18px rgba(255,46,104,0.22); }
+    #tab-iot .iot-evt-title{ font-weight: 950; font-size: 12.5px; }
+    #tab-iot .iot-evt-sub{ opacity:0.74; font-size: 11px; margin-top: 2px; }
+
+    @media (max-width: 380px){
+      #tab-iot .iot-card-v{ font-size: 18px; }
+}
+    @media (min-width: 860px){
+      #tab-iot .iot-cards{ grid-template-columns: repeat(4, minmax(0,1fr)); }
+      #tab-iot .iot-wide{ grid-template-columns: 1.2fr 0.8fr; }
+      #tab-iot .iot-viewport{ max-height: none; }
+    }
+
+
+    /* --- Neon / Hi-Tech upgrade (v3) --- */
+    #tab-iot .iot-inner-tabs{
+      position:relative;
+      background: linear-gradient(180deg, rgba(8,12,26,0.62), rgba(0,0,0,0.18));
+      border: 1px solid rgba(40,217,255,0.22);
+      box-shadow:
+        0 0 0 1px rgba(179,166,255,0.10) inset,
+        0 18px 60px rgba(0,0,0,0.55),
+        0 0 40px rgba(40,217,255,0.10);
+      overflow:hidden;
+    }
+    #tab-iot .iot-inner-tabs::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(1200px 260px at 20% 0%, rgba(40,217,255,0.18), rgba(0,0,0,0) 60%),
+                  radial-gradient(900px 240px at 85% 110%, rgba(179,166,255,0.14), rgba(0,0,0,0) 55%);
+      pointer-events:none;
+      opacity: 0.9;
+    }
+    #tab-iot .iot-inner-tabs::after{
+      content:"";
+      position:absolute; left:-30%; top:-40%;
+      width: 60%; height: 220%;
+      background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.12), rgba(255,255,255,0));
+      transform: rotate(18deg);
+      animation: iotSweep 3.6s linear infinite;
+      pointer-events:none;
+      opacity: 0.35;
+      mix-blend-mode: screen;
+    }
+    @keyframes iotSweep{
+      0%{ transform: translateX(-60%) rotate(18deg); }
+      100%{ transform: translateX(240%) rotate(18deg); }
+    }
+
+    #tab-iot .iot-pill{
+      position:relative;
+      border: 1px solid rgba(240,248,255,0.10);
+      background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(0,0,0,0.20));
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04) inset,
+        0 10px 22px rgba(0,0,0,0.35);
+      transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease, background 140ms ease;
+    }
+    #tab-iot .iot-pill::after{
+      content:"";
+      position:absolute; left:14px; right:14px; bottom:6px;
+      height:2px; border-radius:999px;
+      background: rgba(40,217,255,0.0);
+      box-shadow: 0 0 0 rgba(40,217,255,0.0);
+      transition: all 160ms ease;
+    }
+    #tab-iot .iot-pill:active{ transform: scale(0.99); }
+
+    #tab-iot .iot-pill.is-active{
+      border-color: rgba(40,217,255,0.42);
+      background: linear-gradient(180deg, rgba(40,217,255,0.14), rgba(0,0,0,0.26));
+      box-shadow:
+        0 0 0 1px rgba(40,217,255,0.14) inset,
+        0 16px 34px rgba(0,0,0,0.40),
+        0 0 32px rgba(40,217,255,0.12);
+    }
+    #tab-iot .iot-pill.is-active::after{
+      background: linear-gradient(90deg, rgba(40,217,255,0), rgba(40,217,255,0.95), rgba(179,166,255,0.55), rgba(40,217,255,0));
+      box-shadow: 0 0 18px rgba(40,217,255,0.42);
+    }
+
+    /* viewport feels more "console" */
+    #tab-iot .iot-viewport{
+      background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.06));
+      border: 1px solid rgba(40,217,255,0.12);
+      box-shadow:
+        0 0 0 1px rgba(179,166,255,0.06) inset,
+        0 26px 80px rgba(0,0,0,0.55);
+      position:relative;
+      overflow-y:auto;
+      overflow-x:hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+    #tab-iot .iot-viewport::before{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0)),
+        repeating-linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.03) 1px, rgba(0,0,0,0) 8px, rgba(0,0,0,0) 16px);
+      opacity: 0.08;
+      pointer-events:none;
+    }
+    #tab-iot .iot-card, #tab-iot .iot-wide-left, #tab-iot .iot-wide-right, #tab-iot .iot-chart-card, #tab-iot .iot-event{
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.18));
+      border-color: rgba(240,248,255,0.10);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.03) inset, 0 14px 42px rgba(0,0,0,0.38);
+    }
+    #tab-iot .iot-card-v{
+      text-shadow: 0 0 18px rgba(40,217,255,0.10);
+    }
+    #tab-iot .iot-status{
+      background: linear-gradient(180deg, rgba(0,0,0,0.30), rgba(0,0,0,0.18));
+      border-color: rgba(35,255,156,0.16);
+      box-shadow: 0 0 26px rgba(35,255,156,0.10);
+    }
+
+  
+/* ===== Tab visibility hard-fix (prevents inactive tabs from leaking) ===== */
+.tab{ display:none !important; }
+.tab.active{ display:block !important; }
+#tab-qa.active{ display:flex !important; flex-direction:column; }
+
+/* Fixed header + internal scroll (like Tools tab) */
+.tab-scroll{
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+#tab-valid, #tab-defect, #tab-analysis, #tab-calibration{
+  height: 100%;
+  overflow: hidden;
+}
+#tab-valid.active, #tab-defect.active, #tab-analysis.active, #tab-calibration.active{
+  display: flex !important;
+  flex-direction: column;
+}
+
+#tab-camera.active{ display:block !important; }
+#tab-upload.active{ display:block !important; }
+#tab-manuals.active{ display:block !important; }
+#tab-saved.active{ display:block !important; }
+/* if any tab forces display/flex, the rules above keep it hidden unless .active */
+
+
+/* ================================
+   TOOLS – SCROLL EXACTLY LIKE ANALYSIS
+   ================================ */
+#tab-tools {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+#tab-tools .tab-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+#tab-tools .acc-body,
+#tab-tools .accordion-body {
+  overflow: visible !important;
+  max-height: none !important;
+}
+
+
+/* ================================
+   FORCE SCROLL: release wheel from camera/canvas
+   ================================ */
+#tab-tools .camera-controls,
+#tab-tools button {
+  pointer-events: auto;
+}
+
+</style>
 <script>
     (function(){
       // Internal view tabs
@@ -12345,6 +12307,94 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(()=>{ try{ window.updateAnalysis(); }catch(err){} }, 0);
     }
   }, true);
+})();
+</script>
+
+
+<style id="v50_torch_constructive">
+/* v50 — Torch button (SVG) uses existing .lux-icon sizing. */
+.cam-torch-btn .icon-svg{
+  width:18px; height:18px; display:block;
+  fill: currentColor;
+}
+.cam-torch-btn[disabled]{ opacity:.45; cursor:not-allowed; }
+.cam-torch-btn.is-on,
+.cam-torch-btn[aria-pressed="true"]{
+  border-color: rgba(255,193,77,.9) !important;
+  background: rgba(255,193,77,.14) !important;
+  color: rgba(255,233,194,.98) !important;
+  box-shadow: 0 0 0 2px rgba(255,193,77,.18), 0 0 14px rgba(255,193,77,.25);
+}
+</style>
+
+
+<script id="v50_torch_manager">
+(function(){
+  const state = { on:false };
+
+  function getActiveTrack(){
+    const vids = [
+      document.querySelector('#tab-calibration #tab-camera video'),
+      document.querySelector('#tab-camera video'),
+      ...Array.from(document.querySelectorAll('video'))
+    ].filter(Boolean);
+    for(const v of vids){
+      const s = v.srcObject;
+      if(s && s.getVideoTracks && s.getVideoTracks().length) return s.getVideoTracks()[0];
+    }
+    return null;
+  }
+
+  function setButtonsStatus(){
+    const track = getActiveTrack();
+    let supported = false;
+    if(track && track.getCapabilities){
+      const caps = track.getCapabilities();
+      supported = !!caps && ('torch' in caps);
+    }
+    document.querySelectorAll('.cam-torch-btn').forEach(btn=>{
+      // If camera not started: keep enabled but explain
+      if(!track){
+        btn.disabled = false;
+        btn.title = 'Start camera first';
+        btn.setAttribute('aria-pressed', state.on ? 'true':'false');
+        btn.classList.toggle('is-on', state.on);
+        return;
+      }
+      btn.disabled = !supported;
+      btn.title = supported ? (state.on ? 'Torch: ON' : 'Torch: OFF') : 'Torch not supported on this device';
+      btn.setAttribute('aria-pressed', state.on ? 'true':'false');
+      btn.classList.toggle('is-on', state.on);
+    });
+  }
+
+  async function toggleTorch(){
+    const track = getActiveTrack();
+    if(!track) throw new Error('Start camera first');
+    const caps = track.getCapabilities ? track.getCapabilities() : {};
+    if(!caps || !('torch' in caps)) throw new Error('Torch not supported');
+    state.on = !state.on;
+    await track.applyConstraints({advanced:[{torch: state.on}]});
+    setButtonsStatus();
+  }
+
+  document.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('.cam-torch-btn');
+    if(!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    try{
+      await toggleTorch();
+    }catch(err){
+      const msg = err?.message || 'Torch failed';
+      if(typeof window.toast === 'function') window.toast(msg);
+      else console.warn(msg);
+      setButtonsStatus();
+    }
+  }, {capture:true});
+
+  // Keep status in sync when camera starts/stops
+  setInterval(setButtonsStatus, 800);
 })();
 </script>
 
