@@ -12670,7 +12670,8 @@ document.addEventListener('DOMContentLoaded', () => {
 (function(){
   // Event delegation for fullscreen button to avoid missing bindings
   function closestToolView(el){
-    return el ? el.closest('#tab-calibration .cal-tool-view') : null;
+    // Works both inside the Calibration tab and when a tool view is 'portaled' to <body>
+    return el ? (el.closest('.cal-tool-view') || el.closest('#tab-calibration .cal-tool-view')) : null;
   }
 
   // Ensure toggleFullscreenFor exists
@@ -12684,7 +12685,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.addEventListener('click', function(e){
-    const fsBtn = e.target.closest('#tab-calibration .cal-fs-btn');
+    const fsBtn = e.target.closest('.cal-fs-btn');
     if(fsBtn){
       e.preventDefault();
       const view = closestToolView(fsBtn);
@@ -12692,7 +12693,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const backBtn = e.target.closest('#tab-calibration .cal-back-btn, #tab-calibration [data-calback]');
+    const backBtn = e.target.closest('.cal-back-btn, [data-calback]');
     if(backBtn){
       e.preventDefault();
       const view = closestToolView(backBtn);
