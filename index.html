@@ -3207,6 +3207,24 @@ body.cal-fs-active nav.main-menu{display:none !important;}
   box-shadow:0 0 14px rgba(255,155,47,.35);
   z-index:5;
 }
+.spec-gauge-label{
+  position:absolute;
+  left:50%;
+  top:14px;
+  transform:translateX(-50%);
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.15px;
+  color:rgba(255,255,255,.82);
+  background:rgba(0,0,0,.18);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:0 8px 22px rgba(0,0,0,.35);
+  z-index:4; /* behind needle (5) and center (6) */
+  pointer-events:none;
+  white-space:nowrap;
+}
 .spec-center{
   position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);
   width:220px;height:140px;border-radius:16px;
@@ -3728,6 +3746,74 @@ body.cal-fs-active nav.main-menu{display:none !important;}
   height:auto !important;
   max-height:50vh;
 }
+
+/* --- Calibration fullscreen: compact, single-screen (no page scroll) --- */
+.cal-tool-view.is-fullscreen{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:9999 !important;
+  background: var(--bg);
+  overflow:hidden !important;
+}
+.cal-tool-view.is-fullscreen .cal-tool-topbar{
+  position:sticky;
+  top:0;
+  z-index:5;
+}
+.cal-tool-view.is-fullscreen .cal-tool-topbar,
+.cal-tool-view.is-fullscreen .cal-tool-topbar *{
+  touch-action:manipulation;
+}
+.cal-tool-view.is-fullscreen .cal-tool-body{
+  height: calc(100vh - 56px);
+  overflow:hidden !important;
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+}
+.cal-tool-view.is-fullscreen .cal-tool-body > *{ min-height:0; }
+
+/* Compact all tool UIs in fullscreen */
+.cal-tool-view.is-fullscreen .lux-ui,
+.cal-tool-view.is-fullscreen .ct-ui,
+.cal-tool-view.is-fullscreen .flicker-ui,
+.cal-tool-view.is-fullscreen .spec-ui{
+  font-size: 0.85rem;
+  line-height: 1.15;
+}
+.cal-tool-view.is-fullscreen video{
+  max-height: clamp(140px, 28vh, 220px);
+  height: auto;
+}
+.cal-tool-view.is-fullscreen canvas{
+  max-height: clamp(120px, 26vh, 220px);
+}
+
+/* Ensure gauges never exceed viewport */
+.cal-tool-view.is-fullscreen .lux-gauge,
+.cal-tool-view.is-fullscreen .ct-gauge,
+.cal-tool-view.is-fullscreen .flicker-gauge,
+.cal-tool-view.is-fullscreen .spec-gauge{
+  width: min(72vw, 220px) !important;
+  height: min(72vw, 220px) !important;
+}
+
+/* Info panels: always closable + internal scroll */
+#tab-calibration .cal-info-panel{
+  max-height: 80vh;
+  overflow:auto;
+  -webkit-overflow-scrolling: touch;
+}
+#tab-calibration .cal-info-close{
+  position: sticky;
+  top: 0;
+  width: 100%;
+  text-align:left;
+  padding: 10px 12px;
+  border-radius: 12px;
+  margin: 0 0 10px 0;
+}
+
 </style>
 <style id="modern-shell">
   :root{
@@ -4685,6 +4771,7 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 <div class="spec-gauge-wrap">
 <div class="spec-gauge">
 <div class="spec-needle" id="specNeedle"></div>
+<div class="spec-gauge-label" id="specGaugeLabel">Rear Camera · Spectrum estimate</div>
 <div class="spec-center">
 <div class="spec-big" id="specNm">---</div>
 <div class="spec-unit">Nanometers (nm)</div>
@@ -4715,7 +4802,7 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 </div>
 <div class="spec-camera">
 <div class="lux-camera-head">
-<div class="lux-camera-title">Rear Camera · Spectral estimate</div>
+<div class="lux-camera-title">Rear Camera · Spectrum estimate</div>
 <div class="lux-camera-actions">
 <button class="lux-btn" id="specFreezeBtn" type="button">Freeze</button>
 <button class="lux-btn" id="specSaveBtn" type="button">Save</button>
@@ -10490,6 +10577,7 @@ btn.addEventListener('click', closeGate);
   const sEl = document.getElementById('specSat');
   const statusEl = document.getElementById('specStatus');
   const titleEl = details.querySelector('.lux-camera-title');
+  const gaugeLabelEl = document.getElementById('specGaugeLabel');
   const overlay = document.getElementById('specOverlay');
   const warnText = document.getElementById('specWarnText');
 
@@ -10507,9 +10595,10 @@ btn.addEventListener('click', closeGate);
   let facing = 'environment';
 
   function updateTitle(){
-    if(!titleEl) return;
     const cam = (facing === 'environment') ? 'Rear Camera' : 'Front Camera';
-    titleEl.textContent = cam + ' · Spectrum estimate';
+    const txt = cam + ' · Spectrum estimate';
+    if(titleEl) titleEl.textContent = txt;
+    if(gaugeLabelEl) gaugeLabelEl.textContent = txt;
   }
 
   function setStatus(s){ if(statusEl) statusEl.textContent = s; }
@@ -12338,7 +12427,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const backBtn = e.target.closest('#tab-calibration .cal-back');
+    const backBtn = e.target.closest('#tab-calibration .cal-back-btn, #tab-calibration [data-calback]');
     if(backBtn){
       e.preventDefault();
       const view = closestToolView(backBtn);
@@ -12358,11 +12447,27 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.remove('cal-info-open');
       return;
     }
+
+    // click on the translucent info panel backdrop closes it
+    const infoPanel = e.target.classList && e.target.classList.contains('cal-info-panel') ? e.target : null;
+    if(infoPanel){
+      // only close when clicking the panel itself (not its children)
+      if(e.target === infoPanel){
+        infoPanel.hidden = true;
+        document.body.classList.remove('cal-info-open');
+      }
+      return;
+    }
   }, {passive:false});
 
   // Inject close buttons into any calibration info panels that lack one
   function enhanceInfoPanels(){
-    const panels = document.querySelectorAll('#tab-calibration .lux-info, #tab-calibration .ct-info, #tab-calibration .flicker-info, #tab-calibration .spec-info, #tab-calibration .cal-info-panel, #tab-calibration [id$="Info"]');
+    let panels=[];
+    try{
+      panels = document.querySelectorAll('#tab-calibration .lux-info, #tab-calibration .ct-info, #tab-calibration .flicker-info, #tab-calibration .spec-info, #tab-calibration .cal-info-panel, #tab-calibration [id$="Info"]');
+    }catch(err){
+      panels = document.querySelectorAll('#tab-calibration [id$="Info"]');
+    }
     panels.forEach(p=>{
       // mark as panel if it's a DIV with hidden capability and contains explanatory text
       if(!p.classList.contains('cal-info-panel')) p.classList.add('cal-info-panel');
