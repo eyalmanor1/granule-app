@@ -2776,8 +2776,10 @@ details.acc[open] summary{ filter:brightness(1.02); }
   inset:0 !important;
   z-index:9999 !important;
   background:var(--app-bg, #0b0e18) !important;
-  overflow:auto !important;
-  padding:12px 12px 24px !important;
+  overflow:hidden !important; /* no scroll in full-screen */
+  padding:12px !important;
+  display:flex !important;
+  flex-direction:column !important;
 }
 body.cal-fs-active{
   overflow:hidden !important;
@@ -2793,6 +2795,91 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 /* Ensure video regions don't block vertical scrolling */
 #tab-calibration .cal-tool-view.is-fullscreen video{
   touch-action:pan-y;
+}
+
+/* Inline header for embedded camera accordion */
+#tab-calibration .cal-inline-topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:10px; margin:6px 0 10px;
+}
+#tab-calibration .cal-inline-title{
+  font-weight:900; color:var(--accent); font-size:18px; letter-spacing:.2px;
+}
+#tab-calibration .cal-inline-actions{ display:flex; gap:8px; }
+
+/* Full-screen layout: make the tool fill the viewport nicely */
+.cal-tool-view.is-fullscreen .cal-tool-body{
+  flex:1 1 auto !important;
+  height:100% !important;
+  overflow:hidden !important;
+}
+.cal-tool-view.is-fullscreen .cal-tool-topbar{
+  flex:0 0 auto !important;
+}
+
+/* Lux Meter full-screen: two-pane, no-scroll, responsive */
+.lux-main{ display:block; }
+.cal-tool-view.is-fullscreen #caltool-lux .lux-ui{
+  height:100% !important;
+  display:flex !important;
+  flex-direction:column !important;
+}
+.cal-tool-view.is-fullscreen #caltool-lux .lux-main{
+  display:grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+  align-items:stretch;
+  flex:1 1 auto;
+  overflow:hidden;
+}
+.cal-tool-view.is-fullscreen #caltool-lux .lux-left,
+.cal-tool-view.is-fullscreen #caltool-lux .lux-right{
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+}
+.cal-tool-view.is-fullscreen #caltool-lux .lux-gauge{
+  width:min(46vw, 260px);
+  height:min(46vw, 260px);
+}
+.cal-tool-view.is-fullscreen #caltool-lux .lux-settings{
+  margin-top:8px;
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap:10px;
+}
+.cal-tool-view.is-fullscreen #caltool-lux .lux-setting{
+  padding:10px 10px 8px;
+}
+.cal-tool-view.is-fullscreen #caltool-lux .lux-camera{
+  flex:1 1 auto;
+  min-height:0;
+  margin-top:0;
+}
+.cal-tool-view.is-fullscreen #caltool-lux .lux-video-wrap{
+  flex:1 1 auto;
+  min-height:0;
+  border-radius:14px;
+}
+.cal-tool-view.is-fullscreen #caltool-lux video{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover;
+}
+
+/* Small screens: stack */
+@media (max-width: 720px){
+  .cal-tool-view.is-fullscreen #caltool-lux .lux-main{
+    grid-template-columns: 1fr !important;
+  }
+  .cal-tool-view.is-fullscreen #caltool-lux .lux-gauge{
+    width:min(84vw, 260px);
+    height:min(84vw, 260px);
+  }
+  .cal-tool-view.is-fullscreen #caltool-lux .lux-settings{
+    grid-template-columns: 1fr;
+  }
 }
 .lux-icon:hover{filter:brightness(1.1)}
 
@@ -3380,6 +3467,28 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 
 /* Ensure HF chromatic outputs are visible */
 #hfColorOrderBox, #hfCannotUseBox{ font-weight:600; }
+
+/* Camera accordion full-screen: keep everything in-view (no scroll) */
+.cal-tool-view.is-fullscreen#tab-camera .cam-wrap,
+.cal-tool-view.is-fullscreen #tab-camera .cam-wrap{
+  height:100%;
+}
+.cal-tool-view.is-fullscreen #tab-camera .cam-card{
+  max-height: calc(100vh - 90px);
+  overflow:hidden;
+}
+.cal-tool-view.is-fullscreen #tab-camera .cam-view{
+  min-height:0;
+}
+.cal-tool-view.is-fullscreen #tab-camera .cam-frame{
+  max-height:50vh;
+}
+.cal-tool-view.is-fullscreen #tab-camera canvas#preview,
+.cal-tool-view.is-fullscreen #tab-camera video#live-video{
+  width:100% !important;
+  height:auto !important;
+  max-height:50vh;
+}
 </style>
 <style id="modern-shell">
   :root{
@@ -4038,8 +4147,13 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 </div>
 <div id="camCapturePreviewInner" style="margin-top:10px;"></div>
 </div>
-<div class="acc-body"><div class="tool-tab" id="tab-camera">
-<h2 style="color:var(--accent); margin-bottom:6px;">Camera</h2>
+<div class="acc-body"><div class="tool-tab cal-tool-view" id="tab-camera">
+<div class="cal-inline-topbar">
+  <div class="cal-inline-title">Camera</div>
+  <div class="cal-inline-actions">
+    <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+  </div>
+</div>
 <div class="cam-wrap">
 <div class="cam-pane active" id="camPaneLive">
 <div class="cam-card">
@@ -4094,6 +4208,8 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 <button class="lux-icon" id="luxSwitchBtn" title="Switch Camera" type="button">⟳</button>
 </div>
 </div>
+<div class="lux-main">
+  <div class="lux-left">
 <div class="lux-gauge-wrap">
 <div class="lux-gauge">
 <div class="lux-needle" id="luxNeedle"></div>
@@ -4128,6 +4244,8 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 <div class="lux-setting-sub">Camera gain (sim)</div>
 </div>
 </div>
+  </div>
+  <div class="lux-right">
 <div class="lux-camera">
 <div class="lux-camera-head">
 <div class="lux-camera-title">Rear Camera · Reflected Light</div>
@@ -4145,12 +4263,40 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 </div>
 </div>
 </div>
+  </div>
+</div>
 <div class="lux-info" hidden="" id="luxInfo">
 <div class="lux-info-card">
 <div class="lux-info-h">Lux Meter (Preview)</div>
 <div class="lux-info-p">
-      This is a browser-based preview. Exposure/ISO/aperture controls are simulated for workflow testing.
-      The live lux estimate is computed from video brightness and is meant for relative calibration.
+      
+<p><b>מה הכלי עושה?</b><br/>
+Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lux</b> (וגם <b>Foot‑candles</b>) מתוך תמונת המצלמה בזמן אמת.
+המדידה כאן היא <b>הערכה המבוססת על בהירות התמונה</b> (Preview בדפדפן) ונועדה בעיקר ליישור/השוואה במהלך כיול.</p>
+
+<p><b>מה אתה רואה במסך?</b></p>
+<ul style="margin:6px 0 10px 18px;">
+  <li><b>Exposure Value (EV)</b> – מספר לוגאריתמי שמייצג “כמה אור” הגיע לחיישן ביחס להגדרות צילום.</li>
+  <li><b>Lux / fc</b> – המרה משוערת מתוך בהירות הפריים (לשימוש כיול יחסי, לא כמד‑אור מעבדתי).</li>
+  <li><b>וידאו</b> – תצוגת מצלמה חיה שממנה מחושב הערך.</li>
+</ul>
+
+<p><b>הסליידרים (השפעה על EV וההמרה):</b></p>
+<ul style="margin:6px 0 10px 18px;">
+  <li><b>Aperture (צמצם)</b> – ערך f/ (למשל f/2.8). מספר קטן יותר = צמצם פתוח יותר = יותר אור = EV “גבוה” יותר.</li>
+  <li><b>Speed / Shutter (מהירות תריס)</b> – זמן חשיפה. זמן ארוך יותר = יותר אור. הערכים מוצגים בסגנון 1/60, 1/125 וכו’.</li>
+  <li><b>ISO</b> – הגברה/רגישות. כאן זה <b>סימולציה</b> שמדמה שינוי Gain לצורך בדיקת זרימת עבודה.</li>
+</ul>
+
+<p><b>כפתורים:</b></p>
+<ul style="margin:6px 0 0 18px;">
+  <li><b>i (Info)</b> – פותח את ההסבר הזה.</li>
+  <li><b>⛶ Full Screen</b> – הופך את הכלי למסך מלא (כמו תת‑אפליקציה). לחיצה נוספת יוצאת חזרה לאקורדיון.</li>
+  <li><b>⟳ Switch Camera</b> – מעבר בין מצלמה קדמית/אחורית.</li>
+  <li><b>Freeze</b> – “מקפיא” את הקריאה על הפריים הנוכחי (נוח להשוואה).</li>
+  <li><b>Save</b> – שומר Snapshot של הערכים (לוג/תיעוד בתוך האפליקציה).</li>
+</ul>
+
     </div>
 <button class="lux-btn lux-btn-accent" id="luxInfoClose" type="button">Got it</button>
 </div>
