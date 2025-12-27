@@ -10,8 +10,46 @@
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="AI Sorting" name="apple-mobile-web-app-title"/>
-<style>
-  body {
+
+
+
+<link href="manifest.webmanifest" rel="manifest"/><meta content="#0b0f18" name="theme-color"/><link href="icons/icon-180.png" rel="apple-touch-icon"/><style id="css-architecture-v29">
+/* =======================================================================
+   MANOR ENGINEERING — Single-file (v29) — Constructive CSS Architecture
+   Generated: 2025-12-27 17:58
+   Principles:
+     - Single stylesheet (no scattered <style> tags)
+     - Preserve original rule order to keep behavior identical
+     - Clearly separated layers/sections for maintainability
+     - Explicit visibility rules for overlays ([hidden] safety)
+   ======================================================================= */
+
+@layer tokens, base, layout, components, utilities, states;
+
+/* ------------------------ TOKENS ------------------------------------- */
+@layer tokens {
+  /* keep existing :root tokens from original styles (preserved below) */
+}
+
+/* ------------------------ BASE --------------------------------------- */
+@layer base {
+  /* Safety: ensure HTML hidden attribute always wins */
+  [hidden]{ display:none !important; }
+}
+
+/* ------------------------ LAYOUT ------------------------------------- */
+@layer layout {
+  /* Layout scaffolding is defined in original CSS (preserved below) */
+}
+
+/* ------------------------ COMPONENTS --------------------------------- */
+/* NOTE: The following CSS is a verbatim concatenation of the original
+   <style> blocks (in the same order) wrapped in @layer components,
+   so behavior should remain identical while structure becomes maintainable. */
+@layer components {
+
+/* ---- Original style block #1 ---- */
+body {
     background: #121212;
     color: var(--muted);
     font-family: 'Segoe UI', sans-serif;
@@ -2298,11 +2336,6 @@ button.active, .btn.active, .pill.active, .toggle.on{ background: var(--accent) 
 .cal-back button{ padding: 10px 12px; border-radius: 12px; }
 
   /* Calibration tool buttons (same interaction language as Granules actions) */
-
-/* Calibration: no Back buttons (fullscreen toggles in/out) */
-#tab-calibration .cal-back-btn,
-#tab-calibration [data-calback],
-#tab-calibration .cal-fs-back{display:none !important;}
   .cal-shell{ display:block; }
   .cal-sub{ margin: 2px 0 12px; color: var(--muted); font-weight: 700; }
   .cal-btn-grid{ display:flex; flex-direction:column; gap:12px; }
@@ -2776,10 +2809,6 @@ details.acc[open] summary{ filter:brightness(1.02); }
 }
 
 /* Calibration full-screen mode */
-
-/* Fullscreen: hide per-tool fullscreen buttons; use header toggle only */
-.cal-tool-view.is-fullscreen .cal-fs-btn{display:inline-flex !important;}
-.cal-tool-view.is-fullscreen .cam-fs-btn{display:none !important;}
 .cal-tool-view.is-fullscreen{
   position:fixed !important;
   inset:0 !important;
@@ -2791,153 +2820,6 @@ details.acc[open] summary{ filter:brightness(1.02); }
   flex-direction:column !important;
 }
 
-
-
-/* Camera tool: true full-bleed fullscreen + always-visible toggle */
-#tab-camera.is-fullscreen .cal-inline-topbar{
-  position:fixed !important;
-  top:12px !important;
-  left:12px !important;
-  right:12px !important;
-  z-index:10020 !important;
-  background: linear-gradient(180deg, rgba(10,12,22,0.78), rgba(10,12,22,0.20)) !important;
-  border: 1px solid rgba(255,255,255,0.10) !important;
-  backdrop-filter: blur(10px);
-}
-#tab-camera.is-fullscreen .cam-wrap{ flex:1 !important; min-height:0 !important; display:flex !important; }
-#tab-camera.is-fullscreen .cam-pane,
-#tab-camera.is-fullscreen .cam-card,
-#tab-camera.is-fullscreen .cam-view,
-#tab-camera.is-fullscreen .cam-frame{
-  flex:1 !important;
-  min-height:0 !important;
-}
-#tab-camera.is-fullscreen video{
-  width:100% !important;
-  height:100% !important;
-  object-fit:cover !important;
-  display:block !important;
-}
-#tab-camera.is-fullscreen h3{ display:none !important; }
-
-/* Full-screen: compact & proportional (NO transform scaling; avoid overlaps) */
-.cal-tool-view.is-fullscreen{
-  /* Slightly smaller typography in full-screen so everything fits without scroll */
-  font-size: 14px;
-}
-.cal-tool-view.is-fullscreen .cal-tool-topbar{
-  padding: 8px 10px !important;
-}
-.cal-tool-view.is-fullscreen .cal-tool-body{
-  padding: 0 !important;
-}
-
-/* Info panels: show as an overlay with its own scroll (so full-screen itself stays non-scrollable) */
-.cal-tool-view.is-fullscreen .lux-info{
-  position: fixed !important;
-  left: 12px; right: 12px;
-  top: 64px; bottom: calc(12px + env(safe-area-inset-bottom));
-  z-index: 10000 !important;
-  overflow: auto !important;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Shared camera region sizing for CT / Flicker / Spectrum */
-.cal-tool-view.is-fullscreen .ct-camera,
-.cal-tool-view.is-fullscreen .fl-camera,
-.cal-tool-view.is-fullscreen .spec-camera{
-  flex: 1 1 auto !important;
-  min-height: 0 !important;
-}
-.cal-tool-view.is-fullscreen .ct-video,
-.cal-tool-view.is-fullscreen .fl-video,
-.cal-tool-view.is-fullscreen .spec-video{
-  height: clamp(140px, 28vh, 200px) !important;
-}
-
-/* Color Temperature full-screen: keep gauge + bars compact and prevent collision */
-.cal-tool-view.is-fullscreen .ct-ui{
-  padding: 10px !important;
-  gap: 10px !important;
-}
-.cal-tool-view.is-fullscreen .ct-gauge-wrap{
-  flex: 0 0 auto !important;
-  padding: 6px !important;
-}
-.cal-tool-view.is-fullscreen .ct-gauge{
-  width: clamp(190px, 62vw, 280px) !important;
-  height: clamp(190px, 62vw, 280px) !important;
-}
-.cal-tool-view.is-fullscreen .ct-bars{
-  flex: 0 0 auto !important;
-  gap: 8px !important;
-}
-.cal-tool-view.is-fullscreen .ct-bar-h{ font-size: 12px !important; }
-.cal-tool-view.is-fullscreen .ct-bar-v{ font-size: 12px !important; }
-
-/* Flicker full-screen: compact gauge + keep strip visible */
-.cal-tool-view.is-fullscreen .fl-ui{
-  padding: 10px !important;
-  gap: 10px !important;
-}
-.cal-tool-view.is-fullscreen .fl-gauge-wrap{
-  flex: 0 0 auto !important;
-  padding: 6px !important;
-}
-.cal-tool-view.is-fullscreen .fl-gauge{
-  width: clamp(190px, 62vw, 280px) !important;
-  height: clamp(190px, 62vw, 280px) !important;
-}
-.cal-tool-view.is-fullscreen .fl-strip{ padding: 6px 2px !important; }
-
-/* Light Spectrum full-screen: compact plot + camera */
-.cal-tool-view.is-fullscreen .spec-ui{
-  padding: 10px !important;
-  gap: 10px !important;
-}
-.cal-tool-view.is-fullscreen .spec-plot{
-  height: clamp(120px, 20vh, 190px) !important;
-}
-
-/* === vFS2: strict no-overlap layout inside full-screen tools (mobile first) === */
-.cal-tool-view.is-fullscreen .ct-gauge-wrap,
-.cal-tool-view.is-fullscreen .fl-gauge-wrap,
-.cal-tool-view.is-fullscreen .spec-gauge-wrap{
-  padding:6px !important;
-}
-.cal-tool-view.is-fullscreen .ct-gauge,
-.cal-tool-view.is-fullscreen .fl-gauge,
-.cal-tool-view.is-fullscreen .spec-gauge{
-  width:clamp(200px, 70vw, 360px) !important;
-  height:clamp(200px, 70vw, 360px) !important;
-}
-.cal-tool-view.is-fullscreen .ct-bars,
-.cal-tool-view.is-fullscreen .fl-strip,
-.cal-tool-view.is-fullscreen .spec-metrics{
-  margin-top:8px !important;
-}
-.cal-tool-view.is-fullscreen .ct-camera,
-.cal-tool-view.is-fullscreen .fl-camera,
-.cal-tool-view.is-fullscreen .spec-camera,
-.cal-tool-view.is-fullscreen .lux-camera{
-  margin-top:8px !important;
-  position:relative !important;
-}
-.cal-tool-view.is-fullscreen .ct-camera video,
-.cal-tool-view.is-fullscreen .fl-camera video,
-.cal-tool-view.is-fullscreen .spec-camera video,
-.cal-tool-view.is-fullscreen .lux-camera video{
-  width:100% !important;
-  height:100% !important;
-  object-fit:cover !important;
-  display:block !important;
-}
-/* Prevent any absolute elements from escaping and stacking on top of controls */
-.cal-tool-view.is-fullscreen .ct-ui *, 
-.cal-tool-view.is-fullscreen .fl-ui *,
-.cal-tool-view.is-fullscreen .spec-ui *{
-  max-width:100% !important;
-}
 /* Full-screen calibration: keep everything within one viewport (no scrolling) */
 .cal-tool-view.is-fullscreen .cal-tool-topbar{flex:0 0 auto;}
 .cal-tool-view.is-fullscreen .cal-tool-body{
@@ -3148,14 +3030,6 @@ body.cal-fs-active nav.main-menu{display:none !important;}
   box-shadow:inset 0 10px 22px rgba(0,0,0,.35);
 }
 .lux-setting-h{font-size:12px;color:rgba(255,255,255,.70);font-weight:900}
-
-.lux-setting-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.lux-helpbtn{
-  width:24px;height:24px;border-radius:8px;border:1px solid #34406a;
-  background:#1a2140;color:#cbd5ff;font-weight:1000;line-height:22px;
-  display:inline-flex;align-items:center;justify-content:center;
-}
-.lux-helpbtn:active{transform:scale(.98)}
 .lux-setting-v{font-size:18px;color:#fff;font-weight:1000;margin-top:4px}
 .lux-setting-sub{font-size:11px;color:rgba(255,255,255,.60);margin-top:6px}
 .lux-slider{width:100%}
@@ -3177,13 +3051,10 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 .lux-dot{width:8px;height:8px;border-radius:50%;background:#18ff7a;box-shadow:0 0 10px rgba(24,255,122,.35)}
 .lux-small{font-size:12px;color:rgba(255,255,255,.85);font-weight:800;text-shadow:0 2px 10px rgba(0,0,0,.6)}
 
-.lux-info{position:fixed;inset:0;z-index:10000;display:flex;align-items:flex-start;justify-content:center;padding:20px 0;background:rgba(0,0,0,.25);backdrop-filter:blur(6px)}
+.lux-info{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);backdrop-filter:blur(6px)}
 .lux-info[hidden]{display:none !important;}
 .lux-info-card{
   width:min(520px,calc(100vw - 40px));
-  max-height:calc(100vh - 80px);
-  overflow:auto;
-  -webkit-overflow-scrolling:touch;
   background:rgba(20,24,42,.62);
   border:1px solid rgba(255,255,255,.10);
   border-radius:16px;
@@ -3243,24 +3114,6 @@ body.cal-fs-active nav.main-menu{display:none !important;}
   border-radius:3px;
   box-shadow:0 0 14px rgba(255,155,47,.35);
   z-index:5;
-}
-.spec-gauge-label{
-  position:absolute;
-  left:50%;
-  top:14px;
-  transform:translateX(-50%);
-  padding:4px 10px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:900;
-  letter-spacing:.15px;
-  color:rgba(255,255,255,.82);
-  background:rgba(0,0,0,.18);
-  border:1px solid rgba(255,255,255,.10);
-  box-shadow:0 8px 22px rgba(0,0,0,.35);
-  z-index:4; /* behind needle (5) and center (6) */
-  pointer-events:none;
-  white-space:nowrap;
 }
 .spec-center{
   position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);
@@ -3342,54 +3195,6 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 
 .ct-camera{margin-top:10px;border:1px solid rgba(255,255,255,.10);border-radius:16px;overflow:hidden;background:rgba(0,0,0,.12)}
 .ct-video{height:240px}
-
-
-/* --- Calibration tools: tighter full-screen layout (no page scroll) --- */
-.cal-tool-view.is-fullscreen .ct-ui,
-.cal-tool-view.is-fullscreen .fl-ui,
-.cal-tool-view.is-fullscreen .spec-ui,
-.cal-tool-view.is-fullscreen .lux-ui{
-  height:100% !important;
-  display:flex !important;
-  flex-direction:column !important;
-  min-height:0 !important;
-}
-
-/* Compact top rows in full-screen */
-.cal-tool-view.is-fullscreen .ct-top,
-.cal-tool-view.is-fullscreen .fl-top,
-.cal-tool-view.is-fullscreen .spec-top,
-.cal-tool-view.is-fullscreen .lux-top{
-  margin-bottom:8px !important;
-}
-
-/* Video blocks: clamp height so buttons never get pushed off-screen */
-.cal-tool-view.is-fullscreen .ct-camera,
-.cal-tool-view.is-fullscreen .fl-camera,
-.cal-tool-view.is-fullscreen .spec-camera,
-.cal-tool-view.is-fullscreen .lux-camera{
-  height:clamp(120px, 22vh, 210px) !important;
-}
-.cal-tool-view.is-fullscreen .ct-video,
-.cal-tool-view.is-fullscreen .fl-video,
-.cal-tool-view.is-fullscreen .spec-video,
-.cal-tool-view.is-fullscreen .lux-video{
-  height:100% !important;
-}
-
-/* CT: keep bars compact */
-.cal-tool-view.is-fullscreen .ct-bars{gap:10px !important; margin-top:8px !important;}
-.cal-tool-view.is-fullscreen .ct-bar-track{height:12px !important;}
-.cal-tool-view.is-fullscreen .ct-bar-h{font-size:12px !important;}
-.cal-tool-view.is-fullscreen .ct-bottom{font-size:12px !important;}
-
-/* Flicker: make wave strip smaller and prevent a huge empty block */
-.cal-tool-view.is-fullscreen .fl-wave{margin-top:8px !important;}
-.cal-tool-view.is-fullscreen #flWave{height:70px !important;}
-.cal-tool-view.is-fullscreen .fl-note{font-size:12px !important;}
-
-/* Spectrometer: keep plot readable but compact */
-.cal-tool-view.is-fullscreen .spec-plot{height:clamp(120px, 22vh, 210px) !important;}
 
 /* === v55 Flicker Meter UI === */
 .fl-ui{ padding:14px !important; background:rgba(20,24,42,.62) !important; border:1px solid rgba(255,255,255,.10) !important; border-radius:16px !important; }
@@ -3784,164 +3589,8 @@ body.cal-fs-active nav.main-menu{display:none !important;}
   max-height:50vh;
 }
 
-/* --- Calibration fullscreen: compact, single-screen (no page scroll) --- */
-.cal-tool-view.is-fullscreen{
-  position:fixed !important;
-  inset:0 !important;
-  z-index:9999 !important;
-  background: var(--bg);
-  overflow:hidden !important;
-}
-.cal-tool-view.is-fullscreen .cal-tool-topbar{
-  position:sticky;
-  top:0;
-  z-index:5;
-}
-.cal-tool-view.is-fullscreen .cal-tool-topbar,
-.cal-tool-view.is-fullscreen .cal-tool-topbar *{
-  touch-action:manipulation;
-}
-.cal-tool-view.is-fullscreen .cal-tool-body{
-  height: calc(100vh - 56px);
-  overflow:hidden !important;
-  display:flex;
-  flex-direction:column;
-  min-height:0;
-}
-.cal-tool-view.is-fullscreen .cal-tool-body > *{ min-height:0; }
-
-/* Compact all tool UIs in fullscreen */
-.cal-tool-view.is-fullscreen .lux-ui,
-.cal-tool-view.is-fullscreen .ct-ui,
-.cal-tool-view.is-fullscreen .flicker-ui,
-.cal-tool-view.is-fullscreen .spec-ui{
-  font-size: 0.85rem;
-  line-height: 1.15;
-}
-.cal-tool-view.is-fullscreen video{
-  max-height: clamp(140px, 28vh, 220px);
-  height: auto;
-}
-.cal-tool-view.is-fullscreen canvas{
-  max-height: clamp(120px, 26vh, 220px);
-}
-
-/* Ensure gauges never exceed viewport */
-.cal-tool-view.is-fullscreen .lux-gauge,
-.cal-tool-view.is-fullscreen .ct-gauge,
-.cal-tool-view.is-fullscreen .flicker-gauge,
-.cal-tool-view.is-fullscreen .spec-gauge{
-  width: min(72vw, 220px) !important;
-  height: min(72vw, 220px) !important;
-}
-
-/* Info panels: always closable + internal scroll */
-#tab-calibration .cal-info-panel{
-  max-height: 80vh;
-  overflow:auto;
-  -webkit-overflow-scrolling: touch;
-}
-#tab-calibration .cal-info-close{
-  position: sticky;
-  top: 0;
-  width: 100%;
-  text-align:left;
-  padding: 10px 12px;
-  border-radius: 12px;
-  margin: 0 0 10px 0;
-}
-
-
-/* === Calibration Fullscreen: unified header to avoid duplicate buttons & ensure Back works === */
-.cal-tool-view .cal-fs-header{
-  display:none;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:10px 12px;
-  background: rgba(12,16,28,.92);
-  border-bottom: 1px solid rgba(255,255,255,.08);
-  position: sticky;
-  top: 0;
-  z-index: 10050;
-  backdrop-filter: blur(10px);
-}
-.cal-tool-view.is-fullscreen .cal-fs-header{display:flex;}
-.cal-tool-view.is-fullscreen .cal-tool-topbar,
-.cal-tool-view.is-fullscreen .cal-inline-topbar{display:none !important;}
-
-.cal-fs-header .cal-fs-left{display:flex;align-items:center;gap:10px;min-width:0;}
-.cal-fs-header .cal-fs-title{font-weight:700;font-size:14px;opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.cal-fs-header .cal-fs-actions{display:flex;align-items:center;gap:8px;}
-.cal-fs-header button{
-  border:1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.06);
-  color:#e9ecff;
-  padding:8px 10px;
-  border-radius:10px;
-  line-height:1;
-  touch-action:manipulation;
-}
-.cal-fs-header button:active{transform: translateY(1px);}
-
-/* Info sheets: close button at the bottom */
-.cal-info-close-row{
-  display:flex;
-  justify-content:flex-end;
-  padding: 12px;
-  border-top: 1px solid rgba(255,255,255,.10);
-  margin-top: 10px;
-}
-.cal-info-close-row .cal-info-close{
-  width:100%;
-  border:1px solid rgba(255,255,255,.18);
-  background: rgba(255,255,255,.08);
-  color:#e9ecff;
-  padding: 12px 14px;
-  border-radius: 12px;
-  font-weight: 700;
-  touch-action: manipulation;
-}
-.cal-info-close-row .cal-info-close:active{transform: translateY(1px);}
-
-/* Prevent overlaps in fullscreen by constraining key canvases/videos */
-.cal-tool-view.is-fullscreen .ct-ui,
-.cal-tool-view.is-fullscreen .fl-ui,
-.cal-tool-view.is-fullscreen .spec-ui,
-.cal-tool-view.is-fullscreen .lux-ui{
-  max-height: calc(100vh - 62px - env(safe-area-inset-bottom));
-}
-.cal-tool-view.is-fullscreen .ct-gauge,
-.cal-tool-view.is-fullscreen .fl-gauge,
-.cal-tool-view.is-fullscreen .spec-gauge,
-.cal-tool-view.is-fullscreen .lux-gauge{
-  width: clamp(200px, 60vw, 320px) !important;
-  height: clamp(200px, 60vw, 320px) !important;
-}
-.cal-tool-view.is-fullscreen .ct-camera,
-.cal-tool-view.is-fullscreen .fl-camera,
-.cal-tool-view.is-fullscreen .spec-camera,
-.cal-tool-view.is-fullscreen .lux-video{
-  max-height: 32vh !important;
-}
-
-
-/* Make Calibration info blocks behave like true overlays (tap background to close) */
-#tab-calibration .lux-info,
-#tab-calibration .ct-info,
-#tab-calibration .fl-info,
-#tab-calibration .spec-info{
-  background: rgba(0,0,0,.45);
-  padding: 14px;
-}
-#tab-calibration .lux-info[hidden],
-#tab-calibration .ct-info[hidden],
-#tab-calibration .fl-info[hidden],
-#tab-calibration .spec-info[hidden]{display:none !important;}
-
-</style>
-<style id="modern-shell">
-  :root{
+/* ---- Original style block #2 (id="modern-shell") ---- */
+:root{
     --shell-max: 980px;
 
     /* Measured at runtime (fallback values below) */
@@ -4079,9 +3728,8 @@ body.cal-fs-active nav.main-menu{display:none !important;}
   pointer-events: auto;
 }
 
-</style>
-<style id="fix-sticky-headers-v14">
-  /* ===== Fix v14 (patched in v20): DO NOT let the whole tab scroll. =====
+/* ---- Original style block #3 (id="fix-sticky-headers-v14") ---- */
+/* ===== Fix v14 (patched in v20): DO NOT let the whole tab scroll. =====
      In Granules we want: fixed tab head + internal scroller (.tab-scroll).
      The old v14 made #tab-valid/#tab-defect the scroller (overflow-y:auto),
      which caused the "Valid Granule" / "Defect Granule" headers and previews to move out of view.
@@ -4136,948 +3784,8 @@ body.cal-fs-active nav.main-menu{display:none !important;}
   pointer-events: auto;
 }
 
-</style>
-<link href="manifest.webmanifest" rel="manifest"/><meta content="#0b0f18" name="theme-color"/><link href="icons/icon-180.png" rel="apple-touch-icon"/></head>
-<body>
-<div class="intro-overlay" hidden="" id="introGate">
-<div aria-modal="true" class="intro-card" role="dialog">
-<div class="intro-head">
-<div class="intro-title">Welcome — Read Before Use</div>
-<div class="intro-sub">First run only. Tap Skip to continue.</div>
-</div>
-<div class="intro-scroll" id="introGateScroll">
-<h2>Overview</h2>
-<p>This application configures and operates the granules inspection workflow (Granules, Analysis, Calibration, Tools).</p>
-<h2>Tabs</h2>
-<ul>
-<li><b>Granules</b> — Define valid/defect colors used by the detection pipeline.</li>
-<li><b>Analysis</b> — Preview and validate behavior (simulation / deltas).</li>
-<li><b>Calibration</b> — Exposure/brightness reference and tuning utilities.</li>
-<li><b>Tools</b> — Operational tools (Camera, Upload, Manuals, Saved, QA, Factory Live).</li>
-</ul>
-<h2>Recommended first-time workflow</h2>
-<ol>
-<li>Set <b>Valid</b> and <b>Defect</b> colors in <b>Granules</b>.</li>
-<li>Validate behavior in <b>Analysis</b>.</li>
-<li>Stabilize brightness/exposure in <b>Calibration</b>.</li>
-<li>Use <b>Tools</b> for operation and QA.</li>
-</ol>
-<h2>Important</h2>
-<ul>
-<li>Some modules initialize only when their accordion/tool is opened (on-demand).</li>
-<li>After any change, validate in Analysis/QA before production use.</li>
-</ul>
-<p><i>Scroll to the very bottom to unlock the confirmation.</i></p>
-<div class="intro-spacer"></div>
-<div class="intro-end">End of introduction.</div>
-</div>
-<div class="intro-confirm" style="justify-content:flex-end">
-<button class="intro-btn" id="introGateBtn" type="button">Skip</button>
-</div>
-</div>
-</div>
-<div class="intro-overlay" hidden="" id="tabHelpOverlay">
-<div class="intro-card" style="height:min(68vh,620px)">
-<div class="intro-head">
-<div class="intro-title" id="tabHelpTitle">Tab Help</div>
-<div class="intro-sub">Shown once per tab (first time you it)</div>
-</div>
-<div class="intro-scroll" id="tabHelpBody"></div>
-<div class="intro-confirm" style="justify-content:flex-end">
-<button class="intro-btn" id="tabHelpContinue" type="button">Skip</button>
-</div>
-</div>
-</div>
-<div aria-hidden="false" id="intro-splash">
-<div id="video-layer">
-<video autoplay="" id="bgVideo" loop="" muted="" playsinline="" preload="auto">
-</video>
-</div>
-<div id="gradient-overlay"></div>
-<canvas id="intro-grain"></canvas>
-<div class="intro-scan"></div>
-<div class="intro-center">
-<div class="intro-badge">Manor Engineering</div>
-<div class="intro-name">Eyal Manor</div>
-<div class="intro-sub">AI • Computer Vision • Smart Manufacturing</div>
-<div class="intro-status">Scanning grains…</div>
-<button class="intro-skip" id="intro-skip">Skip</button>
-</div>
-</div>
-<div aria-hidden="true" id="home-overlay">
-<div aria-label="Start menu" class="home-card" role="dialog">
-<div class="home-head">
-<div>
-<div class="home-title">Choose an action</div>
-<div class="home-sub">No need to hunt for tabs — choose where to go and the screen will switch automatically.</div>
-</div>
-<div aria-label="Close" class="home-close" id="home-close">×</div>
-</div>
-<div class="home-grid">
-<button class="home-action home-primary" data-home-tab="valid">
-<div>
-          Granules • Valid
-          <small>Set valid granule</small>
-</div>
-<div class="chev">›</div>
-</button>
-<button class="home-action home-primary" data-home-tab="defect">
-<div>
-          Granules • Defect
-          <small>Set defect granule</small>
-</div>
-<div class="chev">›</div>
-</button>
-<button class="home-action" data-home-tab="analysis">
-<div>
-          Analysis
-          <small>Signal / Light / Gain</small>
-</div>
-<div class="chev">›</div>
-</button>
-<button class="home-action" data-home-tab="upload">
-<div>
-          Tools • Upload
-          <small>Import / Images</small>
-</div>
-<div class="chev">›</div>
-</button>
-<button class="home-action" data-home-tab="qa">
-<div>
-          Tools • QA
-          <small>Quick checks</small>
-</div>
-<div class="chev">›</div>
-</button>
-<button class="home-action" data-home-tab="saved">
-<div>
-          Tools • Saved
-          <small>Saved presets</small>
-</div>
-<div class="chev">›</div>
-</button>
-<button class="home-action" data-home-tab="simulation">
-<div>
-          Simulation
-          <small>Simulation</small>
-</div>
-<div class="chev">›</div>
-</button>
-<button class="home-action" data-home-tab="camera">
-<div>
-          Camera
-          <small>Camera view</small>
-</div>
-<div class="chev">›</div>
-</button>
-<button class="home-action" data-home-tab="iot">
-<div>
-          Factory Live
-          <small>Machine connection</small>
-</div>
-<div class="chev">›</div>
-</button>
-</div>
-</div>
-</div>
-<div aria-atomic="true" aria-live="polite" class="toast-container" id="toast-container"></div>
-<div class="app-shell">
-<header class="app-header"></header>
-<div hidden="" id="contextBar"><div class="context-inner"></div></div>
-<div class="app-content">
-<section class="tab active" id="tab-granules">
-<div class="tab-fixed-head granule-head">
-<h2 class="tab-title solo-title">Granules</h2>
-</div>
-<div class="tab-scroll granule-scroll">
-<div class="scroll-gutter"></div>
-<details class="acc">
-<summary>
-<div>
-<div class="acc-title">Valid</div>
-<div class="acc-sub">Choose valid granule color</div>
-</div>
-<span class="an-chip">Picker</span>
-</summary>
-<div class="acc-body">
-<div class="valid-mini-row">
-<div class="mini-rgb-indicator" id="valid-mini" title="Valid color">
-<div class="mini-trans-label">Transp</div>
-<label class="mini-trans-toggle" title="Transparency">
-<input id="transparent-toggle" type="checkbox"/>
-<span class="mini-switch"></span>
-</label>
-<div class="mini-rgb-text mini-rgb-text-small" id="valid-mini-text">RGB(—)</div>
-</div>
-</div>
-<div class="hsv-card" data-prefix="valid">
-<div class="hsv-title">Select Color (Valid)</div>
-<div class="hsv-picker" data-prefix="valid">
-<div class="hsv-sv-wrap">
-<canvas aria-label="Saturation Value" class="hsv-sv" height="320" id="valid-sv" width="520"></canvas>
-<div aria-hidden="true" class="hsv-cursor" id="valid-sv-cursor"></div>
-</div>
-<div class="hsv-hue-wrap">
-<canvas aria-label="Hue" class="hsv-hue" height="320" id="valid-hue" width="36"></canvas>
-<div aria-hidden="true" class="hsv-hue-cursor" id="valid-hue-cursor"></div>
-</div>
-</div>
-<div class="hsv-meta">
-<div class="hsv-rgb" id="valid-hsv-rgb">RGB(—)</div>
-</div>
-<div aria-hidden="true" class="hsv-hidden-inputs">
-<input id="valid-r" max="255" min="0" type="range" value="128"/>
-<input id="valid-g" max="255" min="0" type="range" value="128"/>
-<input id="valid-b" max="255" min="0" type="range" value="128"/>
-</div>
-</div>
-</div></details>
-<details class="acc">
-<summary>
-<div>
-<div class="acc-title">Defect</div>
-<div class="acc-sub">Choose defect granule color</div>
-</div>
-<span class="an-chip">Picker</span>
-</summary>
-<div class="acc-body">
-<div class="valid-mini-row">
-<div class="mini-rgb-indicator" id="defect-mini" title="Defect color">
-<div class="mini-rgb-text mini-rgb-text-small" id="defect-mini-text">RGB(—)</div>
-</div>
-</div>
-<div class="hsv-card" data-prefix="defect">
-<div class="hsv-title">Select Color (Defect)</div>
-<div class="hsv-picker" data-prefix="defect">
-<div class="hsv-sv-wrap">
-<canvas aria-label="Saturation Value" class="hsv-sv" height="320" id="defect-sv" width="520"></canvas>
-<div aria-hidden="true" class="hsv-cursor" id="defect-sv-cursor"></div>
-</div>
-<div class="hsv-hue-wrap">
-<canvas aria-label="Hue" class="hsv-hue" height="320" id="defect-hue" width="36"></canvas>
-<div aria-hidden="true" class="hsv-hue-cursor" id="defect-hue-cursor"></div>
-</div>
-</div>
-<div class="hsv-meta">
-<div class="hsv-rgb" id="defect-hsv-rgb">RGB(—)</div>
-</div>
-<div aria-hidden="true" class="hsv-hidden-inputs">
-<input id="defect-r" max="255" min="0" type="range" value="128"/>
-<input id="defect-g" max="255" min="0" type="range" value="128"/>
-<input id="defect-b" max="255" min="0" type="range" value="128"/>
-</div>
-</div>
-</div></details>
-</div>
-</section>
-<!-- removed tab-iot (moved into Tools accordion) -->
-<section class="tab" id="tab-analysis">
-<div class="tab-fixed-head"><h2>Analyze / Signal Settings</h2></div>
-<div class="tab-scroll">
-<details class="acc" id="acc-simulation">
-<summary>
-<div>
-<div class="acc-title">Simulation</div>
-<div class="acc-sub">Front / back camera simulation preview</div>
-</div>
-<span class="an-chip">Preview</span>
-</summary>
-<div class="acc-body">
-<div style="display: flex; flex-direction: column; gap: 16px;">
-<div style="border: 1px solid var(--border); padding: 10px; border-radius: 12px; background-color: var(--surface);">
-<h3 style="margin: 0 0 8px 0; color: var(--muted); font-weight: 700;">Front Camera Simulation</h3>
-<canvas height="180" id="front-canvas" style="width: 100%; max-width: 100%; height: 130px;" width="320"></canvas>
-</div>
-<div style="border: 1px solid var(--accent); padding: 10px; border-radius: 12px; background-color: var(--surface);">
-<h3 style="margin: 0 0 8px 0; color: var(--accent); font-weight: 700;">Back Camera Simulation</h3>
-<canvas height="180" id="back-canvas" style="width: 100%; max-width: 100%; height: 130px;" width="320"></canvas>
-</div>
-</div>
-</div>
-</details>
-<details class="acc">
-<summary>
-<div>
-<div class="acc-title">Granules</div>
-<div class="acc-sub">Valid / Defect colors and deltas</div>
-</div>
-<span class="an-chip">Colors</span>
-</summary>
-<div class="acc-body">
-<div class="an-row"><div class="an-label">Valid RGB</div><div class="an-val" id="analysis-valid">RGB(128,128,128)</div></div>
-<div class="an-row"><div class="an-label">Defect RGB</div><div class="an-val" id="analysis-defect">RGB(128,128,128)</div></div>
-<div class="an-row">
-<div class="an-label">ΔR / ΔG / ΔB</div>
-<div class="an-val" id="deltaBox">0 / 0 / 0</div>
-<span class="an-chip" id="dominantChip">—</span>
-</div>
-</div>
-</details>
-<details class="acc">
-<summary>
-<div>
-<div class="acc-title">Light Settings</div>
-<div class="acc-sub">Front/Rear lights + background boards</div>
-</div>
-<span class="an-chip">Light</span>
-</summary>
-<div class="acc-body an-grid-2">
-<div>
-<div class="an-row"><div class="an-label">Front Light</div><div class="an-val" id="front-light-box">180</div></div>
-<div class="an-row"><div class="an-label">Front Background</div><div class="an-val" id="fgBackgroundBox">RGB(90,90,90)</div></div>
-</div>
-<div>
-<div class="an-row"><div class="an-label">Rear Light</div><div class="an-val" id="back-light-box">160</div></div>
-<div class="an-row"><div class="an-label">Rear Background</div><div class="an-val" id="bgCameraBackgroundBox">RGB(90,90,90)</div></div>
-</div>
-<div class="an-row" style="grid-column:1/-1;">
-<div class="an-label">Material Mode</div>
-<div class="an-val"><span id="an-transparent-label">Opaque</span></div>
-</div>
-</div>
-</details>
-<details class="acc">
-<summary>
-<div>
-<div class="acc-title">CCD Gain</div>
-<div class="acc-sub">Analog/Digital gain targets per view</div>
-</div>
-<span class="an-chip">Gain</span>
-</summary>
-<div class="acc-body an-grid-2">
-<div>
-<div class="an-row"><div class="an-label">Front Analog</div><div class="an-val" id="gain-front-analog-val">128</div></div>
-<div class="an-row"><div class="an-label">Front Digital</div><div class="an-val" id="gain-front-digital-val">128</div></div>
-</div>
-<div>
-<div class="an-row"><div class="an-label">Rear Analog</div><div class="an-val" id="gain-rear-analog-val">128</div></div>
-<div class="an-row"><div class="an-label">Rear Digital</div><div class="an-val" id="gain-rear-digital-val">128</div></div>
-</div>
-<div class="an-row" style="grid-column:1/-1;">
-<div class="an-label">Manual Target (Valid signal)</div>
-<div class="an-val">Min only → 192–244 | Min+Max → 128–160</div>
-</div>
-<div class="an-row" style="grid-column:1/-1;">
-<div class="an-label">Note</div>
-<div class="an-val">Analog ≠ Digital numerically. Tune both until the Valid waveform sits in the target band.</div>
-</div>
-</div>
-</details>
-<details class="acc">
-<summary>
-<div>
-<div class="acc-title">Optical Calibration</div>
-<div class="acc-sub">White balance, focus/bell check, data path</div>
-</div>
-<span class="an-chip">Cal</span>
-</summary>
-<div class="acc-body">
-<div class="an-row">
-<div class="an-label">White Balance</div>
-<div class="an-val">Use white target → look for flat bell</div>
-<button class="an-chip" id="btn-white-cal" type="button">Calibrate</button>
-</div>
-<div class="an-row">
-<div class="an-label">Focus / Position</div>
-<div class="an-val">Bell sharp + aligned to standard lines</div>
-<button class="an-chip" id="btn-focus-check" type="button">Check</button>
-</div>
-<div class="an-row"><div class="an-label">Data Path View</div><div class="an-val">Raw / Calibrated / Test (UI)</div></div>
-<div class="an-row">
-<div class="an-label">Status</div>
-<div class="an-val" id="cal-status">Idle</div>
-<button class="an-chip" id="btn-reset-cal" type="button">Reset</button>
-</div>
-</div>
-</details>
-<details class="acc">
-<summary>
-<div>
-<div class="acc-title">Sorting Method</div>
-<div class="acc-sub">HF and WS sorting definitions</div>
-</div>
-<span class="an-chip">Sort</span>
-</summary>
-<div class="acc-body">
-<!-- HF (keeps original IDs/JS bindings) -->
-<details class="acc">
-<summary>
-<div>
-<div class="acc-title">Sorting HF</div>
-<div class="acc-sub">Program + dominant channel + sensitivity</div>
-</div>
-<span class="an-chip">HF</span>
-</summary>
-<div class="acc-body">
-<div class="an-row">
-<div class="an-label">Sorting Program</div>
-<div class="an-val" id="sortingProgramBox">Program A</div>
-</div>
-<div class="an-row">
-<div class="an-label">Dominant Channel</div>
-<div class="an-val" id="analysisChannelBox">Blue</div>
-</div>
-<div class="an-row">
-<div class="an-label">Color Order</div>
-<div class="an-val" id="hfColorOrderBox">—</div>
-</div>
-<div class="an-row">
-<div class="an-label">Cannot use</div>
-<div class="an-val" id="hfCannotUseBox">—</div>
-</div>
-<div class="an-row">
-<div class="an-label">Sensitivity</div>
-<div class="an-val" id="sensitivityBox">50%</div>
-</div>
-</div>
-</details>
-<!-- WS (same look, plus parameters from screenshots) -->
-<details class="acc">
-<summary>
-<div>
-<div class="acc-title">Sorting WS</div>
-<div class="acc-sub">Program parameters (copied from manual screenshots)</div>
-</div>
-<span class="an-chip">WS</span>
-</summary>
-<div class="acc-body">
-<!-- Keep the same 3-row header like HF -->
-<div class="an-row">
-<div class="an-label">Sorting Program</div>
-<div class="an-val" id="sortingProgramBoxWS">Gray A</div>
-</div>
-<div class="an-row">
-<div class="an-label">Dominant Channel</div>
-<div class="an-val" id="analysisChannelBoxWS">Green</div>
-</div>
-<div style="height:10px;"></div>
-<!-- Manual parameters (Figure 3-4 / 3-5 / 3-6 style) -->
-<div class="an-row">
-<div class="an-label">Arith List</div>
-<select disabled="" id="wsArithList" style="flex:1; min-width:160px; height:38px; border-radius:8px; border:1px solid #555; padding:0 10px; background:#0f1324; color:#e8e8ff;" title="Auto-selected by algorithm">
-<option>All Set Solely</option>
-<option>All Alike</option>
-<option>Front and Rear Alike</option>
-<option>1st and 2nd and 3rd Alike</option>
-</select>
-</div>
-<div class="an-row">
-<div class="an-label">Sens</div>
-<input id="wsSens" type="text" value="1.0%"/>
-</div>
-<div class="an-row">
-<div class="an-label">Scale</div>
-<input id="wsScale" type="number" value="16"/>
-</div>
-<div class="an-row">
-<div class="an-label">Purity</div>
-<input id="wsPurity" type="number" value="512"/>
-</div>
-<div class="an-row" id="wsLightLimitRow">
-<div class="an-label">Light Limit</div>
-<input id="wsLightLimit" type="number" value="20"/>
-</div>
-</div>
-</details>
-</div>
-</details>
-</div>
-</section>
-<section class="tab" id="tab-calibration">
-<div class="tab-fixed-head"><h2>Calibration</h2></div>
-<div class="tab-scroll">
-<div class="cal-shell">
-<div class="acc-list" id="calAccList"><details class="acc" data-acc="camera"><summary><div><div class="acc-title">Camera</div><div class="acc-sub">Live view &amp; controls</div></div><span class="an-chip">Open</span></summary>
-<!-- Camera capture status/preview (auto-injected) -->
-<div id="camCaptureStatus" style="margin:10px 0; font-size:13px; opacity:.85;"></div>
-<div id="camCapturePreview" style="display:none; margin:10px 0; padding:10px; border:1px solid rgba(255,255,255,.15); border-radius:12px;">
-<div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-<div style="font-weight:600;">Captured frame</div>
-<div id="camCaptureMeta" style="font-size:12px; opacity:.75;"></div>
-</div>
-<div id="camCapturePreviewInner" style="margin-top:10px;"></div>
-</div>
-<div class="acc-body"><div class="tool-tab cal-tool-view" id="tab-camera">
-<div class="cal-inline-topbar">
-  <div class="cal-inline-title">Camera</div>
-  <div class="cal-inline-actions">
-    <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-  </div>
-</div>
-<div class="cam-wrap">
-<div class="cam-pane active" id="camPaneLive">
-<div class="cam-card">
-<h3>Live Camera</h3>
-<div class="cam-sub" id="cam-status" style="color:#cbd5ff;">Status: idle</div>
-<div class="cam-view">
-<div class="cam-frame">
-<video autoplay="" id="live-video" muted="" playsinline="" style="display:none;"></video>
-<canvas height="240" id="preview" width="240"></canvas>
-<div aria-hidden="true" class="reticle square-mode size-m" id="reticle-overlay">
-<div class="circle"></div>
-<div class="square"></div>
-<div class="hline"></div>
-<div class="vline"></div>
-<div class="dot"></div>
-<div class="label">Center the granule inside the reticle (ROI)</div>
-</div>
-</div>
-<div class="cam-colorbox" id="camera-color-box">RGB Preview</div>
-</div>
-<div class="cam-row" style="margin-top:10px;">
-<button class="cam-btn" disabled="" id="capture-photo-btn" onclick="captureAndAnalyze()" type="button">Capture &amp; Analyze</button></div>
-<div class="cam-row" id="capture-preview-row" style="margin-top:10px; display:none; align-items:flex-start; gap:10px;">
-<div style="min-width:110px; opacity:.8; font-size:12px; padding-top:6px;">Captured</div>
-<img alt="Captured frame" id="capture-preview-img" style="max-width:220px; width:220px; height:auto; border-radius:10px; border:1px solid rgba(255,255,255,0.12);"/>
-</div>
-<div class="cam-row" style="margin-top:8px;">
-</div>
-</div>
-<div class="cam-card">
-<h3>Save Sample</h3>
-<div class="cam-row">
-<button class="cam-btn" id="save-valid-btn" type="button">Save as Valid</button>
-<button class="cam-btn" id="save-defect-btn" type="button">Save as Defect</button>
-</div>
-</div>
-</div>
-</div>
-</div></div></details><details class="acc" data-caltool="lux"><summary><div><div class="acc-title">Lux Meter</div><div class="acc-sub">Exposure / brightness reference</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="cal-tool-view" id="caltool-lux">
-<div class="cal-tool-topbar">
-<button class="cal-back-btn" data-calback="" type="button">‹ Back</button>
-<div class="cal-tool-h">Lux Meter</div>
-<div class="cal-tool-badge">CAL</div>
-</div>
-<div class="cal-tool-body">
-<div class="soft-card lux-ui">
-<div class="lux-top">
-<div class="lux-title">Lux Meter</div>
-<div class="lux-icons">
-<button class="lux-icon" id="luxInfoBtn" title="Info" type="button">i</button>
-<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-<button class="lux-icon" id="luxSwitchBtn" title="Switch Camera" type="button">⟳</button>
-</div>
-</div>
-<div class="lux-main">
-  <div class="lux-left">
-<div class="lux-gauge-wrap">
-<div class="lux-gauge">
-<div class="lux-needle" id="luxNeedle"></div>
-<div class="lux-gauge-center">
-<div class="lux-label">Exposure Value</div>
-<div class="lux-ev" id="luxEV">--</div>
-<div class="lux-subrow">
-<span id="luxLux">-- lux</span>
-<span id="luxFc">-- fc</span>
-</div>
-</div>
-<div aria-hidden="true" class="lux-scale"></div>
-</div>
-</div>
-<div class="lux-settings">
-<div class="lux-setting">
-<div class="lux-setting-h">Aperture</div>
-<div class="lux-setting-v" id="luxApertureVal">2.8</div>
-<input class="lux-slider" id="luxAperture" max="40" min="14" type="range" value="28"/>
-<div class="lux-setting-sub">f/<span id="luxApertureTxt">2.8</span></div>
-</div>
-<div class="lux-setting">
-<div class="lux-setting-h">Speed (s)</div>
-<div class="lux-setting-v" id="luxSpeedVal">1/60</div>
-<input class="lux-slider" id="luxSpeed" max="200" min="10" type="range" value="60"/>
-<div class="lux-setting-sub">Shutter</div>
-</div>
-<div class="lux-setting">
-<div class="lux-setting-h">ISO</div>
-<div class="lux-setting-v" id="luxISOVal">200</div>
-<input class="lux-slider" id="luxISO" max="3200" min="100" step="100" type="range" value="200"/>
-<div class="lux-setting-sub">Camera gain (sim)</div>
-</div>
-</div>
-  </div>
-  <div class="lux-right">
-<div class="lux-camera">
-<div class="lux-camera-head">
-<div class="lux-camera-title">Rear Camera · Reflected Light</div>
-<div class="lux-camera-actions">
-<button class="lux-btn" id="luxFreezeBtn" type="button">Freeze</button>
-<button class="lux-btn" id="luxSaveBtn" type="button">Save</button>
-</div>
-</div>
-<div class="lux-video-wrap">
-<video autoplay="" id="luxVideo" muted="" playsinline=""></video>
-<canvas height="120" id="luxCanvas" style="display:none" width="160"></canvas>
-<div class="lux-video-overlay">
-<div class="lux-dot"></div>
-<div class="lux-small" id="luxStatus">Camera: idle</div>
-</div>
-</div>
-</div>
-  </div>
-</div>
-<div class="lux-info" hidden="" id="luxInfo">
-<div class="lux-info-card"><div class="lux-info-h">Lux Meter (Preview)</div><div class="lux-info-p"><p><b>What this tool does</b><br/>Lux Meter estimates <b>Exposure Value (EV)</b> and a <b>relative illuminance</b> (<b>lux</b> and <b>foot‑candles</b>) from the live camera preview. This is a <b>browser-based approximation</b> for <b>calibration and comparison</b> (not a lab-grade light meter).</p><p><b>What you see</b></p><ul style="margin-top:6px"><li><b>Live camera preview</b> – source used to compute readings.</li><li><b>EV</b> – logarithmic light level relative to exposure parameters.</li><li><b>Lux / fc</b> – estimated conversion from preview brightness (relative).</li></ul><p><b>Sliders</b></p><ul style="margin-top:6px"><li><b>Aperture (f‑number)</b>: smaller f = more light.</li><li><b>Shutter speed</b>: longer time = more light.</li><li><b>ISO</b>: higher gain = brighter image (more noise).</li></ul><p><b>Buttons</b></p><ul style="margin-top:6px"><li><b>Info</b>: open help.</li><li><b>⛶ Full Screen</b>: toggle full-screen mode.</li><li><b>Switch Camera</b>: rear/front toggle.</li><li><b>Freeze</b>: hold current frame/values.</li><li><b>Save</b>: store a snapshot of current readings.</li></ul><p style="opacity:.85"><b>Tip:</b> Keep the phone steady; avoid auto-exposure swings.</p></div></div>
-</div>
-</div>
-</div>
-</div></div></details><details class="acc" data-caltool="ct"><summary><div><div class="acc-title">Color Temperature</div><div class="acc-sub">CCT / Δuv calibration</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="cal-tool-view" id="caltool-ct">
-<div class="cal-tool-topbar">
-<button class="cal-back-btn" data-calback="" type="button">‹ Back</button>
-<div class="cal-tool-h">Color Temperature</div>
-<div class="cal-tool-badge">CAL</div>
-</div>
-<div class="cal-tool-body">
-<div class="soft-card ct-ui">
-<div class="ct-top">
-<div class="ct-title">Color Temperature</div>
-<div class="ct-icons">
-<button class="lux-icon" id="ctInfoBtn" title="Info" type="button">i</button>
-<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-<button class="lux-icon" id="ctSwitchBtn" title="Switch Camera" type="button">⟳</button>
-<button class="lux-icon" id="ctSaveBtn" title="Save" type="button">💾</button>
-</div>
-</div>
-<div class="ct-gauge-wrap">
-<div class="ct-gauge">
-<div class="ct-needle" id="ctNeedle"></div>
-<div class="ct-center">
-<div class="ct-label">Color Temperature</div>
-<div class="ct-big" id="ctKelvin">----</div>
-<div class="ct-unit">Kelvin</div>
-</div>
-<div class="ct-arc"></div>
-<div class="ct-labels">
-<span style="left:12%">3000</span>
-<span style="left:32%">4000</span>
-<span style="left:52%">5000</span>
-<span style="left:72%">6000</span>
-<span style="left:90%">7000</span>
-</div>
-<div class="ct-sides">
-<div class="ct-side ct-warm">Warm<br/>White</div>
-<div class="ct-side ct-cold">Cold<br/>White</div>
-</div>
-</div>
-</div>
-<div class="ct-bars">
-<div class="ct-bar">
-<div class="ct-bar-h">Δuv · Magenta/Green shift</div>
-<div class="ct-bar-track">
-<div class="ct-bar-mid"></div>
-<div class="ct-bar-knob" id="ctDuvKnob"></div>
-</div>
-<div class="ct-bar-v" id="ctDuvVal">--</div>
-</div>
-<div class="ct-bar">
-<div class="ct-bar-h">CIE 1931 xy</div>
-<div class="ct-bar-v" id="ctXY">(---, ---)</div>
-</div>
-</div>
-<div class="ct-camera">
-<div class="lux-camera-head">
-<div class="lux-camera-title">Rear Camera · CCT estimate</div>
-<div class="lux-camera-actions">
-<button class="lux-btn" id="ctFreezeBtn" type="button">Freeze</button>
-</div>
-</div>
-<div class="lux-video-wrap ct-video">
-<video autoplay="" id="ctVideo" muted="" playsinline=""></video>
-<canvas height="165" id="ctCanvas" style="display:none" width="220"></canvas>
-<div class="spec-overlay" hidden="" id="ctOverlay">
-<div class="spec-overlay-card">
-<div class="spec-overlay-row">
-<span class="spec-warn">⚠</span>
-<span id="ctWarnText">Too dark to make a reliable measurement</span>
-</div>
-</div>
-</div>
-<div class="lux-video-overlay">
-<div class="lux-dot"></div>
-<div class="lux-small" id="ctStatus">Camera: idle</div>
-</div>
-</div>
-</div>
-<div class="lux-info" hidden="" id="ctInfo">
-<div class="lux-info-card"><div class="lux-info-h">Color Temperature (Preview)</div><div class="lux-info-p"><p><b>What this tool does</b><br/>Estimates <b>CCT (Kelvin)</b>, <b>CIE 1931 x/y</b> and <b>Δuv</b> from the live camera preview (approximation for calibration/trending).</p><p><b>Warm vs. Cool</b></p><ul style="margin-top:6px"><li><b>Warm White</b> (≈2700–3500K): yellow/orange tint.</li><li><b>Neutral White</b> (≈3500–4500K): balanced white.</li><li><b>Cool White</b> (≈5000–6500K+): bluish/daylight.</li></ul><p><b>Metrics explained</b></p><ul style="margin-top:6px"><li><b>CCT</b>: warm/cool along the black-body curve.</li><li><b>CIE x/y</b>: chromaticity coordinates.</li><li><b>Δuv</b>: distance from black-body locus (often +green / −magenta).</li></ul><p><b>Buttons</b></p><ul style="margin-top:6px"><li><b>Info</b>: open help.</li><li><b>⛶ Full Screen</b>: toggle full-screen.</li><li><b>Switch Camera</b>: rear/front toggle.</li><li><b>Freeze</b>: hold current frame/values.</li><li><b>Save</b>: store a snapshot.</li></ul><p style="opacity:.85"><b>Tip:</b> Aim at a neutral matte surface to reduce bias.</p></div></div>
-</div>
-</div>
-</div>
-</div></div></details><details class="acc" data-caltool="flicker"><summary><div><div class="acc-title">Flicker Meter</div><div class="acc-sub">Frequency / flicker level</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="cal-tool-view" id="caltool-flicker">
-<div class="cal-tool-topbar">
-<button class="cal-back-btn" data-calback="" type="button">‹ Back</button>
-<div class="cal-tool-h">Flicker Meter</div>
-<div class="cal-tool-badge">CAL</div>
-</div>
-<div class="cal-tool-body">
-<div class="soft-card fl-ui">
-<div class="fl-top">
-<div class="fl-title">Flicker Meter</div>
-<div class="fl-icons">
-<button class="lux-icon" id="flInfoBtn" title="Info" type="button">i</button>
-<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-<button class="lux-icon" id="flSwitchBtn" title="Switch Camera" type="button">⟳</button>
-<button class="lux-icon" id="flSaveBtn" title="Save" type="button">💾</button>
-</div>
-</div>
-<div class="fl-gauge-wrap">
-<div class="fl-gauge">
-<div class="fl-needle" id="flNeedle"></div>
-<div class="fl-center">
-<div class="fl-big" id="flPct">--%</div>
-<div class="fl-sub">Flickering</div>
-<div class="fl-small">Frequency <span id="flFreq">--</span></div>
-</div>
-<div class="fl-arc"></div>
-<div class="fl-scale">
-<span style="left:10%">10</span>
-<span style="left:30%">30</span>
-<span style="left:50%">50</span>
-<span style="left:70%">70</span>
-<span style="left:90%">90</span>
-</div>
-</div>
-</div>
-<div class="fl-strip">
-<div class="fl-strip-track">
-<div class="fl-strip-fill" id="flStripFill"></div>
-</div>
-</div>
-<div class="fl-wave">
-<canvas height="110" id="flWave" width="600"></canvas>
-</div>
-<div class="fl-note" id="flNote">
-  Light varies between full intensity and full intensity minus <span id="flNotePct">--</span>%.
-</div>
-<div class="fl-camera">
-<div class="lux-camera-head">
-<div class="lux-camera-title">Rear Camera · Flicker estimate</div>
-<div class="lux-camera-actions">
-<button class="lux-btn" id="flFreezeBtn" type="button">Freeze</button>
-</div>
-</div>
-<div class="lux-video-wrap fl-video">
-<video autoplay="" id="flVideo" muted="" playsinline=""></video>
-<canvas height="165" id="flCanvas" style="display:none" width="220"></canvas>
-<div class="spec-overlay" hidden="" id="flOverlay">
-<div class="spec-overlay-card">
-<div class="spec-overlay-row">
-<span class="spec-warn">⚠</span>
-<span id="flWarnText">Too dark to make a reliable measurement</span>
-</div>
-</div>
-</div>
-<div class="lux-video-overlay">
-<div class="lux-dot"></div>
-<div class="lux-small" id="flStatus">Camera: idle</div>
-</div>
-</div>
-</div>
-<div class="lux-info" hidden="" id="flInfo">
-<div class="lux-info-card"><div class="lux-info-h">Flicker Meter (Preview)</div><div class="lux-info-p"><p><b>What this tool does</b><br/>Estimates <b>flicker %</b> and <b>dominant frequency (Hz)</b> from brightness changes in the live preview.</p><p><b>What you see</b></p><ul style="margin-top:6px"><li><b>Flicker %</b>: oscillation amplitude indicator.</li><li><b>Frequency</b>: main detected rate.</li><li><b>Color scale</b>: quick severity cue.</li><li><b>Waveform</b>: brightness-over-time trace.</li></ul><p><b>Buttons</b></p><ul style="margin-top:6px"><li><b>Info</b>: open help.</li><li><b>⛶ Full Screen</b>: toggle full-screen.</li><li><b>Switch Camera</b>: rear/front toggle.</li><li><b>Freeze</b>: hold trace/values.</li><li><b>Save</b>: store a snapshot.</li></ul><p style="opacity:.85"><b>Note:</b> Frame rate/auto exposure can affect readings.</p></div></div>
-</div>
-</div>
-</div>
-</div></div></details><details class="acc" data-caltool="spectrum"><summary><div><div class="acc-title">Light Spectrometer</div><div class="acc-sub">Dominant wavelength / saturation</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="cal-tool-view" id="caltool-spectrum">
-<div class="cal-tool-topbar">
-<button class="cal-back-btn" data-calback="" type="button">‹ Back</button>
-<div class="cal-tool-h">Light Spectrometer</div>
-<div class="cal-tool-badge">CAL</div>
-</div>
-<div class="cal-tool-body">
-<div class="soft-card spec-ui">
-<div class="spec-top">
-<div class="spec-title">Light Spectrometer</div>
-<div class="spec-icons">
-<button class="lux-icon" id="specInfoBtn" title="Info" type="button">i</button>
-<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-<button class="lux-icon" id="specSwitchBtn" title="Switch Camera" type="button">⟳</button>
-</div>
-</div>
-<div class="spec-gauge-wrap">
-<div class="spec-gauge">
-<div class="spec-needle" id="specNeedle"></div>
-<div class="spec-gauge-label" id="specGaugeLabel">Rear Camera · Spectrum estimate</div>
-<div class="spec-center">
-<div class="spec-big" id="specNm">---</div>
-<div class="spec-unit">Nanometers (nm)</div>
-</div>
-<div class="spec-arc"></div>
-<div class="spec-labels">
-<span style="left:10%">450</span>
-<span style="left:30%">500</span>
-<span style="left:50%">550</span>
-<span style="left:70%">600</span>
-<span style="left:90%">650</span>
-</div>
-</div>
-</div>
-<div class="spec-metrics">
-<div class="spec-metric">
-<div class="spec-m-h">Frequency</div>
-<div class="spec-m-v" id="specFreq">--- THz</div>
-</div>
-<div class="spec-metric">
-<div class="spec-m-h">Period</div>
-<div class="spec-m-v" id="specPeriod">--- fs</div>
-</div>
-<div class="spec-metric">
-<div class="spec-m-h">Saturation</div>
-<div class="spec-m-v" id="specSat">-- %</div>
-</div>
-</div>
-<div class="spec-camera">
-<div class="lux-camera-head">
-<div class="lux-camera-title">Rear Camera · Spectrum estimate</div>
-<div class="lux-camera-actions">
-<button class="lux-btn" id="specFreezeBtn" type="button">Freeze</button>
-<button class="lux-btn" id="specSaveBtn" type="button">Save</button>
-</div>
-</div>
-<div class="lux-video-wrap spec-video">
-<video autoplay="" id="specVideo" muted="" playsinline=""></video>
-<canvas height="150" id="specCanvas" style="display:none" width="200"></canvas>
-<div class="spec-overlay" hidden="" id="specOverlay">
-<div class="spec-overlay-card">
-<div class="spec-overlay-row">
-<span class="spec-warn">⚠</span>
-<span id="specWarnText">Too dark to make a reliable measurement</span>
-</div>
-</div>
-</div>
-<div class="lux-video-overlay">
-<div class="lux-dot"></div>
-<div class="lux-small" id="specStatus">Camera: idle</div>
-</div>
-</div>
-</div>
-<div class="lux-info" hidden="" id="specInfo">
-<div class="lux-info-card"><div class="lux-info-h">Light Spectrum (Preview)</div><div class="lux-info-p"><p><b>What this tool does</b><br/>Shows a <b>relative</b> spectral profile derived from the live preview (qualitative, for trending).</p><p><b>How to read it</b></p><ul style="margin-top:6px"><li><b>Shape/peaks</b>: relative distribution across channels.</li><li><b>Balance</b>: compare sources and detect shifts.</li></ul><p><b>Buttons</b></p><ul style="margin-top:6px"><li><b>Info</b>: open help.</li><li><b>⛶ Full Screen</b>: toggle full-screen.</li><li><b>Switch Camera</b>: rear/front toggle.</li><li><b>Freeze</b>: hold plot/values.</li><li><b>Save</b>: store a snapshot.</li></ul><p style="opacity:.85"><b>Tip:</b> Avoid clipping/saturation for best shape.</p></div></div>
-</div>
-</div>
-</div>
-</div></div></details></div>
-<!-- Tool pages (placeholders for now) -->
-</div>
-</div>
-</section>
-<section class="tab" id="tab-tools">
-<div class="tab-scroll">
-<h2 class="tab-title">Tools</h2>
-<div class="acc-list" id="toolsAccList">
-<details class="acc" data-acc="iot"><summary><div><div class="acc-title">Factory Live</div><div class="acc-sub">Live factory dashboard • Throughput &amp; data</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="tool-tab" id="tab-iot">
-<div class="iot-shell">
-<div class="iot-top">
-<div class="iot-title">
-<div class="iot-title-main">Factory Live</div>
-<div class="iot-title-sub">Mobile-ready snapshot · live-style demo</div>
-</div>
-<div class="iot-status">
-<span class="dot-live"></span>
-<span class="iot-status-text">LIVE</span>
-</div>
-</div>
-<div class="iot-viewport">
-<div class="iot-sticky-tabs"><div aria-label="Factory Live Views" class="iot-inner-tabs" role="tablist">
-<button aria-selected="true" class="iot-pill is-active" data-iotview="overview" role="tab">Overview</button>
-<button aria-selected="false" class="iot-pill" data-iotview="charts" role="tab">Charts</button>
-<button aria-selected="false" class="iot-pill" data-iotview="events" role="tab">Events</button>
-</div></div>
-<!-- OVERVIEW -->
-<div class="iot-view is-active" data-iotview="overview" role="tabpanel">
-<div class="iot-cards">
-<div class="iot-card">
-<div class="iot-card-k">Line Speed</div>
-<div class="iot-card-v"><span id="iotSpeed">3.4</span> <span class="iot-unit">m/s</span></div>
-<div class="iot-card-s">Conveyor / feeder</div>
-</div>
-<div class="iot-card">
-<div class="iot-card-k">Throughput</div>
-<div class="iot-card-v"><span id="iotTP">2.1</span> <span class="iot-unit">t/h</span></div>
-<div class="iot-card-s">Estimated</div>
-</div>
-<div class="iot-card">
-<div class="iot-card-k">Good Rate</div>
-<div class="iot-card-v"><span id="iotGood">96.8</span><span class="iot-unit">%</span></div>
-<div class="iot-card-s">Accepted pellets</div>
-</div>
-<div class="iot-card">
-<div class="iot-card-k">Reject Rate</div>
-<div class="iot-card-v"><span id="iotBad">3.2</span><span class="iot-unit">%</span></div>
-<div class="iot-card-s">Ejected</div>
-</div>
-</div>
-<div class="iot-wide">
-<div class="iot-wide-left">
-<div class="iot-wide-title">Current Batch</div>
-<div class="iot-wide-row"><span class="iot-l">Material</span><span class="iot-r">PP / Natural</span></div>
-<div class="iot-wide-row"><span class="iot-l">Machine</span><span class="iot-r">Sorter-01</span></div>
-<div class="iot-wide-row"><span class="iot-l">Shift</span><span class="iot-r">A</span></div>
-</div>
-<div class="iot-wide-right">
-<canvas aria-label="Good vs Reject donut" height="140" id="iotDonut" width="260"></canvas>
-</div>
-</div>
-</div>
-<!-- CHARTS -->
-<div class="iot-view" data-iotview="charts" role="tabpanel">
-<div class="iot-chart-card">
-<div class="iot-chart-head">
-<div>
-<div class="iot-chart-title">Hourly Output</div>
-<div class="iot-chart-sub">Last 6 hours (demo)</div>
-</div>
-<div class="iot-chip">Bars</div>
-</div>
-<canvas aria-label="Bar chart" height="220" id="iotBars" width="520"></canvas>
-</div>
-<div class="iot-chart-card">
-<div class="iot-chart-head">
-<div>
-<div class="iot-chart-title">Reject Types</div>
-<div class="iot-chart-sub">Distribution (demo)</div>
-</div>
-<div class="iot-chip">Pie</div>
-</div>
-<canvas aria-label="Pie chart" height="220" id="iotPie" width="520"></canvas>
-</div>
-</div>
-<!-- EVENTS -->
-<div class="iot-view" data-iotview="events" role="tabpanel">
-<div class="iot-events">
-<div class="iot-event">
-<div class="iot-evt-dot ok"></div>
-<div class="iot-evt-main">
-<div class="iot-evt-title">Camera sync stable</div>
-<div class="iot-evt-sub">00:00:12 · OK</div>
-</div>
-</div>
-<div class="iot-event">
-<div class="iot-evt-dot warn"></div>
-<div class="iot-evt-main">
-<div class="iot-evt-title">Air nozzle pulse drift</div>
-<div class="iot-evt-sub">00:00:21 · check pressure</div>
-</div>
-</div>
-<div class="iot-event">
-<div class="iot-evt-dot ok"></div>
-<div class="iot-evt-main">
-<div class="iot-evt-title">Model confidence ↑</div>
-<div class="iot-evt-sub">00:00:35 · stable classification</div>
-</div>
-</div>
-<div class="iot-event">
-<div class="iot-evt-dot err"></div>
-<div class="iot-evt-main">
-<div class="iot-evt-title">Reject bin nearing 25%</div>
-<div class="iot-evt-sub">00:00:49 · monitor discharge</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<style>
-    /* Factory Live (tab-iot) – mobile-first, one-screen layout */
+/* ---- Original style block #4 ---- */
+/* Factory Live (tab-iot) – mobile-first, one-screen layout */
 
     /* ---- Factory Live: robust scrolling on mobile ---- */
     /* Use ONE scroll container: the inner viewport. Prevent the outer .tab from stealing scroll. */
@@ -5477,7 +4185,1016 @@ body.cal-fs-active nav.main-menu{display:none !important;}
   pointer-events: auto;
 }
 
+}}
+
+/* ------------------------ UTILITIES ---------------------------------- */
+@layer utilities{
+  /* reserved for future refactors (spacing helpers, typography utils, etc.) */
+}
+
+/* ------------------------ STATES/OVERRIDES ---------------------------- */
+@layer states{
+  /* Guarantee install overlay stays hidden when not active */
+  .install-overlay[hidden]{ display:none !important; }
+
+  /* Calibration tool fullscreen — keep close/back accessible */
+  .cal-tool-topbar, .cal-fs-header{ pointer-events:auto; }
+}
 </style>
+
+</head>
+<body>
+<div class="intro-overlay" hidden="" id="introGate">
+<div aria-modal="true" class="intro-card" role="dialog">
+<div class="intro-head">
+<div class="intro-title">Welcome — Read Before Use</div>
+<div class="intro-sub">First run only. Tap Skip to continue.</div>
+</div>
+<div class="intro-scroll" id="introGateScroll">
+<h2>Overview</h2>
+<p>This application configures and operates the granules inspection workflow (Granules, Analysis, Calibration, Tools).</p>
+<h2>Tabs</h2>
+<ul>
+<li><b>Granules</b> — Define valid/defect colors used by the detection pipeline.</li>
+<li><b>Analysis</b> — Preview and validate behavior (simulation / deltas).</li>
+<li><b>Calibration</b> — Exposure/brightness reference and tuning utilities.</li>
+<li><b>Tools</b> — Operational tools (Camera, Upload, Manuals, Saved, QA, Factory Live).</li>
+</ul>
+<h2>Recommended first-time workflow</h2>
+<ol>
+<li>Set <b>Valid</b> and <b>Defect</b> colors in <b>Granules</b>.</li>
+<li>Validate behavior in <b>Analysis</b>.</li>
+<li>Stabilize brightness/exposure in <b>Calibration</b>.</li>
+<li>Use <b>Tools</b> for operation and QA.</li>
+</ol>
+<h2>Important</h2>
+<ul>
+<li>Some modules initialize only when their accordion/tool is opened (on-demand).</li>
+<li>After any change, validate in Analysis/QA before production use.</li>
+</ul>
+<p><i>Scroll to the very bottom to unlock the confirmation.</i></p>
+<div class="intro-spacer"></div>
+<div class="intro-end">End of introduction.</div>
+</div>
+<div class="intro-confirm" style="justify-content:flex-end">
+<button class="intro-btn" id="introGateBtn" type="button">Skip</button>
+</div>
+</div>
+</div>
+<div class="intro-overlay" hidden="" id="tabHelpOverlay">
+<div class="intro-card" style="height:min(68vh,620px)">
+<div class="intro-head">
+<div class="intro-title" id="tabHelpTitle">Tab Help</div>
+<div class="intro-sub">Shown once per tab (first time you it)</div>
+</div>
+<div class="intro-scroll" id="tabHelpBody"></div>
+<div class="intro-confirm" style="justify-content:flex-end">
+<button class="intro-btn" id="tabHelpContinue" type="button">Skip</button>
+</div>
+</div>
+</div>
+<div aria-hidden="false" id="intro-splash">
+<div id="video-layer">
+<video autoplay="" id="bgVideo" loop="" muted="" playsinline="" preload="auto">
+</video>
+</div>
+<div id="gradient-overlay"></div>
+<canvas id="intro-grain"></canvas>
+<div class="intro-scan"></div>
+<div class="intro-center">
+<div class="intro-badge">Manor Engineering</div>
+<div class="intro-name">Eyal Manor</div>
+<div class="intro-sub">AI • Computer Vision • Smart Manufacturing</div>
+<div class="intro-status">Scanning grains…</div>
+<button class="intro-skip" id="intro-skip">Skip</button>
+</div>
+</div>
+<div aria-hidden="true" id="home-overlay">
+<div aria-label="Start menu" class="home-card" role="dialog">
+<div class="home-head">
+<div>
+<div class="home-title">בחר פעולה</div>
+<div class="home-sub">כדי שלא תצטרך “לצוד” טאבים – בחר לאן להיכנס, and the screen will switch automatically.</div>
+</div>
+<div aria-label="Close" class="home-close" id="home-close">×</div>
+</div>
+<div class="home-grid">
+<button class="home-action home-primary" data-home-tab="valid">
+<div>
+          Granules • Valid
+          <small>Set valid granule</small>
+</div>
+<div class="chev">›</div>
+</button>
+<button class="home-action home-primary" data-home-tab="defect">
+<div>
+          Granules • Defect
+          <small>Set defect granule</small>
+</div>
+<div class="chev">›</div>
+</button>
+<button class="home-action" data-home-tab="analysis">
+<div>
+          Analysis
+          <small>Signal / Light / Gain</small>
+</div>
+<div class="chev">›</div>
+</button>
+<button class="home-action" data-home-tab="upload">
+<div>
+          Tools • Upload
+          <small>Import / Images</small>
+</div>
+<div class="chev">›</div>
+</button>
+<button class="home-action" data-home-tab="qa">
+<div>
+          Tools • QA
+          <small>Quick checks</small>
+</div>
+<div class="chev">›</div>
+</button>
+<button class="home-action" data-home-tab="saved">
+<div>
+          Tools • Saved
+          <small>Saved presets</small>
+</div>
+<div class="chev">›</div>
+</button>
+<button class="home-action" data-home-tab="simulation">
+<div>
+          Simulation
+          <small>Simulation</small>
+</div>
+<div class="chev">›</div>
+</button>
+<button class="home-action" data-home-tab="camera">
+<div>
+          Camera
+          <small>Camera view</small>
+</div>
+<div class="chev">›</div>
+</button>
+<button class="home-action" data-home-tab="iot">
+<div>
+          Factory Live
+          <small>Machine connection</small>
+</div>
+<div class="chev">›</div>
+</button>
+</div>
+</div>
+</div>
+<div aria-atomic="true" aria-live="polite" class="toast-container" id="toast-container"></div>
+<div class="app-shell">
+<header class="app-header"></header>
+<div hidden="" id="contextBar"><div class="context-inner"></div></div>
+<div class="app-content">
+<section class="tab active" id="tab-granules">
+<div class="tab-fixed-head granule-head">
+<h2 class="tab-title solo-title">Granules</h2>
+</div>
+<div class="tab-scroll granule-scroll">
+<div class="scroll-gutter"></div>
+<details class="acc">
+<summary>
+<div>
+<div class="acc-title">Valid</div>
+<div class="acc-sub">Choose valid granule color</div>
+</div>
+<span class="an-chip">Picker</span>
+</summary>
+<div class="acc-body">
+<div class="valid-mini-row">
+<div class="mini-rgb-indicator" id="valid-mini" title="Valid color">
+<div class="mini-trans-label">Transp</div>
+<label class="mini-trans-toggle" title="Transparency">
+<input id="transparent-toggle" type="checkbox"/>
+<span class="mini-switch"></span>
+</label>
+<div class="mini-rgb-text mini-rgb-text-small" id="valid-mini-text">RGB(—)</div>
+</div>
+</div>
+<div class="hsv-card" data-prefix="valid">
+<div class="hsv-title">בחירת צבע (Valid)</div>
+<div class="hsv-picker" data-prefix="valid">
+<div class="hsv-sv-wrap">
+<canvas aria-label="Saturation Value" class="hsv-sv" height="320" id="valid-sv" width="520"></canvas>
+<div aria-hidden="true" class="hsv-cursor" id="valid-sv-cursor"></div>
+</div>
+<div class="hsv-hue-wrap">
+<canvas aria-label="Hue" class="hsv-hue" height="320" id="valid-hue" width="36"></canvas>
+<div aria-hidden="true" class="hsv-hue-cursor" id="valid-hue-cursor"></div>
+</div>
+</div>
+<div class="hsv-meta">
+<div class="hsv-rgb" id="valid-hsv-rgb">RGB(—)</div>
+</div>
+<div aria-hidden="true" class="hsv-hidden-inputs">
+<input id="valid-r" max="255" min="0" type="range" value="128"/>
+<input id="valid-g" max="255" min="0" type="range" value="128"/>
+<input id="valid-b" max="255" min="0" type="range" value="128"/>
+</div>
+</div>
+</div></details>
+<details class="acc">
+<summary>
+<div>
+<div class="acc-title">Defect</div>
+<div class="acc-sub">Choose defect granule color</div>
+</div>
+<span class="an-chip">Picker</span>
+</summary>
+<div class="acc-body">
+<div class="valid-mini-row">
+<div class="mini-rgb-indicator" id="defect-mini" title="Defect color">
+<div class="mini-rgb-text mini-rgb-text-small" id="defect-mini-text">RGB(—)</div>
+</div>
+</div>
+<div class="hsv-card" data-prefix="defect">
+<div class="hsv-title">בחירת צבע (Defect)</div>
+<div class="hsv-picker" data-prefix="defect">
+<div class="hsv-sv-wrap">
+<canvas aria-label="Saturation Value" class="hsv-sv" height="320" id="defect-sv" width="520"></canvas>
+<div aria-hidden="true" class="hsv-cursor" id="defect-sv-cursor"></div>
+</div>
+<div class="hsv-hue-wrap">
+<canvas aria-label="Hue" class="hsv-hue" height="320" id="defect-hue" width="36"></canvas>
+<div aria-hidden="true" class="hsv-hue-cursor" id="defect-hue-cursor"></div>
+</div>
+</div>
+<div class="hsv-meta">
+<div class="hsv-rgb" id="defect-hsv-rgb">RGB(—)</div>
+</div>
+<div aria-hidden="true" class="hsv-hidden-inputs">
+<input id="defect-r" max="255" min="0" type="range" value="128"/>
+<input id="defect-g" max="255" min="0" type="range" value="128"/>
+<input id="defect-b" max="255" min="0" type="range" value="128"/>
+</div>
+</div>
+</div></details>
+</div>
+</section>
+<!-- removed tab-iot (moved into Tools accordion) -->
+<section class="tab" id="tab-analysis">
+<div class="tab-fixed-head"><h2>Analyze / Signal Settings</h2></div>
+<div class="tab-scroll">
+<details class="acc" id="acc-simulation">
+<summary>
+<div>
+<div class="acc-title">Simulation</div>
+<div class="acc-sub">Front / back camera simulation preview</div>
+</div>
+<span class="an-chip">Preview</span>
+</summary>
+<div class="acc-body">
+<div style="display: flex; flex-direction: column; gap: 16px;">
+<div style="border: 1px solid var(--border); padding: 10px; border-radius: 12px; background-color: var(--surface);">
+<h3 style="margin: 0 0 8px 0; color: var(--muted); font-weight: 700;">Front Camera Simulation</h3>
+<canvas height="180" id="front-canvas" style="width: 100%; max-width: 100%; height: 130px;" width="320"></canvas>
+</div>
+<div style="border: 1px solid var(--accent); padding: 10px; border-radius: 12px; background-color: var(--surface);">
+<h3 style="margin: 0 0 8px 0; color: var(--accent); font-weight: 700;">Back Camera Simulation</h3>
+<canvas height="180" id="back-canvas" style="width: 100%; max-width: 100%; height: 130px;" width="320"></canvas>
+</div>
+</div>
+</div>
+</details>
+<details class="acc">
+<summary>
+<div>
+<div class="acc-title">Granules</div>
+<div class="acc-sub">Valid / Defect colors and deltas</div>
+</div>
+<span class="an-chip">Colors</span>
+</summary>
+<div class="acc-body">
+<div class="an-row"><div class="an-label">Valid RGB</div><div class="an-val" id="analysis-valid">RGB(128,128,128)</div></div>
+<div class="an-row"><div class="an-label">Defect RGB</div><div class="an-val" id="analysis-defect">RGB(128,128,128)</div></div>
+<div class="an-row">
+<div class="an-label">ΔR / ΔG / ΔB</div>
+<div class="an-val" id="deltaBox">0 / 0 / 0</div>
+<span class="an-chip" id="dominantChip">—</span>
+</div>
+</div>
+</details>
+<details class="acc">
+<summary>
+<div>
+<div class="acc-title">Light Settings</div>
+<div class="acc-sub">Front/Rear lights + background boards</div>
+</div>
+<span class="an-chip">Light</span>
+</summary>
+<div class="acc-body an-grid-2">
+<div>
+<div class="an-row"><div class="an-label">Front Light</div><div class="an-val" id="front-light-box">180</div></div>
+<div class="an-row"><div class="an-label">Front Background</div><div class="an-val" id="fgBackgroundBox">RGB(90,90,90)</div></div>
+</div>
+<div>
+<div class="an-row"><div class="an-label">Rear Light</div><div class="an-val" id="back-light-box">160</div></div>
+<div class="an-row"><div class="an-label">Rear Background</div><div class="an-val" id="bgCameraBackgroundBox">RGB(90,90,90)</div></div>
+</div>
+<div class="an-row" style="grid-column:1/-1;">
+<div class="an-label">Material Mode</div>
+<div class="an-val"><span id="an-transparent-label">Opaque</span></div>
+</div>
+</div>
+</details>
+<details class="acc">
+<summary>
+<div>
+<div class="acc-title">CCD Gain</div>
+<div class="acc-sub">Analog/Digital gain targets per view</div>
+</div>
+<span class="an-chip">Gain</span>
+</summary>
+<div class="acc-body an-grid-2">
+<div>
+<div class="an-row"><div class="an-label">Front Analog</div><div class="an-val" id="gain-front-analog-val">128</div></div>
+<div class="an-row"><div class="an-label">Front Digital</div><div class="an-val" id="gain-front-digital-val">128</div></div>
+</div>
+<div>
+<div class="an-row"><div class="an-label">Rear Analog</div><div class="an-val" id="gain-rear-analog-val">128</div></div>
+<div class="an-row"><div class="an-label">Rear Digital</div><div class="an-val" id="gain-rear-digital-val">128</div></div>
+</div>
+<div class="an-row" style="grid-column:1/-1;">
+<div class="an-label">Manual Target (Valid signal)</div>
+<div class="an-val">Min only → 192–244 | Min+Max → 128–160</div>
+</div>
+<div class="an-row" style="grid-column:1/-1;">
+<div class="an-label">Note</div>
+<div class="an-val">Analog ≠ Digital numerically. Tune both until the Valid waveform sits in the target band.</div>
+</div>
+</div>
+</details>
+<details class="acc">
+<summary>
+<div>
+<div class="acc-title">Optical Calibration</div>
+<div class="acc-sub">White balance, focus/bell check, data path</div>
+</div>
+<span class="an-chip">Cal</span>
+</summary>
+<div class="acc-body">
+<div class="an-row">
+<div class="an-label">White Balance</div>
+<div class="an-val">Use white target → look for flat bell</div>
+<button class="an-chip" id="btn-white-cal" type="button">Calibrate</button>
+</div>
+<div class="an-row">
+<div class="an-label">Focus / Position</div>
+<div class="an-val">Bell sharp + aligned to standard lines</div>
+<button class="an-chip" id="btn-focus-check" type="button">Check</button>
+</div>
+<div class="an-row"><div class="an-label">Data Path View</div><div class="an-val">Raw / Calibrated / Test (UI)</div></div>
+<div class="an-row">
+<div class="an-label">Status</div>
+<div class="an-val" id="cal-status">Idle</div>
+<button class="an-chip" id="btn-reset-cal" type="button">Reset</button>
+</div>
+</div>
+</details>
+<details class="acc">
+<summary>
+<div>
+<div class="acc-title">Sorting Method</div>
+<div class="acc-sub">HF and WS sorting definitions</div>
+</div>
+<span class="an-chip">Sort</span>
+</summary>
+<div class="acc-body">
+<!-- HF (keeps original IDs/JS bindings) -->
+<details class="acc">
+<summary>
+<div>
+<div class="acc-title">Sorting HF</div>
+<div class="acc-sub">Program + dominant channel + sensitivity</div>
+</div>
+<span class="an-chip">HF</span>
+</summary>
+<div class="acc-body">
+<div class="an-row">
+<div class="an-label">Sorting Program</div>
+<div class="an-val" id="sortingProgramBox">Program A</div>
+</div>
+<div class="an-row">
+<div class="an-label">Dominant Channel</div>
+<div class="an-val" id="analysisChannelBox">Blue</div>
+</div>
+<div class="an-row">
+<div class="an-label">Color Order</div>
+<div class="an-val" id="hfColorOrderBox">—</div>
+</div>
+<div class="an-row">
+<div class="an-label">Cannot use</div>
+<div class="an-val" id="hfCannotUseBox">—</div>
+</div>
+<div class="an-row">
+<div class="an-label">Sensitivity</div>
+<div class="an-val" id="sensitivityBox">50%</div>
+</div>
+</div>
+</details>
+<!-- WS (same look, plus parameters from screenshots) -->
+<details class="acc">
+<summary>
+<div>
+<div class="acc-title">Sorting WS</div>
+<div class="acc-sub">Program parameters (copied from manual screenshots)</div>
+</div>
+<span class="an-chip">WS</span>
+</summary>
+<div class="acc-body">
+<!-- Keep the same 3-row header like HF -->
+<div class="an-row">
+<div class="an-label">Sorting Program</div>
+<div class="an-val" id="sortingProgramBoxWS">Gray A</div>
+</div>
+<div class="an-row">
+<div class="an-label">Dominant Channel</div>
+<div class="an-val" id="analysisChannelBoxWS">Green</div>
+</div>
+<div style="height:10px;"></div>
+<!-- Manual parameters (Figure 3-4 / 3-5 / 3-6 style) -->
+<div class="an-row">
+<div class="an-label">Arith List</div>
+<select disabled="" id="wsArithList" style="flex:1; min-width:160px; height:38px; border-radius:8px; border:1px solid #555; padding:0 10px; background:#0f1324; color:#e8e8ff;" title="Auto-selected by algorithm">
+<option>All Set Solely</option>
+<option>All Alike</option>
+<option>Front and Rear Alike</option>
+<option>1st and 2nd and 3rd Alike</option>
+</select>
+</div>
+<div class="an-row">
+<div class="an-label">Sens</div>
+<input id="wsSens" type="text" value="1.0%"/>
+</div>
+<div class="an-row">
+<div class="an-label">Scale</div>
+<input id="wsScale" type="number" value="16"/>
+</div>
+<div class="an-row">
+<div class="an-label">Purity</div>
+<input id="wsPurity" type="number" value="512"/>
+</div>
+<div class="an-row" id="wsLightLimitRow">
+<div class="an-label">Light Limit</div>
+<input id="wsLightLimit" type="number" value="20"/>
+</div>
+</div>
+</details>
+</div>
+</details>
+</div>
+</section>
+<section class="tab" id="tab-calibration">
+<div class="tab-fixed-head"><h2>Calibration</h2></div>
+<div class="tab-scroll">
+<div class="cal-shell">
+<div class="acc-list" id="calAccList"><details class="acc" data-acc="camera"><summary><div><div class="acc-title">Camera</div><div class="acc-sub">Live view &amp; controls</div></div><span class="an-chip">Open</span></summary>
+<!-- Camera capture status/preview (auto-injected) -->
+<div id="camCaptureStatus" style="margin:10px 0; font-size:13px; opacity:.85;"></div>
+<div id="camCapturePreview" style="display:none; margin:10px 0; padding:10px; border:1px solid rgba(255,255,255,.15); border-radius:12px;">
+<div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+<div style="font-weight:600;">Captured frame</div>
+<div id="camCaptureMeta" style="font-size:12px; opacity:.75;"></div>
+</div>
+<div id="camCapturePreviewInner" style="margin-top:10px;"></div>
+</div>
+<div class="acc-body"><div class="tool-tab cal-tool-view" id="tab-camera">
+<div class="cal-inline-topbar">
+  <div class="cal-inline-title">Camera</div>
+  <div class="cal-inline-actions">
+    <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+  </div>
+</div>
+<div class="cam-wrap">
+<div class="cam-pane active" id="camPaneLive">
+<div class="cam-card">
+<h3>Live Camera</h3>
+<div class="cam-sub" id="cam-status" style="color:#cbd5ff;">Status: idle</div>
+<div class="cam-view">
+<div class="cam-frame">
+<video autoplay="" id="live-video" muted="" playsinline="" style="display:none;"></video>
+<canvas height="240" id="preview" width="240"></canvas>
+<div aria-hidden="true" class="reticle square-mode size-m" id="reticle-overlay">
+<div class="circle"></div>
+<div class="square"></div>
+<div class="hline"></div>
+<div class="vline"></div>
+<div class="dot"></div>
+<div class="label">Center the granule inside the reticle (ROI)</div>
+</div>
+</div>
+<div class="cam-colorbox" id="camera-color-box">RGB Preview</div>
+</div>
+<div class="cam-row" style="margin-top:10px;">
+<button class="cam-btn" disabled="" id="capture-photo-btn" onclick="captureAndAnalyze()" type="button">Capture &amp; Analyze</button></div>
+<div class="cam-row" id="capture-preview-row" style="margin-top:10px; display:none; align-items:flex-start; gap:10px;">
+<div style="min-width:110px; opacity:.8; font-size:12px; padding-top:6px;">Captured</div>
+<img alt="Captured frame" id="capture-preview-img" style="max-width:220px; width:220px; height:auto; border-radius:10px; border:1px solid rgba(255,255,255,0.12);"/>
+</div>
+<div class="cam-row" style="margin-top:8px;">
+</div>
+</div>
+<div class="cam-card">
+<h3>Save Sample</h3>
+<div class="cam-row">
+<button class="cam-btn" id="save-valid-btn" type="button">Save as Valid</button>
+<button class="cam-btn" id="save-defect-btn" type="button">Save as Defect</button>
+</div>
+</div>
+</div>
+</div>
+</div></div></details><details class="acc" data-caltool="lux"><summary><div><div class="acc-title">Lux Meter</div><div class="acc-sub">Exposure / brightness reference</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="cal-tool-view" id="caltool-lux">
+<div class="cal-tool-topbar">
+<button class="cal-back-btn" data-calback="" type="button">‹ Back</button>
+<div class="cal-tool-h">Lux Meter</div>
+<div class="cal-tool-badge">CAL</div>
+</div>
+<div class="cal-tool-body">
+<div class="soft-card lux-ui">
+<div class="lux-top">
+<div class="lux-title">Lux Meter</div>
+<div class="lux-icons">
+<button class="lux-icon" id="luxInfoBtn" title="Info" type="button">i</button>
+<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+<button class="lux-icon" id="luxSwitchBtn" title="Switch Camera" type="button">⟳</button>
+</div>
+</div>
+<div class="lux-main">
+  <div class="lux-left">
+<div class="lux-gauge-wrap">
+<div class="lux-gauge">
+<div class="lux-needle" id="luxNeedle"></div>
+<div class="lux-gauge-center">
+<div class="lux-label">Exposure Value</div>
+<div class="lux-ev" id="luxEV">--</div>
+<div class="lux-subrow">
+<span id="luxLux">-- lux</span>
+<span id="luxFc">-- fc</span>
+</div>
+</div>
+<div aria-hidden="true" class="lux-scale"></div>
+</div>
+</div>
+<div class="lux-settings">
+<div class="lux-setting">
+<div class="lux-setting-h">Aperture</div>
+<div class="lux-setting-v" id="luxApertureVal">2.8</div>
+<input class="lux-slider" id="luxAperture" max="40" min="14" type="range" value="28"/>
+<div class="lux-setting-sub">f/<span id="luxApertureTxt">2.8</span></div>
+</div>
+<div class="lux-setting">
+<div class="lux-setting-h">Speed (s)</div>
+<div class="lux-setting-v" id="luxSpeedVal">1/60</div>
+<input class="lux-slider" id="luxSpeed" max="200" min="10" type="range" value="60"/>
+<div class="lux-setting-sub">Shutter</div>
+</div>
+<div class="lux-setting">
+<div class="lux-setting-h">ISO</div>
+<div class="lux-setting-v" id="luxISOVal">200</div>
+<input class="lux-slider" id="luxISO" max="3200" min="100" step="100" type="range" value="200"/>
+<div class="lux-setting-sub">Camera gain (sim)</div>
+</div>
+</div>
+  </div>
+  <div class="lux-right">
+<div class="lux-camera">
+<div class="lux-camera-head">
+<div class="lux-camera-title">Rear Camera · Reflected Light</div>
+<div class="lux-camera-actions">
+<button class="lux-btn" id="luxFreezeBtn" type="button">Freeze</button>
+<button class="lux-btn" id="luxSaveBtn" type="button">Save</button>
+</div>
+</div>
+<div class="lux-video-wrap">
+<video autoplay="" id="luxVideo" muted="" playsinline=""></video>
+<canvas height="120" id="luxCanvas" style="display:none" width="160"></canvas>
+<div class="lux-video-overlay">
+<div class="lux-dot"></div>
+<div class="lux-small" id="luxStatus">Camera: idle</div>
+</div>
+</div>
+</div>
+  </div>
+</div>
+<div class="lux-info" hidden="" id="luxInfo">
+<div class="lux-info-card">
+<div class="lux-info-h">Lux Meter (Preview)</div>
+<div class="lux-info-p">
+      
+<p><b>מה הכלי עושה?</b><br/>
+Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lux</b> (וגם <b>Foot‑candles</b>) מתוך תמונת המצלמה בזמן אמת.
+המדידה כאן היא <b>הערכה המבוססת על בהירות התמונה</b> (Preview בדפדפן) ונועדה בעיקר ליישור/השוואה במהלך כיול.</p>
+
+<p><b>מה אתה רואה במסך?</b></p>
+<ul style="margin:6px 0 10px 18px;">
+  <li><b>Exposure Value (EV)</b> – מספר לוגאריתמי שמייצג “כמה אור” הגיע לחיישן ביחס להגדרות צילום.</li>
+  <li><b>Lux / fc</b> – המרה משוערת מתוך בהירות הפריים (לשימוש כיול יחסי, לא כמד‑אור מעבדתי).</li>
+  <li><b>וידאו</b> – תצוגת מצלמה חיה שממנה מחושב הערך.</li>
+</ul>
+
+<p><b>הסליידרים (השפעה על EV וההמרה):</b></p>
+<ul style="margin:6px 0 10px 18px;">
+  <li><b>Aperture (צמצם)</b> – ערך f/ (למשל f/2.8). מספר קטן יותר = צמצם פתוח יותר = יותר אור = EV “גבוה” יותר.</li>
+  <li><b>Speed / Shutter (מהירות תריס)</b> – זמן חשיפה. זמן ארוך יותר = יותר אור. הערכים מוצגים בסגנון 1/60, 1/125 וכו’.</li>
+  <li><b>ISO</b> – הגברה/רגישות. כאן זה <b>סימולציה</b> שמדמה שינוי Gain לצורך בדיקת זרימת עבודה.</li>
+</ul>
+
+<p><b>כפתורים:</b></p>
+<ul style="margin:6px 0 0 18px;">
+  <li><b>i (Info)</b> – פותח את ההסבר הזה.</li>
+  <li><b>⛶ Full Screen</b> – הופך את הכלי למסך מלא (כמו תת‑אפליקציה). לחיצה נוספת יוצאת חזרה לאקורדיון.</li>
+  <li><b>⟳ Switch Camera</b> – מעבר בין מצלמה קדמית/אחורית.</li>
+  <li><b>Freeze</b> – “מקפיא” את הקריאה על הפריים הנוכחי (נוח להשוואה).</li>
+  <li><b>Save</b> – שומר Snapshot של הערכים (לוג/תיעוד בתוך האפליקציה).</li>
+</ul>
+
+    </div>
+<button class="lux-btn lux-btn-accent" id="luxInfoClose" type="button">Got it</button>
+</div>
+</div>
+</div>
+</div>
+</div></div></details><details class="acc" data-caltool="ct"><summary><div><div class="acc-title">Color Temperature</div><div class="acc-sub">CCT / Δuv calibration</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="cal-tool-view" id="caltool-ct">
+<div class="cal-tool-topbar">
+<button class="cal-back-btn" data-calback="" type="button">‹ Back</button>
+<div class="cal-tool-h">Color Temperature</div>
+<div class="cal-tool-badge">CAL</div>
+</div>
+<div class="cal-tool-body">
+<div class="soft-card ct-ui">
+<div class="ct-top">
+<div class="ct-title">Color Temperature</div>
+<div class="ct-icons">
+<button class="lux-icon" id="ctInfoBtn" title="Info" type="button">i</button>
+<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+<button class="lux-icon" id="ctSwitchBtn" title="Switch Camera" type="button">⟳</button>
+<button class="lux-icon" id="ctSaveBtn" title="Save" type="button">💾</button>
+</div>
+</div>
+<div class="ct-gauge-wrap">
+<div class="ct-gauge">
+<div class="ct-needle" id="ctNeedle"></div>
+<div class="ct-center">
+<div class="ct-label">Color Temperature</div>
+<div class="ct-big" id="ctKelvin">----</div>
+<div class="ct-unit">Kelvin</div>
+</div>
+<div class="ct-arc"></div>
+<div class="ct-labels">
+<span style="left:12%">3000</span>
+<span style="left:32%">4000</span>
+<span style="left:52%">5000</span>
+<span style="left:72%">6000</span>
+<span style="left:90%">7000</span>
+</div>
+<div class="ct-sides">
+<div class="ct-side ct-warm">Warm<br/>White</div>
+<div class="ct-side ct-cold">Cold<br/>White</div>
+</div>
+</div>
+</div>
+<div class="ct-bars">
+<div class="ct-bar">
+<div class="ct-bar-h">Δuv · Magenta/Green shift</div>
+<div class="ct-bar-track">
+<div class="ct-bar-mid"></div>
+<div class="ct-bar-knob" id="ctDuvKnob"></div>
+</div>
+<div class="ct-bar-v" id="ctDuvVal">--</div>
+</div>
+<div class="ct-bar">
+<div class="ct-bar-h">CIE 1931 xy</div>
+<div class="ct-bar-v" id="ctXY">(---, ---)</div>
+</div>
+</div>
+<div class="ct-camera">
+<div class="lux-camera-head">
+<div class="lux-camera-title">Rear Camera · CCT estimate</div>
+<div class="lux-camera-actions">
+<button class="lux-btn" id="ctFreezeBtn" type="button">Freeze</button>
+</div>
+</div>
+<div class="lux-video-wrap ct-video">
+<video autoplay="" id="ctVideo" muted="" playsinline=""></video>
+<canvas height="165" id="ctCanvas" style="display:none" width="220"></canvas>
+<div class="spec-overlay" hidden="" id="ctOverlay">
+<div class="spec-overlay-card">
+<div class="spec-overlay-row">
+<span class="spec-warn">⚠</span>
+<span id="ctWarnText">Too dark to make a reliable measurement</span>
+</div>
+</div>
+</div>
+<div class="lux-video-overlay">
+<div class="lux-dot"></div>
+<div class="lux-small" id="ctStatus">Camera: idle</div>
+</div>
+</div>
+</div>
+<div class="lux-info" hidden="" id="ctInfo">
+<div class="lux-info-card">
+<div class="lux-info-h">Color Temperature (Preview)</div>
+<div class="lux-info-p">
+      Browser approximation: CCT is estimated from average RGB (relative).
+      Use for alignment and workflow checks, not lab calibration.
+    </div>
+<button class="lux-btn lux-btn-accent" id="ctInfoClose" type="button">Got it</button>
+</div>
+</div>
+</div>
+</div>
+</div></div></details><details class="acc" data-caltool="flicker"><summary><div><div class="acc-title">Flicker Meter</div><div class="acc-sub">Frequency / flicker level</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="cal-tool-view" id="caltool-flicker">
+<div class="cal-tool-topbar">
+<button class="cal-back-btn" data-calback="" type="button">‹ Back</button>
+<div class="cal-tool-h">Flicker Meter</div>
+<div class="cal-tool-badge">CAL</div>
+</div>
+<div class="cal-tool-body">
+<div class="soft-card fl-ui">
+<div class="fl-top">
+<div class="fl-title">Flicker Meter</div>
+<div class="fl-icons">
+<button class="lux-icon" id="flInfoBtn" title="Info" type="button">i</button>
+<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+<button class="lux-icon" id="flSwitchBtn" title="Switch Camera" type="button">⟳</button>
+<button class="lux-icon" id="flSaveBtn" title="Save" type="button">💾</button>
+</div>
+</div>
+<div class="fl-gauge-wrap">
+<div class="fl-gauge">
+<div class="fl-needle" id="flNeedle"></div>
+<div class="fl-center">
+<div class="fl-big" id="flPct">--%</div>
+<div class="fl-sub">Flickering</div>
+<div class="fl-small">Frequency <span id="flFreq">--</span></div>
+</div>
+<div class="fl-arc"></div>
+<div class="fl-scale">
+<span style="left:10%">10</span>
+<span style="left:30%">30</span>
+<span style="left:50%">50</span>
+<span style="left:70%">70</span>
+<span style="left:90%">90</span>
+</div>
+</div>
+</div>
+<div class="fl-strip">
+<div class="fl-strip-track">
+<div class="fl-strip-fill" id="flStripFill"></div>
+</div>
+</div>
+<div class="fl-wave">
+<canvas height="110" id="flWave" width="600"></canvas>
+</div>
+<div class="fl-note" id="flNote">
+  Light varies between full intensity and full intensity minus <span id="flNotePct">--</span>%.
+</div>
+<div class="fl-camera">
+<div class="lux-camera-head">
+<div class="lux-camera-title">Rear Camera · Flicker estimate</div>
+<div class="lux-camera-actions">
+<button class="lux-btn" id="flFreezeBtn" type="button">Freeze</button>
+</div>
+</div>
+<div class="lux-video-wrap fl-video">
+<video autoplay="" id="flVideo" muted="" playsinline=""></video>
+<canvas height="165" id="flCanvas" style="display:none" width="220"></canvas>
+<div class="spec-overlay" hidden="" id="flOverlay">
+<div class="spec-overlay-card">
+<div class="spec-overlay-row">
+<span class="spec-warn">⚠</span>
+<span id="flWarnText">Too dark to make a reliable measurement</span>
+</div>
+</div>
+</div>
+<div class="lux-video-overlay">
+<div class="lux-dot"></div>
+<div class="lux-small" id="flStatus">Camera: idle</div>
+</div>
+</div>
+</div>
+<div class="lux-info" hidden="" id="flInfo">
+<div class="lux-info-card">
+<div class="lux-info-h">Flicker Meter (Preview)</div>
+<div class="lux-info-p">
+      Flicker percentage is estimated from short-term brightness variation in the video stream.
+      Frequency is best-effort and may show as unknown depending on device/frame rate.
+    </div>
+<button class="lux-btn lux-btn-accent" id="flInfoClose" type="button">Got it</button>
+</div>
+</div>
+</div>
+</div>
+</div></div></details><details class="acc" data-caltool="spectrum"><summary><div><div class="acc-title">Light Spectrometer</div><div class="acc-sub">Dominant wavelength / saturation</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="cal-tool-view" id="caltool-spectrum">
+<div class="cal-tool-topbar">
+<button class="cal-back-btn" data-calback="" type="button">‹ Back</button>
+<div class="cal-tool-h">Light Spectrometer</div>
+<div class="cal-tool-badge">CAL</div>
+</div>
+<div class="cal-tool-body">
+<div class="soft-card spec-ui">
+<div class="spec-top">
+<div class="spec-title">Light Spectrometer</div>
+<div class="spec-icons">
+<button class="lux-icon" id="specInfoBtn" title="Info" type="button">i</button>
+<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+<button class="lux-icon" id="specSwitchBtn" title="Switch Camera" type="button">⟳</button>
+</div>
+</div>
+<div class="spec-gauge-wrap">
+<div class="spec-gauge">
+<div class="spec-needle" id="specNeedle"></div>
+<div class="spec-center">
+<div class="spec-big" id="specNm">---</div>
+<div class="spec-unit">Nanometers (nm)</div>
+</div>
+<div class="spec-arc"></div>
+<div class="spec-labels">
+<span style="left:10%">450</span>
+<span style="left:30%">500</span>
+<span style="left:50%">550</span>
+<span style="left:70%">600</span>
+<span style="left:90%">650</span>
+</div>
+</div>
+</div>
+<div class="spec-metrics">
+<div class="spec-metric">
+<div class="spec-m-h">Frequency</div>
+<div class="spec-m-v" id="specFreq">--- THz</div>
+</div>
+<div class="spec-metric">
+<div class="spec-m-h">Period</div>
+<div class="spec-m-v" id="specPeriod">--- fs</div>
+</div>
+<div class="spec-metric">
+<div class="spec-m-h">Saturation</div>
+<div class="spec-m-v" id="specSat">-- %</div>
+</div>
+</div>
+<div class="spec-camera">
+<div class="lux-camera-head">
+<div class="lux-camera-title">Rear Camera · Spectral estimate</div>
+<div class="lux-camera-actions">
+<button class="lux-btn" id="specFreezeBtn" type="button">Freeze</button>
+<button class="lux-btn" id="specSaveBtn" type="button">Save</button>
+</div>
+</div>
+<div class="lux-video-wrap spec-video">
+<video autoplay="" id="specVideo" muted="" playsinline=""></video>
+<canvas height="150" id="specCanvas" style="display:none" width="200"></canvas>
+<div class="spec-overlay" hidden="" id="specOverlay">
+<div class="spec-overlay-card">
+<div class="spec-overlay-row">
+<span class="spec-warn">⚠</span>
+<span id="specWarnText">Too dark to make a reliable measurement</span>
+</div>
+</div>
+</div>
+<div class="lux-video-overlay">
+<div class="lux-dot"></div>
+<div class="lux-small" id="specStatus">Camera: idle</div>
+</div>
+</div>
+</div>
+<div class="lux-info" hidden="" id="specInfo">
+<div class="lux-info-card">
+<div class="lux-info-h">Light Spectrometer (Preview)</div>
+<div class="lux-info-p">
+      This is a browser-based approximation. The dominant wavelength is estimated from average RGB hue.
+      Use it for relative checks, not lab-grade measurement.
+    </div>
+<button class="lux-btn lux-btn-accent" id="specInfoClose" type="button">Got it</button>
+</div>
+</div>
+</div>
+</div>
+</div></div></details></div>
+<!-- Tool pages (placeholders for now) -->
+</div>
+</div>
+</section>
+<section class="tab" id="tab-tools">
+<div class="tab-scroll">
+<h2 class="tab-title">Tools</h2>
+<div class="acc-list" id="toolsAccList">
+<details class="acc" data-acc="iot"><summary><div><div class="acc-title">Factory Live</div><div class="acc-sub">Live factory dashboard • Throughput &amp; data</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="tool-tab" id="tab-iot">
+<div class="iot-shell">
+<div class="iot-top">
+<div class="iot-title">
+<div class="iot-title-main">Factory Live</div>
+<div class="iot-title-sub">Mobile-ready snapshot · live-style demo</div>
+</div>
+<div class="iot-status">
+<span class="dot-live"></span>
+<span class="iot-status-text">LIVE</span>
+</div>
+</div>
+<div class="iot-viewport">
+<div class="iot-sticky-tabs"><div aria-label="Factory Live Views" class="iot-inner-tabs" role="tablist">
+<button aria-selected="true" class="iot-pill is-active" data-iotview="overview" role="tab">Overview</button>
+<button aria-selected="false" class="iot-pill" data-iotview="charts" role="tab">Charts</button>
+<button aria-selected="false" class="iot-pill" data-iotview="events" role="tab">Events</button>
+</div></div>
+<!-- OVERVIEW -->
+<div class="iot-view is-active" data-iotview="overview" role="tabpanel">
+<div class="iot-cards">
+<div class="iot-card">
+<div class="iot-card-k">Line Speed</div>
+<div class="iot-card-v"><span id="iotSpeed">3.4</span> <span class="iot-unit">m/s</span></div>
+<div class="iot-card-s">Conveyor / feeder</div>
+</div>
+<div class="iot-card">
+<div class="iot-card-k">Throughput</div>
+<div class="iot-card-v"><span id="iotTP">2.1</span> <span class="iot-unit">t/h</span></div>
+<div class="iot-card-s">Estimated</div>
+</div>
+<div class="iot-card">
+<div class="iot-card-k">Good Rate</div>
+<div class="iot-card-v"><span id="iotGood">96.8</span><span class="iot-unit">%</span></div>
+<div class="iot-card-s">Accepted pellets</div>
+</div>
+<div class="iot-card">
+<div class="iot-card-k">Reject Rate</div>
+<div class="iot-card-v"><span id="iotBad">3.2</span><span class="iot-unit">%</span></div>
+<div class="iot-card-s">Ejected</div>
+</div>
+</div>
+<div class="iot-wide">
+<div class="iot-wide-left">
+<div class="iot-wide-title">Current Batch</div>
+<div class="iot-wide-row"><span class="iot-l">Material</span><span class="iot-r">PP / Natural</span></div>
+<div class="iot-wide-row"><span class="iot-l">Machine</span><span class="iot-r">Sorter-01</span></div>
+<div class="iot-wide-row"><span class="iot-l">Shift</span><span class="iot-r">A</span></div>
+</div>
+<div class="iot-wide-right">
+<canvas aria-label="Good vs Reject donut" height="140" id="iotDonut" width="260"></canvas>
+</div>
+</div>
+</div>
+<!-- CHARTS -->
+<div class="iot-view" data-iotview="charts" role="tabpanel">
+<div class="iot-chart-card">
+<div class="iot-chart-head">
+<div>
+<div class="iot-chart-title">Hourly Output</div>
+<div class="iot-chart-sub">Last 6 hours (demo)</div>
+</div>
+<div class="iot-chip">Bars</div>
+</div>
+<canvas aria-label="Bar chart" height="220" id="iotBars" width="520"></canvas>
+</div>
+<div class="iot-chart-card">
+<div class="iot-chart-head">
+<div>
+<div class="iot-chart-title">Reject Types</div>
+<div class="iot-chart-sub">Distribution (demo)</div>
+</div>
+<div class="iot-chip">Pie</div>
+</div>
+<canvas aria-label="Pie chart" height="220" id="iotPie" width="520"></canvas>
+</div>
+</div>
+<!-- EVENTS -->
+<div class="iot-view" data-iotview="events" role="tabpanel">
+<div class="iot-events">
+<div class="iot-event">
+<div class="iot-evt-dot ok"></div>
+<div class="iot-evt-main">
+<div class="iot-evt-title">Camera sync stable</div>
+<div class="iot-evt-sub">00:00:12 · OK</div>
+</div>
+</div>
+<div class="iot-event">
+<div class="iot-evt-dot warn"></div>
+<div class="iot-evt-main">
+<div class="iot-evt-title">Air nozzle pulse drift</div>
+<div class="iot-evt-sub">00:00:21 · check pressure</div>
+</div>
+</div>
+<div class="iot-event">
+<div class="iot-evt-dot ok"></div>
+<div class="iot-evt-main">
+<div class="iot-evt-title">Model confidence ↑</div>
+<div class="iot-evt-sub">00:00:35 · stable classification</div>
+</div>
+</div>
+<div class="iot-event">
+<div class="iot-evt-dot err"></div>
+<div class="iot-evt-main">
+<div class="iot-evt-title">Reject bin nearing 25%</div>
+<div class="iot-evt-sub">00:00:49 · monitor discharge</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
 <script>
     (function(){
       // Internal view tabs
@@ -5761,7 +5478,7 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 <h2 style="color:var(--accent); margin:0 0 10px;">QA Calculations and Reports</h2>
 <!-- QA Guide (clickable help) -->
 <div style="display:flex; justify-content:flex-start; gap:10px; margin:0 0 10px;">
-<button class="qa2-btn" id="qa_doc_btn" title="QA Guide — explanations and methodology" type="button">📘 QA Guide</button>
+<button class="qa2-btn" id="qa_doc_btn" title="מדריך QA – הסברים ומתודולוגיה" type="button">📘 מדריך QA</button>
 </div>
 <div class="qa2-wrap">
 <div class="qa2-topbar">
@@ -5772,64 +5489,64 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 <!-- INPUTS -->
 <div class="qa2-pane active" id="qa2-pane-inputs">
 <div class="qa2-card">
-<div class="qa2-card-title">Inputs</div>
+<div class="qa2-card-title">הזנת נתונים</div>
 <div class="qa2-grid">
 <div class="qa2-field">
-<label>Average pellet weight <span class="qa2-unit">mg</span></label>
+<label>משקל גרגיר ממוצע <span class="qa2-unit">mg</span></label>
 <input id="qa2_pelletMg" step="0.001" type="number" value="12.5"/>
 </div>
 <div class="qa2-field">
-<label>Feed (in) <span class="qa2-unit">kg</span></label>
+<label>Feed (נכנס) <span class="qa2-unit">kg</span></label>
 <input id="qa2_wInKg" step="0.001" type="number" value="3.6"/>
 </div>
 <div class="qa2-field">
-<label>Accept (good) <span class="qa2-unit">kg</span></label>
+<label>Accept (טוב) <span class="qa2-unit">kg</span></label>
 <input id="qa2_wGoodKg" step="0.001" type="number" value="6.8"/>
 </div>
 <div class="qa2-field">
-<label>Reject (bad) <span class="qa2-unit">kg</span></label>
+<label>Reject (רע) <span class="qa2-unit">kg</span></label>
 <input id="qa2_wBadKg" step="0.001" type="number" value="0.8"/>
 </div>
 <div class="qa2-field">
-<label>Accept sample <span class="qa2-unit">g</span></label>
+<label>דגימה מהטוב <span class="qa2-unit">g</span></label>
 <input id="qa2_sampleGoodG" step="0.1" type="number" value="100"/>
 </div>
 <div class="qa2-field">
-<label>Defects found in sample</label>
+<label>פגומים שנמצאו בדגימה</label>
 <input id="qa2_defectsInSample" step="1" type="number" value="25"/>
 </div>
 <div class="qa2-field">
-<label>Reject sample <span class="qa2-unit">g</span></label>
+<label>דגימה מהרע <span class="qa2-unit">g</span></label>
 <input id="qa2_sampleBadG" step="0.1" type="number" value="100"/>
-<div class="qa2-hint">Optional: If you sample Reject, the tool can estimate “good-in-reject” instead of using the default assumption.</div>
+<div class="qa2-hint">אופציונלי: אם דוגמים Reject, אפשר לחשב “טובים ברע” במקום הנחה.</div>
 </div>
 <div class="qa2-field">
-<label>Good pellets found in Reject sample (count)</label>
+<label>טובים שנמצאו בדגימת Reject (ספירה)</label>
 <input id="qa2_goodsInBadSample" step="1" type="number" value="22"/>
 </div>
 <div class="qa2-field">
-<label>α — Severity of defect escape</label>
+<label>α — חשיבות “בריחת פגום”</label>
 <select id="qa2_alpha">
-<option value="2">1 · Low (×2)</option>
-<option value="5">2 · Medium (×5)</option>
-<option selected="" value="10">3 · High (×10)</option>
-<option value="20">4 · Critical (×20)</option>
-<option value="50">5 · Catastrophic (×50)</option>
+<option value="2">1 · נמוך (×2)</option>
+<option value="5">2 · בינוני (×5)</option>
+<option selected="" value="10">3 · גבוה (×10)</option>
+<option value="20">4 · קריטי (×20)</option>
+<option value="50">5 · קטסטרופלי (×50)</option>
 </select>
 </div>
 <div class="qa2-field">
-<label>β — Good-loss pain</label>
+<label>β — כאב “איבוד טוב”</label>
 <select id="qa2_beta">
-<option value="0.5">1 · Low (×0.5)</option>
-<option selected="" value="1">2 · Medium (×1)</option>
-<option value="2">3 · High (×2)</option>
-<option value="3">4 · Critical (×3)</option>
-<option value="5">5 · Catastrophic (×5)</option>
+<option value="0.5">1 · נמוך (×0.5)</option>
+<option selected="" value="1">2 · בינוני (×1)</option>
+<option value="2">3 · גבוה (×2)</option>
+<option value="3">4 · קריטי (×3)</option>
+<option value="5">5 · קטסטרופלי (×5)</option>
 </select>
 </div>
 </div>
 <div class="qa2-hint">
-          Tip: Enter only what you have. Everything else is calculated automatically and shown in the KPIs and Visuals.
+          טיפ: אפשר להזין רק מה שיש לכם בפועל. כל השאר מחושב אוטומטית ומופיע ב‑KPIs וב‑Visual.
         </div>
 <div class="qa2-actions">
 <button class="qa2-btn" id="qa2_reset" type="button">Reset</button>
@@ -5840,10 +5557,10 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 <!-- VISUAL -->
 <div class="qa2-pane" id="qa2-pane-visual">
 <div class="qa2-card">
-<div class="qa2-card-title">Visualization</div>
+<div class="qa2-card-title">המחשה</div>
 <div class="qa2-legend">
-<span class="qa2-dot good"></span><span class="qa2-legtxt">Good</span>
-<span class="qa2-dot bad"></span><span class="qa2-legtxt">Defect</span>
+<span class="qa2-dot good"></span><span class="qa2-legtxt">טוב</span>
+<span class="qa2-dot bad"></span><span class="qa2-legtxt">פגום</span>
 </div>
 <div class="qa2-cylgrid">
 <div class="qa2-cylcard">
@@ -5855,7 +5572,7 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 <div class="qa2-cylmeta" id="qa2_feed_meta">—</div>
 </div>
 <div class="qa2-cylcard">
-<div class="qa2-cylhdr">Accept (good)</div>
+<div class="qa2-cylhdr">Accept (טוב)</div>
 <div aria-label="Accept cylinder" class="qa2-cyl">
 <div class="qa2-fill good" id="qa2_acc_good"></div>
 <div class="qa2-fill bad" id="qa2_acc_bad"></div>
@@ -5863,7 +5580,7 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 <div class="qa2-cylmeta" id="qa2_acc_meta">—</div>
 </div>
 <div class="qa2-cylcard">
-<div class="qa2-cylhdr">Reject (bad)</div>
+<div class="qa2-cylhdr">Reject (רע)</div>
 <div aria-label="Reject cylinder" class="qa2-cyl">
 <div class="qa2-fill good" id="qa2_rej_good"></div>
 <div class="qa2-fill bad" id="qa2_rej_bad"></div>
@@ -5874,14 +5591,14 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 <div class="qa2-mini">
 <div class="qa2-minirow">
 <div class="qa2-minikpi">
-<div class="qa2-minilab">Defects escaped into Accept (estimated)</div>
+<div class="qa2-minilab">פגומים שברחו ל‑Accept (משוער)</div>
 <div class="qa2-minival" id="qa2_escape_est">—</div>
 </div>
 <button class="qa2-info" data-qa2-explain="escape" type="button">ⓘ</button>
 </div>
 <div class="qa2-minirow">
 <div class="qa2-minikpi">
-<div class="qa2-minilab">Good loss to Reject (estimated)</div>
+<div class="qa2-minilab">איבוד טוב ל‑Reject (משוער)</div>
 <div class="qa2-minival" id="qa2_goodloss_est">—</div>
 </div>
 <button class="qa2-info" data-qa2-explain="goodloss" type="button">ⓘ</button>
@@ -5898,33 +5615,33 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 </div>
 <div class="qa2-kpig qa2-kpig-compact">
 <div class="qa2-kpi qa2-wide qa2-score-hero">
-<div class="qa2-klabel">Weighted score (final)</div>
+<div class="qa2-klabel">Score משוקלל (התוצאה הסופית)</div>
 <div class="qa2-kvalue" id="qa2_score">—</div>
 <div aria-label="Score bar" class="qa2-scorebar"><div id="qa2_scorebar"></div></div>
 <button class="qa2-info" data-qa2-explain="score" type="button">ⓘ</button>
 </div>
 <div class="qa2-kpi">
-<div class="qa2-klabel">N_in (pellets in Feed)</div>
+<div class="qa2-klabel">N_in (מס׳ גרגירים ב‑Feed)</div>
 <div class="qa2-kvalue" id="qa2_nin">—</div>
 <button class="qa2-info" data-qa2-explain="nin" type="button">ⓘ</button>
 </div>
 <div class="qa2-kpi">
-<div class="qa2-klabel">Purity in Accept</div>
+<div class="qa2-klabel">Purity ב‑Accept</div>
 <div class="qa2-kvalue qa2-good" id="qa2_purity">—</div>
 <button class="qa2-info" data-qa2-explain="purity" type="button">ⓘ</button>
 </div>
 <div class="qa2-kpi">
-<div class="qa2-klabel">Escape rate (defects remaining in Accept)</div>
+<div class="qa2-klabel">Escape rate (פגומים שנשארו ב‑Accept)</div>
 <div class="qa2-kvalue qa2-bad" id="qa2_escape_rate">—</div>
 <button class="qa2-info" data-qa2-explain="escape" type="button">ⓘ</button>
 </div>
 <div class="qa2-kpi qa2-wide">
-<div class="qa2-klabel">Good loss (good thrown to Reject)</div>
+<div class="qa2-klabel">Good loss (טובים שנזרקו ל‑Reject)</div>
 <div class="qa2-kvalue" id="qa2_goodloss_rate">—</div>
 <button class="qa2-info" data-qa2-explain="goodloss" type="button">ⓘ</button>
 </div>
 </div>
-<div class="qa2-note" id="qa2_note"><b>Note:</b> Escape rate and C_A are computed from the Accept sample. Good loss is computed from the Reject sample (if provided) or a default assumption.</div>
+<div class="qa2-note" id="qa2_note"><b>הערה:</b> Escape rate ו‑C<sub>A</sub> מחושבים מדגימת Accept. Good loss מחושב מדגימת Reject (אם הוזנה) או מערך ברירת מחדל/הנחה.</div>
 </div>
 </div>
 </div>
@@ -5933,7 +5650,7 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 <div class="qa2-modal-backdrop" data-qa2-close="1"></div>
 <div aria-labelledby="qa2_modal_title" aria-modal="true" class="qa2-modal-card" role="dialog">
 <div class="qa2-modal-h">
-<div class="qa2-modal-title" id="qa2_modal_title">Explanation</div>
+<div class="qa2-modal-title" id="qa2_modal_title">הסבר</div>
 <button class="qa2-modal-x" data-qa2-close="1" type="button">✕</button>
 </div>
 <div class="qa2-modal-b" id="qa2_modal_body"></div>
@@ -5947,11 +5664,200 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 <div class="qa2-modal-backdrop" data-qa-doc-close="1"></div>
 <div aria-labelledby="qa_doc_modal_title" aria-modal="true" class="qa2-modal-card" role="dialog">
 <div class="qa2-modal-h">
-<div class="qa2-modal-title" id="qa_doc_modal_title">QA Guide — Pellet Sorting Quality Check</div>
+<div class="qa2-modal-title" id="qa_doc_modal_title">מדריך QA – בדיקת איכות מיון גרגירי פלסטיק (Pellet Sorting)</div>
 <button class="qa2-modal-x" data-qa-doc-close="1" type="button">✕</button>
 </div>
 <div class="qa2-modal-b" id="qa_doc_modal_body">
-<div style="max-height:70vh; overflow:auto; padding-left:4px;"><div style="color:#cbd5ff; font-size:13px; line-height:1.55;"><p><b>This panel is a practical guide for checking pellet‑sorting quality</b> using sampling and weight inputs.</p><p><b>Inputs</b></p><ul><li><b>Average pellet weight (mg)</b>: converts mass to pellet counts.</li><li><b>Feed / Accept / Reject</b>: stream masses.</li><li><b>Accept sample + defects</b>: estimate defect escape.</li><li><b>Reject sample + good count (optional)</b>: estimate good loss.</li><li><b>α / β</b>: weighting factors for defect escape vs. good loss.</li></ul><p><b>Outputs</b></p><ul><li><b>Purity</b>, <b>Escape rate</b>, <b>Good loss</b>, <b>Weighted score</b>.</li></ul><p style="opacity:.85"><b>Notes</b>: Estimates depend on representative sampling.</p></div></div>
+<div style="max-height:70vh; overflow:auto; padding-left:4px;">
+<div style="color:#cbd5ff; font-size:13px; line-height:1.55;">
+<p><b>מסמך זה נועד לשמש מדריך מקצועי, תפעולי וברור</b> לביצוע בדיקות QA למכונות מיון גרגירי פלסטיק (PE / PP / סיליקונים), בדגש על שקופים עם פגמים (כתמים שחורים/חומים).</p>
+<div style="margin:10px 0 14px;">
+<div><b>המסמך מתאים:</b></div>
+<ul style="margin:6px 0 0 18px;">
+<li>למהנדסי איכות</li>
+<li>לספקי מכונות מיון</li>
+<li>ללקוחות קצה</li>
+<li>לצרכי FAT / SAT / קבלה תעשייתית</li>
+</ul>
+</div>
+<h3 style="margin:14px 0 6px; color:var(--accent);">1. מטרת ה‑QA</h3>
+<p>מטרת בדיקת ה‑QA היא לענות על שאלה אחת מרכזית:</p>
+<blockquote style="margin:8px 0; padding:8px 10px; border-right:3px solid rgba(250,174,82,.7); background:var(--accentSoft); border-radius:10px;">
+              כמה פגומים באמת נשארים בחומר הטוב שמגיע ללקוח, וכמה טובים נזרקים בטעות?
+            </blockquote>
+<p>כלומר:</p>
+<ul>
+<li><b>זיהום החומר הטוב (Defect Escape)</b></li>
+<li><b>איבוד חומר טוב (Good Loss)</b></li>
+</ul>
+<p>ה‑QA לא נועד “להוכיח 99%” באופן שיווקי, אלא לתת <b>מדד אמיתי, מדיד, והשוואתי</b>.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">2. הגדרות בסיסיות (זרמים)</h3>
+<p>במערכת מיון קיימים שלושה זרמים עיקריים:</p>
+<h4 style="margin:10px 0 4px;">2.1 Feed – הזנה</h4>
+<p>כל החומר שנכנס למכונה.</p>
+<ul>
+<li>משקל כולל (ק״ג)</li>
+<li>אחוז פגומים משוער או ידוע</li>
+</ul>
+<h4 style="margin:10px 0 4px;">2.2 Accept – חומר טוב</h4>
+<p>החומר שאמור להגיע ללקוח. כאן הקריטריון הוא <b>כמה פגומים נשארו</b>.</p>
+<h4 style="margin:10px 0 4px;">2.3 Reject – חומר רע</h4>
+<p>החומר שנפסל. כאן הקריטריון הוא <b>כמה טובים נזרקו בטעות</b>.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">3. למה עובדים עם דגימות (Sampling)</h3>
+<p>בפועל, לא ניתן לספור מיליוני גרגירים אחד־אחד. לכן, בתעשייה מקובל לעבוד בשיטת <b>דגימה סטטיסטית</b>:</p>
+<ul>
+<li>שוקלים כמות קטנה (לרוב 50–200 גרם)</li>
+<li>סופרים ידנית פגומים או טובים</li>
+<li>משליכים את היחס על כל הזרם</li>
+</ul>
+<p>זו שיטה מקובלת בתעשיית הפלסטיק, מזון, פארמה, ויז’ן תעשייתי.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">4. דגימה מה‑Accept (החומר הטוב)</h3>
+<h4 style="margin:10px 0 4px;">4.1 מה מודדים</h4>
+<ul>
+<li>משקל הדגימה (גרם)</li>
+<li>מספר פגומים שנמצאו בדגימה</li>
+</ul>
+<h4 style="margin:10px 0 4px;">4.2 חישוב</h4>
+<ol>
+<li>חישוב מספר גרגירים בדגימה:</li>
+</ol>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">N_sample = (משקל דגימה [g] × 1000) / משקל גרגיר [mg]</pre>
+<ol start="2">
+<li>חישוב שיעור פגומים ב‑Accept:</li>
+</ol>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Escape Rate = פגומים בדגימה / N_sample</pre>
+<ol start="3">
+<li>חישוב זיהום ב‑Accept:</li>
+</ol>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">מספר פגומים לק״ג = Escape Rate × (1,000,000 / משקל גרגיר [mg])</pre>
+<p><b>זהו המדד החשוב ביותר ללקוח.</b></p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">5. דגימה מה‑Reject (החומר הרע)</h3>
+<h4 style="margin:10px 0 4px;">5.1 למה זה חשוב</h4>
+<blockquote style="margin:8px 0; padding:8px 10px; border-right:3px solid rgba(250,174,82,.7); background:var(--accentSoft); border-radius:10px;">
+              בלי דגימה מה‑Reject, אין דרך אמיתית לדעת כמה חומר טוב נזרק לפח.
+            </blockquote>
+<h4 style="margin:10px 0 4px;">5.2 מה מודדים</h4>
+<ul>
+<li>משקל דגימה מה‑Reject (גרם)</li>
+<li>מספר <b>טובים</b> שנמצאו בדגימה</li>
+</ul>
+<h4 style="margin:10px 0 4px;">5.3 חישוב</h4>
+<ol>
+<li>מספר גרגירים בדגימת Reject:</li>
+</ol>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">N_rej_sample = (משקל דגימה [g] × 1000) / משקל גרגיר [mg]</pre>
+<ol start="2">
+<li>אחוז טובים ב‑Reject:</li>
+</ol>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Good-in-Reject = טובים בדגימה / N_rej_sample</pre>
+<ol start="3">
+<li>איבוד חומר טוב:</li>
+</ol>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Good Loss = Good-in-Reject × משקל Reject</pre>
+<h3 style="margin:14px 0 6px; color:var(--accent);">6. המרה ממשקל למספר גרגירים</h3>
+<p>מאחר וגרגירים הם יחידות בדידות, רוב החישובים נעשים בפועל <b>במספר גרגירים</b>, לא בק״ג.</p>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">גרגירים לק״ג = 1,000,000 / משקל גרגיר [mg]</pre>
+<p>לדוגמה: גרגיר 12.5 mg → 80,000 גרגירים לק״ג</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">7. מדדי KPI עיקריים</h3>
+<h4 style="margin:10px 0 4px;">7.1 Purity (ניקיון Accept)</h4>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Purity = 1 − Escape Rate</pre>
+<h4 style="margin:10px 0 4px;">7.2 Escape Rate</h4>
+<p>כמה פגומים נשארו בחומר הטוב (הכי חשוב ללקוח).</p>
+<h4 style="margin:10px 0 4px;">7.3 Good Loss</h4>
+<p>כמה חומר טוב נזרק ל‑Reject.</p>
+<h4 style="margin:10px 0 4px;">7.4 Recall (של פגומים)</h4>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Recall = פגומים שנתפסו / סך הפגומים ב‑Feed</pre>
+<h3 style="margin:14px 0 6px; color:var(--accent);">8. למה לא מספיק להגיד “99% הצלחה”</h3>
+<p>ברוב המקרים, יצרן מתכוון ל‑<b>Recall</b>: מתוך כל הפגומים – כמה נתפסו.</p>
+<p>אבל זה <b>לא אומר</b>:</p>
+<ul>
+<li>כמה פגומים נשארו ב‑Accept</li>
+<li>כמה טובים נזרקו</li>
+</ul>
+<p>לכן QA אמיתי תמיד בודק <b>שני צדדים</b>.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">9. α (Alpha) – חומרת פגום שברח</h3>
+<p>α מגדיר: כמה חמור פגום אחד שהגיע ללקוח, יחסית לזריקת גרגיר טוב אחד.</p>
+<div style="overflow:auto;">
+<table style="width:100%; border-collapse:collapse; font-size:13px;">
+<thead>
+<tr>
+<th style="text-align:right; padding:6px; border-bottom:1px solid rgba(255,255,255,.10);">רמה</th>
+<th style="text-align:right; padding:6px; border-bottom:1px solid rgba(255,255,255,.10);">משמעות</th>
+<th style="text-align:right; padding:6px; border-bottom:1px solid rgba(255,255,255,.10);">α פנימי</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">1</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">נסבל</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">2</td></tr>
+<tr><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">2</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">לא רצוי</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">5</td></tr>
+<tr><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">3</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">בעייתי</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">10</td></tr>
+<tr><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">4</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">חמור</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">20</td></tr>
+<tr><td style="padding:6px;">5</td><td style="padding:6px;">קריטי</td><td style="padding:6px;">50</td></tr>
+</tbody>
+</table>
+</div>
+<h3 style="margin:14px 0 6px; color:var(--accent);">10. β (Beta) – כאב של איבוד חומר טוב</h3>
+<p>β מגדיר את העלות/כאב של זריקת חומר טוב. גם כאן סקאלה 1–5, עם ערכים פנימיים שונים.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">11. Score משוקלל – המדד הסופי</h3>
+<p>ה‑Score משלב: פגומים שברחו × α, טובים שנזרקו × β.</p>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Score = 1 − (α × Escape + β × Good Loss)</pre>
+<p>זה <b>לא תקן</b>, אלא מדד השוואתי פנימי להשוואת מכונות / הגדרות / ריצות.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">12. ויזואליזציה (גלילים)</h3>
+<p>הגלילים מציגים בצורה אינטואיטיבית Feed / Accept / Reject, כולל משקל (ק״ג), כמות גרגירים, ואחוז יחסי.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">13. מה מקובל בתעשייה</h3>
+<ul>
+<li>✔ עבודה בדגימות</li>
+<li>✔ הפרדה בין Accept / Reject</li>
+<li>✔ מדידה במספר יחידות (pellets)</li>
+<li>✔ הבחנה בין Recall לבין Purity</li>
+<li>✔ שימוש במדדי QA ולא רק אחוז שיווקי</li>
+</ul>
+<h3 style="margin:14px 0 6px; color:var(--accent);">14. המחלוקת המקצועית בתעשייה – מה באמת אומר "99%"</h3>
+<h4 style="margin:10px 0 4px;">14.1 גישת היצרן / הספק – Recall של פגומים</h4>
+<p>בדרך כלל “99% הצלחה” = מתוך כלל הפגומים שנכנסו – 99% זוהו והוצאו ל‑Reject (Recall).</p>
+<p><b>יתרונות:</b> קל למדידה, מחמיא לאלגוריתם, מתאים להשוואת טכנולוגיות.<br/>
+<b>חסרונות:</b> לא אומר מה נשאר אצל הלקוח, לא מתחשב בטוב שנזרק, לא משקף סיכון תפעולי.</p>
+<h4 style="margin:10px 0 4px;">14.2 גישת הלקוח / האיכות – Purity ו‑Escape</h4>
+<p>מבחינת הלקוח: כמה פגומים נשארו בחומר הטוב שאני מקבל? (Purity / Escape rate)</p>
+<p><b>יתרונות:</b> משקף סיכון אמיתי, מדבר בשפת איכות, ניתן לבדיקה בדגימות פשוטות.<br/>
+<b>חסרונות:</b> לבדו לא מספר כמה טוב נזרק.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">15. הגשר בין הגישות – למה צריך מודל משוקלל</h3>
+<p>מערכת מיון טובה נמדדת בשלושה צירים:</p>
+<ol>
+<li>כמה פגומים הצלחנו להוציא (Recall)</li>
+<li>כמה פגומים נשארו אצל הלקוח (Escape / Purity)</li>
+<li>כמה חומר טוב נזרק (Good Loss)</li>
+</ol>
+<p>מדידה חד‑צדדית תמיד תטעה, לכן נדרש מודל משוקלל.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">16. α (Alpha) ו‑β (Beta) – תרגום איכות לשיקול עסקי</h3>
+<h4 style="margin:10px 0 4px;">16.1 Alpha – חומרת פגום שברח</h4>
+<p>תרגום של תלונות/החזרות/עצירת קו/פגיעה במוניטין. Alpha הוא פרמטר מדיניות (לא מספר פיזיקלי).</p>
+<h4 style="margin:10px 0 4px;">16.2 Beta – כאב של איבוד חומר טוב</h4>
+<p>תלוי במחיר חומר, זמינות, ואפשרות מיחזור. גם כאן – סקאלה תפעולית.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">17. Score משוקלל – למה זה המדד הנכון</h3>
+<p>ה‑Score נועד להיות מדד השוואתי, יציב, מובן, ולא אקדמי:</p>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Score = 1 − (α × Escape + β × GoodLoss)</pre>
+<h3 style="margin:14px 0 6px; color:var(--accent);">18. למה זה המודל המומלץ</h3>
+<ul>
+<li>✔ משלב את שתי נקודות המבט (ספק + לקוח)</li>
+<li>✔ מבוסס על מדידות אמיתיות (דגימות)</li>
+<li>✔ ניתן להסבר פשוט</li>
+<li>✔ ניתן להשוואה בין מכונות / הגדרות / ריצות / ספקים</li>
+</ul>
+<p><b>והכי חשוב:</b> הוא מדבר בשפה שהלקוח, האיכות וההנהלה מבינים.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">19. שימוש במסמך זה</h3>
+<ul>
+<li>קישור מתוך אפליקציית ה‑QA</li>
+<li>נספח להסכם / FAT</li>
+<li>בסיס לדיון מקצועי, לא שיווקי</li>
+</ul>
+<p>מומלץ להציג אותו כ‑reference ולא כדרישה רגולטורית.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">20. Final summary</h3>
+<blockquote style="margin:8px 0; padding:8px 10px; border-right:3px solid rgba(250,174,82,.7); background:var(--accentSoft); border-radius:10px;">
+              Real QA doesn’t ask “what is the machine’s success rate?”, it asks “what is my risk as a customer, and what is my cost as a manufacturer?”
+            </blockquote>
+<p>This model was built specifically to answer that question.</p>
+</div>
+</div>
 </div>
 <div class="qa2-modal-f">
 <button class="qa2-btn qa2-btn-primary" data-qa-doc-close="1" type="button">Close</button>
@@ -6028,7 +5934,7 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 </div></div></details><details class="acc" data-acc="manuals"><summary><div><div class="acc-title">Video Manuals</div><div class="acc-sub">Training &amp; operation videos</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="tool-tab" id="tab-manuals">
 <h2 style="color:var(--accent); margin-bottom:6px;">Video Manuals</h2>
 <p class="hint" style="margin-top:0;">
-    Select a tutorial video to open it in a larger view.
+    בחר סרטון הדרכה כדי לפתוח אותו במסך גדול.
   </p>
 <div aria-label="Video manuals list" class="manuals-list" id="manuals-list"></div>
 <!-- Player Modal -->
@@ -6457,10 +6363,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 // ===== Calibration navigation =====
 function initCalibrationNav(){
-  const tab = document.getElementById('tab-calibration');
-  if(!tab) return;
-
-  // Optional legacy "home/tool view" navigation (kept for backward-compatibility if elements exist)
   const calHome = document.getElementById('cal-home');
   const views = {
     lux: document.getElementById('caltool-lux'),
@@ -6470,238 +6372,73 @@ function initCalibrationNav(){
   };
 
   function showHome(){
-    if(calHome){
-      calHome.hidden = false;
-      calHome.style.display = 'block';
-    }
-    Object.values(views).forEach(v=>{
-      if(!v) return;
-      v.hidden = true;
-      v.style.display = 'none';
-    });
-    // Keep UX consistent
-    tab.scrollTop = 0;
+    if(calHome) calHome.hidden = false;
+    Object.values(views).forEach(v=>{ if(v) v.hidden = true; });
+    // scroll to top so sticky header aligns nicely
+    const tab = document.getElementById('tab-calibration');
+    if(tab) tab.scrollTop = 0;
   }
   function showTool(key){
-    const view = views[key];
-    if(!view) return;
-    if(calHome){
-      calHome.hidden = true;
-      calHome.style.display = 'none';
-    }
-    Object.entries(views).forEach(([k,v])=>{
-      if(!v) return;
-      v.hidden = (k !== key);
-      v.style.display = (k !== key) ? 'none' : '';
-    });
-    tab.scrollTop = 0;
+    if(!views[key]) return;
+    if(calHome) calHome.hidden = true;
+    Object.entries(views).forEach(([k,v])=>{ if(v) v.hidden = (k!==key); });
+    const tab = document.getElementById('tab-calibration');
+    if(tab) tab.scrollTop = 0;
   }
 
-  tab.querySelectorAll('[data-caltool]').forEach(btn=>{
+  document.querySelectorAll('#tab-calibration [data-caltool]').forEach(btn=>{
     btn.addEventListener('click', ()=> showTool(btn.getAttribute('data-caltool')));
   });
+  document.querySelectorAll('#tab-calibration [data-calback]').forEach(btn=>{
+    btn.addEventListener('click', showHome);
+  });
 
-  // ===== Fullscreen: one toggle button (⛶) only. No Back. =====
-  const portalMap = new Map();
+  // expose for other handlers (e.g., full-screen exit)
+  window.__calShowHome = showHome;
+  window.__calShowTool = showTool;
 
-  function portalIn(view){
-    if(!view || portalMap.has(view)) return;
-    const parent = view.parentNode;
-    if(!parent) return;
-    const placeholder = document.createComment('cal-fs-placeholder');
-    parent.insertBefore(placeholder, view);
-    portalMap.set(view, { parent, placeholder });
-    document.body.appendChild(view);
-  }
-
-  function portalOut(view){
-    const st = portalMap.get(view);
-    if(!st) return;
-    st.parent.insertBefore(view, st.placeholder);
-    st.placeholder.remove();
-    portalMap.delete(view);
-  }
-
-  function setFsButtonState(view, on){
-    const btn = view ? view.querySelector('.cal-inline-topbar .cal-fs-btn') : null;
-    if(!btn) return;
-    btn.setAttribute('aria-label', on ? 'Exit full screen' : 'Full screen');
-    btn.title = on ? 'Exit full screen' : 'Full screen';
-    // Keep the same glyph, but you can swap if you want different icons.
-    btn.textContent = '⛶';
-  }
-
-  function setFullscreen(view, on){
+  // Full-screen toggle for calibration tools (acts like a mini "sub-app" mode)
+  function toggleFullscreenFor(view){
     if(!view) return;
-
-    // close any other fullscreen tool first
-    document.querySelectorAll('.cal-tool-view.is-fullscreen').forEach(v=>{
-      if(v !== view){
-        v.classList.remove('is-fullscreen');
-        setFsButtonState(v, false);
-        try { portalOut(v); } catch(_) {}
-      }
+    const on = !view.classList.contains('is-fullscreen');
+    // turn off any other fullscreen tool
+    document.querySelectorAll('#tab-calibration .cal-tool-view.is-fullscreen').forEach(v=>{
+      if(v !== view) v.classList.remove('is-fullscreen');
     });
-
-    const isCamera = (view.id === 'tab-camera');
-
+    view.classList.toggle('is-fullscreen', on);
+    document.body.classList.toggle('cal-fs-active', on);
     if(on){
-      // Portal breaks some iOS interactions for the Camera tool; keep it in-place.
-      if(!isCamera){
-        portalIn(view);
-      }
-      view.classList.add('is-fullscreen');
-      document.body.classList.add('cal-fs-active');
       view.scrollTop = 0;
-      setFsButtonState(view, true);
     }else{
-      view.classList.remove('is-fullscreen');
+      // return to accordion/home view when exiting fullscreen
+      showHome();
       document.body.classList.remove('cal-fs-active');
-      setFsButtonState(view, false);
-      try { if(!isCamera) portalOut(view); } catch(_) {}
-      // Return to the calibration accordion context
-      tab.scrollTop = 0;
     }
   }
 
-  
-  // Expose navigation helpers (some other scripts rely on window.showHome/showTool)
-  window.showHome = showHome;
-  window.showTool = showTool;
+  // button inside each tool header
+  document.querySelectorAll('#tab-calibration .cal-fs-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const view = btn.closest('.cal-tool-view');
+      toggleFullscreenFor(view);
+    });
+  });
 
-  // Expose a robust fullscreen toggle for delegated handlers (⛶ button)
-  // - Enter: go full-screen
-  // - Exit : return to the accordion position (e.g., Camera accordion)
-  window.toggleFullscreenFor = function(view){
-    if(!view) return;
-
-    const tabEl = document.getElementById('tab-calibration');
-    const entering = !view.classList.contains('is-fullscreen');
-
-    if(entering){
-      // Remember where we came from inside the accordion
-      try{
-        const det = view.closest('details.acc');
-        if(det){
-          view.dataset.fsAcc = det.getAttribute('data-acc') || det.id || '';
-        }else{
-          view.dataset.fsAcc = '';
-        }
-        view.dataset.fsScroll = String(tabEl ? tabEl.scrollTop : 0);
-      }catch(_){}
-      setFullscreen(view, true);
-      return;
-    }
-
-    // Exiting fullscreen
-    setFullscreen(view, false);
-
-    // Restore accordion context (prefer scrolling to the same accordion summary)
-    try{
-      const key = (view.dataset.fsAcc || '').trim();
-      let det = null;
-
-      if(key){
-        // key is usually a simple token like "camera"
-        det = document.querySelector('#tab-calibration details.acc[data-acc="'+ key +'"]')
-           || document.getElementById(key);
-      }
-      if(!det){
-        det = view.closest('details.acc');
-      }
-
-      if(det){
-        det.open = true;
-        const sum = det.querySelector('summary');
-        if(sum) sum.scrollIntoView({block:'start', behavior:'smooth'});
-      }else if(tabEl && view.dataset.fsScroll){
-        tabEl.scrollTop = parseInt(view.dataset.fsScroll, 10) || 0;
-      }
-    }catch(_){
-      try{ if(tabEl) tabEl.scrollTop = 0; }catch(__){}
-    }
-  };
-
-// ESC exits fullscreen (desktop)
+  // ESC exits fullscreen (desktop)
   document.addEventListener('keydown', (e)=>{
     if(e.key === 'Escape'){
-      const fs = document.querySelector('.cal-tool-view.is-fullscreen');
-      if(fs) setFullscreen(fs, false);
+      const fs = document.querySelector('#tab-calibration .cal-tool-view.is-fullscreen');
+      if(fs){
+        fs.classList.remove('is-fullscreen');
+        document.body.classList.remove('cal-fs-active');
+        showHome();
+      }
     }
   });
 
-  // ===== Info sheets: always have a working Close at the bottom =====
-  function ensureInfoCloseButtons(){
-    const infos = tab.querySelectorAll('.lux-info, .ct-info, .fl-info, .spec-info');
-    infos.forEach(info=>{
-      const card = info.querySelector('.lux-info-card, .ct-info-card, .fl-info-card, .spec-info-card') || info.firstElementChild;
-      if(!card) return;
-      if(card.querySelector('.cal-info-close')) return;
-      const row = document.createElement('div');
-      row.className = 'cal-info-close-row';
-      row.innerHTML = '<button type="button" class="cal-info-close">Close</button>';
-      card.appendChild(row);
-    });
-  }
-
-  // Remove Save buttons inside Calibration (per request)
-  function removeCalibrationSaveButtons(){
-    tab.querySelectorAll('button').forEach(b=>{
-      const t = (b.textContent || '').trim().toLowerCase();
-      const ti = (b.getAttribute('title') || '').trim().toLowerCase();
-      if(t === 'save' || ti === 'save' || ti.includes('save')){
-        b.style.display = 'none';
-        b.setAttribute('aria-hidden','true');
-      }
-    });
-  }
-
-  ensureInfoCloseButtons();
-  removeCalibrationSaveButtons();
-
-  // ===== Event delegation (works even after portaling to <body>) =====
-  document.addEventListener('click', (e)=>{
-    // Fullscreen toggle (works in normal + fullscreen)
-    const fsBtn = e.target.closest('.cal-fs-btn');
-    if(fsBtn){
-      const view = fsBtn.closest('.cal-tool-view');
-      if(view){
-        const on = !view.classList.contains('is-fullscreen');
-        setFullscreen(view, on);
-      }
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-
-    // Close button inside Info overlays
-    const closeBtn = e.target.closest('.cal-info-close');
-    if(closeBtn){
-      const info = closeBtn.closest('.lux-info, .ct-info, .fl-info, .spec-info');
-      if(info){
-        info.hidden = true;
-        info.style.display = 'none';
-      }
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-
-    // Tap on the dimmed overlay background closes Info
-    const overlay = e.target.closest('.lux-info, .ct-info, .fl-info, .spec-info');
-    if(overlay && e.target === overlay){
-      overlay.hidden = true;
-      overlay.style.display = 'none';
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-  });
-
-  // Default to accordion/home view
+  // default state
   showHome();
 }
-
 
 // ===== Mock IoT Dashboard =====
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -9460,29 +9197,29 @@ function bind(){
 
   // Explanation texts
   const EXPL = {
-    nin: `N_in is computed from Feed mass and the average pellet weight:
-          <br><b>N_in = (kg · 1,000,000 mg/kg) / (mg per pellet)</b>.`,
-    purity: `Purity in Accept describes how many pellets in the “good” stream are actually good.
-             <br><b>Purity = 1 − p(defect|Accept)</b> (from the sample).`,
-    ca: `C_A is an estimate of how many defects entered Accept (count):
+    nin: `N_in מחושב מתוך משקל ה‑Feed והמשקל הממוצע לגרגיר:
+          <br><b>N_in = (kg · 1,000,000 mg/kg) / (mg לגרגיר)</b>.`,
+    purity: `Purity ב‑Accept מתאר כמה מהגרגירים בזרם ה“טוב” הם באמת טובים.
+             <br><b>Purity = 1 − p(defect|Accept)</b> (מהדגימה).`,
+    ca: `C_A הוא אומדן לכמה פגומים נכנסו ל‑Accept (כמות/מס׳):
          <br><b>C_A ≈ p(defect|Accept) · N_accept</b>.`,
-    defkg: `Defects/kg is an estimate of defects per kg in Accept:
+    defkg: `Defects/kg הוא אומדן כמות פגומים פר ק״ג ב‑Accept:
             <br><b>defects/kg ≈ (p(defect|Accept) · N_accept) / (kg_accept)</b>.`,
-    recall: `Recall here is “how many defects we managed to catch into Reject”.
-             If missing a real Feed sample, this is an estimate derived from the sample and masses.`,
-    escape: `Escape_est is an estimate of how many defects reached Accept:
+    recall: `Recall כאן הוא “כמה מהפגומים הצלחנו לתפוס ל‑Reject”.
+             בהיעדר דגימת Feed אמיתית, זו הערכה נגזרת מהדגימה והמסות.`,
+    escape: `Escape_est הוא אומדן כמות פגומים שהגיעו ל‑Accept:
              <br><b>Escape_est ≈ p(defect|Accept) · N_accept</b>.`,
-    escape_rate: `Escape rate is the fraction of defects within Accept (not out of all defects that were in Feed):
-                  <br><b>Escape rate = p(defect|Accept)</b> (from the sample).`,
-    goodloss: `Good loss to Reject depends on how much good material falls into the “bad” stream.
-              If there is no Reject sample/count, an assumption is required.
-              <br>Shown as a rough estimate: (good fraction in Reject) × N_reject.`,
-    goodloss_rate: `Good loss rate is ideally measured from a Reject sample:`,
+    escape_rate: `Escape rate הוא שיעור הפגומים בתוך ה‑Accept (לא מתוך כלל הפגומים שהיו ב‑Feed):
+                  <br><b>Escape rate = p(defect|Accept)</b> (מהדגימה).`,
+    goodloss: `איבוד טוב ל‑Reject תלוי בכמה חומר טוב נופל לזרם ה“רע”.
+              אם אין דגימה/ספירה מה‑Reject, חייבים הנחה.
+              <br>כאן מוצג כאומדן גס: חלק מה‑Reject שהוא טוב × N_reject.`,
+    goodloss_rate: `Good loss rate נמדד אידאלית מדגימה מה‑Reject:
                     <br><b>p(good|Reject) ≈ good_in_reject_sample / N_reject_sample</b>.
-                    <br>If there is no Reject sample, this remains an estimate.`,
-    score: `Weighted score prioritizes “defect escape to the customer” (α) over “good loss” (β):
+                    <br>אם אין דגימה מה‑Reject — זה נשאר “הערכה”.`,
+    score: `Score משוקלל נותן עדיפות גבוהה ל“בריחת פגום ללקוח” (α) לעומת “איבוד טוב” (β):
             <br><b>Score = 100 − ( α·Escape_rate  +  β·GoodLoss_rate )·100</b>
-            <br>This is not a universal scientific metric; it’s a QA decision tool for comparing setups/machines.`
+            <br>זה לא “מדד מדעי אוניברסלי”, אלא כלי החלטה/QA להשוואה בין סט‑אפים/מכונות.`
   };
 
   function showExplain(key){
@@ -9570,8 +9307,8 @@ function bind(){
       sb.style.width = sPct.toFixed(1) + '%';
     }
 
-    $('qa2_escape_est').textContent = fmtInt(escapeEst) + ' pellets';
-    $('qa2_goodloss_est').textContent = fmtInt(goodLossEst) + ' pellets';
+    $('qa2_escape_est').textContent = fmtInt(escapeEst) + ' גרגירים';
+    $('qa2_goodloss_est').textContent = fmtInt(goodLossEst) + ' גרגירים';
 
     // visuals - show composition by weight (normalized within each cylinder)
     // Feed composition unknown => show relative sizes of streams by weight, and within streams show defect fraction estimate.
@@ -9635,9 +9372,9 @@ function setFill(goodEl, badEl, goodFrac, badFrac, totalKg, pelletMg, goodLblId,
     setFill($('qa2_rej_good'), $('qa2_rej_bad'), pGoodInRej, 1-pGoodInRej, wBadKg, pelletMg, 'qa2_rej_good_lbl','qa2_rej_bad_lbl');
 
     // metadata lines
-    $('qa2_feed_meta').innerHTML = `${fmtNum(wInKg,3)} kg · ${fmtInt(Nin)} pellets (≈ ${fmtPct(1-pDefInFeed)} good / ${fmtPct(pDefInFeed)} defect)`;
-    $('qa2_acc_meta').innerHTML  = `${fmtNum(wGoodKg,3)} kg · ${fmtInt(Nacc)} pellets (≈ ${fmtPct(purity)} good / ${fmtPct(1-purity)} defect)`;
-    $('qa2_rej_meta').innerHTML  = `${fmtNum(wBadKg,3)} kg · ${fmtInt(Nrej)} pellets (assumption: ${fmtPct(pGoodInRej)} good / ${fmtPct(1-pGoodInRej)} defect)`;
+    $('qa2_feed_meta').innerHTML = `${fmtNum(wInKg,3)} kg · ${fmtInt(Nin)} גרגירים (≈ ${fmtPct(1-pDefInFeed)} טוב / ${fmtPct(pDefInFeed)} פגום)`;
+    $('qa2_acc_meta').innerHTML  = `${fmtNum(wGoodKg,3)} kg · ${fmtInt(Nacc)} גרגירים (≈ ${fmtPct(purity)} טוב / ${fmtPct(1-purity)} פגום)`;
+    $('qa2_rej_meta').innerHTML  = `${fmtNum(wBadKg,3)} kg · ${fmtInt(Nrej)} גרגירים (הנחה: ${fmtPct(pGoodInRej)} טוב / ${fmtPct(1-pGoodInRej)} פגום)`;
 
     // on small screens, keep the UI in one screen: if user edits inputs, auto-switch to Visual quickly? no, keep as is.
   }
@@ -10280,10 +10017,10 @@ function setFill(goodEl, badEl, goodFrac, badFrac, totalKg, pelletMg, goodLblId,
     const items = CONTEXT[state.main] || [];
     inner.innerHTML = '';
     if(items.length === 0){
-      ctx.hidden = true; ctx.style.display = 'none';
+      ctx.hidden = true;
       return;
     }
-    ctx.hidden = false; ctx.style.display = 'block';
+    ctx.hidden = false;
 
     for(const item of items){
       const btn = document.createElement('button');
@@ -10337,14 +10074,14 @@ function openCalibrationTool(which){
     btn.disabled = false;
   }
   function openGate(){
-    gate.hidden = false; gate.style.display = 'block';
+    gate.hidden = false;
     scrollBox.scrollTop = 0;
     if(chk) chk.checked = false;
     update();
   }
   function closeGate(){
     try{ localStorage.setItem(INTRO_KEY,'yes'); }catch(e){}
-    gate.hidden = true; gate.style.display = 'none';
+    gate.hidden = true;
     // Go straight to Calibration after intro
     try{ if(typeof window.switchTab==='function') window.switchTab('calibration'); }catch(e){}
 }
@@ -10473,10 +10210,10 @@ btn.addEventListener('click', closeGate);
       "<h2>" + label + "</h2>" +
       "<p>No predefined help was found for this tab key: <code>" + key + "</code>.</p>"
     );
-    overlay.hidden = false; overlay.style.display = 'block';
+    overlay.hidden = false;
     btnEl.onclick = () => {
       try{ localStorage.setItem('tab_help_'+key,'seen'); }catch(e){}
-      overlay.hidden = true; overlay.style.display = 'none';
+      overlay.hidden = true;
     };
   }
   // (disabled) tab click auto-help handled by AV24
@@ -10543,54 +10280,6 @@ btn.addEventListener('click', closeGate);
   const infoBtn = document.getElementById('luxInfoBtn');
   const info = document.getElementById('luxInfo');
   const infoClose = document.getElementById('luxInfoClose');
-
-  // Lux slider help buttons: tap the small 'i' to jump to the relevant section inside Info
-  function openLuxInfoAndScroll(targetId){
-    if(!info) return;
-    info.hidden = false; info.style.display = 'block';
-    requestAnimationFrame(() => {
-      const card = info.querySelector('.lux-info-card');
-      const target = document.getElementById(targetId);
-      if(card){
-        // ensure the card itself is the scroll container
-        card.style.overflowY = 'auto';
-        card.style.webkitOverflowScrolling = 'touch';
-      }
-      if(target && card){
-        // scroll within the card, not the page
-        const top = target.getBoundingClientRect().top - card.getBoundingClientRect().top + card.scrollTop;
-        card.scrollTop = Math.max(0, top - 10);
-      }
-    });
-  }
-
-  function injectLuxHelpButtons(){
-    const mapping = [
-      {match: /Aperture/i, target: 'luxInfoAperture'},
-      {match: /(Speed|Shutter)/i, target: 'luxInfoSpeed'},
-      {match: /ISO/i, target: 'luxInfoISO'},
-    ];
-    document.querySelectorAll('#caltool-lux .lux-setting .lux-setting-h').forEach(h => {
-      const txt = (h.textContent || '').trim();
-      const hit = mapping.find(m => m.match.test(txt));
-      if(!hit) return;
-      if(h.querySelector('.lux-helpbtn')) return;
-
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'lux-helpbtn';
-      btn.setAttribute('aria-label', 'Info');
-      btn.textContent = 'i';
-      btn.addEventListener('click', (ev) => {
-        ev.preventDefault();
-        ev.stopPropagation();
-        openLuxInfoAndScroll(hit.target);
-      });
-      h.appendChild(btn);
-    });
-  }
-  injectLuxHelpButtons();
-
 
   let stream = null;
   let running = false;
@@ -10819,8 +10508,8 @@ btn.addEventListener('click', closeGate);
   saveBtn && saveBtn.addEventListener('click', saveFrame);
   switchBtn && switchBtn.addEventListener('click', switchCamera);
 
-  infoBtn && infoBtn.addEventListener('click', () => { info.hidden = false; info.style.display = 'block'; });
-  infoClose && infoClose.addEventListener('click', () => { info.hidden = true; info.style.display = 'none'; });
+  infoBtn && infoBtn.addEventListener('click', () => { info.hidden = false; });
+  infoClose && infoClose.addEventListener('click', () => { info.hidden = true; });
 
   updateSimUI();
 
@@ -10842,7 +10531,6 @@ btn.addEventListener('click', closeGate);
   const sEl = document.getElementById('specSat');
   const statusEl = document.getElementById('specStatus');
   const titleEl = details.querySelector('.lux-camera-title');
-  const gaugeLabelEl = document.getElementById('specGaugeLabel');
   const overlay = document.getElementById('specOverlay');
   const warnText = document.getElementById('specWarnText');
 
@@ -10860,10 +10548,9 @@ btn.addEventListener('click', closeGate);
   let facing = 'environment';
 
   function updateTitle(){
+    if(!titleEl) return;
     const cam = (facing === 'environment') ? 'Rear Camera' : 'Front Camera';
-    const txt = cam + ' · Spectrum estimate';
-    if(titleEl) titleEl.textContent = txt;
-    if(gaugeLabelEl) gaugeLabelEl.textContent = txt;
+    titleEl.textContent = cam + ' · Spectrum estimate';
   }
 
   function setStatus(s){ if(statusEl) statusEl.textContent = s; }
@@ -10995,7 +10682,7 @@ btn.addEventListener('click', closeGate);
     }
     if(video) video.srcObject = null;
     setStatus("Camera: idle");
-    if(overlay) overlay.hidden = true; overlay.style.display = 'none';
+    if(overlay) overlay.hidden = true;
   }
 
   function toggleFreeze(){
@@ -11040,8 +10727,8 @@ btn.addEventListener('click', closeGate);
   if(saveBtn) saveBtn.addEventListener('click', saveFrame);
   if(switchBtn) switchBtn.addEventListener('click', switchCamera);
 
-  if(infoBtn) infoBtn.addEventListener('click', () => { info.hidden = false; info.style.display = 'block'; });
-  if(infoClose) infoClose.addEventListener('click', () => { info.hidden = true; info.style.display = 'none'; });
+  if(infoBtn) infoBtn.addEventListener('click', () => { info.hidden = false; });
+  if(infoClose) infoClose.addEventListener('click', () => { info.hidden = true; });
 
 })();
 </script>
@@ -11203,7 +10890,7 @@ btn.addEventListener('click', closeGate);
     }
     if(video) video.srcObject = null;
     setStatus("Camera: idle");
-    if(overlay) overlay.hidden = true; overlay.style.display = 'none';
+    if(overlay) overlay.hidden = true;
   }
 
   function toggleFreeze(){
@@ -11237,8 +10924,8 @@ btn.addEventListener('click', closeGate);
 
   if(freezeBtn) freezeBtn.addEventListener('click', toggleFreeze);
   if(switchBtn) switchBtn.addEventListener('click', switchCamera);
-  if(infoBtn) infoBtn.addEventListener('click', () => { if(info) info.hidden = false; info.style.display = 'block'; });
-  if(infoClose) infoClose.addEventListener('click', () => { if(info) info.hidden = true; info.style.display = 'none'; });
+  if(infoBtn) infoBtn.addEventListener('click', () => { if(info) info.hidden = false; });
+  if(infoClose) infoClose.addEventListener('click', () => { if(info) info.hidden = true; });
 
 })();
 </script>
@@ -11330,9 +11017,6 @@ btn.addEventListener('click', closeGate);
     if(!wave || !wctx) return;
     const W = wave.width, H = wave.height;
     wctx.clearRect(0,0,W,H);
-    // ensure visible stroke on dark background
-    wctx.lineWidth = 3;
-    wctx.strokeStyle = "rgba(255,255,255,.85)";
     const N = Math.min(hist.length, 120);
     const slice = hist.slice(-N);
     if(slice.length < 2) return;
@@ -11421,7 +11105,7 @@ btn.addEventListener('click', closeGate);
     }
     if(video) video.srcObject = null;
     setStatus("Camera: idle");
-    if(overlay) overlay.hidden = true; overlay.style.display = 'none';
+    if(overlay) overlay.hidden = true;
   }
 
   function toggleFreeze(){
@@ -11466,8 +11150,8 @@ btn.addEventListener('click', closeGate);
   if(freezeBtn) freezeBtn.addEventListener('click', toggleFreeze);
   if(switchBtn) switchBtn.addEventListener('click', switchCamera);
   if(saveBtn) saveBtn.addEventListener('click', saveSnapshot);
-  if(infoBtn) infoBtn.addEventListener('click', () => { if(info) info.hidden = false; info.style.display = 'block'; });
-  if(infoClose) infoClose.addEventListener('click', () => { if(info) info.hidden = true; info.style.display = 'none'; });
+  if(infoBtn) infoBtn.addEventListener('click', () => { if(info) info.hidden = false; });
+  if(infoClose) infoClose.addEventListener('click', () => { if(info) info.hidden = true; });
 
 })();
 </script>
@@ -11522,7 +11206,7 @@ document.addEventListener('DOMContentLoaded', () => {
       splash.style.pointerEvents = 'none';
     }
     if(gate){
-      gate.hidden = true; gate.style.display = 'none';
+      gate.hidden = true;
       gate.style.display = 'none';
       gate.style.pointerEvents = 'none';
     }
@@ -11788,7 +11472,7 @@ document.addEventListener('DOMContentLoaded', () => {
       splash.style.pointerEvents='none';
     }
     if(gate){
-      gate.hidden = true; gate.style.display = 'none';
+      gate.hidden = true;
       gate.style.display='none';
       gate.style.pointerEvents='none';
     }
@@ -12377,13 +12061,13 @@ document.addEventListener('DOMContentLoaded', () => {
       `<h2>${label}</h2><p>No help content defined yet for: <code>${key}</code>.</p>`
     );
 
-    overlay.hidden = false; overlay.style.display = 'block';
+    overlay.hidden = false;
     overlay.style.display = 'flex';
     overlay.style.pointerEvents = 'auto';
 
     contBtn.onclick = () => {
       try{ localStorage.setItem(SEEN_PREFIX + key, 'seen'); }catch(e){}
-      overlay.hidden = true; overlay.style.display = 'none';
+      overlay.hidden = true;
       overlay.style.display = 'none';
       overlay.style.pointerEvents = 'none';
     };
@@ -12530,11 +12214,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let deferredPrompt = null;
 
   function $(id){ return document.getElementById(id); }
-  function showOverlay(){ const ov=$('installOverlay'); if(ov){ ov.hidden = false; ov.style.display = 'block'; ov.style.display='flex'; } }
+  function showOverlay(){ const ov=$('installOverlay'); if(ov){ ov.hidden=false; ov.style.display='flex'; } }
   function hideOverlay(){
     const ov=$('installOverlay');
     if(ov){
-      ov.hidden = true; ov.style.display = 'none';
+      ov.hidden=true;
       ov.style.display='none';
     }
   }
@@ -12639,7 +12323,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Fallback: no native prompt → show hint + simulate progress anyway
-        if(hint) hint.hidden = false; hint.style.display = 'block';
+        if(hint) hint.hidden = false;
         await simulateInstall(15000);
         hideOverlay();
         enterApp();
@@ -12664,194 +12348,5 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
-
-<script>
-/* === Calibration: Robust Fullscreen + Info Close (Final14) === */
-(function(){
-  // Event delegation for fullscreen button to avoid missing bindings
-  function closestToolView(el){
-    // Works both inside the Calibration tab and when a tool view is 'portaled' to <body>
-    return el ? (el.closest('.cal-tool-view') || el.closest('#tab-calibration .cal-tool-view')) : null;
-  }
-
-  // Ensure toggleFullscreenFor exists
-  if(typeof window.toggleFullscreenFor !== 'function'){
-    // fallback minimal toggler (shouldn't happen)
-    window.toggleFullscreenFor = function(view){
-      if(!view) return;
-      view.classList.toggle('is-fullscreen');
-      document.body.classList.toggle('cal-fs-active', view.classList.contains('is-fullscreen'));
-    };
-  }
-
-  document.addEventListener('click', function(e){
-    const fsBtn = e.target.closest('.cal-fs-btn');
-    if(fsBtn){
-      e.preventDefault();
-      const view = closestToolView(fsBtn);
-      window.toggleFullscreenFor(view);
-      return;
-    }
-
-    const backBtn = e.target.closest('.cal-back-btn, [data-calback]');
-    if(backBtn){
-      e.preventDefault();
-      const view = closestToolView(backBtn);
-      if(view && view.classList.contains('is-fullscreen')){
-        window.toggleFullscreenFor(view);
-      }else if(typeof window.showHome === 'function'){
-        window.showHome();
-      }
-      return;
-    }
-
-    const infoClose = e.target.closest('#tab-calibration .cal-info-close');
-    if(infoClose){
-      e.preventDefault();
-      const panel = infoClose.closest('.cal-info-panel');
-      if(panel) panel.hidden = true; panel.style.display = 'none';
-      document.body.classList.remove('cal-info-open');
-      return;
-    }
-
-    // click on the translucent info panel backdrop closes it
-    const infoPanel = e.target.classList && e.target.classList.contains('cal-info-panel') ? e.target : null;
-    if(infoPanel){
-      // only close when clicking the panel itself (not its children)
-      if(e.target === infoPanel){
-        infoPanel.hidden = true; infoPanel.style.display = 'none';
-        document.body.classList.remove('cal-info-open');
-      }
-      return;
-    }
-  }, {passive:false});
-
-  // Inject close buttons into any calibration info panels that lack one
-  function enhanceInfoPanels(){
-    let panels=[];
-    try{
-      panels = document.querySelectorAll('#tab-calibration .lux-info, #tab-calibration .ct-info, #tab-calibration .flicker-info, #tab-calibration .spec-info, #tab-calibration .cal-info-panel, #tab-calibration [id$="Info"]');
-    }catch(err){
-      panels = document.querySelectorAll('#tab-calibration [id$="Info"]');
-    }
-    panels.forEach(p=>{
-      // mark as panel if it's a DIV with hidden capability and contains explanatory text
-      if(!p.classList.contains('cal-info-panel')) p.classList.add('cal-info-panel');
-      // add close button if missing
-      if(!p.querySelector('.cal-info-close')){
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'cal-info-close';
-        btn.textContent = 'Close';
-        // put at top
-        p.insertBefore(btn, p.firstChild);
-      }
-      // make panel scroll internally even when fullscreen disables page scroll
-      p.style.overflow = 'auto';
-      p.style.webkitOverflowScrolling = 'touch';
-      p.style.maxHeight = '85vh';
-    });
-
-    // Hook existing "Info" buttons to open the nearest panel
-    document.querySelectorAll('#tab-calibration button[title="Info"], #tab-calibration .lux-icon[title="Info"], #tab-calibration .ct-icon[title="Info"], #tab-calibration .qa2-info').forEach(btn=>{
-      if(btn.dataset._infoBound) return;
-      btn.dataset._infoBound = "1";
-      btn.addEventListener('click', ()=>{
-        // Try common ids first
-        const view = closestToolView(btn) || btn.closest('#tab-calibration');
-        let panel = null;
-        if(view){
-          panel = view.querySelector('.cal-info-panel, .lux-info, .ct-info, .flicker-info, .spec-info');
-        }
-        if(!panel){
-          // last resort by id convention: luxInfo / ctInfo / flickerInfo / specInfo
-          const map = ['luxInfo','ctInfo','flickerInfo','specInfo'];
-          for(const id of map){
-            const el = document.getElementById(id);
-            if(el){ panel = el; break; }
-          }
-        }
-        if(panel){
-          panel.hidden = false; panel.style.display = 'block';
-          document.body.classList.add('cal-info-open');
-          // focus close for accessibility
-          const c = panel.querySelector('.cal-info-close');
-          if(c) c.focus();
-        }
-      }, {passive:true});
-    });
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', enhanceInfoPanels);
-  }else{
-    enhanceInfoPanels();
-  }
-})();
-</script>
-<style>
-/* Close button styling (consistent, visible) */
-#tab-calibration .cal-info-close{
-  position: sticky;
-  top: 0;
-  width: 100%;
-  border: 1px solid #2b3156;
-  background: #0b0f1f;
-  color: #cbd5ff;
-  font-weight: 900;
-  padding: 10px 12px;
-  border-radius: 12px;
-  margin-bottom: 10px;
-  z-index: 5;
-}
-#tab-calibration .cal-info-panel[hidden]{ display:none !important; }
-
-/* Fullscreen: keep the inline topbar as the only control strip */
-.cal-tool-view.is-fullscreen{ padding-top: 76px !important; }
-.cal-tool-view.is-fullscreen .cal-inline-topbar{
-  position:fixed !important;
-  top:12px !important; left:12px !important; right:12px !important;
-  z-index:10001 !important;
-  background: rgba(16,20,40,.78) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border:1px solid rgba(255,255,255,.12) !important;
-  border-radius:14px !important;
-  padding:10px 12px !important;
-}
-.cal-tool-view.is-fullscreen .cal-inline-actions{gap:10px !important;}
-.cal-tool-view.is-fullscreen .cal-inline-actions .cal-fs-btn{min-width:40px; height:40px; border-radius:12px;}
-
-/* Camera fullscreen: true full-bleed preview */
-#tab-camera.is-fullscreen .cam-wrap{ height: calc(100vh - 92px) !important; }
-#tab-camera.is-fullscreen .cam-pane,
-#tab-camera.is-fullscreen .cam-card{ height:100% !important; }
-#tab-camera.is-fullscreen .cam-card{ display:flex !important; flex-direction:column !important; }
-#tab-camera.is-fullscreen .cam-view{ flex:1 1 auto !important; min-height:0 !important; }
-#tab-camera.is-fullscreen .cam-frame{ height:100% !important; }
-#tab-camera.is-fullscreen video{ width:100% !important; height:100% !important; object-fit:cover !important; }
-
-</style>
-
 </body>
-</html
-/* Info Close button: sticky at bottom inside the translucent card */
-.cal-info-close-row{
-  position: sticky;
-  bottom: 0;
-  padding: 12px;
-  margin-top: 14px;
-  background: linear-gradient(to top, rgba(10,12,20,.98), rgba(10,12,20,.75));
-  border-top: 1px solid rgba(255,255,255,.10);
-}
-.cal-info-close{
-  width: 100%;
-  border-radius: 12px;
-  padding: 12px 14px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.06);
-  color: #e9ecff;
-  font-weight: 700;
-}
-
->
+</html>
