@@ -2781,9 +2781,70 @@ details.acc[open] summary{ filter:brightness(1.02); }
   display:flex !important;
   flex-direction:column !important;
 }
+
+/* Full-screen calibration: keep everything within one viewport (no scrolling) */
+.cal-tool-view.is-fullscreen .cal-tool-topbar{flex:0 0 auto;}
+.cal-tool-view.is-fullscreen .cal-tool-body{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  max-width:980px;
+  margin:0 auto;
+}
+.cal-tool-view.is-fullscreen .soft-card{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+}
+
+/* Make gauge areas responsive (CT / Flicker / Spectrometer) */
+.cal-tool-view.is-fullscreen .ct-gauge-wrap,
+.cal-tool-view.is-fullscreen .fl-gauge-wrap,
+.cal-tool-view.is-fullscreen .spec-gauge-wrap{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:8px !important;
+}
+
+/* Clamp gauge size so it fits on mobile */
+.cal-tool-view.is-fullscreen .ct-gauge,
+.cal-tool-view.is-fullscreen .fl-gauge,
+.cal-tool-view.is-fullscreen .spec-gauge{
+  width:clamp(240px, 82vw, 420px) !important;
+  height:clamp(240px, 82vw, 420px) !important;
+}
+
+/* Keep bottom readouts visible and compact */
+.cal-tool-view.is-fullscreen .ct-bottom,
+.cal-tool-view.is-fullscreen .fl-bottom,
+.cal-tool-view.is-fullscreen .spec-bottom{
+  flex:0 0 auto !important;
+}
+
+/* Lux full-screen: fit camera + EV + sliders without scroll */
+.cal-tool-view.is-fullscreen .lux-ui{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+}
+.cal-tool-view.is-fullscreen .lux-stage{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+}
+.cal-tool-view.is-fullscreen .lux-cam-wrap{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+}
+
+/* Ensure all clickable controls remain tappable */
+.cal-tool-view.is-fullscreen button{touch-action:manipulation;}
 body.cal-fs-active{
   overflow:hidden !important;
-  touch-action:none;
+  touch-action:manipulation;
 }
 body.cal-fs-active #bottomMenu{display:none !important;}
 body.cal-fs-active .tabs-nav,
@@ -2931,6 +2992,14 @@ body.cal-fs-active nav.main-menu{display:none !important;}
   box-shadow:inset 0 10px 22px rgba(0,0,0,.35);
 }
 .lux-setting-h{font-size:12px;color:rgba(255,255,255,.70);font-weight:900}
+
+.lux-setting-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lux-helpbtn{
+  width:24px;height:24px;border-radius:8px;border:1px solid #34406a;
+  background:#1a2140;color:#cbd5ff;font-weight:1000;line-height:22px;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.lux-helpbtn:active{transform:scale(.98)}
 .lux-setting-v{font-size:18px;color:#fff;font-weight:1000;margin-top:4px}
 .lux-setting-sub{font-size:11px;color:rgba(255,255,255,.60);margin-top:6px}
 .lux-slider{width:100%}
@@ -2952,10 +3021,13 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 .lux-dot{width:8px;height:8px;border-radius:50%;background:#18ff7a;box-shadow:0 0 10px rgba(24,255,122,.35)}
 .lux-small{font-size:12px;color:rgba(255,255,255,.85);font-weight:800;text-shadow:0 2px 10px rgba(0,0,0,.6)}
 
-.lux-info{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);backdrop-filter:blur(6px)}
+.lux-info{position:fixed;inset:0;z-index:10000;display:flex;align-items:flex-start;justify-content:center;padding:20px 0;background:rgba(0,0,0,.25);backdrop-filter:blur(6px)}
 .lux-info[hidden]{display:none !important;}
 .lux-info-card{
   width:min(520px,calc(100vw - 40px));
+  max-height:calc(100vh - 80px);
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
   background:rgba(20,24,42,.62);
   border:1px solid rgba(255,255,255,.10);
   border-radius:16px;
@@ -4283,9 +4355,9 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 
 <p><b>הסליידרים (השפעה על EV וההמרה):</b></p>
 <ul style="margin:6px 0 10px 18px;">
-  <li><b>Aperture (צמצם)</b> – ערך f/ (למשל f/2.8). מספר קטן יותר = צמצם פתוח יותר = יותר אור = EV “גבוה” יותר.</li>
-  <li><b>Speed / Shutter (מהירות תריס)</b> – זמן חשיפה. זמן ארוך יותר = יותר אור. הערכים מוצגים בסגנון 1/60, 1/125 וכו’.</li>
-  <li><b>ISO</b> – הגברה/רגישות. כאן זה <b>סימולציה</b> שמדמה שינוי Gain לצורך בדיקת זרימת עבודה.</li>
+  <li id="luxInfoAperture"><b>Aperture (צמצם)</b> – ערך f/ (למשל f/2.8). מספר קטן יותר = צמצם פתוח יותר = יותר אור = EV “גבוה” יותר.</li>
+  <li id="luxInfoSpeed"><b>Speed / Shutter (מהירות תריס)</b> – זמן חשיפה. זמן ארוך יותר = יותר אור. הערכים מוצגים בסגנון 1/60, 1/125 וכו’.</li>
+  <li id="luxInfoISO"><b>ISO</b> – הגברה/רגישות. כאן זה <b>סימולציה</b> שמדמה שינוי Gain לצורך בדיקת זרימת עבודה.</li>
 </ul>
 
 <p><b>כפתורים:</b></p>
@@ -4298,7 +4370,7 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 </ul>
 
     </div>
-<button class="lux-btn lux-btn-accent" id="luxInfoClose" type="button">Got it</button>
+<button class="lux-btn lux-btn-accent" id="luxInfoClose" type="button">Close</button>
 </div>
 </div>
 </div>
@@ -10166,6 +10238,54 @@ btn.addEventListener('click', closeGate);
   const infoBtn = document.getElementById('luxInfoBtn');
   const info = document.getElementById('luxInfo');
   const infoClose = document.getElementById('luxInfoClose');
+
+  // Lux slider help buttons: tap the small 'i' to jump to the relevant section inside Info
+  function openLuxInfoAndScroll(targetId){
+    if(!info) return;
+    info.hidden = false;
+    requestAnimationFrame(() => {
+      const card = info.querySelector('.lux-info-card');
+      const target = document.getElementById(targetId);
+      if(card){
+        // ensure the card itself is the scroll container
+        card.style.overflowY = 'auto';
+        card.style.webkitOverflowScrolling = 'touch';
+      }
+      if(target && card){
+        // scroll within the card, not the page
+        const top = target.getBoundingClientRect().top - card.getBoundingClientRect().top + card.scrollTop;
+        card.scrollTop = Math.max(0, top - 10);
+      }
+    });
+  }
+
+  function injectLuxHelpButtons(){
+    const mapping = [
+      {match: /Aperture/i, target: 'luxInfoAperture'},
+      {match: /(Speed|Shutter)/i, target: 'luxInfoSpeed'},
+      {match: /ISO/i, target: 'luxInfoISO'},
+    ];
+    document.querySelectorAll('#caltool-lux .lux-setting .lux-setting-h').forEach(h => {
+      const txt = (h.textContent || '').trim();
+      const hit = mapping.find(m => m.match.test(txt));
+      if(!hit) return;
+      if(h.querySelector('.lux-helpbtn')) return;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'lux-helpbtn';
+      btn.setAttribute('aria-label', 'Info');
+      btn.textContent = 'i';
+      btn.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        openLuxInfoAndScroll(hit.target);
+      });
+      h.appendChild(btn);
+    });
+  }
+  injectLuxHelpButtons();
+
 
   let stream = null;
   let running = false;
