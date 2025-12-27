@@ -3169,6 +3169,54 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 .ct-camera{margin-top:10px;border:1px solid rgba(255,255,255,.10);border-radius:16px;overflow:hidden;background:rgba(0,0,0,.12)}
 .ct-video{height:240px}
 
+
+/* --- Calibration tools: tighter full-screen layout (no page scroll) --- */
+.cal-tool-view.is-fullscreen .ct-ui,
+.cal-tool-view.is-fullscreen .fl-ui,
+.cal-tool-view.is-fullscreen .spec-ui,
+.cal-tool-view.is-fullscreen .lux-ui{
+  height:100% !important;
+  display:flex !important;
+  flex-direction:column !important;
+  min-height:0 !important;
+}
+
+/* Compact top rows in full-screen */
+.cal-tool-view.is-fullscreen .ct-top,
+.cal-tool-view.is-fullscreen .fl-top,
+.cal-tool-view.is-fullscreen .spec-top,
+.cal-tool-view.is-fullscreen .lux-top{
+  margin-bottom:8px !important;
+}
+
+/* Video blocks: clamp height so buttons never get pushed off-screen */
+.cal-tool-view.is-fullscreen .ct-camera,
+.cal-tool-view.is-fullscreen .fl-camera,
+.cal-tool-view.is-fullscreen .spec-camera,
+.cal-tool-view.is-fullscreen .lux-camera{
+  height:clamp(120px, 22vh, 210px) !important;
+}
+.cal-tool-view.is-fullscreen .ct-video,
+.cal-tool-view.is-fullscreen .fl-video,
+.cal-tool-view.is-fullscreen .spec-video,
+.cal-tool-view.is-fullscreen .lux-video{
+  height:100% !important;
+}
+
+/* CT: keep bars compact */
+.cal-tool-view.is-fullscreen .ct-bars{gap:10px !important; margin-top:8px !important;}
+.cal-tool-view.is-fullscreen .ct-bar-track{height:12px !important;}
+.cal-tool-view.is-fullscreen .ct-bar-h{font-size:12px !important;}
+.cal-tool-view.is-fullscreen .ct-bottom{font-size:12px !important;}
+
+/* Flicker: make wave strip smaller and prevent a huge empty block */
+.cal-tool-view.is-fullscreen .fl-wave{margin-top:8px !important;}
+.cal-tool-view.is-fullscreen #flWave{height:70px !important;}
+.cal-tool-view.is-fullscreen .fl-note{font-size:12px !important;}
+
+/* Spectrometer: keep plot readable but compact */
+.cal-tool-view.is-fullscreen .spec-plot{height:clamp(120px, 22vh, 210px) !important;}
+
 /* === v55 Flicker Meter UI === */
 .fl-ui{ padding:14px !important; background:rgba(20,24,42,.62) !important; border:1px solid rgba(255,255,255,.10) !important; border-radius:16px !important; }
 .fl-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
@@ -4370,7 +4418,7 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 </ul>
 
     </div>
-<button class="lux-btn lux-btn-accent" id="luxInfoClose" type="button">Close</button>
+<button class="lux-btn lux-btn-accent" id="luxInfoClose" data-closeinfo="luxInfo" type="button">Close</button>
 </div>
 </div>
 </div>
@@ -4620,12 +4668,34 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
 </div>
 <div class="lux-info" hidden="" id="specInfo">
 <div class="lux-info-card">
-<div class="lux-info-h">Light Spectrometer (Preview)</div>
+<div class="lux-info-h">Light Spectrum</div>
 <div class="lux-info-p">
-      This is a browser-based approximation. The dominant wavelength is estimated from average RGB hue.
-      Use it for relative checks, not lab-grade measurement.
-    </div>
-<button class="lux-btn lux-btn-accent" id="specInfoClose" type="button">Got it</button>
+
+<p><b>מה הכלי עושה?</b><br/>
+<b>Light Spectrum</b> מציג הערכה של פרופיל צבע/ספקטרום מתוך נתוני RGB של המצלמה (Proxy), כדי להשוות בין מקורות אור ולזהות סטיות.
+זו <b>אינדיקציה תפעולית</b> – לא ספקטרומטר פיזיקלי.</p>
+
+<p><b>מה אתה רואה במסך?</b></p>
+<ul style="margin:6px 0 10px 18px">
+  <li><b>גרף/עמודות</b> – אנרגיה יחסית לפי תחומי צבע.</li>
+  <li><b>Dominant</b> – צבע/תחום דומיננטי בתמונה.</li>
+  <li><b>Balance</b> – איזון כללי (Warm/Neutral/Cold).</li>
+</ul>
+
+<p><b>כפתורים</b></p>
+<ul style="margin:6px 0 10px 18px">
+  <li><b>i (Info)</b> – מסך הסבר.</li>
+  <li><b>⛶ (Full Screen)</b> – מצב מסך מלא. לחיצה נוספת יוצאת חזרה לאקורדיון.</li>
+  <li><b>⟳ (Switch Camera)</b> – מעבר בין מצלמה קדמית/אחורית.</li>
+  <li><b>Freeze</b> – הקפאת הקריאה על הפריים הנוכחי (נוח להשוואה).</li>
+  <li><b>💾 (Save)</b> – שמירה/תיעוד.</li>
+</ul>
+
+<p><b>טיפ</b><br/>
+כדי להשוות בין מקורות אור – השאר את המרחק והזווית קבועים וצפה בשינויי הגרף והמדדים.</p>
+
+</div>
+<button class="lux-btn lux-btn-accent" id="specInfoClose" data-closeinfo="specInfo" type="button">Close</button>
 </div>
 </div>
 </div>
@@ -11023,6 +11093,9 @@ btn.addEventListener('click', closeGate);
     if(!wave || !wctx) return;
     const W = wave.width, H = wave.height;
     wctx.clearRect(0,0,W,H);
+    // ensure visible stroke on dark background
+    wctx.lineWidth = 3;
+    wctx.strokeStyle = "rgba(255,255,255,.85)";
     const N = Math.min(hist.length, 120);
     const slice = hist.slice(-N);
     if(slice.length < 2) return;
