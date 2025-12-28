@@ -4920,6 +4920,13 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 </div>
 </div>
 </div></div></details><details class="acc" data-caltool="lux"><summary><div><div class="acc-title">Lux Meter</div><div class="acc-sub">Exposure / brightness reference</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="cal-tool-view" id="caltool-lux">
+<div class="cal-inline-topbar">
+  <div class="cal-inline-title">Lux Meter</div>
+  <div class="cal-inline-actions">
+    <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+  </div>
+</div>
+
 
 <!-- ===== Lux Meter Embedded (generated) ===== -->
 <div data-luxm="1">
@@ -5062,109 +5069,14 @@ body.cal-fs-active nav.main-menu{display:none !important;}
 <!-- ===== /Lux Meter Embedded ===== -->
 
 </div>
-<div class="cal-tool-badge">CAL</div>
-</div>
-<div class="cal-tool-body">
-<div class="soft-card lux-ui">
-<div class="lux-top">
-<div class="lux-title">Lux Meter</div>
-<div class="lux-icons">
-<button class="lux-icon" id="luxInfoBtn" title="Info" type="button">i</button>
-<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-<button class="lux-icon" id="luxSwitchBtn" title="Switch Camera" type="button">⟳</button>
-</div>
-</div>
-<div class="lux-main">
-<div class="lux-left">
-<div class="lux-gauge-wrap">
-<div class="lux-gauge">
-<div class="lux-needle" id="luxNeedle"></div>
-<div class="lux-gauge-center">
-<div class="lux-label">Exposure Value</div>
-<div class="lux-ev" id="luxEV">--</div>
-<div class="lux-subrow">
-<span id="luxLux">-- lux</span>
-<span id="luxFc">-- fc</span>
-</div>
-</div>
-<div aria-hidden="true" class="lux-scale"></div>
-</div>
-</div>
-<div class="lux-settings">
-<div class="lux-setting">
-<div class="lux-setting-h">Aperture</div>
-<div class="lux-setting-v" id="luxApertureVal">2.8</div>
-<input class="lux-slider" id="luxAperture" max="40" min="14" type="range" value="28"/>
-<div class="lux-setting-sub">f/<span id="luxApertureTxt">2.8</span></div>
-</div>
-<div class="lux-setting">
-<div class="lux-setting-h">Speed (s)</div>
-<div class="lux-setting-v" id="luxSpeedVal">1/60</div>
-<input class="lux-slider" id="luxSpeed" max="200" min="10" type="range" value="60"/>
-<div class="lux-setting-sub">Shutter</div>
-</div>
-<div class="lux-setting">
-<div class="lux-setting-h">ISO</div>
-<div class="lux-setting-v" id="luxISOVal">200</div>
-<input class="lux-slider" id="luxISO" max="3200" min="100" step="100" type="range" value="200"/>
-<div class="lux-setting-sub">Camera gain (sim)</div>
-</div>
-</div>
-</div>
-<div class="lux-right">
-<div class="lux-camera">
-<div class="lux-camera-head">
-<div class="lux-camera-title">Rear Camera · Reflected Light</div>
-<div class="lux-camera-actions">
-<button class="lux-btn" id="luxFreezeBtn" type="button">Freeze</button>
-<button class="lux-btn" id="luxSaveBtn" type="button">Save</button>
-</div>
-</div>
-<div class="lux-video-wrap">
-<video autoplay="" id="luxVideo" muted="" playsinline=""></video>
-<canvas height="120" id="luxCanvas" style="display:none" width="160"></canvas>
-<div class="lux-video-overlay">
-<div class="lux-dot"></div>
-<div class="lux-small" id="luxStatus">Camera: idle</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="lux-info" hidden="" id="luxInfo">
-<div class="lux-info-card">
-<div class="lux-info-h">Lux Meter (Preview)</div>
-<div class="lux-info-p">
-<p><b>מה הכלי עושה?</b><br/>
-Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lux</b> (וגם <b>Foot‑candles</b>) מתוך תמונת המצלמה בזמן אמת.
-המדידה כאן היא <b>הערכה המבוססת על בהירות התמונה</b> (Preview בדפדפן) ונועדה בעיקר ליישור/השוואה במהלך כיול.</p>
-<p><b>מה אתה רואה במסך?</b></p>
-<ul style="margin:6px 0 10px 18px;">
-<li><b>Exposure Value (EV)</b> – מספר לוגאריתמי שמייצג “כמה אור” הגיע לחיישן ביחס להגדרות צילום.</li>
-<li><b>Lux / fc</b> – המרה משוערת מתוך בהירות הפריים (לשימוש כיול יחסי, לא כמד‑אור מעבדתי).</li>
-<li><b>וידאו</b> – תצוגת מצלמה חיה שממנה מחושב הערך.</li>
-</ul>
-<p><b>הסליידרים (השפעה על EV וההמרה):</b></p>
-<ul style="margin:6px 0 10px 18px;">
-<li><b>Aperture (צמצם)</b> – ערך f/ (למשל f/2.8). מספר קטן יותר = צמצם פתוח יותר = יותר אור = EV “גבוה” יותר.</li>
-<li><b>Speed / Shutter (מהירות תריס)</b> – זמן חשיפה. זמן ארוך יותר = יותר אור. הערכים מוצגים בסגנון 1/60, 1/125 וכו’.</li>
-<li><b>ISO</b> – הגברה/רגישות. כאן זה <b>סימולציה</b> שמדמה שינוי Gain לצורך בדיקת זרימת עבודה.</li>
-</ul>
-<p><b>כפתורים:</b></p>
-<ul style="margin:6px 0 0 18px;">
-<li><b>i (Info)</b> – פותח את ההסבר הזה.</li>
-<li><b>⛶ Full Screen</b> – הופך את הכלי למסך מלא (כמו תת‑אפליקציה). לחיצה נוספת יוצאת חזרה לאקורדיון.</li>
-<li><b>⟳ Switch Camera</b> – מעבר בין מצלמה קדמית/אחורית.</li>
-<li><b>Freeze</b> – “מקפיא” את הקריאה על הפריים הנוכחי (נוח להשוואה).</li>
-<li><b>Save</b> – שומר Snapshot של הערכים (לוג/תיעוד בתוך האפליקציה).</li>
-</ul>
-</div>
-<button class="lux-btn lux-btn-accent" id="luxInfoClose" type="button">Got it</button>
-</div>
-</div>
-</div>
-</div>
 </div></div></details><details class="acc" data-caltool="ct"><summary><div><div class="acc-title">Color Temperature</div><div class="acc-sub">CCT / Δuv calibration</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="cal-tool-view" id="caltool-ct">
+<div class="cal-inline-topbar">
+  <div class="cal-inline-title">Color Temperature</div>
+  <div class="cal-inline-actions">
+    <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+    </div>
+</div>
+
 <div class="cal-tool-topbar">
 <button class="cal-back-btn" data-calback="" type="button">‹ Back</button>
 <div class="cal-tool-h">Color Temperature</div>
@@ -5178,7 +5090,6 @@ Lux Meter מציג <b>Exposure Value (EV)</b> והערכה יחסית של <b>Lu
     <div class="ctm-title">Color Temperature ...</div>
     <div class="ctm-icons">
       <button class="ctm-iconbtn" id="ctmInfoBtn" title="Info" type="button">ⓘ</button>
-      <button class="ctm-iconbtn cal-fs-btn" id="ctmFsBtn" title="Full Screen" type="button">⛶</button>
       <button class="ctm-iconbtn" id="ctmSwitchBtn" title="Switch Camera" type="button">⟳</button>
       <button class="ctm-iconbtn" id="ctmSaveBtn" title="Save" type="button">💾</button>
     </div>
@@ -5238,6 +5149,13 @@ reliable measurement</div>
 
 </div>
 </div></div></details><details class="acc" data-caltool="flicker"><summary><div><div class="acc-title">Flicker Meter</div><div class="acc-sub">Frequency / flicker level</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="cal-tool-view" id="caltool-flicker">
+<div class="cal-inline-topbar">
+  <div class="cal-inline-title">Flicker Meter</div>
+  <div class="cal-inline-actions">
+    <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+    </div>
+</div>
+
 
 <!-- ===== Flicker Meter Embedded (generated) ===== -->
 <div data-flickm="1">
@@ -5380,7 +5298,6 @@ reliable measurement</div>
 <div class="fl-title">Flicker Meter</div>
 <div class="fl-icons">
 <button class="lux-icon" id="flInfoBtn" title="Info" type="button">i</button>
-<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
 <button class="lux-icon" id="flSwitchBtn" title="Switch Camera" type="button">⟳</button>
 <button class="lux-icon" id="flSaveBtn" title="Save" type="button">💾</button>
 </div>
@@ -5451,6 +5368,13 @@ reliable measurement</div>
 </div>
 </div>
 </div></div></details><details class="acc" data-caltool="spectrum"><summary><div><div class="acc-title">Light Spectrometer</div><div class="acc-sub">Dominant wavelength / saturation</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="cal-tool-view" id="caltool-spectrum">
+<div class="cal-inline-topbar">
+  <div class="cal-inline-title">Light Spectrometer</div>
+  <div class="cal-inline-actions">
+    <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+    </div>
+</div>
+
 <div class="cal-tool-topbar">
 <button class="cal-back-btn" data-calback="" type="button">‹ Back</button>
 <div class="cal-tool-h">Light Spectrometer</div>
@@ -7868,19 +7792,39 @@ function initCalibrationNav(){
   // Full-screen toggle for calibration tools (acts like a mini "sub-app" mode)
   function toggleFullscreenFor(view){
     if(!view) return;
+
+    const tab = view.closest('.tab') || document.getElementById('tab-calibration');
+    const scroller = (tab && tab.querySelector('.tab-scroll')) ? tab.querySelector('.tab-scroll') : tab;
+
     const on = !view.classList.contains('is-fullscreen');
+
+    // Remember where we were inside the Calibration list so we can return to the same spot
+    if(on && scroller){
+      view.dataset.fsScrollTop = String(scroller.scrollTop || 0);
+    }
+
     // turn off any other fullscreen tool
     document.querySelectorAll('#tab-calibration .cal-tool-view.is-fullscreen').forEach(v=>{
       if(v !== view) v.classList.remove('is-fullscreen');
     });
+
     view.classList.toggle('is-fullscreen', on);
     document.body.classList.toggle('cal-fs-active', on);
+
     if(on){
       view.scrollTop = 0;
     }else{
       // return to accordion/home view when exiting fullscreen
+      const prevScroll = scroller ? Number(view.dataset.fsScrollTop || 0) : 0;
       showHome();
       document.body.classList.remove('cal-fs-active');
+
+      // Restore scroll position (important for tools that are not the first accordion)
+      if(scroller){
+        requestAnimationFrame(()=>{
+          scroller.scrollTop = prevScroll;
+        });
+      }
     }
   }
 
@@ -11731,6 +11675,9 @@ btn.addEventListener('click', closeGate);
   const fcEl = document.getElementById('luxFc');
   const statusEl = document.getElementById('luxStatus');
 
+  // If the legacy Lux Meter UI isn't present (we use the embedded luxm UI), skip this module.
+  if(!video || !canvas || !needle || !evEl) return;
+
   const titleEl = details.querySelector('.lux-camera-title');
 
   const iso = document.getElementById('luxISO');
@@ -14931,6 +14878,58 @@ Measurements are estimated from camera brightness over time.");
 })();
 })();
 </script>
+
+
+<style id="v62_calibration_match_lspectro_structure">
+/* ============================================================
+   v62 — Make Lux / Flicker / Color Temperature containers match
+   Light Spectrometer's in-accordion layout (card sizing/padding),
+   without changing internal logic or scales.
+   ============================================================ */
+#tab-calibration #caltool-lux .phone,
+#tab-calibration #caltool-flicker #flickm_app,
+#tab-calibration #caltool-ct .ct-ui{
+  width:100%;
+  max-width:none !important;
+  background:#1B1F25;
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:22px;
+  box-shadow: 0 12px 22px rgba(0,0,0,.45);
+  padding:14px;
+  margin: 0 0 12px 0;
+  box-sizing:border-box;
+}
+
+/* Remove "phone/app" frame paddings that fight the reference look */
+#tab-calibration #caltool-lux .phone{padding:14px !important;}
+#tab-calibration #caltool-lux .phone .topbar{display:none !important;}
+
+#tab-calibration #caltool-flicker #flickm_app{padding:14px !important;}
+#tab-calibration #caltool-flicker #flickm_app .topbar{display:none !important;}
+
+#tab-calibration #caltool-ct .ct-ui{padding:14px !important;}
+#tab-calibration #caltool-ct .ctm-topbar{display:none !important;}
+
+/* Ensure inner content doesn't overflow on small screens */
+#tab-calibration #caltool-lux .phone *,
+#tab-calibration #caltool-flicker #flickm_app *,
+#tab-calibration #caltool-ct .ct-ui *{
+  box-sizing:border-box;
+}
+
+#tab-calibration #caltool-lux .phone,
+#tab-calibration #caltool-flicker #flickm_app,
+#tab-calibration #caltool-ct .ct-ui{
+  overflow:hidden;
+}
+
+/* Make any fixed-width elements fluid where possible (safe overrides) */
+#tab-calibration #caltool-lux .phone .content,
+#tab-calibration #caltool-flicker #flickm_app .content,
+#tab-calibration #caltool-ct .ct-ui .ctm-body{
+  width:100%;
+}
+</style>
 
 </body>
 </html>
