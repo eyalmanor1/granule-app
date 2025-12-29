@@ -5399,6 +5399,16 @@ body{
   border-color: rgba(10,132,255,0.55);
   background: rgba(10,132,255,0.18);
 }
+
+
+/* === Live values box injected into metrics placeholders === */
+#tab-calibration .cal-livevals{margin-top:10px;display:flex;flex-direction:column;gap:10px}
+#tab-calibration .cal-livevals .lv-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid rgba(255,255,255,0.12);border-radius:14px;background:rgba(0,0,0,0.14)}
+#tab-calibration .cal-livevals .lv-k{font-size:12px;opacity:.78}
+#tab-calibration .cal-livevals .lv-v{font-size:16px;font-weight:900;letter-spacing:.2px}
+#tab-calibration .cal-livevals .lv-bar{width:100%;height:10px;border-radius:999px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);overflow:hidden}
+#tab-calibration .cal-livevals .lv-bar>i{display:block;height:100%;width:0%;background:rgba(10,132,255,0.42)}
+#tab-calibration .cal-livevals .lv-note{font-size:11px;opacity:.55}
 </style>
 <style id="modern-shell">
 :root{
@@ -15934,142 +15944,205 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 </script>
 <script>
-/* === Shared Camera Session (one at a time) === */
+<script>
+/* === Per-tool Camera Buttons (use the global Camera accordion stream) + Live Values === */
 (function(){
   const tab = document.getElementById('tab-calibration');
-  if(!tab || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+  if(!tab) return;
 
-  const session = {
-    stream: null,
-    track: null,
-    ownerTool: null,
-    ownerBtn: null,
-    ownerVideo: null
-  };
+  const camDetails = tab.querySelector('details.acc[data-acc="camera"]');
+  const openBtn = document.getElementById('open-camera-btn');
+  const closeBtn = document.getElementById('close-camera-btn');
+  const video = document.getElementById('live-video');
+  const canvas = document.getElementById('preview');
 
-  function stopSession(){
+  const tools = ['lux','ct','flicker','spectrum'];
+
+  function isCameraLive(){
     try{
-      if(session.stream){
-        session.stream.getTracks().forEach(t=>t.stop());
-      }
-    }catch(e){}
-    if(session.ownerVideo){
-      try{ session.ownerVideo.srcObject = null; }catch(e){}
-    }
-    if(session.ownerBtn){
-      session.ownerBtn.classList.remove('is-on');
-    }
-    session.stream = null;
-    session.track = null;
-    session.ownerTool = null;
-    session.ownerBtn = null;
-    session.ownerVideo = null;
+      const s = video && video.srcObject;
+      return !!(s && s.getTracks && s.getTracks().some(t=>t.readyState==='live'));
+    }catch(e){ return false; }
   }
 
-  function closeOtherAccordions(currentDetails){
-    const all = tab.querySelectorAll('details.acc[data-caltool], details.acc[data-acc="camera"]');
-    all.forEach(d=>{
-      if(d !== currentDetails && d.open){
-        d.open = false;
+  function stopCameraSafe(){
+    try{
+      if(typeof window.stopCamera === 'function') window.stopCamera();
+      else if(typeof window.closeCamera === 'function') window.closeCamera();
+      else if(video && video.srcObject && video.srcObject.getTracks){
+        video.srcObject.getTracks().forEach(t=>t.stop());
+        video.srcObject = null;
       }
+    }catch(_){}
+  }
+
+  function closeOtherAccordions(keep){
+    const list = tab.querySelectorAll('details.acc[data-caltool], details.acc[data-acc="camera"]');
+    list.forEach(d=>{
+      if(d !== keep && d.open) d.open = false;
     });
   }
 
-  async function startFor(tool, btn){
-    // Find the tool's camera placeholder video (or the real camera accordion video if tool=="camera")
-    let rootVideo = null;
+  function ensureLiveVals(tool){
+    const view = tab.querySelector('#caltool-'+tool);
+    if(!view) return null;
+    const metrics = view.querySelector('[data-ph="'+tool+'-metrics"]');
+    if(!metrics) return null;
 
-    if(tool === 'camera'){
-      const camDetails = tab.querySelector('details.acc[data-acc="camera"]');
-      if(camDetails) rootVideo = camDetails.querySelector('video');
-    } else {
-      const view = tab.querySelector(`#caltool-${tool}`);
-      if(view){
-        // Prefer reference camera UI if exists
-        rootVideo = view.querySelector('.refcam video') || view.querySelector('video');
-      }
+    let box = metrics.querySelector('.cal-livevals');
+    if(!box){
+      box = document.createElement('div');
+      box.className = 'cal-livevals';
+      box.innerHTML = `
+        <div class="lv-row">
+          <div><div class="lv-k" data-k="a">Value A</div><div class="lv-v" data-v="a">--</div></div>
+          <div style="text-align:right"><div class="lv-k" data-k="b">Value B</div><div class="lv-v" data-v="b">--</div></div>
+        </div>
+        <div class="lv-row">
+          <div><div class="lv-k" data-k="c">Value C</div><div class="lv-v" data-v="c">--</div></div>
+          <div style="text-align:right"><div class="lv-k" data-k="d">Value D</div><div class="lv-v" data-v="d">--</div></div>
+        </div>
+        <div class="lv-bar"><i></i></div>
+        <div class="lv-note">* best-effort from reference feed (replace with calibrated pipeline later)</div>
+      `;
+      metrics.insertBefore(box, metrics.children[2] || null);
     }
-    if(!rootVideo){
-      alert('Camera UI not found for this tool.');
-      return;
-    }
-
-    // Stop any existing session
-    stopSession();
-
-    // Start new session (best-effort cross device)
-    try{
-      rootVideo.setAttribute('playsinline','');
-      rootVideo.setAttribute('webkit-playsinline','');
-      rootVideo.muted = true;
-      rootVideo.autoplay = true;
-    }catch(_){}
-
-    const tryList = [
-      { video: { facingMode: { exact: "environment" }, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
-      { video: { facingMode: "environment", width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
-      { video: { facingMode: { ideal: "environment" }, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
-      { video: true, audio:false }
-    ];
-
-    let stream = null, lastErr = null;
-    for(const c of tryList){
-      try{
-        stream = await navigator.mediaDevices.getUserMedia(c);
-        if(stream) break;
-      }catch(e){ lastErr = e; }
-    }
-    if(!stream) throw (lastErr || new Error('getUserMedia failed'));
-
-    rootVideo.srcObject = stream;
-    await rootVideo.play();
-
-    session.stream = stream;
-    session.track = stream.getVideoTracks()[0] || null;
-    session.ownerTool = tool;
-    session.ownerBtn = btn;
-    session.ownerVideo = rootVideo;
-    btn.classList.add('is-on');
+    return box;
   }
 
+  function setVals(tool, a,b,c,d, barPct){
+    const box = ensureLiveVals(tool);
+    if(!box) return;
+    const set = (k,val)=>{
+      const el = box.querySelector('[data-v="'+k+'"]');
+      if(el) el.textContent = val;
+    };
+    set('a', a); set('b', b); set('c', c); set('d', d);
+    const i = box.querySelector('.lv-bar i');
+    if(i) i.style.width = Math.max(0, Math.min(100, barPct||0)) + '%';
+  }
+
+  function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+
+  function sampleCenterROI(){
+    if(!canvas) return null;
+    const w = canvas.width || 0, h = canvas.height || 0;
+    if(!w || !h) return null;
+    const ctx = canvas.getContext('2d', { willReadFrequently:true });
+    // sample a square ROI around center
+    const size = Math.max(12, Math.floor(Math.min(w,h) * 0.12));
+    const x = Math.floor(w/2 - size/2);
+    const y = Math.floor(h/2 - size/2);
+    let img;
+    try{ img = ctx.getImageData(x,y,size,size); }catch(e){ return null; }
+    const d = img.data;
+    let R=0,G=0,B=0, hi=0, lo=0;
+    const n = size*size;
+    for(let i=0;i<d.length;i+=4){
+      const r=d[i], g=d[i+1], b=d[i+2];
+      R+=r; G+=g; B+=b;
+      if(r>=250||g>=250||b>=250) hi++;
+      if(r<=5||g<=5||b<=5) lo++;
+    }
+    R/=n; G/=n; B/=n;
+    const luma = (R*0.2126 + G*0.7152 + B*0.0722);
+    return {R,G,B,luma, clipHi: hi/n, clipLo: lo/n};
+  }
+
+  // Update loop (only when camera is live)
+  let raf = 0;
+  function loop(){
+    raf = 0;
+    if(!isCameraLive()){
+      return;
+    }
+    const s = sampleCenterROI();
+    if(s){
+      // LUX (best-effort)
+      const y = clamp01(s.luma/255);
+      const lux = Math.round(Math.pow(y, 1.6) * 2000);
+      const ev = (Math.log2(Math.max(1e-6, lux/2.5))).toFixed(2);
+      setVals('lux', `${lux} lx*`, `${(lux/10.764).toFixed(1)} fc*`, `EV≈${ev}*`, `RGB ${s.R.toFixed(0)},${s.G.toFixed(0)},${s.B.toFixed(0)}`, Math.min(100, lux/20));
+
+      // CCT (McCamy approx)
+      const r=s.R/255, g=s.G/255, b=s.B/255;
+      const X = 0.4124*r + 0.3576*g + 0.1805*b;
+      const Y = 0.2126*r + 0.7152*g + 0.0722*b;
+      const Z = 0.0193*r + 0.1192*g + 0.9505*b;
+      const denom = (X+Y+Z) || 1e-6;
+      const x = X/denom, yy = Y/denom;
+      const n = (x - 0.3320) / (0.1858 - yy);
+      const cct = Math.round(449*(n**3) + 3525*(n**2) + 6823.3*n + 5520.33);
+      const duv = ((yy - 0.1858) - (x - 0.3320)*0.5);
+      setVals('ct', `${isFinite(cct)?cct:'--'} K*`, `Δuv≈${isFinite(duv)?duv.toFixed(4):'--'}*`, `x=${x.toFixed(3)} y=${yy.toFixed(3)}`, `RGB ${s.R.toFixed(0)},${s.G.toFixed(0)},${s.B.toFixed(0)}`, clamp01((cct-2000)/8000)*100);
+
+      // Flicker: placeholder (needs temporal sampling)
+      const mod = Math.min(100, Math.round((s.clipHi*100) + (s.clipLo*100)));
+      setVals('flicker', `Hz: --`, `Mod≈${mod}%*`, `ClipHi ${(s.clipHi*100).toFixed(1)}%`, `ClipLo ${(s.clipLo*100).toFixed(1)}%`, mod);
+
+      // Spectrum: hue->nm toy mapping
+      const mx=Math.max(r,g,b), mn=Math.min(r,g,b);
+      let h=0;
+      if(mx===mn) h=0;
+      else if(mx===r) h=((g-b)/(mx-mn))%6;
+      else if(mx===g) h=((b-r)/(mx-mn))+2;
+      else h=((r-g)/(mx-mn))+4;
+      h=(h*60+360)%360;
+      const nm = Math.round(420 + (1 - (h/360))*280);
+      const sat = (mx===0?0:((mx-mn)/mx));
+      setVals('spectrum', `${nm} nm*`, `${Math.round(sat*100)}%*`, `Hue ${Math.round(h)}°`, `RGB ${s.R.toFixed(0)},${s.G.toFixed(0)},${s.B.toFixed(0)}`, clamp01((nm-420)/280)*100);
+    }
+    raf = requestAnimationFrame(loop);
+  }
+
+  function kickLoop(){
+    if(raf) return;
+    raf = requestAnimationFrame(loop);
+  }
+
+  // Button click: open camera accordion, close others, start/stop camera
   tab.addEventListener('click', async (e)=>{
     const btn = e.target.closest('[data-cam-start]');
     if(!btn) return;
-    const tool = btn.getAttribute('data-cam-start');
-    const det = btn.closest('details') || tab.querySelector(`#caltool-${tool}`)?.closest('details');
-    if(det) closeOtherAccordions(det);
+    e.preventDefault();
+    e.stopPropagation();
 
-    // Toggle behavior: if same tool running, stop. Else start.
-    if(session.ownerTool === tool){
-      stopSession();
+    const tool = btn.getAttribute('data-cam-start');
+
+    // Close everything except the tool details + camera details
+    const toolDetails = tab.querySelector('#caltool-'+tool)?.closest('details.acc[data-caltool]');
+    if(toolDetails) toolDetails.open = true;
+    if(camDetails) camDetails.open = true;
+    closeOtherAccordions(toolDetails || camDetails || null);
+
+    // Toggle camera
+    if(isCameraLive()){
+      stopCameraSafe();
+      btn.classList.remove('is-on');
       return;
     }
+
+    // Start camera via the *real* Start button to keep user-gesture semantics
     try{
-      await startFor(tool, btn);
+      if(openBtn) openBtn.click();
+      btn.classList.add('is-on');
+      // start loop shortly after stream attaches
+      setTimeout(kickLoop, 120);
     }catch(err){
-      stopSession();
-      // Common cases: insecure context (file://) or blocked permissions.
-      alert('Camera failed to start.
-
-Tip: use https:// (GitHub Pages) or http://localhost and allow Camera permission.
-
-' + (err && err.name ? (err.name + ': ') : '') + (err && err.message ? err.message : ''));
+      btn.classList.remove('is-on');
+      alert('Camera failed to start. Use https:// (GitHub Pages) or http://localhost and allow Camera.
+' + (err && err.message ? err.message : err));
     }
   }, true);
 
-  // If user opens a different accordion manually, stop camera to avoid confusion.
-  tab.addEventListener('toggle', (e)=>{
-    const det = e.target;
-    if(!(det instanceof HTMLDetailsElement)) return;
-    if(det.open) return;
-    // If the accordion that closed was the owner, stop session
-    if(session.ownerBtn && !tab.contains(session.ownerBtn)){
-      stopSession();
-    }
-  }, true);
+  // If camera starts from camera accordion start button, also kick the loop.
+  if(openBtn){
+    openBtn.addEventListener('click', ()=> setTimeout(kickLoop, 120), true);
+  }
+  if(closeBtn){
+    closeBtn.addEventListener('click', ()=>{ try{ if(raf) cancelAnimationFrame(raf); }catch(_){ } raf=0; }, true);
+  }
 
-  // Expose stop for other scripts if needed
-  window.__CalibrationCamStop = stopSession;
 })();
 </script>
 </body>
