@@ -5255,6 +5255,150 @@ max-width:340px}[data-luxm="1"] .debug{
   aspect-ratio: auto !important;
   height: clamp(170px, 26vh, 300px) !important;
 }
+
+
+/* === iOS vibe pass (works cross-device; looks more at-home on iPhone) === */
+:root{
+  --ios-bg: rgba(10,14,22,0.92);
+  --ios-card: rgba(18,24,36,0.72);
+  --ios-card2: rgba(18,24,36,0.55);
+  --ios-border: rgba(255,255,255,0.10);
+  --ios-border-strong: rgba(255,255,255,0.14);
+  --ios-text: rgba(240,245,255,0.92);
+  --ios-sub: rgba(240,245,255,0.62);
+  --ios-blue: rgba(10,132,255,0.95);
+  --ios-blue2: rgba(10,132,255,0.22);
+  --ios-shadow: 0 18px 60px rgba(0,0,0,0.45);
+}
+
+/* iOS system typography */
+html, body, button, input, textarea{
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, system-ui, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* safer fixed UI on iPhone notch */
+.safe-bottom{
+  padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
+}
+.safe-top{
+  padding-top: calc(env(safe-area-inset-top) + 6px);
+}
+
+/* cards + accordion */
+.acc, .card, .panel, .tool-tab, .cal-tool-view{
+  border-color: var(--ios-border) !important;
+}
+.acc > summary, .tool-header, .cal-inline-topbar{
+  border-color: var(--ios-border) !important;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)) !important;
+  border-radius: 18px !important;
+}
+.acc > summary{
+  padding: 14px 16px !important;
+}
+.acc[open] > summary{
+  outline: 2px solid rgba(10,132,255,0.35) !important;
+  box-shadow: 0 0 0 6px rgba(10,132,255,0.10) !important;
+}
+.acc-body{
+  margin-top: 10px !important;
+}
+.cal-inline-panel{
+  border-radius: 18px !important;
+  background: rgba(0,0,0,0.14) !important;
+}
+
+/* buttons: iOS pill */
+button, .btn, .refbtn{
+  border-radius: 999px !important;
+  border: 1px solid var(--ios-border) !important;
+  background: rgba(255,255,255,0.08) !important;
+  color: var(--ios-text) !important;
+  box-shadow: none !important;
+}
+button:hover, .btn:hover, .refbtn:hover{
+  background: rgba(255,255,255,0.12) !important;
+}
+button:active, .btn:active, .refbtn:active{
+  transform: translateY(1px);
+}
+.btn-primary, .refbtn[data-act="start"]{
+  border-color: rgba(10,132,255,0.55) !important;
+  background: rgba(10,132,255,0.18) !important;
+}
+.btn-primary:hover, .refbtn[data-act="start"]:hover{
+  background: rgba(10,132,255,0.24) !important;
+}
+
+/* text rhythm */
+h1,h2,h3,.title{
+  letter-spacing: -0.2px !important;
+}
+.sub, .muted, .cal-ph-sub{
+  color: var(--ios-sub) !important;
+}
+
+/* bottom tab bar: iOS translucent glass */
+.bottom-tabs, .tabbar, .nav, .phone-tabs{
+  background: rgba(12,16,24,0.62) !important;
+  border-top: 1px solid rgba(255,255,255,0.10) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.35);
+}
+.bottom-tabs, .tabbar, .nav, .phone-tabs{
+  border-radius: 20px 20px 0 0;
+}
+.bottom-tabs a, .tabbar button, .nav button{
+  border-radius: 14px !important;
+}
+.bottom-tabs .active, .tabbar .active, .nav .active{
+  background: rgba(10,132,255,0.18) !important;
+  border-color: rgba(10,132,255,0.45) !important;
+}
+
+/* page backdrop: smoother iOS-like depth */
+body{
+  background: radial-gradient(1200px 900px at 35% 10%, rgba(90,120,220,0.18), transparent 60%),
+              radial-gradient(900px 700px at 85% 30%, rgba(255,170,80,0.14), transparent 55%),
+              radial-gradient(1200px 900px at 30% 95%, rgba(40,220,200,0.10), transparent 60%),
+              rgba(8,10,16,1) !important;
+}
+.phone, .shell, .app, .viewport{
+  box-shadow: var(--ios-shadow) !important;
+  border-radius: 28px !important;
+  border-color: rgba(255,255,255,0.10) !important;
+  background: rgba(10,14,22,0.62) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* avoid “android-y” thick outlines */
+*:focus{
+  outline: none !important;
+}
+*:focus-visible{
+  outline: 2px solid rgba(10,132,255,0.35) !important;
+  outline-offset: 2px !important;
+}
+
+
+/* === Calibration: per-tool camera start button === */
+#tab-calibration .cal-inline-actions .cal-cam-btn{
+  border:1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.06);
+  color: rgba(240,245,255,0.92);
+  border-radius: 999px;
+  padding: 8px 10px;
+  min-height: 40px;
+}
+#tab-calibration .cal-inline-actions .cal-cam-btn:active{ transform: translateY(1px); }
+#tab-calibration .cal-inline-actions .cal-cam-btn.is-on{
+  border-color: rgba(10,132,255,0.55);
+  background: rgba(10,132,255,0.18);
+}
 </style>
 <style id="modern-shell">
 :root{
@@ -5980,7 +6124,7 @@ max-width:340px}[data-luxm="1"] .debug{
 </div>
 <div aria-atomic="true" aria-live="polite" class="toast-container" id="toast-container"></div>
 <div class="app-shell">
-<header class="app-header"></header>
+<header class="app-header safe-top"></header>
 <div hidden="" id="contextBar"><div class="context-inner"></div></div>
 <div class="app-content">
 <section class="tab active" id="tab-granules">
@@ -6350,6 +6494,7 @@ max-width:340px}[data-luxm="1"] .debug{
     <div class="cal-inline-topbar">
       <div class="cal-inline-title">Lux Meter</div>
       <div class="cal-inline-actions">
+        <button class="lux-icon cal-cam-btn" type="button" data-cam-start="lux" title="Start Camera">📷</button>
         <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
       </div>
     </div>
@@ -6395,6 +6540,7 @@ max-width:340px}[data-luxm="1"] .debug{
     <div class="cal-inline-topbar">
       <div class="cal-inline-title">Color Temperature</div>
       <div class="cal-inline-actions">
+        <button class="lux-icon cal-cam-btn" type="button" data-cam-start="ct" title="Start Camera">📷</button>
         <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
       </div>
     </div>
@@ -6440,6 +6586,7 @@ max-width:340px}[data-luxm="1"] .debug{
     <div class="cal-inline-topbar">
       <div class="cal-inline-title">Flicker Meter</div>
       <div class="cal-inline-actions">
+        <button class="lux-icon cal-cam-btn" type="button" data-cam-start="flicker" title="Start Camera">📷</button>
         <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
       </div>
     </div>
@@ -6485,6 +6632,7 @@ max-width:340px}[data-luxm="1"] .debug{
     <div class="cal-inline-topbar">
       <div class="cal-inline-title">Light Spectrometer</div>
       <div class="cal-inline-actions">
+        <button class="lux-icon cal-cam-btn" type="button" data-cam-start="spectrum" title="Start Camera">📷</button>
         <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
       </div>
     </div>
@@ -10122,9 +10270,34 @@ const status = document.getElementById('cam-status');
       }
 
       if(status) status.textContent = "Status: requesting permission…";
-      stream = await window.CameraManager.getUserMedia({
-        video: { facingMode: { ideal: "environment" } },
-        audio: false
+      // iOS/Safari: ensure inline playback + mute (required for autoplay-like behavior)
+      try{
+        video.setAttribute('playsinline','');
+        video.setAttribute('webkit-playsinline','');
+        video.muted = true;
+        video.autoplay = true;
+      }catch(_){}
+
+      // Cross-device constraints (try back camera; fall back gracefully)
+      const tryList = [
+        { video: { facingMode: { exact: "environment" }, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
+        { video: { facingMode: "environment", width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
+        { video: { facingMode: { ideal: "environment" }, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
+        { video: true, audio:false }
+      ];
+
+      let lastErr = null;
+      for(const c of tryList){
+        try{
+          stream = await window.CameraManager.getUserMedia(c);
+          if(stream) break;
+        }catch(e){
+          lastErr = e;
+        }
+      }
+      if(!stream){
+        throw (lastErr || new Error('getUserMedia failed'));
+      }
       });
       video.srcObject = stream;
       video.style.display = "block";
@@ -15759,6 +15932,145 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 })();
 });
+</script>
+<script>
+/* === Shared Camera Session (one at a time) === */
+(function(){
+  const tab = document.getElementById('tab-calibration');
+  if(!tab || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+
+  const session = {
+    stream: null,
+    track: null,
+    ownerTool: null,
+    ownerBtn: null,
+    ownerVideo: null
+  };
+
+  function stopSession(){
+    try{
+      if(session.stream){
+        session.stream.getTracks().forEach(t=>t.stop());
+      }
+    }catch(e){}
+    if(session.ownerVideo){
+      try{ session.ownerVideo.srcObject = null; }catch(e){}
+    }
+    if(session.ownerBtn){
+      session.ownerBtn.classList.remove('is-on');
+    }
+    session.stream = null;
+    session.track = null;
+    session.ownerTool = null;
+    session.ownerBtn = null;
+    session.ownerVideo = null;
+  }
+
+  function closeOtherAccordions(currentDetails){
+    const all = tab.querySelectorAll('details.acc[data-caltool], details.acc[data-acc="camera"]');
+    all.forEach(d=>{
+      if(d !== currentDetails && d.open){
+        d.open = false;
+      }
+    });
+  }
+
+  async function startFor(tool, btn){
+    // Find the tool's camera placeholder video (or the real camera accordion video if tool=="camera")
+    let rootVideo = null;
+
+    if(tool === 'camera'){
+      const camDetails = tab.querySelector('details.acc[data-acc="camera"]');
+      if(camDetails) rootVideo = camDetails.querySelector('video');
+    } else {
+      const view = tab.querySelector(`#caltool-${tool}`);
+      if(view){
+        // Prefer reference camera UI if exists
+        rootVideo = view.querySelector('.refcam video') || view.querySelector('video');
+      }
+    }
+    if(!rootVideo){
+      alert('Camera UI not found for this tool.');
+      return;
+    }
+
+    // Stop any existing session
+    stopSession();
+
+    // Start new session (best-effort cross device)
+    try{
+      rootVideo.setAttribute('playsinline','');
+      rootVideo.setAttribute('webkit-playsinline','');
+      rootVideo.muted = true;
+      rootVideo.autoplay = true;
+    }catch(_){}
+
+    const tryList = [
+      { video: { facingMode: { exact: "environment" }, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
+      { video: { facingMode: "environment", width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
+      { video: { facingMode: { ideal: "environment" }, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
+      { video: true, audio:false }
+    ];
+
+    let stream = null, lastErr = null;
+    for(const c of tryList){
+      try{
+        stream = await navigator.mediaDevices.getUserMedia(c);
+        if(stream) break;
+      }catch(e){ lastErr = e; }
+    }
+    if(!stream) throw (lastErr || new Error('getUserMedia failed'));
+
+    rootVideo.srcObject = stream;
+    await rootVideo.play();
+
+    session.stream = stream;
+    session.track = stream.getVideoTracks()[0] || null;
+    session.ownerTool = tool;
+    session.ownerBtn = btn;
+    session.ownerVideo = rootVideo;
+    btn.classList.add('is-on');
+  }
+
+  tab.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('[data-cam-start]');
+    if(!btn) return;
+    const tool = btn.getAttribute('data-cam-start');
+    const det = btn.closest('details') || tab.querySelector(`#caltool-${tool}`)?.closest('details');
+    if(det) closeOtherAccordions(det);
+
+    // Toggle behavior: if same tool running, stop. Else start.
+    if(session.ownerTool === tool){
+      stopSession();
+      return;
+    }
+    try{
+      await startFor(tool, btn);
+    }catch(err){
+      stopSession();
+      // Common cases: insecure context (file://) or blocked permissions.
+      alert('Camera failed to start.
+
+Tip: use https:// (GitHub Pages) or http://localhost and allow Camera permission.
+
+' + (err && err.name ? (err.name + ': ') : '') + (err && err.message ? err.message : ''));
+    }
+  }, true);
+
+  // If user opens a different accordion manually, stop camera to avoid confusion.
+  tab.addEventListener('toggle', (e)=>{
+    const det = e.target;
+    if(!(det instanceof HTMLDetailsElement)) return;
+    if(det.open) return;
+    // If the accordion that closed was the owner, stop session
+    if(session.ownerBtn && !tab.contains(session.ownerBtn)){
+      stopSession();
+    }
+  }, true);
+
+  // Expose stop for other scripts if needed
+  window.__CalibrationCamStop = stopSession;
+})();
 </script>
 </body>
 </html>
