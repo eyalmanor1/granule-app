@@ -5416,6 +5416,13 @@ body{
 #tab-calibration .toolcam-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 #tab-calibration .toolcam-roi{position:absolute;left:50%;top:50%;width:min(46%, 260px);height:min(46%, 260px);transform:translate(-50%,-50%);border:2px solid rgba(255,255,255,0.85);border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,0.12)}
 #tab-calibration .toolcam-cross{position:absolute;inset:0;background:linear-gradient(to right, transparent calc(50% - 1px), rgba(255,255,255,0.75) 0, rgba(255,255,255,0.75) calc(50% + 1px), transparent 0),linear-gradient(to bottom, transparent calc(50% - 1px), rgba(255,255,255,0.75) 0, rgba(255,255,255,0.75) calc(50% + 1px), transparent 0);opacity:.55;border-radius:12px}
+
+
+/* === Per-tool camera preview (stay in tool) === */
+#tab-calibration .toolcam{position:relative;width:100%;aspect-ratio:16/9;border:1px solid rgba(255,255,255,0.12);border-radius:16px;overflow:hidden;background:rgba(0,0,0,0.18)}
+#tab-calibration .toolcam-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#tab-calibration .toolcam-roi{position:absolute;left:50%;top:50%;width:min(46%, 260px);height:min(46%, 260px);transform:translate(-50%,-50%);border:2px solid rgba(255,255,255,0.85);border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,0.12)}
+#tab-calibration .toolcam-cross{position:absolute;inset:0;background:linear-gradient(to right, transparent calc(50% - 1px), rgba(255,255,255,0.75) 0, rgba(255,255,255,0.75) calc(50% + 1px), transparent 0),linear-gradient(to bottom, transparent calc(50% - 1px), rgba(255,255,255,0.75) 0, rgba(255,255,255,0.75) calc(50% + 1px), transparent 0);opacity:.55;border-radius:12px}
 </style>
 <style id="modern-shell">
 :root{
@@ -10315,7 +10322,6 @@ const status = document.getElementById('cam-status');
       if(!stream){
         throw (lastErr || new Error('getUserMedia failed'));
       }
-      });
       video.srcObject = stream;
       video.style.display = "block";
       await video.play().catch(()=>{});
@@ -14514,9 +14520,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Elements
   const gauge = root.querySelector('#ctm-gauge');
+  if(!gauge){ console.warn("[ctm] gauge missing"); return; }
   const gctx = gauge.getContext('2d');
   const video = root.querySelector('#ctm-video');
   const work = root.querySelector('#ctm-work');
+  if(!video || !work){ console.warn("[ctm] video/work missing"); return; }
   const wctx = work.getContext('2d', { willReadFrequently:true });
 
   const darkOverlay = root.querySelector('#ctmDarkOverlay');
@@ -15362,10 +15370,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // info icon: simple dialog
   document.getElementById("flickm_btnInfo").addEventListener('click', () => {
-    alert("Flicker Meter (demo UI)
+    alert(`Flicker Meter (demo UI)
 
-Tap anywhere to enable camera.
-Measurements are estimated from camera brightness over time.");
+Tap the camera button to start.
+Measurements are estimated from camera brightness over time.`);
   });
 
   // pro icon: no-op (matches UI)
@@ -15487,16 +15495,16 @@ Measurements are estimated from camera brightness over time.");
     camera: {
       title: 'Camera — Live view & controls',
       steps: [
-        'This tool opens the live camera stream and shows a preview in the center frame.
+        `This tool opens the live camera stream and shows a preview in the center frame.
 
-Tip: run the page via http://localhost to allow camera permissions smoothly.',
-        'Controls:
+Tip: run the page via http://localhost to allow camera permissions smoothly.`,
+        `Controls:
 • Full Screen button (⛶) toggles the tool view to full screen.
-• The RGB readout panel updates based on the pixel under the sampling cursor (if enabled).',
-        'If the camera does not start:
+• The RGB readout panel updates based on the pixel under the sampling cursor (if enabled).`,
+        `If the camera does not start:
 • Check browser permissions for Camera
 • Close other apps using the camera
-• Refresh and try again'
+• Refresh and try again`
       ]
     },
     lux: {
@@ -15951,208 +15959,6 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 </script>
 <script>
-<script>
-/* === Per-tool Camera Buttons (use the global Camera accordion stream) + Live Values === */
-(function(){
-  const tab = document.getElementById('tab-calibration');
-  if(!tab) return;
-
-  const camDetails = tab.querySelector('details.acc[data-acc="camera"]');
-  const openBtn = document.getElementById('open-camera-btn');
-  const closeBtn = document.getElementById('close-camera-btn');
-  const video = document.getElementById('live-video');
-  const canvas = document.getElementById('preview');
-
-  const tools = ['lux','ct','flicker','spectrum'];
-
-  function isCameraLive(){
-    try{
-      const s = video && video.srcObject;
-      return !!(s && s.getTracks && s.getTracks().some(t=>t.readyState==='live'));
-    }catch(e){ return false; }
-  }
-
-  function stopCameraSafe(){
-    try{
-      if(typeof window.stopCamera === 'function') window.stopCamera();
-      else if(typeof window.closeCamera === 'function') window.closeCamera();
-      else if(video && video.srcObject && video.srcObject.getTracks){
-        video.srcObject.getTracks().forEach(t=>t.stop());
-        video.srcObject = null;
-      }
-    }catch(_){}
-  }
-
-  function closeOtherAccordions(keep){
-    const list = tab.querySelectorAll('details.acc[data-caltool], details.acc[data-acc="camera"]');
-    list.forEach(d=>{
-      if(d !== keep && d.open) d.open = false;
-    });
-  }
-
-  function ensureLiveVals(tool){
-    const view = tab.querySelector('#caltool-'+tool);
-    if(!view) return null;
-    const metrics = view.querySelector('[data-ph="'+tool+'-metrics"]');
-    if(!metrics) return null;
-
-    let box = metrics.querySelector('.cal-livevals');
-    if(!box){
-      box = document.createElement('div');
-      box.className = 'cal-livevals';
-      box.innerHTML = `
-        <div class="lv-row">
-          <div><div class="lv-k" data-k="a">Value A</div><div class="lv-v" data-v="a">--</div></div>
-          <div style="text-align:right"><div class="lv-k" data-k="b">Value B</div><div class="lv-v" data-v="b">--</div></div>
-        </div>
-        <div class="lv-row">
-          <div><div class="lv-k" data-k="c">Value C</div><div class="lv-v" data-v="c">--</div></div>
-          <div style="text-align:right"><div class="lv-k" data-k="d">Value D</div><div class="lv-v" data-v="d">--</div></div>
-        </div>
-        <div class="lv-bar"><i></i></div>
-        <div class="lv-note">* best-effort from reference feed (replace with calibrated pipeline later)</div>
-      `;
-      metrics.insertBefore(box, metrics.children[2] || null);
-    }
-    return box;
-  }
-
-  function setVals(tool, a,b,c,d, barPct){
-    const box = ensureLiveVals(tool);
-    if(!box) return;
-    const set = (k,val)=>{
-      const el = box.querySelector('[data-v="'+k+'"]');
-      if(el) el.textContent = val;
-    };
-    set('a', a); set('b', b); set('c', c); set('d', d);
-    const i = box.querySelector('.lv-bar i');
-    if(i) i.style.width = Math.max(0, Math.min(100, barPct||0)) + '%';
-  }
-
-  function clamp01(x){ return Math.max(0, Math.min(1, x)); }
-
-  function sampleCenterROI(){
-    if(!canvas) return null;
-    const w = canvas.width || 0, h = canvas.height || 0;
-    if(!w || !h) return null;
-    const ctx = canvas.getContext('2d', { willReadFrequently:true });
-    // sample a square ROI around center
-    const size = Math.max(12, Math.floor(Math.min(w,h) * 0.12));
-    const x = Math.floor(w/2 - size/2);
-    const y = Math.floor(h/2 - size/2);
-    let img;
-    try{ img = ctx.getImageData(x,y,size,size); }catch(e){ return null; }
-    const d = img.data;
-    let R=0,G=0,B=0, hi=0, lo=0;
-    const n = size*size;
-    for(let i=0;i<d.length;i+=4){
-      const r=d[i], g=d[i+1], b=d[i+2];
-      R+=r; G+=g; B+=b;
-      if(r>=250||g>=250||b>=250) hi++;
-      if(r<=5||g<=5||b<=5) lo++;
-    }
-    R/=n; G/=n; B/=n;
-    const luma = (R*0.2126 + G*0.7152 + B*0.0722);
-    return {R,G,B,luma, clipHi: hi/n, clipLo: lo/n};
-  }
-
-  // Update loop (only when camera is live)
-  let raf = 0;
-  function loop(){
-    raf = 0;
-    if(!isCameraLive()){
-      return;
-    }
-    const s = sampleCenterROI();
-    if(s){
-      // LUX (best-effort)
-      const y = clamp01(s.luma/255);
-      const lux = Math.round(Math.pow(y, 1.6) * 2000);
-      const ev = (Math.log2(Math.max(1e-6, lux/2.5))).toFixed(2);
-      setVals('lux', `${lux} lx*`, `${(lux/10.764).toFixed(1)} fc*`, `EV≈${ev}*`, `RGB ${s.R.toFixed(0)},${s.G.toFixed(0)},${s.B.toFixed(0)}`, Math.min(100, lux/20));
-
-      // CCT (McCamy approx)
-      const r=s.R/255, g=s.G/255, b=s.B/255;
-      const X = 0.4124*r + 0.3576*g + 0.1805*b;
-      const Y = 0.2126*r + 0.7152*g + 0.0722*b;
-      const Z = 0.0193*r + 0.1192*g + 0.9505*b;
-      const denom = (X+Y+Z) || 1e-6;
-      const x = X/denom, yy = Y/denom;
-      const n = (x - 0.3320) / (0.1858 - yy);
-      const cct = Math.round(449*(n**3) + 3525*(n**2) + 6823.3*n + 5520.33);
-      const duv = ((yy - 0.1858) - (x - 0.3320)*0.5);
-      setVals('ct', `${isFinite(cct)?cct:'--'} K*`, `Δuv≈${isFinite(duv)?duv.toFixed(4):'--'}*`, `x=${x.toFixed(3)} y=${yy.toFixed(3)}`, `RGB ${s.R.toFixed(0)},${s.G.toFixed(0)},${s.B.toFixed(0)}`, clamp01((cct-2000)/8000)*100);
-
-      // Flicker: placeholder (needs temporal sampling)
-      const mod = Math.min(100, Math.round((s.clipHi*100) + (s.clipLo*100)));
-      setVals('flicker', `Hz: --`, `Mod≈${mod}%*`, `ClipHi ${(s.clipHi*100).toFixed(1)}%`, `ClipLo ${(s.clipLo*100).toFixed(1)}%`, mod);
-
-      // Spectrum: hue->nm toy mapping
-      const mx=Math.max(r,g,b), mn=Math.min(r,g,b);
-      let h=0;
-      if(mx===mn) h=0;
-      else if(mx===r) h=((g-b)/(mx-mn))%6;
-      else if(mx===g) h=((b-r)/(mx-mn))+2;
-      else h=((r-g)/(mx-mn))+4;
-      h=(h*60+360)%360;
-      const nm = Math.round(420 + (1 - (h/360))*280);
-      const sat = (mx===0?0:((mx-mn)/mx));
-      setVals('spectrum', `${nm} nm*`, `${Math.round(sat*100)}%*`, `Hue ${Math.round(h)}°`, `RGB ${s.R.toFixed(0)},${s.G.toFixed(0)},${s.B.toFixed(0)}`, clamp01((nm-420)/280)*100);
-    }
-    raf = requestAnimationFrame(loop);
-  }
-
-  function kickLoop(){
-    if(raf) return;
-    raf = requestAnimationFrame(loop);
-  }
-
-  // Button click: open camera accordion, close others, start/stop camera
-  tab.addEventListener('click', async (e)=>{
-    const btn = e.target.closest('[data-cam-start]');
-    if(!btn) return;
-    e.preventDefault();
-    e.stopPropagation();
-
-    const tool = btn.getAttribute('data-cam-start');
-
-    // Close everything except the tool details + camera details
-    const toolDetails = tab.querySelector('#caltool-'+tool)?.closest('details.acc[data-caltool]');
-    if(toolDetails) toolDetails.open = true;
-    if(camDetails) camDetails.open = true;
-    closeOtherAccordions(toolDetails || camDetails || null);
-
-    // Toggle camera
-    if(isCameraLive()){
-      stopCameraSafe();
-      btn.classList.remove('is-on');
-      return;
-    }
-
-    // Start camera via the *real* Start button to keep user-gesture semantics
-    try{
-      if(openBtn) openBtn.click();
-      btn.classList.add('is-on');
-      // start loop shortly after stream attaches
-      setTimeout(kickLoop, 120);
-    }catch(err){
-      btn.classList.remove('is-on');
-      alert('Camera failed to start. Use https:// (GitHub Pages) or http://localhost and allow Camera.
-' + (err && err.message ? err.message : err));
-    }
-  }, true);
-
-  // If camera starts from camera accordion start button, also kick the loop.
-  if(openBtn){
-    openBtn.addEventListener('click', ()=> setTimeout(kickLoop, 120), true);
-  }
-  if(closeBtn){
-    closeBtn.addEventListener('click', ()=>{ try{ if(raf) cancelAnimationFrame(raf); }catch(_){ } raf=0; }, true);
-  }
-
-})();
-</script>
-<script>
 /* === Per-tool Camera (singleton stream, stays inside the selected tool) === */
 (function(){
   const tab = document.getElementById('tab-calibration');
@@ -16232,13 +16038,10 @@ document.addEventListener('DOMContentLoaded', function(){
       await start(tool, btn);
     }catch(err){
       stop();
-      alert('Camera failed to start.
-
-Tip: use https:// (GitHub Pages) or http://localhost and allow Camera permission.
-
-' +
+      alert(`Camera failed to start.\n\nTip: use https:// (GitHub Pages) or http://localhost and allow Camera permission.\n\n` +
         (err && err.name ? (err.name + ': ') : '') + (err && err.message ? err.message : ''));
-    }
+
+}
   }, true);
 
   // If the tool accordion closes, stop the stream
@@ -16252,6 +16055,86 @@ Tip: use https:// (GitHub Pages) or http://localhost and allow Camera permission
   }, true);
 
   window.__CalToolCamStop = stop;
+})();
+</script>
+<script>
+/* === Per-tool Camera Singleton (stays in the selected accordion) === */
+(function(){
+  const tab = document.getElementById('tab-calibration');
+  if(!tab || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+
+  const session = { stream:null, tool:null, btn:null, video:null };
+
+  function stop(){
+    try{ if(session.stream) session.stream.getTracks().forEach(t=>t.stop()); }catch(e){}
+    try{ if(session.video) session.video.srcObject = null; }catch(e){}
+    if(session.btn) session.btn.classList.remove('is-on');
+    session.stream=null; session.tool=null; session.btn=null; session.video=null;
+  }
+
+  function closeOtherAccordions(currentDetails){
+    const all = tab.querySelectorAll('details.acc[data-caltool], details.acc[data-acc]');
+    all.forEach(d=>{ if(d!==currentDetails && d.open) d.open=false; });
+  }
+
+  async function start(tool, btn){
+    const view = tab.querySelector(`#caltool-${tool}`);
+    const v = view && view.querySelector('.toolcam-video');
+    if(!v) throw new Error('tool preview video missing');
+    stop();
+
+    try{
+      v.setAttribute('playsinline','');
+      v.setAttribute('webkit-playsinline','');
+      v.muted = true;
+      v.autoplay = true;
+    }catch(_){}
+
+    const tryList = [
+      { video: { facingMode: { exact: "environment" }, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
+      { video: { facingMode: "environment", width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
+      { video: { facingMode: { ideal: "environment" }, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
+      { video: true, audio:false }
+    ];
+
+    let stream=null, lastErr=null;
+    for(const c of tryList){
+      try{ stream = await navigator.mediaDevices.getUserMedia(c); if(stream) break; }
+      catch(e){ lastErr=e; }
+    }
+    if(!stream) throw (lastErr || new Error('getUserMedia failed'));
+
+    v.srcObject = stream;
+    await v.play().catch(()=>{});
+
+    session.stream = stream;
+    session.tool = tool;
+    session.btn = btn;
+    session.video = v;
+    btn.classList.add('is-on');
+  }
+
+  tab.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('[data-cam-start]');
+    if(!btn) return;
+    const tool = btn.getAttribute('data-cam-start');
+
+    const det = btn.closest('details');
+    if(det) closeOtherAccordions(det);
+
+    if(session.tool === tool){ stop(); return; }
+
+    try{
+      await start(tool, btn);
+    }catch(err){
+      stop();
+      alert(`Camera failed to start.\n\nTip: use https:// (GitHub Pages) or http://localhost and allow Camera permission.\n\n` +
+        (err && err.name ? (err.name + ': ') : '') + (err && err.message ? err.message : ''));
+
+}
+  }, true);
+
+  window.__ToolCamStop = stop;
 })();
 </script>
 </body>
