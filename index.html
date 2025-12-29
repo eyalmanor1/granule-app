@@ -11681,6 +11681,8 @@ btn.addEventListener('click', closeGate);
   const video = document.getElementById('luxVideo');
   const canvas = document.getElementById('luxCanvas');
   const ctx = canvas ? canvas.getContext('2d', {willReadFrequently:true}) : null;
+  if(!video || !canvas || !ctx){ console.warn('[ct] missing video/canvas'); return; }
+
 
   const needle = document.getElementById('luxNeedle');
   const evEl = document.getElementById('luxEV');
@@ -11859,6 +11861,7 @@ btn.addEventListener('click', closeGate);
         video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: false
       });
+      if(!video){ console.warn('[camera] video element missing'); return; }
       video.srcObject = stream;
       await video.play();
       updateTitle();
@@ -11949,6 +11952,8 @@ btn.addEventListener('click', closeGate);
   const video = document.getElementById('specVideo');
   const canvas = document.getElementById('specCanvas');
   const ctx = canvas ? canvas.getContext('2d', {willReadFrequently:true}) : null;
+
+  if(!video || !canvas || !ctx){ console.warn('[spectrum] missing video/canvas'); return; }
 
   const needle = document.getElementById('specNeedle');
   const nmEl = document.getElementById('specNm');
@@ -12085,6 +12090,7 @@ btn.addEventListener('click', closeGate);
         video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: false
       });
+      if(!video){ console.warn('[camera] video element missing'); return; }
       video.srcObject = stream;
       await video.play();
       updateTitle();
@@ -12167,6 +12173,8 @@ btn.addEventListener('click', closeGate);
   const video = document.getElementById('ctVideo');
   const canvas = document.getElementById('ctCanvas');
   const ctx = canvas ? canvas.getContext('2d', {willReadFrequently:true}) : null;
+
+  if(!video || !canvas || !ctx){ console.warn('[ct] missing video/canvas'); return; }
 
   const kelvinEl = document.getElementById('ctKelvin');
   const xyEl = document.getElementById('ctXY');
@@ -12293,6 +12301,7 @@ btn.addEventListener('click', closeGate);
         video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: false
       }, {force:true});
+      if(!video){ console.warn('[camera] video element missing'); return; }
       video.srcObject = stream;
       await video.play();
       updateTitle();
@@ -12364,6 +12373,8 @@ btn.addEventListener('click', closeGate);
   const video = document.getElementById('flVideo');
   const canvas = document.getElementById('flCanvas');
   const ctx = canvas ? canvas.getContext('2d', {willReadFrequently:true}) : null;
+
+  if(!video || !canvas || !ctx){ console.warn('[flicker] missing video/canvas'); return; }
 
   const pctEl = document.getElementById('flPct');
   const freqEl = document.getElementById('flFreq');
@@ -12506,6 +12517,7 @@ btn.addEventListener('click', closeGate);
         video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: false
       }, {force:true});
+      if(!video){ console.warn('[camera] video element missing'); return; }
       video.srcObject = stream;
       await video.play();
       updateTitle();
@@ -13407,7 +13419,8 @@ document.addEventListener('DOMContentLoaded', () => {
       audio:false
     };
     stream = await navigator.mediaDevices.getUserMedia(constraints);
-    video.srcObject = stream;
+    if(!video){ console.warn('[camera] video element missing'); return; }
+      video.srcObject = stream;
     await video.play();
     rafId = requestAnimationFrame(loop);
   }
@@ -15071,11 +15084,11 @@ document.addEventListener('DOMContentLoaded', function(){
       await stopCamera();
       setStatus(tool, "error");
       const msg = (err && err.name) ? `${err.name}: ${err.message||""}` : String(err);
-      alert("Camera failed to start.
+      alert(`Camera failed to start.
 
 Tip: use https:// (GitHub Pages) or http://localhost and allow Camera permission.
 
-Error: " + msg);
+Error: ${msg}`);
     }
   }
 
