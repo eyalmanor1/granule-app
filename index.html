@@ -5424,6 +5424,19 @@ body{
 #tab-calibration .toolcam-roi{position:absolute;left:50%;top:50%;width:min(46%, 260px);height:min(46%, 260px);transform:translate(-50%,-50%);border:2px solid rgba(255,255,255,0.85);border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,0.12)}
 #tab-calibration .toolcam-cross{position:absolute;inset:0;background:linear-gradient(to right, transparent calc(50% - 1px), rgba(255,255,255,0.75) 0, rgba(255,255,255,0.75) calc(50% + 1px), transparent 0),linear-gradient(to bottom, transparent calc(50% - 1px), rgba(255,255,255,0.75) 0, rgba(255,255,255,0.75) calc(50% + 1px), transparent 0);opacity:.55;border-radius:12px}
 </style>
+<script>
+/* === file:// safe self-source reader (avoids CORS) === */
+function __readSelfSource(){
+  try{
+    if(location.protocol === 'file:'){
+      return Promise.resolve(document.documentElement.outerHTML);
+    }
+    return __readSelfSource().then(r=>r.text());
+  }catch(e){
+    return Promise.resolve(document.documentElement.outerHTML);
+  }
+}
+</script>
 <style id="modern-shell">
 :root{
     --shell-max: 980px;
@@ -15511,19 +15524,14 @@ Tip: run the page via http://localhost to allow camera permissions smoothly.`,
       title: 'Lux Meter — Exposure / brightness reference',
       steps: [
         'Use this tool to read brightness/exposure reference values and compare scenes.',
-        'Workflow:
-• Point the camera at the target
-• Observe the stability of readings
-• Use it to validate exposure before other calibration steps'
+        `Workflow:\n• Point the camera at the target\n• Observe the stability of readings\n• Use it to validate exposure before other calibration steps`
       ]
     },
     cct: {
       title: 'Color Temperature — CCT / Δuv calibration',
       steps: [
         'Use this tool to calibrate white balance: correlated color temperature (CCT) and Δuv.',
-        'Workflow:
-• Use a neutral target
-• Adjust settings until CCT/Δuv is within your desired range'
+        `Workflow:\n• Use a neutral target\n• Adjust settings until CCT/Δuv is within your desired range`
       ]
     },
     flicker: {
@@ -15537,9 +15545,7 @@ Tip: run the page via http://localhost to allow camera permissions smoothly.`,
       title: 'Light Spectrometer — Dominant wavelength / saturation',
       steps: [
         'Use this tool to estimate dominant wavelength and saturation for the observed light.',
-        'Workflow:
-• Capture a stable sample
-• Compare wavelength shifts across settings'
+        `Workflow:\n• Capture a stable sample\n• Compare wavelength shifts across settings`
       ]
     }
   };
@@ -15959,66 +15965,122 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 </script>
 <script>
-/* === Per-tool Camera (singleton stream, stays inside the selected tool) === */
+/* === Per-tool Camera (singleton stream) — draw into each tool canvas preview === */
 (function(){
   const tab = document.getElementById('tab-calibration');
   if(!tab || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
 
-  const session = { stream:null, ownerTool:null, ownerBtn:null, ownerVideo:null };
+  const session = {
+    stream: null,
+    ownerTool: null,
+    ownerBtn: null,
+    videoEl: null,
+    canvas: null,
+    ctx: null,
+    raf: null
+  };
 
   function stop(){
-    try{ session.stream?.getTracks()?.forEach(t=>t.stop()); }catch(e){}
-    try{ if(session.ownerVideo) session.ownerVideo.srcObject = null; }catch(e){}
-    try{ session.ownerBtn?.classList?.remove('is-on'); }catch(e){}
-    session.stream = null; session.ownerTool = null; session.ownerBtn = null; session.ownerVideo = null;
+    try{ if(session.raf) cancelAnimationFrame(session.raf); }catch(_){}
+    session.raf = null;
+
+    try{
+      if(session.ctx && session.canvas){
+        session.ctx.clearRect(0,0,session.canvas.width, session.canvas.height);
+      }
+    }catch(_){}
+
+    try{
+      if(session.videoEl){
+        session.videoEl.pause();
+        session.videoEl.srcObject = null;
+      }
+    }catch(_){}
+    session.videoEl = null;
+    session.canvas = null;
+    session.ctx = null;
+
+    try{ session.stream?.getTracks()?.forEach(t=>t.stop()); }catch(_){}
+    session.stream = null;
+
+    if(session.ownerBtn) session.ownerBtn.classList.remove('is-on');
+    session.ownerBtn = null;
+    session.ownerTool = null;
   }
 
-  function closeOthers(keepDetails){
-    tab.querySelectorAll('details.acc').forEach(d=>{
-      if(d !== keepDetails && d.open) d.open = false;
+  function closeOtherAccordions(current){
+    tab.querySelectorAll('details.acc[data-caltool]').forEach(d=>{
+      if(d !== current && d.open) d.open = false;
     });
   }
 
-  async function start(tool, btn){
+  function findCanvas(tool){
+    // preferred id scheme: lux_cam_canvas / ct_cam_canvas / ...
+    const byId = tab.querySelector(`#${tool}_cam_canvas`);
+    if(byId) return byId;
+
     const view = tab.querySelector(`#caltool-${tool}`);
-    const video = view?.querySelector('.toolcam-video') || view?.querySelector('video');
-    if(!video){
-      alert('Camera preview element not found for this tool.');
+    if(!view) return null;
+    return view.querySelector(`[data-ph="${tool}-camera"] canvas`) || view.querySelector('canvas.cal-ph-cam');
+  }
+
+  async function start(tool, btn){
+    const canvas = findCanvas(tool);
+    if(!canvas){
+      alert('Camera failed to start.\n\nError: tool preview canvas missing');
+      return;
+    }
+    const ctx = canvas.getContext('2d');
+    if(!ctx){
+      alert('Camera failed to start.\n\nError: cannot get canvas context');
       return;
     }
 
     stop();
 
-    try{
-      video.setAttribute('playsinline','');
-      video.setAttribute('webkit-playsinline','');
-      video.muted = true;
-      video.autoplay = true;
-    }catch(_){}
+    const v = document.createElement('video');
+    v.setAttribute('playsinline','');
+    v.setAttribute('webkit-playsinline','');
+    v.muted = true;
+    v.autoplay = true;
 
-    const tryList = [
-      { video: { facingMode: { exact: "environment" }, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
-      { video: { facingMode: "environment", width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
-      { video: { facingMode: { ideal: "environment" }, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
-      { video: true, audio:false }
+    const tries = [
+      { video:{ facingMode:{ exact:'environment' }, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
+      { video:{ facingMode:'environment', width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
+      { video:{ facingMode:{ ideal:'environment' }, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
+      { video:true, audio:false }
     ];
 
-    let stream=null, lastErr=null;
-    for(const c of tryList){
-      try{
-        stream = await navigator.mediaDevices.getUserMedia(c);
-        if(stream) break;
-      }catch(e){ lastErr=e; }
+    let stream = null, lastErr = null;
+    for(const c of tries){
+      try{ stream = await navigator.mediaDevices.getUserMedia(c); if(stream) break; }
+      catch(e){ lastErr = e; }
     }
-    if(!stream) throw (lastErr || new Error('getUserMedia failed'));
+    if(!stream){
+      const msg = lastErr ? ((lastErr.name||'Error') + ': ' + (lastErr.message||'')) : 'getUserMedia failed';
+      alert('Camera failed to start.\n\nTip: use https:// (GitHub Pages) or http://localhost and allow Camera permission.\n\n' + msg);
+      return;
+    }
 
-    video.srcObject = stream;
-    await video.play();
+    v.srcObject = stream;
+    try{ await v.play(); }catch(_){}
+
+    function draw(){
+      try{
+        if(v.readyState >= 2){
+          ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+        }
+      }catch(_){}
+      session.raf = requestAnimationFrame(draw);
+    }
+    draw();
 
     session.stream = stream;
     session.ownerTool = tool;
     session.ownerBtn = btn;
-    session.ownerVideo = video;
+    session.videoEl = v;
+    session.canvas = canvas;
+    session.ctx = ctx;
     btn.classList.add('is-on');
   }
 
@@ -16027,34 +16089,19 @@ document.addEventListener('DOMContentLoaded', function(){
     if(!btn) return;
 
     const tool = btn.getAttribute('data-cam-start');
-    const det = btn.closest('details.acc');
-    if(det) closeOthers(det);
+
+    const det = btn.closest('details') || tab.querySelector(`#caltool-${tool}`)?.closest('details');
+    if(det) closeOtherAccordions(det);
 
     if(session.ownerTool === tool){
       stop();
       return;
     }
-    try{
-      await start(tool, btn);
-    }catch(err){
-      stop();
-      alert(`Camera failed to start.\n\nTip: use https:// (GitHub Pages) or http://localhost and allow Camera permission.\n\n` +
-        (err && err.name ? (err.name + ': ') : '') + (err && err.message ? err.message : ''));
 
-}
+    await start(tool, btn);
   }, true);
 
-  // If the tool accordion closes, stop the stream
-  tab.addEventListener('toggle', (e)=>{
-    const det = e.target;
-    if(!(det instanceof HTMLDetailsElement)) return;
-    if(det.open) return;
-    if(session.ownerBtn && det.contains(session.ownerBtn)){
-      stop();
-    }
-  }, true);
-
-  window.__CalToolCamStop = stop;
+  window.__CalibrationCamStop = stop;
 })();
 </script>
 <script>
