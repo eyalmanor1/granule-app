@@ -22,6 +22,208 @@
   };
 })();
 </script>
+
+<script>
+/* === CAL01: Calibration tools read from the Reference Camera (no extra getUserMedia calls) === */
+(function(){
+  function el(id){ return document.getElementById(id); }
+  function getOut(){
+    return {
+      lux: { lux: el('lux_val_lux'), fc: el('lux_val_fc'), ev: el('lux_val_ev'), cv: el('lux_cam_canvas') },
+      ct:  { cct: el('ct_val_cct'), duv: el('ct_val_duv'), rgb: el('ct_val_rgb'), cv: el('ct_cam_canvas') },
+      fl:  { hz: el('fl_val_hz'), pct: el('fl_val_pct'), idx: el('fl_val_index'), cv: el('flicker_cam_canvas') },
+      sp:  { nm: el('sp_val_nm'), sat: el('sp_val_sat'), rgb: el('sp_val_rgb'), cv: el('spectrum_cam_canvas') }
+    };
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', ()=>{ try{ window.__calBinderStart && window.__calBinderStart(); }catch(_){} }, {once:true});
+  }
+
+  // Offscreen canvas for sampling
+  const sCanvas = document.createElement('canvas');
+  const sCtx = sCanvas.getContext('2d', { willReadFrequently: true });
+
+  const flHist = []; // {t, y}
+  const FL_MAX = 220;
+
+  function fmt1(x){ return (x==null || !isFinite(x)) ? '--' : (Math.round(x*10)/10).toString(); }
+  function fmt0(x){ return (x==null || !isFinite(x)) ? '--' : Math.round(x).toString(); }
+  function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+
+  function rgbToCct(r,g,b){
+    // sRGB [0..1] -> linear
+    function lin(u){ return (u <= 0.04045) ? (u/12.92) : Math.pow((u+0.055)/1.055, 2.4); }
+    const R = lin(r), G = lin(g), B = lin(b);
+    // sRGB D65 -> XYZ
+    const X = R*0.4124 + G*0.3576 + B*0.1805;
+    const Y = R*0.2126 + G*0.7152 + B*0.0722;
+    const Z = R*0.0193 + G*0.1192 + B*0.9505;
+    const sum = (X+Y+Z) || 1e-9;
+    const x = X/sum;
+    const y = Y/sum;
+    // McCamy approximation
+    const n = (x - 0.3320) / ((y || 1e-9) - 0.1858);
+    const cct = 449*Math.pow(n,3) + 3525*Math.pow(n,2) + 6823.3*n + 5520.33;
+    return cct;
+  }
+
+  function estimateFlicker(){
+    if(flHist.length < 60) return {hz:null, mod:null, idx:null};
+    // Remove mean
+    const ys = flHist.map(p=>p.y);
+    const mean = ys.reduce((a,b)=>a+b,0)/ys.length;
+    const y0 = ys.map(v=>v-mean);
+    // Modulation (approx)
+    const min = Math.min(...ys);
+    const max = Math.max(...ys);
+    const mod = (max+min>0) ? ((max-min)/(max+min))*100 : 0;
+    // Autocorrelation peak search
+    const dt = (flHist[flHist.length-1].t - flHist[0].t) / (flHist.length-1);
+    if(!isFinite(dt) || dt<=0) return {hz:null, mod, idx:null};
+    const fs = 1/dt;
+    const minHz = 40, maxHz = 150;
+    const minLag = Math.round(fs/maxHz);
+    const maxLag = Math.round(fs/minHz);
+    let bestLag = null, best = -Infinity;
+    for(let lag=minLag; lag<=maxLag; lag++){
+      let s=0;
+      for(let i=0; i<y0.length-lag; i++) s += y0[i]*y0[i+lag];
+      if(s>best){ best=s; bestLag=lag; }
+    }
+    const hz = bestLag ? (fs/bestLag) : null;
+    const idx = mod==null ? null : (mod/100);
+    return {hz, mod, idx};
+  }
+
+  function drawTo(canvas, video){
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    // Cover-fit: draw video to canvas while preserving aspect
+    const vw = video.videoWidth || 0;
+    const vh = video.videoHeight || 0;
+    if(vw<2 || vh<2) return;
+    const s = Math.max(w/vw, h/vh);
+    const dw = vw*s;
+    const dh = vh*s;
+    const dx = (w-dw)/2;
+    const dy = (h-dh)/2;
+    ctx.clearRect(0,0,w,h);
+    ctx.drawImage(video, 0,0,vw,vh, dx,dy,dw,dh);
+  }
+
+  function sample(video){
+    const vw = video.videoWidth || 0;
+    const vh = video.videoHeight || 0;
+    if(vw<2 || vh<2) return null;
+    const size = 64;
+    sCanvas.width = size;
+    sCanvas.height = size;
+    // Center crop ROI
+    const sx = Math.max(0, Math.floor(vw/2 - size/2));
+    const sy = Math.max(0, Math.floor(vh/2 - size/2));
+    sCtx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
+    const img = sCtx.getImageData(0,0,size,size).data;
+    let r=0,g=0,b=0,y=0;
+    for(let i=0;i<img.length;i+=4){
+      const R=img[i], G=img[i+1], B=img[i+2];
+      r += R; g += G; b += B;
+      y += 0.2126*R + 0.7152*G + 0.0722*B;
+    }
+    const n = img.length/4;
+    r/=n; g/=n; b/=n; y/=n;
+    return {r,g,b,y};
+  }
+
+  function setAllIdle(){
+    const out = getOut();
+    try{
+      if(out.lux.lux) out.lux.lux.textContent='--';
+      if(out.lux.fc)  out.lux.fc.textContent='--';
+      if(out.lux.ev)  out.lux.ev.textContent='--';
+      if(out.ct.cct)  out.ct.cct.textContent='--';
+      if(out.ct.duv)  out.ct.duv.textContent='--';
+      if(out.ct.rgb)  out.ct.rgb.textContent='--';
+      if(out.fl.hz)   out.fl.hz.textContent='--';
+      if(out.fl.pct)  out.fl.pct.textContent='--';
+      if(out.fl.idx)  out.fl.idx.textContent='--';
+      if(out.sp.nm)   out.sp.nm.textContent='--';
+      if(out.sp.sat)  out.sp.sat.textContent='--';
+      if(out.sp.rgb)  out.sp.rgb.textContent='--';
+    }catch(_e){}
+  }
+
+  function loop(){
+    const out = getOut();
+    const video = el('live-video');
+    const camOk = video && video.srcObject && (video.videoWidth||0) > 2;
+    if(!camOk){
+      setAllIdle();
+      requestAnimationFrame(loop);
+      return;
+    }
+
+    // Draw the same reference feed into each tool's camera placeholder
+    drawTo(out.lux.cv, video);
+    drawTo(out.ct.cv, video);
+    drawTo(out.fl.cv, video);
+    drawTo(out.sp.cv, video);
+
+    const s = sample(video);
+    if(!s){ requestAnimationFrame(loop); return; }
+
+    // --- Lux (simple luminance->lux mapping; placeholder calibration) ---
+    const yN = clamp01(s.y/255);
+    const lux = Math.pow(yN, 2.0) * 20000; // 0..~20k (tune later)
+    const fc = lux / 10.764;
+    const ev = Math.log2(Math.max(0.001, lux/2.5));
+    if(out.lux.lux) out.lux.lux.textContent = fmt0(lux);
+    if(out.lux.fc)  out.lux.fc.textContent  = fmt1(fc);
+    if(out.lux.ev)  out.lux.ev.textContent  = fmt1(ev);
+
+    // --- CCT (McCamy), Δuv placeholder ---
+    const rN = s.r/255, gN = s.g/255, bN = s.b/255;
+    const cct = rgbToCct(rN,gN,bN);
+    if(out.ct.cct) out.ct.cct.textContent = isFinite(cct) ? fmt0(cct) : '--';
+    if(out.ct.duv) out.ct.duv.textContent = '0.000'; // placeholder until we compute uv distance
+    if(out.ct.rgb) out.ct.rgb.textContent = `${fmt0(s.r)},${fmt0(s.g)},${fmt0(s.b)}`;
+
+    // --- Flicker (autocorrelation over ROI luminance) ---
+    const now = performance.now()/1000;
+    flHist.push({t:now, y:yN});
+    if(flHist.length>FL_MAX) flHist.splice(0, flHist.length-FL_MAX);
+    const fl = estimateFlicker();
+    if(out.fl.hz)  out.fl.hz.textContent  = fl.hz ? fmt1(fl.hz) : '--';
+    if(out.fl.pct) out.fl.pct.textContent = (fl.mod==null) ? '--' : fmt1(fl.mod);
+    if(out.fl.idx) out.fl.idx.textContent = (fl.idx==null) ? '--' : fmt1(fl.idx);
+
+    // --- Spectrum (dominant wavelength proxy from hue; placeholder) ---
+    const max = Math.max(rN,gN,bN), min = Math.min(rN,gN,bN);
+    const d = max-min;
+    let h = 0;
+    if(d>1e-6){
+      if(max===rN) h = ((gN-bN)/d) % 6;
+      else if(max===gN) h = (bN-rN)/d + 2;
+      else h = (rN-gN)/d + 4;
+      h *= 60; if(h<0) h += 360;
+    }
+    const sat = (max<=1e-6) ? 0 : (d/max);
+    // Map hue [0..360] -> nm [380..700] very roughly
+    const nm = 700 - (h/360)*(700-380);
+    if(out.sp.nm)  out.sp.nm.textContent  = fmt0(nm);
+    if(out.sp.sat) out.sp.sat.textContent = fmt0(sat*100);
+    if(out.sp.rgb) out.sp.rgb.textContent = `${fmt0(s.r)},${fmt0(s.g)},${fmt0(s.b)}`;
+
+    requestAnimationFrame(loop);
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    // start render loop; it will stay idle until user hits Start in Camera.
+    requestAnimationFrame(loop);
+  });
+})();
+</script>
 <!-- === /Manor Dev Inspector Hook === -->
 
 <!-- === Camera Permission Gate (prevents unwanted prompts) === -->
@@ -79,31 +281,21 @@
   document.addEventListener('DOMContentLoaded', wrapCameraManager);
   window.addEventListener('load', wrapCameraManager);
 
-  // Unlock on clicks that are clearly meant to open camera-based tools (Calibration tab)
+  // Unlock only on explicit camera start actions (prevents random permission prompts).
   document.addEventListener('click', function(e){
     const t = e.target;
     if(!t) return;
 
-    // Open chip in Calibration accordion summaries
-    const inCal = t.closest && t.closest('#tab-calibration');
-    if(!inCal) return;
-
-    // If clicking on the Open chip or Info (we treat as intentional context too)
-    const chip = t.closest && t.closest('.an-chip, .an-chip-info');
-    if(chip){
-      // Only for camera-based accordions
-      const details = chip.closest && chip.closest('details.acc');
-      const acc = details ? (details.getAttribute('data-acc') || '') : '';
-      if(/camera|lux|cct|flicker|spec/i.test(acc)){
-        window.unlockCameraRequests();
-      }
+    // 1) Explicit Start buttons
+    if(t.closest && t.closest('#open-camera-btn, #luxm_camStartBtn, [data-cam-unlock="1"]')){
+      window.unlockCameraRequests();
+      return;
     }
 
-    // If clicking inside camera tool view on video/canvas region, also allow
-    if(t.closest && t.closest('#tab-camera')){
-      if(t.closest('video, canvas, .cam-frame, .cam-view, .cam-wrap, .cam-card')){
-        window.unlockCameraRequests();
-      }
+    // 2) Capture is allowed to auto-start (if you choose to support it)
+    if(t.closest && t.closest('#capture-photo-btn')){
+      window.unlockCameraRequests();
+      return;
     }
   }, true);
 })();
@@ -4987,6 +5179,14 @@ max-width:340px}[data-luxm="1"] .debug{
   background:rgba(0,0,0,0.20);
   overflow:hidden;
 }
+#tab-calibration .cal-ph-cam{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+}
 #tab-calibration .cal-ph-crosshair{
   position:absolute; inset:0;
   background:
@@ -6085,7 +6285,7 @@ max-width:340px}[data-luxm="1"] .debug{
 <div class="tab-fixed-head"><h2>Calibration</h2></div>
 <div class="tab-scroll">
 <div class="cal-shell">
-<div class="acc-list" id="calAccList"><details class="acc" data-acc="camera"><summary><div><div class="acc-title">Camera</div><div class="acc-sub">Live view &amp; controls</div></div><span class="an-chip">Open</span><button class="an-chip an-chip-info" type="button" title="Information">Info</button></summary>
+<div class="acc-list" id="calAccList"><details class="acc" data-acc="camera"><summary><div><div class="acc-title">Camera</div><div class="acc-sub">Live view &amp; controls</div></div><button class="an-chip an-chip-info" type="button" title="Information">Info</button></summary>
 <!-- Camera capture status/preview (auto-injected) -->
 <div id="camCaptureStatus" style="margin:10px 0; font-size:13px; opacity:.85;"></div>
 <div id="camCapturePreview" style="display:none; margin:10px 0; padding:10px; border:1px solid rgba(255,255,255,.15); border-radius:12px;">
@@ -6107,6 +6307,10 @@ max-width:340px}[data-luxm="1"] .debug{
 <div class="cam-card">
 <h3>Live Camera</h3>
 <div class="cam-sub" id="cam-status" style="color:#cbd5ff;">Status: idle</div>
+<div class="cam-row" style="margin-top:10px; gap:10px; flex-wrap:wrap;">
+  <button class="cam-btn" id="open-camera-btn" type="button" data-cam-unlock="1">Start</button>
+  <button class="cam-btn" id="close-camera-btn" type="button" style="display:none;">Stop</button>
+</div>
 <div class="cam-view">
 <div class="cam-frame">
 <video autoplay="" id="live-video" muted="" playsinline="" style="display:none;"></video>
@@ -6140,7 +6344,7 @@ max-width:340px}[data-luxm="1"] .debug{
 </div>
 </div>
 </div>
-</div></div></details><details class="acc" data-caltool="lux"><summary><div><div class="acc-title">Lux Meter</div><div class="acc-sub">Exposure / brightness reference</div></div><span class="an-chip">Open</span><button class="an-chip an-chip-info" type="button" title="Information">Info</button></summary>
+</div></div></details><details class="acc" data-caltool="lux"><summary><div><div class="acc-title">Lux Meter</div><div class="acc-sub">Exposure / brightness reference</div></div><button class="an-chip an-chip-info" type="button" title="Information">Info</button></summary>
 <div class="acc-body">
   <div class="cal-tool-view" id="caltool-lux">
     <div class="cal-inline-topbar">
@@ -6164,9 +6368,9 @@ max-width:340px}[data-luxm="1"] .debug{
             <div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
           </div>
           <div class="cal-ph-readout">
-            <div class="cal-ph-readoutRow"><span>Value 1</span><b>--</b></div>
-            <div class="cal-ph-readoutRow"><span>Value 2</span><b>--</b></div>
-            <div class="cal-ph-readoutRow"><span>Value 3</span><b>--</b></div>
+            <div class="cal-ph-readoutRow"><span>Lux</span><b id="lux_val_lux">--</b></div>
+            <div class="cal-ph-readoutRow"><span>Foot‑candles</span><b id="lux_val_fc">--</b></div>
+            <div class="cal-ph-readoutRow"><span>EV (approx)</span><b id="lux_val_ev">--</b></div>
           </div>
         
 
@@ -6174,6 +6378,7 @@ max-width:340px}[data-luxm="1"] .debug{
         <div class="cal-ph-title">Camera Placeholder</div>
         <div class="cal-ph-sub">This area will host the camera feed used by lux.</div>
         <div class="cal-ph-cameraFrame">
+          <canvas class="cal-ph-cam" id="lux_cam_canvas" width="360" height="240" aria-label="Lux camera preview"></canvas>
           <div class="cal-ph-crosshair"></div>
         </div>
       </div>
@@ -6184,7 +6389,7 @@ max-width:340px}[data-luxm="1"] .debug{
 </div>
   </div>
 </div>
-</details><details class="acc" data-caltool="ct"><summary><div><div class="acc-title">Color Temperature</div><div class="acc-sub">CCT / Δuv calibration</div></div><span class="an-chip">Open</span><button class="an-chip an-chip-info" type="button" title="Information">Info</button></summary>
+</details><details class="acc" data-caltool="ct"><summary><div><div class="acc-title">Color Temperature</div><div class="acc-sub">CCT / Δuv calibration</div></div><button class="an-chip an-chip-info" type="button" title="Information">Info</button></summary>
 <div class="acc-body">
   <div class="cal-tool-view" id="caltool-ct">
     <div class="cal-inline-topbar">
@@ -6208,9 +6413,9 @@ max-width:340px}[data-luxm="1"] .debug{
             <div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
           </div>
           <div class="cal-ph-readout">
-            <div class="cal-ph-readoutRow"><span>Value 1</span><b>--</b></div>
-            <div class="cal-ph-readoutRow"><span>Value 2</span><b>--</b></div>
-            <div class="cal-ph-readoutRow"><span>Value 3</span><b>--</b></div>
+            <div class="cal-ph-readoutRow"><span>CCT (K)</span><b id="ct_val_cct">--</b></div>
+            <div class="cal-ph-readoutRow"><span>Δuv</span><b id="ct_val_duv">--</b></div>
+            <div class="cal-ph-readoutRow"><span>RGB</span><b id="ct_val_rgb">--</b></div>
           </div>
         
 
@@ -6218,6 +6423,7 @@ max-width:340px}[data-luxm="1"] .debug{
         <div class="cal-ph-title">Camera Placeholder</div>
         <div class="cal-ph-sub">This area will host the camera feed used by ct.</div>
         <div class="cal-ph-cameraFrame">
+          <canvas class="cal-ph-cam" id="ct_cam_canvas" width="360" height="240" aria-label="CCT camera preview"></canvas>
           <div class="cal-ph-crosshair"></div>
         </div>
       </div>
@@ -6228,7 +6434,7 @@ max-width:340px}[data-luxm="1"] .debug{
 </div>
   </div>
 </div>
-</details><details class="acc" data-caltool="flicker"><summary><div><div class="acc-title">Flicker Meter</div><div class="acc-sub">Frequency / flicker level</div></div><span class="an-chip">Open</span><button class="an-chip an-chip-info" type="button" title="Information">Info</button></summary>
+</details><details class="acc" data-caltool="flicker"><summary><div><div class="acc-title">Flicker Meter</div><div class="acc-sub">Frequency / flicker level</div></div><button class="an-chip an-chip-info" type="button" title="Information">Info</button></summary>
 <div class="acc-body">
   <div class="cal-tool-view" id="caltool-flicker">
     <div class="cal-inline-topbar">
@@ -6252,9 +6458,9 @@ max-width:340px}[data-luxm="1"] .debug{
             <div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
           </div>
           <div class="cal-ph-readout">
-            <div class="cal-ph-readoutRow"><span>Value 1</span><b>--</b></div>
-            <div class="cal-ph-readoutRow"><span>Value 2</span><b>--</b></div>
-            <div class="cal-ph-readoutRow"><span>Value 3</span><b>--</b></div>
+            <div class="cal-ph-readoutRow"><span>Flicker Hz</span><b id="fl_val_hz">--</b></div>
+            <div class="cal-ph-readoutRow"><span>Flicker %</span><b id="fl_val_pct">--</b></div>
+            <div class="cal-ph-readoutRow"><span>Index (approx)</span><b id="fl_val_index">--</b></div>
           </div>
         
 
@@ -6262,6 +6468,7 @@ max-width:340px}[data-luxm="1"] .debug{
         <div class="cal-ph-title">Camera Placeholder</div>
         <div class="cal-ph-sub">This area will host the camera feed used by flicker.</div>
         <div class="cal-ph-cameraFrame">
+          <canvas class="cal-ph-cam" id="flicker_cam_canvas" width="360" height="240" aria-label="Flicker camera preview"></canvas>
           <div class="cal-ph-crosshair"></div>
         </div>
       </div>
@@ -6272,7 +6479,7 @@ max-width:340px}[data-luxm="1"] .debug{
 </div>
   </div>
 </div>
-</details><details class="acc" data-caltool="spectrum"><summary><div><div class="acc-title">Light Spectrometer</div><div class="acc-sub">Dominant wavelength / saturation</div></div><span class="an-chip">Open</span><button class="an-chip an-chip-info" type="button" title="Information">Info</button></summary>
+</details><details class="acc" data-caltool="spectrum"><summary><div><div class="acc-title">Light Spectrometer</div><div class="acc-sub">Dominant wavelength / saturation</div></div><button class="an-chip an-chip-info" type="button" title="Information">Info</button></summary>
 <div class="acc-body">
   <div class="cal-tool-view" id="caltool-spectrum">
     <div class="cal-inline-topbar">
@@ -6296,9 +6503,9 @@ max-width:340px}[data-luxm="1"] .debug{
             <div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
           </div>
           <div class="cal-ph-readout">
-            <div class="cal-ph-readoutRow"><span>Value 1</span><b>--</b></div>
-            <div class="cal-ph-readoutRow"><span>Value 2</span><b>--</b></div>
-            <div class="cal-ph-readoutRow"><span>Value 3</span><b>--</b></div>
+            <div class="cal-ph-readoutRow"><span>Dominant nm</span><b id="sp_val_nm">--</b></div>
+            <div class="cal-ph-readoutRow"><span>Saturation %</span><b id="sp_val_sat">--</b></div>
+            <div class="cal-ph-readoutRow"><span>RGB</span><b id="sp_val_rgb">--</b></div>
           </div>
         
 
@@ -6306,6 +6513,7 @@ max-width:340px}[data-luxm="1"] .debug{
         <div class="cal-ph-title">Camera Placeholder</div>
         <div class="cal-ph-sub">This area will host the camera feed used by spectrum.</div>
         <div class="cal-ph-cameraFrame">
+          <canvas class="cal-ph-cam" id="spectrum_cam_canvas" width="360" height="240" aria-label="Spectrum camera preview"></canvas>
           <div class="cal-ph-crosshair"></div>
         </div>
       </div>
@@ -12922,6 +13130,8 @@ document.addEventListener('DOMContentLoaded', () => {
 <script>
 /* === AV18: Auto-start camera when available (secure context only) === */
 document.addEventListener('DOMContentLoaded', () => {
+  // Disabled: camera should NOT auto-start. Only explicit Start actions should request permission.
+  return;
   const statusEl = document.getElementById('cam-status');
   const videoEl = document.getElementById('live-video');
 
@@ -12972,6 +13182,8 @@ document.addEventListener('DOMContentLoaded', () => {
 <script>
 /* === AV22: Mobile gesture kick to start camera === */
 document.addEventListener('DOMContentLoaded', () => {
+  // Disabled: do not start camera on first touch/pointer anywhere.
+  return;
   const once = () => { try{ window.openCamera && window.openCamera(); }catch(_){}; window.removeEventListener('touchstart', once, true); window.removeEventListener('pointerdown', once, true); };
   window.addEventListener('touchstart', once, true);
   window.addEventListener('pointerdown', once, true);
@@ -13110,11 +13322,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.openCamera = async ()=> Camera.start({userGesture:true, reason:'openCamera()'});
   window.closeCamera = ()=> Camera.stop();
 
-  document.addEventListener('DOMContentLoaded', ()=>{ Camera.start({userGesture:false, reason:'DOMContentLoaded'}); });
-
-  const onceGesture = ()=>{ Camera.start({userGesture:true, reason:'first-gesture'}); window.removeEventListener('pointerdown', onceGesture, true); window.removeEventListener('touchstart', onceGesture, true); };
-  window.addEventListener('pointerdown', onceGesture, true);
-  window.addEventListener('touchstart', onceGesture, true);
+  // Disabled: never auto-start the camera. Only explicit Start/ Capture actions should request permission.
 
   document.addEventListener('DOMContentLoaded', ()=>{
     const btn = document.getElementById('open-camera-btn');
@@ -13133,11 +13341,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  document.addEventListener('DOMContentLoaded', ()=>{
-    document.querySelectorAll('details.acc').forEach(d=>{
-      d.addEventListener('toggle', ()=>{ if(d.open) setTimeout(()=>Camera.start({userGesture:false, reason:'accordion-open'}), 50); }, true);
-    });
-  });
+  // Disabled: do not start camera on accordion open.
 
   // ---------------- Onboarding / Help ----------------
   function clearTabHelpSeenOnly(){
