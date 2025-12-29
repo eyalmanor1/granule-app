@@ -5132,8 +5132,101 @@ border-radius:14px;
 
   <div class="soft-card lux-panel lux-camera-panel">
     <div class="lux-panel-body">
-      <div class="lux-preview" id="cameraPreviewBox" aria-label="camera preview">
-        <div class="cam-viewport" data-cam="static"><div class="cam-crosshair"></div></div>
+<div class="lux-preview" id="cameraPreviewBox" aria-label="camera preview">
+  <!-- Grain Camera Pane (RTL) -->
+  <div class="cam-wrap" dir="rtl" aria-label="מצלמת גרגירים — בדיקת צבע וגרגירים" style="width:100%; padding:0; margin:0;">
+    <div class="cam-card" style="max-height:none;">
+      <div class="tab-topbar" style="padding:10px 12px;">
+        <h2 class="tab-title" style="font-size:16px; margin:0;">מצלמת גרגירים — בדיקת צבע</h2>
+        <div class="tab-top-controls">
+          <div style="font-weight:800;color:var(--muted);font-size:12px">מיקוד לגרגירים קטנים</div>
+        </div>
+      </div>
+
+      <div class="cam-view" style="gap:12px; align-items:start; padding:12px;">
+        <!-- Live frame -->
+        <div style="flex:1 1 58%; min-width:260px;">
+          <div class="cam-frame" id="granuleCamFrame" style="position:relative;">
+            <video id="granuleVideo" autoplay muted playsinline></video>
+            <canvas id="granuleCanvas" style="display:none;"></canvas>
+
+            <div class="reticle size-m" id="granuleReticle" style="pointer-events:none;">
+              <div class="circle" style="border:3px solid rgba(255,255,255,0.95); box-shadow: 0 0 0 999px rgba(0,0,0,0.12) inset;"></div>
+              <div class="label" id="reticleLabel">התמקד על אזור המדידה</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:10px;flex-wrap:wrap;">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <button class="cam-btn primary" id="btnCapture">צילום</button>
+              <button class="cam-btn" id="btnFreeze">הקפאה</button>
+              <button class="cam-btn" id="btnTorch">תאורה</button>
+              <button class="cam-btn" id="btnDetect">גילוי גרגירים</button>
+            </div>
+
+            <div style="display:flex;gap:8px;align-items:center;">
+              <label style="font-size:12px;color:var(--muted);font-weight:800;">זום</label>
+              <input id="zoomRange" type="range" min="1" max="3" step="0.05" value="1" style="width:120px;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Readouts -->
+        <div style="flex:1 1 42%; min-width:240px;">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="cam-card" style="display:flex;gap:10px;align-items:center;padding:12px;">
+              <div class="cam-colorbox" id="avgColorBox" style="width:88px;height:88px;border-radius:12px;border:1px solid rgba(255,255,255,0.12);">
+                <div style="font-weight:900;color:#fff;opacity:0.95;padding:8px;text-align:center;" id="colorName">--</div>
+              </div>
+
+              <div style="flex:1;">
+                <div style="font-weight:900;color:var(--muted);font-size:12px;margin-bottom:6px;">צבע ממוצע באזור המדידה</div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <div style="min-width:90px;">
+                    <div style="font-weight:900;font-size:16px;color:#e8e8ff" id="rgbLabel">RGB: -- , -- , --</div>
+                    <div style="font-weight:900;font-size:13px;color:#cbd5ff" id="hsvLabel">HSV: -- , -- , --</div>
+                  </div>
+                  <div style="margin-left:auto;">
+                    <div id="passChip" class="an-chip" style="background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.18));color:#ffd7a0;border:1px solid rgba(250,174,82,0.35);">ממתין לניתוח</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="cam-card" style="padding:12px;">
+              <div style="font-weight:900;color:var(--accent);margin-bottom:8px;">תוצאות גילוי גרגירים</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div style="font-size:13px;color:var(--muted);">מספר גרגירים:</div>
+                <div style="font-weight:900;color:#e8e8ff;text-align:left;" id="grainCount">—</div>
+
+                <div style="font-size:13px;color:var(--muted);">גודל ממוצע (פיקסלים):</div>
+                <div style="font-weight:900;color:#e8e8ff;text-align:left;" id="grainAvgSize">—</div>
+
+                <div style="font-size:13px;color:var(--muted);">קטגוריות גודל:</div>
+                <div style="font-weight:900;color:#e8e8ff;text-align:left;" id="sizeCats">—</div>
+              </div>
+              <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="cam-btn" id="btnExport">שמירת תמונה</button>
+                <button class="cam-btn" id="btnClearThumbs">נקה תמונות</button>
+              </div>
+            </div>
+
+            <div class="cam-card" style="padding:10px;">
+              <div style="font-weight:900;color:var(--muted);margin-bottom:8px;">תמונות מדגם</div>
+              <div id="thumbs" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <canvas id="procCanvas" width="640" height="480" style="display:none;"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- keep legacy preview canvas if other code expects it -->
+<canvas id="preview" width="240" height="240" style="display:none;"></canvas>
+</div></div>
         <canvas id="preview" width="240" height="240" style="display:none;"></canvas>
         <div class="lux-crosshair" aria-hidden="true"></div>
       </div>
@@ -11000,6 +11093,301 @@ window.CameraManager = {
   attach: async function(){ throw new Error("Camera disabled"); },
   getStream: function(){ return null; }
 };
+</script>
+
+
+<script>
+/* Grain Camera Pane Script */
+(function(){
+  const video = document.getElementById('granuleVideo');
+  const procCanvas = document.getElementById('procCanvas');
+  const procCtx = procCanvas ? procCanvas.getContext('2d') : null;
+  const granuleCanvas = document.getElementById('granuleCanvas');
+  const granuleCtx = granuleCanvas ? granuleCanvas.getContext('2d') : null;
+
+  const avgColorBox = document.getElementById('avgColorBox');
+  const rgbLabel = document.getElementById('rgbLabel');
+  const hsvLabel = document.getElementById('hsvLabel');
+  const grainCount = document.getElementById('grainCount');
+  const grainAvgSize = document.getElementById('grainAvgSize');
+  const sizeCats = document.getElementById('sizeCats');
+  const passChip = document.getElementById('passChip');
+  const thumbs = document.getElementById('thumbs');
+
+  if (!video || !procCanvas || !procCtx) return; // pane not present
+
+  let stream = null, track = null;
+  let frozen = false;
+  let torchOn = false;
+
+  async function initCamera() {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (passChip) passChip.textContent = 'הדפדפן לא תומך במצלמה';
+        return;
+      }
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: {ideal:1280}, height: {ideal:720} },
+        audio: false
+      });
+      video.srcObject = stream;
+      track = stream.getVideoTracks()[0];
+
+      video.addEventListener('loadedmetadata', () => {
+        if (granuleCanvas) {
+          granuleCanvas.width = video.videoWidth || 1280;
+          granuleCanvas.height = video.videoHeight || 720;
+        }
+        procCanvas.width = Math.min(640, video.videoWidth || 640);
+        procCanvas.height = Math.min(480, video.videoHeight || 480);
+        requestAnimationFrame(loop);
+      }, { once: true });
+
+      if (passChip) passChip.textContent = 'מצלמה פעילה';
+    } catch (e) {
+      console.error('Camera error:', e);
+      if (passChip) passChip.textContent = 'אין גישה למצלמה';
+    }
+  }
+
+  function loop(){
+    if (!frozen && video.readyState >= 2) {
+      procCtx.drawImage(video, 0, 0, procCanvas.width, procCanvas.height);
+      updateReticleMetrics();
+    }
+    requestAnimationFrame(loop);
+  }
+
+  function updateReticleMetrics(){
+    const W = procCanvas.width, H = procCanvas.height;
+    const cx = Math.floor(W/2), cy = Math.floor(H/2);
+    const r = Math.floor(Math.min(W,H) * 0.18);
+
+    const img = procCtx.getImageData(cx - r, cy - r, r*2, r*2);
+    const data = img.data;
+    let rSum=0,gSum=0,bSum=0,count=0;
+
+    for (let y=0;y<r*2;y++){
+      for (let x=0;x<r*2;x++){
+        const dx=x-r, dy=y-r;
+        if (dx*dx+dy*dy <= r*r){
+          const idx = (y*(r*2)+x)*4;
+          const R=data[idx], G=data[idx+1], B=data[idx+2], A=data[idx+3];
+          if (A>32){
+            rSum+=R; gSum+=G; bSum+=B; count++;
+          }
+        }
+      }
+    }
+    if (!count) return;
+
+    const rAvg = Math.round(rSum/count), gAvg=Math.round(gSum/count), bAvg=Math.round(bSum/count);
+    if (rgbLabel) rgbLabel.textContent = `RGB: ${rAvg} , ${gAvg} , ${bAvg}`;
+    const hsv = rgbToHsv(rAvg,gAvg,bAvg);
+    if (hsvLabel) hsvLabel.textContent = `HSV: ${Math.round(hsv.h)}°, ${Math.round(hsv.s)}% , ${Math.round(hsv.v)}%`;
+
+    if (avgColorBox) {
+      avgColorBox.style.background = `rgb(${rAvg},${gAvg},${bAvg})`;
+      avgColorBox.style.color = (luminance(rAvg,gAvg,bAvg) > 0.55) ? '#101226':'#ffffff';
+    }
+    if (passChip && passChip.textContent === 'ממתין לניתוח') passChip.textContent = 'מוכן לניתוח';
+  }
+
+  function detectGrains() {
+    const W = procCanvas.width, H = procCanvas.height;
+    procCtx.drawImage(video, 0, 0, W, H);
+    const img = procCtx.getImageData(0,0,W,H);
+
+    const gray = new Uint8ClampedArray(W*H);
+    for (let i=0, p=0;i<img.data.length;i+=4,p++){
+      const r = img.data[i], g = img.data[i+1], b = img.data[i+2];
+      gray[p] = Math.round(0.2126*r + 0.7152*g + 0.0722*b);
+    }
+
+    const sx = new Int16Array([ -1,0,1,-2,0,2,-1,0,1 ]);
+    const sy = new Int16Array([ -1,-2,-1,0,0,0,1,2,1 ]);
+    const mag = new Uint8ClampedArray(W*H);
+
+    for (let y=1;y<H-1;y++){
+      for (let x=1;x<W-1;x++){
+        let gx=0, gy=0, k=0;
+        for (let yy=-1;yy<=1;yy++){
+          for (let xx=-1;xx<=1;xx++,k++){
+            const v = gray[(y+yy)*W + (x+xx)];
+            gx += v * sx[k];
+            gy += v * sy[k];
+          }
+        }
+        const g = Math.hypot(gx,gy);
+        mag[y*W + x] = Math.min(255, Math.round(g/4));
+      }
+    }
+
+    const thresh = 32;
+    const bin = new Uint8Array(W*H);
+    for (let i=0;i<mag.length;i++) bin[i] = mag[i] > thresh ? 1 : 0;
+
+    const visited = new Uint8Array(W*H);
+    const stack = [];
+    const components = [];
+
+    for (let y=1;y<H-1;y++){
+      for (let x=1;x<W-1;x++){
+        const idx = y*W + x;
+        if (bin[idx] && !visited[idx]){
+          let minx=x,maxx=x,miny=y,maxy=y,area=0;
+          stack.push(idx);
+          visited[idx]=1;
+          while(stack.length){
+            const cur = stack.pop();
+            area++;
+            const cy = Math.floor(cur / W), cx = cur % W;
+            minx = Math.min(minx,cx); maxx = Math.max(maxx,cx);
+            miny = Math.min(miny,cy); maxy = Math.max(maxy,cy);
+            for (let ny=cy-1;ny<=cy+1;ny++){
+              for (let nx=cx-1;nx<=cx+1;nx++){
+                if (ny<=0 || ny>=H || nx<=0 || nx>=W) continue;
+                const nidx = ny*W + nx;
+                if (!visited[nidx] && bin[nidx]){
+                  visited[nidx]=1;
+                  stack.push(nidx);
+                }
+              }
+            }
+          }
+          components.push({area, bbox:[minx,miny,maxx,maxy]});
+        }
+      }
+    }
+
+    const minArea = 36;
+    const grains = components.filter(c=> c.area >= minArea);
+    const count = grains.length;
+    const avgSize = grains.length ? Math.round(grains.reduce((s,g)=>s+g.area,0)/grains.length) : 0;
+
+    const small = grains.filter(g=> g.area < 100).length;
+    const med = grains.filter(g=> g.area >=100 && g.area < 400).length;
+    const large = grains.filter(g=> g.area >=400).length;
+
+    if (grainCount) grainCount.textContent = count ? String(count) : '0';
+    if (grainAvgSize) grainAvgSize.textContent = count ? String(avgSize) : '—';
+    if (sizeCats) sizeCats.textContent = `קטן:${small} • בינוני:${med} • גדול:${large}`;
+
+    // annotate snapshot for thumbnail
+    if (granuleCtx && granuleCanvas) {
+      granuleCanvas.width = video.videoWidth || 1280;
+      granuleCanvas.height = video.videoHeight || 720;
+      granuleCtx.drawImage(video, 0, 0, granuleCanvas.width, granuleCanvas.height);
+
+      granuleCtx.strokeStyle = 'rgba(255,205,90,0.95)';
+      granuleCtx.lineWidth = 2;
+
+      grains.slice(0,200).forEach(g=>{
+        const scaleX = granuleCanvas.width / W;
+        const scaleY = granuleCanvas.height / H;
+        const [minx,miny,maxx,maxy] = g.bbox;
+        granuleCtx.strokeRect(minx*scaleX, miny*scaleY, (maxx-minx)*scaleX, (maxy-miny)*scaleY);
+      });
+
+      addThumb(granuleCanvas.toDataURL('image/jpeg', 0.8));
+    }
+  }
+
+  function addThumb(dataUrl){
+    if (!thumbs) return;
+    const img = document.createElement('img');
+    img.src = dataUrl;
+    img.style.width='72px'; img.style.height='56px'; img.style.objectFit='cover';
+    img.style.borderRadius='6px'; img.style.border='1px solid rgba(255,255,255,0.08)';
+    thumbs.prepend(img);
+    while(thumbs.children.length>12) thumbs.removeChild(thumbs.lastChild);
+  }
+
+  // controls
+  const btnCapture = document.getElementById('btnCapture');
+  const btnFreeze  = document.getElementById('btnFreeze');
+  const btnDetect  = document.getElementById('btnDetect');
+  const btnTorch   = document.getElementById('btnTorch');
+  const btnExport  = document.getElementById('btnExport');
+  const btnClear   = document.getElementById('btnClearThumbs');
+  const zoomRange  = document.getElementById('zoomRange');
+
+  if (btnCapture) btnCapture.addEventListener('click', ()=>{
+    if (!granuleCanvas || !granuleCtx) return;
+    granuleCanvas.width = video.videoWidth || 1280;
+    granuleCanvas.height = video.videoHeight || 720;
+    granuleCtx.drawImage(video,0,0,granuleCanvas.width,granuleCanvas.height);
+    addThumb(granuleCanvas.toDataURL('image/png'));
+  });
+
+  if (btnFreeze) btnFreeze.addEventListener('click', ()=>{
+    frozen = !frozen;
+    btnFreeze.textContent = frozen ? 'המשך' : 'הקפאה';
+    if (passChip) passChip.textContent = frozen ? 'מצב מוקפא' : 'מצלמה פעילה';
+  });
+
+  if (btnDetect) btnDetect.addEventListener('click', detectGrains);
+
+  if (btnExport) btnExport.addEventListener('click', ()=>{
+    if (!granuleCanvas || !granuleCtx) return;
+    const link = document.createElement('a');
+    granuleCanvas.width = video.videoWidth || 1280;
+    granuleCanvas.height = video.videoHeight || 720;
+    granuleCtx.drawImage(video,0,0,granuleCanvas.width,granuleCanvas.height);
+    link.href = granuleCanvas.toDataURL('image/jpeg',0.95);
+    link.download = 'granules_sample.jpg';
+    link.click();
+  });
+
+  if (btnClear) btnClear.addEventListener('click', ()=> { if (thumbs) thumbs.innerHTML=''; });
+
+  if (btnTorch) btnTorch.addEventListener('click', async ()=>{
+    if (!track) return;
+    const cap = track.getCapabilities ? track.getCapabilities() : {};
+    if (!cap.torch) { alert('פלאש/torch לא נתמך במכשיר זה'); return; }
+    try {
+      torchOn = !torchOn;
+      await track.applyConstraints({ advanced: [{ torch: torchOn }] });
+      btnTorch.textContent = torchOn ? 'כבה תאורה' : 'תאורה';
+    } catch(e){ console.warn(e); }
+  });
+
+  if (zoomRange) zoomRange.addEventListener('input', (e)=>{
+    const zoomVal = parseFloat(e.target.value);
+    if (track && track.getCapabilities) {
+      const cap = track.getCapabilities();
+      if (cap.zoom) {
+        const min = cap.zoom.min||1, max = cap.zoom.max||3;
+        const z = Math.max(min, Math.min(max, zoomVal));
+        track.applyConstraints({ advanced:[{zoom: z}] }).catch(()=>{});
+      } else {
+        video.style.transform = `scale(${zoomVal})`;
+      }
+    } else {
+      video.style.transform = `scale(${zoomVal})`;
+    }
+  });
+
+  function rgbToHsv(r,g,b){
+    r/=255;g/=255;b/=255;
+    const mx=Math.max(r,g,b), mn=Math.min(r,g,b);
+    let h=0, s=0, v=mx;
+    const d = mx-mn;
+    s = mx === 0 ? 0 : d/mx;
+    if (d === 0) h = 0;
+    else {
+      if (mx === r) h = ((g-b)/d)%6;
+      else if (mx === g) h = ((b-r)/d)+2;
+      else h = ((r-g)/d)+4;
+      h *= 60; if (h<0) h+=360;
+    }
+    return {h, s: s*100, v: v*100};
+  }
+  function luminance(r,g,b){ return (0.2126*r + 0.7152*g + 0.0722*b)/255; }
+
+  // Start camera as soon as pane exists
+  initCamera();
+})();
 </script>
 
 </body>
