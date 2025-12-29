@@ -13477,7 +13477,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   const onToggle = ()=>{
     if(det.open){
-      if(typeof openCamera === 'function') openCamera();
+      // NOTE: Do NOT auto-open camera on accordion open.
+      // Camera starts only on an explicit user click (Start/Open).
     }else{
       // Stop stream when accordion closes (saves battery + releases camera)
       if(typeof closeCamera === 'function') closeCamera();
