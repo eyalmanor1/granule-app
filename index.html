@@ -100,8 +100,8 @@
     const ctx = canvas.getContext('2d');
     const w = canvas.width, h = canvas.height;
     // Cover-fit: draw video to canvas while preserving aspect
-    const vw = video.videoWidth || 0;
-    const vh = video.videoHeight || 0;
+    const vw = sCanvas.width || 0;
+    const vh = sCanvas.height || 0;
     if(vw<2 || vh<2) return;
     const s = Math.max(w/vw, h/vh);
     const dw = vw*s;
@@ -109,12 +109,12 @@
     const dx = (w-dw)/2;
     const dy = (h-dh)/2;
     ctx.clearRect(0,0,w,h);
-    ctx.drawImage(video, 0,0,vw,vh, dx,dy,dw,dh);
+    ctx.drawImage(sCanvas, 0,0,vw,vh, dx,dy,dw,dh);
   }
 
   function sample(video){
-    const vw = video.videoWidth || 0;
-    const vh = video.videoHeight || 0;
+    const vw = sCanvas.width || 0;
+    const vh = sCanvas.height || 0;
     if(vw<2 || vh<2) return null;
     const size = 64;
     sCanvas.width = size;
@@ -122,7 +122,7 @@
     // Center crop ROI
     const sx = Math.max(0, Math.floor(vw/2 - size/2));
     const sy = Math.max(0, Math.floor(vh/2 - size/2));
-    sCtx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
+    sCtx.drawImage(sCanvas, sx, sy, size, size, 0, 0, size, size);
     const img = sCtx.getImageData(0,0,size,size).data;
     let r=0,g=0,b=0,y=0;
     for(let i=0;i<img.length;i+=4){
@@ -155,14 +155,22 @@
 
   function loop(){
     const out = getOut();
-    const video = el('live-video');
-    const camOk = video && video.srcObject && (video.videoWidth||0) > 2;
+    const state = (typeof window !== 'undefined') ? window.__CalibrationCamState : null;
+    const srcCanvas = state && state.canvas ? state.canvas : null;
+    const camOk = !!(srcCanvas && (srcCanvas.width||0) > 2 && (srcCanvas.height||0) > 2);
     if(!camOk){
       setAllIdle();
       requestAnimationFrame(loop);
       return;
     }
 
+    // Mirror the active tool preview canvas into an offscreen canvas for sampling
+    const sw = srcCanvas.width|0, sh = srcCanvas.height|0;
+    if(sw>0 && sh>0){
+      if(sCanvas.width !== sw) sCanvas.width = sw;
+      if(sCanvas.height !== sh) sCanvas.height = sh;
+      try{ sCtx.drawImage(srcCanvas, 0, 0, sw, sh); }catch(_){ /* ignore */ }
+    }
     // Draw the same reference feed into each tool's camera placeholder
     drawTo(out.lux.cv, video);
     drawTo(out.ct.cv, video);
@@ -11751,7 +11759,7 @@ btn.addEventListener('click', closeGate);
   function estimateLuxFromFrame(){
     if(!video || !ctx || video.readyState < 2) return null;
     const w = canvas.width, h = canvas.height;
-    ctx.drawImage(video, 0, 0, w, h);
+    ctx.drawImage(sCanvas, 0, 0, w, h);
     const img = ctx.getImageData(0,0,w,h).data;
     let sum = 0;
     for(let i=0;i<img.length;i+=16){ // downsample
@@ -11843,7 +11851,7 @@ btn.addEventListener('click', closeGate);
 
   function saveFrame(){
     if(!canvas || !ctx || !video || video.readyState < 2) return;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(sCanvas, 0, 0, canvas.width, canvas.height);
     const a = document.createElement('a');
     a.download = 'lux_meter_frame.png';
     a.href = canvas.toDataURL('image/png');
@@ -11980,7 +11988,7 @@ btn.addEventListener('click', closeGate);
   function estimate(){
     if(!video || !ctx || video.readyState < 2) return null;
     const w = canvas.width, h = canvas.height;
-    ctx.drawImage(video, 0, 0, w, h);
+    ctx.drawImage(sCanvas, 0, 0, w, h);
     const img = ctx.getImageData(0,0,w,h).data;
     let r=0,g=0,b=0;
     for(let i=0;i<img.length;i+=16){
@@ -12070,7 +12078,7 @@ btn.addEventListener('click', closeGate);
 
   function saveFrame(){
     if(!canvas || !ctx || !video || video.readyState < 2) return;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(sCanvas, 0, 0, canvas.width, canvas.height);
     const a = document.createElement('a');
     a.download = 'light_spectrometer_frame.png';
     a.href = canvas.toDataURL('image/png');
@@ -12158,7 +12166,7 @@ btn.addEventListener('click', closeGate);
   function estimate(){
     if(!video || !ctx || video.readyState < 2) return null;
     const w = canvas.width, h = canvas.height;
-    ctx.drawImage(video, 0, 0, w, h);
+    ctx.drawImage(sCanvas, 0, 0, w, h);
     const img = ctx.getImageData(0,0,w,h).data;
 
     let r=0,g=0,b=0;
@@ -12356,7 +12364,7 @@ btn.addEventListener('click', closeGate);
   function sampleBrightness(){
     if(!video || !ctx || video.readyState < 2) return null;
     const w = canvas.width, h = canvas.height;
-    ctx.drawImage(video, 0, 0, w, h);
+    ctx.drawImage(sCanvas, 0, 0, w, h);
     const img = ctx.getImageData(0,0,w,h).data;
     let sum=0;
     for(let i=0;i<img.length;i+=32){
@@ -12499,7 +12507,7 @@ btn.addEventListener('click', closeGate);
 
   function saveSnapshot(){
     if(!canvas || !ctx || !video || video.readyState < 2) return;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(sCanvas, 0, 0, canvas.width, canvas.height);
     const a = document.createElement('a');
     a.download = 'flicker_meter_frame.png';
     a.href = canvas.toDataURL('image/png');
@@ -13364,8 +13372,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function sampleCenterROI(){
-    const vw = video.videoWidth || 0;
-    const vh = video.videoHeight || 0;
+    const vw = sCanvas.width || 0;
+    const vh = sCanvas.height || 0;
     if(!vw || !vh) return null;
 
     const roiScale = 0.22;
@@ -13380,7 +13388,7 @@ document.addEventListener('DOMContentLoaded', () => {
     work.width = tw;
     work.height = th;
 
-    wctx.drawImage(video, x0, y0, rw, rh, 0, 0, tw, th);
+    wctx.drawImage(sCanvas, x0, y0, rw, rh, 0, 0, tw, th);
     const img = wctx.getImageData(0,0,tw,th).data;
 
     let sumR=0,sumG=0,sumB=0,sumY=0,n=0;
@@ -13571,7 +13579,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Metering
   function logAverageLuminance(){
     const w=canvas.width,h=canvas.height;
-    ctx.drawImage(video,0,0,w,h);
+    ctx.drawImage(sCanvas,0,0,w,h);
     const d=ctx.getImageData(0,0,w,h).data;
     let sumLog=0,sumW=0;
     const cx=w/2,cy=h/2,maxR=Math.hypot(cx,cy);
@@ -13671,9 +13679,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Wait until video has frames, then hide overlay
     const t0=performance.now();
     const wait=()=>{
-      if(video.readyState >= 2 && video.videoWidth > 0){
+      if(video.readyState >= 2 && sCanvas.width > 0){
         camOverlay.classList.add("hidden");
-        setDebug(`Camera OK • ${video.videoWidth}x${video.videoHeight}`, true);
+        setDebug(`Camera OK • ${sCanvas.width}x${sCanvas.height}`, true);
         loop();
         return;
       }
@@ -13691,7 +13699,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function loop(){
     if(running) return; running=true;
     const step=()=>{
-      if(!stream || !video.videoWidth){ running=false; camOverlay.classList.remove("hidden"); return; }
+      if(!stream || !sCanvas.width){ running=false; camOverlay.classList.remove("hidden"); return; }
       const br=logAverageLuminance();
       const ev=brightnessToEV100(br);
       state.ev100=ev; state.lux=ev100ToLux(ev);
@@ -13703,10 +13711,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   el("luxm_saveBtn").onclick=()=>{
-    if(!video.videoWidth) return;
+    if(!sCanvas.width) return;
     const c=document.createElement("canvas");
-    c.width=video.videoWidth; c.height=video.videoHeight;
-    c.getContext("2d").drawImage(video,0,0);
+    c.width=sCanvas.width; c.height=sCanvas.height;
+    c.getContext("2d").drawImage(sCanvas,0,0);
     const a=document.createElement("a");
     a.download=`luxmeter_${Date.now()}.png`;
     a.href=c.toDataURL("image/png");
@@ -13886,10 +13894,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function meanBrightness(){
-    if(video.videoWidth === 0) return null;
+    if(sCanvas.width === 0) return null;
     const targetW = 72, targetH = 48;
     work.width = targetW; work.height = targetH;
-    wctx.drawImage(video, 0, 0, targetW, targetH);
+    wctx.drawImage(sCanvas, 0, 0, targetW, targetH);
     const img = wctx.getImageData(0,0,targetW,targetH).data;
     let sum = 0;
     for(let i=0;i<img.length;i+=4){
@@ -14638,6 +14646,7 @@ document.addEventListener('DOMContentLoaded', function(){
     if(session.ownerBtn) session.ownerBtn.classList.remove('is-on');
     session.ownerBtn = null;
     session.ownerTool = null;
+    try{ window.__CalibrationCamState = null; }catch(_){ }
   }
 
   function closeOtherAccordions(current){
@@ -14714,7 +14723,9 @@ document.addEventListener('DOMContentLoaded', function(){
     session.canvas = canvas;
     session.ctx = ctx;
     btn.classList.add('is-on');
-  }
+  
+    try{ window.__CalibrationCamState = { tool: tool, canvas: canvas }; }catch(_){ }
+}
 
   tab.addEventListener('click', async (e)=>{
     const btn = e.target.closest('[data-cam-start]');
