@@ -22,7 +22,6 @@
   };
 })();
 </script>
-
 <script>
 /* === CAL01: Calibration tools read from the Reference Camera (no extra getUserMedia calls) === */
 (function(){
@@ -225,11 +224,8 @@
 })();
 </script>
 <!-- === /Manor Dev Inspector Hook === -->
-
 <!-- === Camera Permission Gate (prevents unwanted prompts) === -->
-
 <!-- === /Camera Permission Gate === -->
-
 <meta content="camera=(self)" http-equiv="Permissions-Policy"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
@@ -5930,7 +5926,6 @@ function __readSelfSource(){
   #caltool-ct .ctm-title{font-size:16px}
 }
 </style>
-
 <style>
 /* === Manor Dev Inspector (single-file helper) === */
 .mdi{position:fixed;left:12px;right:12px;bottom:12px;z-index:2147483647;background:rgba(10,12,16,.96);color:#e8edf7;border:1px solid rgba(255,255,255,.12);border-radius:14px;box-shadow:0 12px 48px rgba(0,0,0,.55);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;backdrop-filter:blur(8px)}
@@ -6401,7 +6396,7 @@ function __readSelfSource(){
 <div class="tab-fixed-head"><h2>Calibration</h2></div>
 <div class="tab-scroll">
 <div class="cal-shell">
-<div class="acc-list" id="calAccList"><details class="acc" data-acc="camera"><summary><div><div class="acc-title">Camera</div><div class="acc-sub">Live view &amp; controls</div></div><button class="an-chip an-chip-info" type="button" title="Information">Info</button></summary>
+<div class="acc-list" id="calAccList"><details class="acc" data-acc="camera"><summary><div><div class="acc-title">Camera</div><div class="acc-sub">Live view &amp; controls</div></div><button class="an-chip an-chip-info" title="Information" type="button">Info</button></summary>
 <!-- Camera capture status/preview (auto-injected) -->
 <div id="camCaptureStatus" style="margin:10px 0; font-size:13px; opacity:.85;"></div>
 <div id="camCapturePreview" style="display:none; margin:10px 0; padding:10px; border:1px solid rgba(255,255,255,.15); border-radius:12px;">
@@ -6424,8 +6419,8 @@ function __readSelfSource(){
 <h3>Live Camera</h3>
 <div class="cam-sub" id="cam-status" style="color:#cbd5ff;">Status: idle</div>
 <div class="cam-row" style="margin-top:10px; gap:10px; flex-wrap:wrap;">
-  <button class="cam-btn" id="open-camera-btn" type="button" data-cam-unlock="1">Start</button>
-  <button class="cam-btn" id="close-camera-btn" type="button" style="display:none;">Stop</button>
+<button class="cam-btn" data-cam-unlock="1" id="open-camera-btn" type="button">Start</button>
+<button class="cam-btn" id="close-camera-btn" style="display:none;" type="button">Stop</button>
 </div>
 <div class="cam-view">
 <div class="cam-frame">
@@ -6460,189 +6455,181 @@ function __readSelfSource(){
 </div>
 </div>
 </div>
-</div></div></details><details class="acc" data-caltool="lux"><summary><div><div class="acc-title">Lux Meter</div><div class="acc-sub">Exposure / brightness reference</div></div><button class="an-chip an-chip-info" type="button" title="Information">Info</button></summary>
+</div></div></details><details class="acc" data-caltool="lux"><summary><div><div class="acc-title">Lux Meter</div><div class="acc-sub">Exposure / brightness reference</div></div><button class="an-chip an-chip-info" title="Information" type="button">Info</button></summary>
 <div class="acc-body">
-  <div class="cal-tool-view" id="caltool-lux">
-    <div class="cal-inline-topbar">
-      <div class="cal-inline-title">Lux Meter</div>
-      <div class="cal-inline-actions">
-        <button class="lux-icon cal-cam-btn" type="button" data-cam-start="lux" title="Start Camera">📷</button>
-        <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-      </div>
-    </div>
-    <div class="cal-inline-panel">
-    <div class="cal-two">
-      <div class="cal-ph cal-ph--metrics" data-ph="lux-metrics">
-        <div class="cal-ph-title">Measurements Placeholder</div>
-        <div class="cal-ph-sub">Scales / ticks / readings derived from the camera placeholder.</div>
-        <div class="cal-ph-metricGrid">
-          <div class="cal-ph-scale">
-            <div class="cal-ph-scaleLabel">Scale A</div>
-            <div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
-          </div>
-          <div class="cal-ph-scale">
-            <div class="cal-ph-scaleLabel">Scale B</div>
-            <div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
-          </div>
-          <div class="cal-ph-readout">
-            <div class="cal-ph-readoutRow"><span>Lux</span><b id="lux_val_lux">--</b></div>
-            <div class="cal-ph-readoutRow"><span>Foot‑candles</span><b id="lux_val_fc">--</b></div>
-            <div class="cal-ph-readoutRow"><span>EV (approx)</span><b id="lux_val_ev">--</b></div>
-          </div>
-        
-
+<div class="cal-tool-view" id="caltool-lux">
+<div class="cal-inline-topbar">
+<div class="cal-inline-title">Lux Meter</div>
+<div class="cal-inline-actions">
+<button class="lux-icon cal-cam-btn" data-cam-start="lux" title="Start Camera" type="button">📷</button>
+<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+</div>
+</div>
+<div class="cal-inline-panel">
+<div class="cal-two">
       <div class="cal-ph cal-ph--camera" data-ph="lux-camera">
-        <div class="cal-ph-title">Camera Placeholder</div>
-        <div class="cal-ph-sub">This area will host the camera feed used by lux.</div>
-        <div class="cal-ph-cameraFrame">
-          <canvas class="cal-ph-cam" id="lux_cam_canvas" width="360" height="240" aria-label="Lux camera preview"></canvas>
-          <div class="cal-ph-crosshair"></div>
-        </div>
-      </div>
+<div class="cal-ph-title">Camera Placeholder</div>
+<div class="cal-ph-sub">This area will host the camera feed used by lux.</div>
+<div class="cal-ph-cameraFrame">
+<canvas aria-label="Lux camera preview" class="cal-ph-cam" height="240" id="lux_cam_canvas" width="360"></canvas>
+<div class="cal-ph-crosshair"></div>
+</div>
+</div>
+      <div class="cal-ph cal-ph--metrics" data-ph="lux-metrics">
+<div class="cal-ph-title">Measurements Placeholder</div>
+<div class="cal-ph-sub">Scales / ticks / readings derived from the camera placeholder.</div>
+<div class="cal-ph-metricGrid">
+<div class="cal-ph-scale">
+<div class="cal-ph-scaleLabel">Scale A</div>
+<div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
+</div>
+<div class="cal-ph-scale">
+<div class="cal-ph-scaleLabel">Scale B</div>
+<div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
+</div>
+<div class="cal-ph-readout">
+<div class="cal-ph-readoutRow"><span>Lux</span><b id="lux_val_lux">--</b></div>
+<div class="cal-ph-readoutRow"><span>Foot‑candles</span><b id="lux_val_fc">--</b></div>
+<div class="cal-ph-readoutRow"><span>EV (approx)</span><b id="lux_val_ev">--</b></div>
+</div>
 
-      </div>
-      </div>
+</div>
+</div>
     </div>
 </div>
-  </div>
 </div>
-</details><details class="acc" data-caltool="ct"><summary><div><div class="acc-title">Color Temperature</div><div class="acc-sub">CCT / Δuv calibration</div></div><button class="an-chip an-chip-info" type="button" title="Information">Info</button></summary>
+</div>
+</details><details class="acc" data-caltool="ct"><summary><div><div class="acc-title">Color Temperature</div><div class="acc-sub">CCT / Δuv calibration</div></div><button class="an-chip an-chip-info" title="Information" type="button">Info</button></summary>
 <div class="acc-body">
-  <div class="cal-tool-view" id="caltool-ct">
-    <div class="cal-inline-topbar">
-      <div class="cal-inline-title">Color Temperature</div>
-      <div class="cal-inline-actions">
-        <button class="lux-icon cal-cam-btn" type="button" data-cam-start="ct" title="Start Camera">📷</button>
-        <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-      </div>
-    </div>
-    <div class="cal-inline-panel">
-    <div class="cal-two">
-      <div class="cal-ph cal-ph--metrics" data-ph="ct-metrics">
-        <div class="cal-ph-title">Measurements Placeholder</div>
-        <div class="cal-ph-sub">Scales / ticks / readings derived from the camera placeholder.</div>
-        <div class="cal-ph-metricGrid">
-          <div class="cal-ph-scale">
-            <div class="cal-ph-scaleLabel">Scale A</div>
-            <div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
-          </div>
-          <div class="cal-ph-scale">
-            <div class="cal-ph-scaleLabel">Scale B</div>
-            <div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
-          </div>
-          <div class="cal-ph-readout">
-            <div class="cal-ph-readoutRow"><span>CCT (K)</span><b id="ct_val_cct">--</b></div>
-            <div class="cal-ph-readoutRow"><span>Δuv</span><b id="ct_val_duv">--</b></div>
-            <div class="cal-ph-readoutRow"><span>RGB</span><b id="ct_val_rgb">--</b></div>
-          </div>
-        
-
+<div class="cal-tool-view" id="caltool-ct">
+<div class="cal-inline-topbar">
+<div class="cal-inline-title">Color Temperature</div>
+<div class="cal-inline-actions">
+<button class="lux-icon cal-cam-btn" data-cam-start="ct" title="Start Camera" type="button">📷</button>
+<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+</div>
+</div>
+<div class="cal-inline-panel">
+<div class="cal-two">
       <div class="cal-ph cal-ph--camera" data-ph="ct-camera">
-        <div class="cal-ph-title">Camera Placeholder</div>
-        <div class="cal-ph-sub">This area will host the camera feed used by ct.</div>
-        <div class="cal-ph-cameraFrame">
-          <canvas class="cal-ph-cam" id="ct_cam_canvas" width="360" height="240" aria-label="CCT camera preview"></canvas>
-          <div class="cal-ph-crosshair"></div>
-        </div>
-      </div>
+<div class="cal-ph-title">Camera Placeholder</div>
+<div class="cal-ph-sub">This area will host the camera feed used by ct.</div>
+<div class="cal-ph-cameraFrame">
+<canvas aria-label="CCT camera preview" class="cal-ph-cam" height="240" id="ct_cam_canvas" width="360"></canvas>
+<div class="cal-ph-crosshair"></div>
+</div>
+</div>
+      <div class="cal-ph cal-ph--metrics" data-ph="ct-metrics">
+<div class="cal-ph-title">Measurements Placeholder</div>
+<div class="cal-ph-sub">Scales / ticks / readings derived from the camera placeholder.</div>
+<div class="cal-ph-metricGrid">
+<div class="cal-ph-scale">
+<div class="cal-ph-scaleLabel">Scale A</div>
+<div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
+</div>
+<div class="cal-ph-scale">
+<div class="cal-ph-scaleLabel">Scale B</div>
+<div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
+</div>
+<div class="cal-ph-readout">
+<div class="cal-ph-readoutRow"><span>CCT (K)</span><b id="ct_val_cct">--</b></div>
+<div class="cal-ph-readoutRow"><span>Δuv</span><b id="ct_val_duv">--</b></div>
+<div class="cal-ph-readoutRow"><span>RGB</span><b id="ct_val_rgb">--</b></div>
+</div>
 
-      </div>
-      </div>
+</div>
+</div>
     </div>
 </div>
-  </div>
 </div>
-</details><details class="acc" data-caltool="flicker"><summary><div><div class="acc-title">Flicker Meter</div><div class="acc-sub">Frequency / flicker level</div></div><button class="an-chip an-chip-info" type="button" title="Information">Info</button></summary>
+</div>
+</details><details class="acc" data-caltool="flicker"><summary><div><div class="acc-title">Flicker Meter</div><div class="acc-sub">Frequency / flicker level</div></div><button class="an-chip an-chip-info" title="Information" type="button">Info</button></summary>
 <div class="acc-body">
-  <div class="cal-tool-view" id="caltool-flicker">
-    <div class="cal-inline-topbar">
-      <div class="cal-inline-title">Flicker Meter</div>
-      <div class="cal-inline-actions">
-        <button class="lux-icon cal-cam-btn" type="button" data-cam-start="flicker" title="Start Camera">📷</button>
-        <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-      </div>
-    </div>
-    <div class="cal-inline-panel">
-    <div class="cal-two">
-      <div class="cal-ph cal-ph--metrics" data-ph="flicker-metrics">
-        <div class="cal-ph-title">Measurements Placeholder</div>
-        <div class="cal-ph-sub">Scales / ticks / readings derived from the camera placeholder.</div>
-        <div class="cal-ph-metricGrid">
-          <div class="cal-ph-scale">
-            <div class="cal-ph-scaleLabel">Scale A</div>
-            <div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
-          </div>
-          <div class="cal-ph-scale">
-            <div class="cal-ph-scaleLabel">Scale B</div>
-            <div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
-          </div>
-          <div class="cal-ph-readout">
-            <div class="cal-ph-readoutRow"><span>Flicker Hz</span><b id="fl_val_hz">--</b></div>
-            <div class="cal-ph-readoutRow"><span>Flicker %</span><b id="fl_val_pct">--</b></div>
-            <div class="cal-ph-readoutRow"><span>Index (approx)</span><b id="fl_val_index">--</b></div>
-          </div>
-        
-
+<div class="cal-tool-view" id="caltool-flicker">
+<div class="cal-inline-topbar">
+<div class="cal-inline-title">Flicker Meter</div>
+<div class="cal-inline-actions">
+<button class="lux-icon cal-cam-btn" data-cam-start="flicker" title="Start Camera" type="button">📷</button>
+<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+</div>
+</div>
+<div class="cal-inline-panel">
+<div class="cal-two">
       <div class="cal-ph cal-ph--camera" data-ph="flicker-camera">
-        <div class="cal-ph-title">Camera Placeholder</div>
-        <div class="cal-ph-sub">This area will host the camera feed used by flicker.</div>
-        <div class="cal-ph-cameraFrame">
-          <canvas class="cal-ph-cam" id="flicker_cam_canvas" width="360" height="240" aria-label="Flicker camera preview"></canvas>
-          <div class="cal-ph-crosshair"></div>
-        </div>
-      </div>
+<div class="cal-ph-title">Camera Placeholder</div>
+<div class="cal-ph-sub">This area will host the camera feed used by flicker.</div>
+<div class="cal-ph-cameraFrame">
+<canvas aria-label="Flicker camera preview" class="cal-ph-cam" height="240" id="flicker_cam_canvas" width="360"></canvas>
+<div class="cal-ph-crosshair"></div>
+</div>
+</div>
+      <div class="cal-ph cal-ph--metrics" data-ph="flicker-metrics">
+<div class="cal-ph-title">Measurements Placeholder</div>
+<div class="cal-ph-sub">Scales / ticks / readings derived from the camera placeholder.</div>
+<div class="cal-ph-metricGrid">
+<div class="cal-ph-scale">
+<div class="cal-ph-scaleLabel">Scale A</div>
+<div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
+</div>
+<div class="cal-ph-scale">
+<div class="cal-ph-scaleLabel">Scale B</div>
+<div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
+</div>
+<div class="cal-ph-readout">
+<div class="cal-ph-readoutRow"><span>Flicker Hz</span><b id="fl_val_hz">--</b></div>
+<div class="cal-ph-readoutRow"><span>Flicker %</span><b id="fl_val_pct">--</b></div>
+<div class="cal-ph-readoutRow"><span>Index (approx)</span><b id="fl_val_index">--</b></div>
+</div>
 
-      </div>
-      </div>
+</div>
+</div>
     </div>
 </div>
-  </div>
 </div>
-</details><details class="acc" data-caltool="spectrum"><summary><div><div class="acc-title">Light Spectrometer</div><div class="acc-sub">Dominant wavelength / saturation</div></div><button class="an-chip an-chip-info" type="button" title="Information">Info</button></summary>
+</div>
+</details><details class="acc" data-caltool="spectrum"><summary><div><div class="acc-title">Light Spectrometer</div><div class="acc-sub">Dominant wavelength / saturation</div></div><button class="an-chip an-chip-info" title="Information" type="button">Info</button></summary>
 <div class="acc-body">
-  <div class="cal-tool-view" id="caltool-spectrum">
-    <div class="cal-inline-topbar">
-      <div class="cal-inline-title">Light Spectrometer</div>
-      <div class="cal-inline-actions">
-        <button class="lux-icon cal-cam-btn" type="button" data-cam-start="spectrum" title="Start Camera">📷</button>
-        <button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-      </div>
-    </div>
-    <div class="cal-inline-panel">
-    <div class="cal-two">
-      <div class="cal-ph cal-ph--metrics" data-ph="spectrum-metrics">
-        <div class="cal-ph-title">Measurements Placeholder</div>
-        <div class="cal-ph-sub">Scales / ticks / readings derived from the camera placeholder.</div>
-        <div class="cal-ph-metricGrid">
-          <div class="cal-ph-scale">
-            <div class="cal-ph-scaleLabel">Scale A</div>
-            <div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
-          </div>
-          <div class="cal-ph-scale">
-            <div class="cal-ph-scaleLabel">Scale B</div>
-            <div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
-          </div>
-          <div class="cal-ph-readout">
-            <div class="cal-ph-readoutRow"><span>Dominant nm</span><b id="sp_val_nm">--</b></div>
-            <div class="cal-ph-readoutRow"><span>Saturation %</span><b id="sp_val_sat">--</b></div>
-            <div class="cal-ph-readoutRow"><span>RGB</span><b id="sp_val_rgb">--</b></div>
-          </div>
-        
-
+<div class="cal-tool-view" id="caltool-spectrum">
+<div class="cal-inline-topbar">
+<div class="cal-inline-title">Light Spectrometer</div>
+<div class="cal-inline-actions">
+<button class="lux-icon cal-cam-btn" data-cam-start="spectrum" title="Start Camera" type="button">📷</button>
+<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
+</div>
+</div>
+<div class="cal-inline-panel">
+<div class="cal-two">
       <div class="cal-ph cal-ph--camera" data-ph="spectrum-camera">
-        <div class="cal-ph-title">Camera Placeholder</div>
-        <div class="cal-ph-sub">This area will host the camera feed used by spectrum.</div>
-        <div class="cal-ph-cameraFrame">
-          <canvas class="cal-ph-cam" id="spectrum_cam_canvas" width="360" height="240" aria-label="Spectrum camera preview"></canvas>
-          <div class="cal-ph-crosshair"></div>
-        </div>
-      </div>
+<div class="cal-ph-title">Camera Placeholder</div>
+<div class="cal-ph-sub">This area will host the camera feed used by spectrum.</div>
+<div class="cal-ph-cameraFrame">
+<canvas aria-label="Spectrum camera preview" class="cal-ph-cam" height="240" id="spectrum_cam_canvas" width="360"></canvas>
+<div class="cal-ph-crosshair"></div>
+</div>
+</div>
+      <div class="cal-ph cal-ph--metrics" data-ph="spectrum-metrics">
+<div class="cal-ph-title">Measurements Placeholder</div>
+<div class="cal-ph-sub">Scales / ticks / readings derived from the camera placeholder.</div>
+<div class="cal-ph-metricGrid">
+<div class="cal-ph-scale">
+<div class="cal-ph-scaleLabel">Scale A</div>
+<div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
+</div>
+<div class="cal-ph-scale">
+<div class="cal-ph-scaleLabel">Scale B</div>
+<div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
+</div>
+<div class="cal-ph-readout">
+<div class="cal-ph-readoutRow"><span>Dominant nm</span><b id="sp_val_nm">--</b></div>
+<div class="cal-ph-readoutRow"><span>Saturation %</span><b id="sp_val_sat">--</b></div>
+<div class="cal-ph-readoutRow"><span>RGB</span><b id="sp_val_rgb">--</b></div>
+</div>
 
-      </div>
-      </div>
+</div>
+</div>
     </div>
 </div>
-  </div>
+</div>
 </div>
 </details></div>
 <!-- Tool pages (placeholders for now) -->
@@ -10211,7 +10198,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 })();
 </script>
-
 <script>
 /* ===== Camera sub-tabs behavior (Fix39) ===== */
 (function(){
@@ -10287,8 +10273,6 @@ const r = document.getElementById('reticle-overlay');
 
 })();
 </script>
-
-
 <script>
 /* ===== Fix Upload = Camera-style preview/analysis (non-invasive) =====
    We reuse the SAME #preview canvas, #reticle-overlay and #image-color-box.
@@ -12673,9 +12657,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) setTimeout(ensureCameraOn, 80); });
 });
 </script>
-
-
-
 <script>
 document.addEventListener('DOMContentLoaded', ()=>{
   const det = document.querySelector('details.acc[data-acc="camera"]');
@@ -12696,7 +12677,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   if(det.open) setTimeout(onToggle, 0);
 });
 </script>
-
 <script>
 /* Onboarding controls (Tools accordion) */
 document.addEventListener('DOMContentLoaded', () => {
@@ -13504,7 +13484,6 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 
 </script>
-
 <script>
 /* ===== Lux Meter Embedded Logic (generated) ===== */
 (function(){
@@ -13744,7 +13723,6 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 })();
 </script>
-
 <script>
 /* ===== Flicker Meter Embedded Logic (generated) ===== */
 (function(){
@@ -14077,7 +14055,6 @@ Measurements are estimated from camera brightness over time.`);
 })();
 })();
 </script>
-
 <style id="v62_calibration_match_lspectro_structure">
 #tab-calibration #caltool-lux .phone,
 #tab-calibration #caltool-flicker #flickm_app,
@@ -14127,22 +14104,22 @@ Measurements are estimated from camera brightness over time.`);
 }
 </style>
 <!-- === Tool Information Overlay === -->
-<div id="toolInfoOverlay" class="info-ov hidden" aria-hidden="true">
-  <div class="info-ov__backdrop" data-info-close="1"></div>
-  <div class="info-ov__card" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
-    <div class="info-ov__head">
-      <div class="info-ov__title" id="infoTitle">Information</div>
-      <button class="info-ov__x" type="button" aria-label="Close" data-info-close="1">×</button>
-    </div>
-    <div class="info-ov__body">
-      <div class="info-ov__step" id="infoStepText"></div>
-    </div>
-    <div class="info-ov__foot">
-      <button class="info-ov__btn info-ov__btn--ghost" type="button" id="infoSkip">Skip</button>
-      <div class="info-ov__progress" id="infoProgress"></div>
-      <button class="info-ov__btn" type="button" id="infoNext">Continue</button>
-    </div>
-  </div>
+<div aria-hidden="true" class="info-ov hidden" id="toolInfoOverlay">
+<div class="info-ov__backdrop" data-info-close="1"></div>
+<div aria-labelledby="infoTitle" aria-modal="true" class="info-ov__card" role="dialog">
+<div class="info-ov__head">
+<div class="info-ov__title" id="infoTitle">Information</div>
+<button aria-label="Close" class="info-ov__x" data-info-close="1" type="button">×</button>
+</div>
+<div class="info-ov__body">
+<div class="info-ov__step" id="infoStepText"></div>
+</div>
+<div class="info-ov__foot">
+<button class="info-ov__btn info-ov__btn--ghost" id="infoSkip" type="button">Skip</button>
+<div class="info-ov__progress" id="infoProgress"></div>
+<button class="info-ov__btn" id="infoNext" type="button">Continue</button>
+</div>
+</div>
 </div>
 <!-- === /Tool Information Overlay === -->
 <script>
@@ -14282,43 +14259,42 @@ Tip: run the page via http://localhost to allow camera permissions smoothly.`,
   });
 })();
 </script>
-
 <!-- === Manor Dev Inspector (single-file helper) === -->
-<div id="manorDevInspector" class="mdi hidden" aria-hidden="true">
-  <div class="mdi__header">
-    <div class="mdi__title">Dev Inspector</div>
-    <div class="mdi__hint">Toggle: <kbd>Ctrl</kbd>+<kbd>I</kbd> · Inspect mode: <kbd>Ctrl</kbd>+Click</div>
-    <div class="mdi__actions">
-      <button type="button" class="mdi__btn" id="mdiMin">Minimize</button>
-      <button type="button" class="mdi__btn" id="mdiToggleInspect">Inspect: Off</button>
-      <button type="button" class="mdi__btn" id="mdiCopy">Copy</button>
-      <button type="button" class="mdi__btn" id="mdiClose">Close</button>
-    </div>
-  </div>
-  <div class="mdi__body">
-    <div class="mdi__col">
-      <div class="mdi__section">
-        <div class="mdi__sectionTitle">Element</div>
-        <pre class="mdi__pre" id="mdiElement"></pre>
-      </div>
-      <div class="mdi__section">
-        <div class="mdi__sectionTitle">HTML snippet</div>
-        <pre class="mdi__pre" id="mdiHtml"></pre>
-      </div>
-    </div>
-    <div class="mdi__col">
-      <div class="mdi__section">
-        <div class="mdi__sectionTitle">JS listeners</div>
-        <pre class="mdi__pre" id="mdiJs"></pre>
-      </div>
-      <div class="mdi__section">
-        <div class="mdi__sectionTitle">CSS (computed + matched rules)</div>
-        <pre class="mdi__pre" id="mdiCss"></pre>
-      </div>
-    </div>
-  </div>
+<div aria-hidden="true" class="mdi hidden" id="manorDevInspector">
+<div class="mdi__header">
+<div class="mdi__title">Dev Inspector</div>
+<div class="mdi__hint">Toggle: <kbd>Ctrl</kbd>+<kbd>I</kbd> · Inspect mode: <kbd>Ctrl</kbd>+Click</div>
+<div class="mdi__actions">
+<button class="mdi__btn" id="mdiMin" type="button">Minimize</button>
+<button class="mdi__btn" id="mdiToggleInspect" type="button">Inspect: Off</button>
+<button class="mdi__btn" id="mdiCopy" type="button">Copy</button>
+<button class="mdi__btn" id="mdiClose" type="button">Close</button>
 </div>
-<div id="mdiHighlight" class="mdi__highlight hidden" aria-hidden="true"></div>
+</div>
+<div class="mdi__body">
+<div class="mdi__col">
+<div class="mdi__section">
+<div class="mdi__sectionTitle">Element</div>
+<pre class="mdi__pre" id="mdiElement"></pre>
+</div>
+<div class="mdi__section">
+<div class="mdi__sectionTitle">HTML snippet</div>
+<pre class="mdi__pre" id="mdiHtml"></pre>
+</div>
+</div>
+<div class="mdi__col">
+<div class="mdi__section">
+<div class="mdi__sectionTitle">JS listeners</div>
+<pre class="mdi__pre" id="mdiJs"></pre>
+</div>
+<div class="mdi__section">
+<div class="mdi__sectionTitle">CSS (computed + matched rules)</div>
+<pre class="mdi__pre" id="mdiCss"></pre>
+</div>
+</div>
+</div>
+</div>
+<div aria-hidden="true" class="mdi__highlight hidden" id="mdiHighlight"></div>
 <!-- === /Manor Dev Inspector === -->
 <script>
 /* === Manor Dev Inspector UI === */
@@ -14760,6 +14736,5 @@ document.addEventListener('DOMContentLoaded', function(){
   window.__CalibrationCamStop = stop;
 })();
 </script>
-
 </body>
 </html>
