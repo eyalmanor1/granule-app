@@ -5409,6 +5409,13 @@ body{
 #tab-calibration .cal-livevals .lv-bar{width:100%;height:10px;border-radius:999px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);overflow:hidden}
 #tab-calibration .cal-livevals .lv-bar>i{display:block;height:100%;width:0%;background:rgba(10,132,255,0.42)}
 #tab-calibration .cal-livevals .lv-note{font-size:11px;opacity:.55}
+
+
+/* === Per-tool camera preview (no navigation to Camera accordion) === */
+#tab-calibration .toolcam{position:relative;width:100%;aspect-ratio:16/9;border:1px solid rgba(255,255,255,0.12);border-radius:16px;overflow:hidden;background:rgba(0,0,0,0.18)}
+#tab-calibration .toolcam-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#tab-calibration .toolcam-roi{position:absolute;left:50%;top:50%;width:min(46%, 260px);height:min(46%, 260px);transform:translate(-50%,-50%);border:2px solid rgba(255,255,255,0.85);border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,0.12)}
+#tab-calibration .toolcam-cross{position:absolute;inset:0;background:linear-gradient(to right, transparent calc(50% - 1px), rgba(255,255,255,0.75) 0, rgba(255,255,255,0.75) calc(50% + 1px), transparent 0),linear-gradient(to bottom, transparent calc(50% - 1px), rgba(255,255,255,0.75) 0, rgba(255,255,255,0.75) calc(50% + 1px), transparent 0);opacity:.55;border-radius:12px}
 </style>
 <style id="modern-shell">
 :root{
@@ -16143,6 +16150,108 @@ document.addEventListener('DOMContentLoaded', function(){
     closeBtn.addEventListener('click', ()=>{ try{ if(raf) cancelAnimationFrame(raf); }catch(_){ } raf=0; }, true);
   }
 
+})();
+</script>
+<script>
+/* === Per-tool Camera (singleton stream, stays inside the selected tool) === */
+(function(){
+  const tab = document.getElementById('tab-calibration');
+  if(!tab || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+
+  const session = { stream:null, ownerTool:null, ownerBtn:null, ownerVideo:null };
+
+  function stop(){
+    try{ session.stream?.getTracks()?.forEach(t=>t.stop()); }catch(e){}
+    try{ if(session.ownerVideo) session.ownerVideo.srcObject = null; }catch(e){}
+    try{ session.ownerBtn?.classList?.remove('is-on'); }catch(e){}
+    session.stream = null; session.ownerTool = null; session.ownerBtn = null; session.ownerVideo = null;
+  }
+
+  function closeOthers(keepDetails){
+    tab.querySelectorAll('details.acc').forEach(d=>{
+      if(d !== keepDetails && d.open) d.open = false;
+    });
+  }
+
+  async function start(tool, btn){
+    const view = tab.querySelector(`#caltool-${tool}`);
+    const video = view?.querySelector('.toolcam-video') || view?.querySelector('video');
+    if(!video){
+      alert('Camera preview element not found for this tool.');
+      return;
+    }
+
+    stop();
+
+    try{
+      video.setAttribute('playsinline','');
+      video.setAttribute('webkit-playsinline','');
+      video.muted = true;
+      video.autoplay = true;
+    }catch(_){}
+
+    const tryList = [
+      { video: { facingMode: { exact: "environment" }, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
+      { video: { facingMode: "environment", width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
+      { video: { facingMode: { ideal: "environment" }, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:60} }, audio:false },
+      { video: true, audio:false }
+    ];
+
+    let stream=null, lastErr=null;
+    for(const c of tryList){
+      try{
+        stream = await navigator.mediaDevices.getUserMedia(c);
+        if(stream) break;
+      }catch(e){ lastErr=e; }
+    }
+    if(!stream) throw (lastErr || new Error('getUserMedia failed'));
+
+    video.srcObject = stream;
+    await video.play();
+
+    session.stream = stream;
+    session.ownerTool = tool;
+    session.ownerBtn = btn;
+    session.ownerVideo = video;
+    btn.classList.add('is-on');
+  }
+
+  tab.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('[data-cam-start]');
+    if(!btn) return;
+
+    const tool = btn.getAttribute('data-cam-start');
+    const det = btn.closest('details.acc');
+    if(det) closeOthers(det);
+
+    if(session.ownerTool === tool){
+      stop();
+      return;
+    }
+    try{
+      await start(tool, btn);
+    }catch(err){
+      stop();
+      alert('Camera failed to start.
+
+Tip: use https:// (GitHub Pages) or http://localhost and allow Camera permission.
+
+' +
+        (err && err.name ? (err.name + ': ') : '') + (err && err.message ? err.message : ''));
+    }
+  }, true);
+
+  // If the tool accordion closes, stop the stream
+  tab.addEventListener('toggle', (e)=>{
+    const det = e.target;
+    if(!(det instanceof HTMLDetailsElement)) return;
+    if(det.open) return;
+    if(session.ownerBtn && det.contains(session.ownerBtn)){
+      stop();
+    }
+  }, true);
+
+  window.__CalToolCamStop = stop;
 })();
 </script>
 </body>
