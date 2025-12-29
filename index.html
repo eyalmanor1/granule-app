@@ -5362,6 +5362,25 @@ body{
 #tab-calibration .cal-ph-cam{width:100%;height:auto;display:block;border-radius:16px;background:rgba(0,0,0,0.18);border:1px solid rgba(255,255,255,0.12)}
 #tab-calibration .cal-ph-cam-overlay{position:absolute;left:50%;top:50%;width:min(46%,260px);height:min(46%,260px);transform:translate(-50%,-50%);border:2px solid rgba(255,255,255,0.85);border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,0.12);pointer-events:none}
 #tab-calibration .cal-ph-cam-cross{position:absolute;inset:0;background:linear-gradient(to right, transparent calc(50% - 1px), rgba(255,255,255,0.75) 0, rgba(255,255,255,0.75) calc(50% + 1px), transparent 0),linear-gradient(to bottom, transparent calc(50% - 1px), rgba(255,255,255,0.75) 0, rgba(255,255,255,0.75) calc(50% + 1px), transparent 0);opacity:.55;border-radius:12px}
+
+/* === Calibration v20 placeholders === */
+.cal-placeholders{display:flex;flex-direction:column;gap:14px;padding:10px 0;}
+.cal-ph{border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:14px;background:rgba(0,0,0,.12);box-shadow:inset 0 0 0 1px rgba(255,255,255,.03);}
+.cal-ph-head{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.cal-ph-title{font-weight:700;font-size:18px;}
+.cal-ph-sub{opacity:.75;font-size:13px;line-height:1.2;}
+.cal-cam-wrap{position:relative;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.35);}
+.cal-cam-canvas{width:100%;height:auto;display:block;}
+.cal-cam-hud{position:absolute;top:10px;left:10px;display:flex;gap:10px;align-items:center;}
+.cal-cam-status{font-size:12px;padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.12);}
+.meas-card{border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px;background:rgba(0,0,0,.18);margin-bottom:10px;}
+.meas-list{border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px;background:rgba(0,0,0,.12);}
+.meas-row{display:flex;justify-content:space-between;gap:10px;padding:8px 2px;border-bottom:1px solid rgba(255,255,255,.06);}
+.meas-row:last-child{border-bottom:none;}
+.meas-k{opacity:.85}
+.meas-v{font-variant-numeric:tabular-nums;font-weight:700;}
+.cal-start-btn{width:42px;height:42px;border-radius:999px;}
+
 </style>
 <script>
 /* === file:// safe self-source reader (avoids CORS) === */
@@ -5574,7 +5593,7 @@ function __readSelfSource(){
   pointer-events: auto;
 }
 </style>
-<link href="manifest.webmanifest" rel="manifest"/><meta content="#0b0f18" name="theme-color"/><link href="icons/icon-180.png" rel="apple-touch-icon"/>
+<!-- manifest removed for file:// safety --><meta content="#0b0f18" name="theme-color"/><link href="icons/icon-180.png" rel="apple-touch-icon"/>
 <style id="v59_calibration_reference_screens">
 /* Fullscreen layout: center a phone-sized card on desktop, fill on mobile */
 #tab-calibration .cal-tool-view.is-fullscreen{
@@ -6463,182 +6482,204 @@ function __readSelfSource(){
 </div>
 </div>
 </div>
-</div></div></details><details class="acc" data-caltool="lux"><summary><div><div class="acc-title">Lux Meter</div><div class="acc-sub">Exposure / brightness reference</div></div><button class="an-chip an-chip-info" title="Information" type="button">Info</button></summary>
-<div class="acc-body">
-<div class="cal-tool-view" id="caltool-lux">
-<div class="cal-inline-topbar">
-<div class="cal-inline-title">Lux Meter</div>
-<div class="cal-inline-actions">
-<button class="lux-icon cal-cam-btn" data-cam-start="lux" title="Start Camera" type="button">📷</button>
-<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-</div>
-</div>
-<div class="cal-inline-panel">
-<div class="cal-two">
-      <div class="cal-ph cal-ph--camera" data-ph="lux-camera">
-<div class="cal-ph-title">Camera Placeholder</div>
-<div class="cal-ph-sub">This area will host the camera feed used by lux.</div>
-<div class="cal-ph-cameraFrame">
-<canvas aria-label="Lux camera preview" class="cal-ph-cam" height="240" id="lux_cam_canvas" width="360"></canvas>
-<div class="cal-ph-crosshair"></div>
-</div>
-</div>
-      <div class="cal-ph cal-ph--metrics" data-ph="lux-metrics">
-<div class="cal-ph-title">Measurements Placeholder</div>
-<div class="cal-ph-sub">Scales / ticks / readings derived from the camera placeholder.</div>
-<div class="cal-ph-metricGrid">
-<div class="cal-ph-scale">
-<div class="cal-ph-scaleLabel">Scale A</div>
-<div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
-</div>
-<div class="cal-ph-scale">
-<div class="cal-ph-scaleLabel">Scale B</div>
-<div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
-</div>
-<div class="cal-ph-readout">
-<div class="cal-ph-readoutRow"><span>Lux</span><b id="lux_val_lux">--</b></div>
-<div class="cal-ph-readoutRow"><span>Foot‑candles</span><b id="lux_val_fc">--</b></div>
-<div class="cal-ph-readoutRow"><span>EV (approx)</span><b id="lux_val_ev">--</b></div>
-</div>
-
-</div>
-</div>
+</div></div></details><details class="acc" data-caltool="lux">
+  <summary>
+    <div>
+      <div class="acc-title">Lux Meter</div>
+      <div class="acc-sub">Exposure / brightness reference</div>
     </div>
-</div>
-</div>
-</div>
-</details><details class="acc" data-caltool="ct"><summary><div><div class="acc-title">Color Temperature</div><div class="acc-sub">CCT / Δuv calibration</div></div><button class="an-chip an-chip-info" title="Information" type="button">Info</button></summary>
-<div class="acc-body">
-<div class="cal-tool-view" id="caltool-ct">
-<div class="cal-inline-topbar">
-<div class="cal-inline-title">Color Temperature</div>
-<div class="cal-inline-actions">
-<button class="lux-icon cal-cam-btn" data-cam-start="ct" title="Start Camera" type="button">📷</button>
-<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-</div>
-</div>
-<div class="cal-inline-panel">
-<div class="cal-two">
-      <div class="cal-ph cal-ph--camera" data-ph="ct-camera">
-<div class="cal-ph-title">Camera Placeholder</div>
-<div class="cal-ph-sub">This area will host the camera feed used by ct.</div>
-<div class="cal-ph-cameraFrame">
-<canvas aria-label="CCT camera preview" class="cal-ph-cam" height="240" id="ct_cam_canvas" width="360"></canvas>
-<div class="cal-ph-crosshair"></div>
-</div>
-</div>
-      <div class="cal-ph cal-ph--metrics" data-ph="ct-metrics">
-<div class="cal-ph-title">Measurements Placeholder</div>
-<div class="cal-ph-sub">Scales / ticks / readings derived from the camera placeholder.</div>
-<div class="cal-ph-metricGrid">
-<div class="cal-ph-scale">
-<div class="cal-ph-scaleLabel">Scale A</div>
-<div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
-</div>
-<div class="cal-ph-scale">
-<div class="cal-ph-scaleLabel">Scale B</div>
-<div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
-</div>
-<div class="cal-ph-readout">
-<div class="cal-ph-readoutRow"><span>CCT (K)</span><b id="ct_val_cct">--</b></div>
-<div class="cal-ph-readoutRow"><span>Δuv</span><b id="ct_val_duv">--</b></div>
-<div class="cal-ph-readoutRow"><span>RGB</span><b id="ct_val_rgb">--</b></div>
-</div>
+    <button class="an-chip an-chip-info" type="button" title="Information">Info</button>
+  </summary>
+  <div class="acc-body">
+    <div class="cal-tool-view tool-tab" id="caltool-lux">
+      <div class="cal-inline-topbar">
+        <div class="cal-inline-title">Lux Meter</div>
+        <div class="cal-inline-actions">
+          <button class="lux-icon cal-start-btn" type="button" data-cal-start="lux" title="Start camera">📷</button>
+          <button class="lux-icon cal-fs-btn" type="button" data-cal-fs="lux" title="Full Screen">⛶</button>
+        </div>
+      </div>
 
-</div>
-</div>
-    </div>
-</div>
-</div>
-</div>
-</details><details class="acc" data-caltool="flicker"><summary><div><div class="acc-title">Flicker Meter</div><div class="acc-sub">Frequency / flicker level</div></div><button class="an-chip an-chip-info" title="Information" type="button">Info</button></summary>
-<div class="acc-body">
-<div class="cal-tool-view" id="caltool-flicker">
-<div class="cal-inline-topbar">
-<div class="cal-inline-title">Flicker Meter</div>
-<div class="cal-inline-actions">
-<button class="lux-icon cal-cam-btn" data-cam-start="flicker" title="Start Camera" type="button">📷</button>
-<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-</div>
-</div>
-<div class="cal-inline-panel">
-<div class="cal-two">
-      <div class="cal-ph cal-ph--camera" data-ph="flicker-camera">
-<div class="cal-ph-title">Camera Placeholder</div>
-<div class="cal-ph-sub">This area will host the camera feed used by flicker.</div>
-<div class="cal-ph-cameraFrame">
-<canvas aria-label="Flicker camera preview" class="cal-ph-cam" height="240" id="flicker_cam_canvas" width="360"></canvas>
-<div class="cal-ph-crosshair"></div>
-</div>
-</div>
-      <div class="cal-ph cal-ph--metrics" data-ph="flicker-metrics">
-<div class="cal-ph-title">Measurements Placeholder</div>
-<div class="cal-ph-sub">Scales / ticks / readings derived from the camera placeholder.</div>
-<div class="cal-ph-metricGrid">
-<div class="cal-ph-scale">
-<div class="cal-ph-scaleLabel">Scale A</div>
-<div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
-</div>
-<div class="cal-ph-scale">
-<div class="cal-ph-scaleLabel">Scale B</div>
-<div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
-</div>
-<div class="cal-ph-readout">
-<div class="cal-ph-readoutRow"><span>Flicker Hz</span><b id="fl_val_hz">--</b></div>
-<div class="cal-ph-readoutRow"><span>Flicker %</span><b id="fl_val_pct">--</b></div>
-<div class="cal-ph-readoutRow"><span>Index (approx)</span><b id="fl_val_index">--</b></div>
-</div>
+      <div class="cal-placeholders">
+        <div class="cal-ph cal-ph-camera">
+          <div class="cal-ph-head">
+            <div class="cal-ph-title">Camera Placeholder</div>
+            <div class="cal-ph-sub">Live preview for lux meter sampling.</div>
+          </div>
+          <div class="cal-cam-wrap">
+            <canvas id="lux_cam_canvas" class="cal-cam-canvas" width="640" height="360"></canvas>
+            <div class="cal-cam-hud">
+              <div class="cal-cam-status" id="lux_cam_status">idle</div>
+            </div>
+          </div>
+        </div>
 
-</div>
-</div>
-    </div>
-</div>
-</div>
-</div>
-</details><details class="acc" data-caltool="spectrum"><summary><div><div class="acc-title">Light Spectrometer</div><div class="acc-sub">Dominant wavelength / saturation</div></div><button class="an-chip an-chip-info" title="Information" type="button">Info</button></summary>
-<div class="acc-body">
-<div class="cal-tool-view" id="caltool-spectrum">
-<div class="cal-inline-topbar">
-<div class="cal-inline-title">Light Spectrometer</div>
-<div class="cal-inline-actions">
-<button class="lux-icon cal-cam-btn" data-cam-start="spectrum" title="Start Camera" type="button">📷</button>
-<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-</div>
-</div>
-<div class="cal-inline-panel">
-<div class="cal-two">
-      <div class="cal-ph cal-ph--camera" data-ph="spectrum-camera">
-<div class="cal-ph-title">Camera Placeholder</div>
-<div class="cal-ph-sub">This area will host the camera feed used by spectrum.</div>
-<div class="cal-ph-cameraFrame">
-<canvas aria-label="Spectrum camera preview" class="cal-ph-cam" height="240" id="spectrum_cam_canvas" width="360"></canvas>
-<div class="cal-ph-crosshair"></div>
-</div>
-</div>
-      <div class="cal-ph cal-ph--metrics" data-ph="spectrum-metrics">
-<div class="cal-ph-title">Measurements Placeholder</div>
-<div class="cal-ph-sub">Scales / ticks / readings derived from the camera placeholder.</div>
-<div class="cal-ph-metricGrid">
-<div class="cal-ph-scale">
-<div class="cal-ph-scaleLabel">Scale A</div>
-<div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
-</div>
-<div class="cal-ph-scale">
-<div class="cal-ph-scaleLabel">Scale B</div>
-<div class="cal-ph-ticks"><span></span><span></span><span></span><span></span><span></span></div>
-</div>
-<div class="cal-ph-readout">
-<div class="cal-ph-readoutRow"><span>Dominant nm</span><b id="sp_val_nm">--</b></div>
-<div class="cal-ph-readoutRow"><span>Saturation %</span><b id="sp_val_sat">--</b></div>
-<div class="cal-ph-readoutRow"><span>RGB</span><b id="sp_val_rgb">--</b></div>
-</div>
+        <div class="cal-ph cal-ph-values">
+          <div class="cal-ph-head">
+            <div class="cal-ph-title">Measurements</div>
+            <div class="cal-ph-sub">Values derived from the camera placeholder.</div>
+          </div>
+          
+  <div class="meas-card">
+    <div class="meas-row"><div class="meas-k">Scale A</div><div class="meas-v" id="lux_scale_a">—</div></div>
+    <div class="meas-row"><div class="meas-k">Scale B</div><div class="meas-v" id="lux_scale_b">—</div></div>
+  </div>
+  <div class="meas-list">
+    <div class="meas-row"><div class="meas-k">Lux</div><div class="meas-v" id="lux_val_lux">—</div></div>
+    <div class="meas-row"><div class="meas-k">Foot‑candles</div><div class="meas-v" id="lux_val_fc">—</div></div>
+    <div class="meas-row"><div class="meas-k">EV (approx)</div><div class="meas-v" id="lux_val_ev">—</div></div>
+  </div>
 
-</div>
-</div>
+        </div>
+      </div>
     </div>
-</div>
-</div>
-</div>
+  </div>
+</details><details class="acc" data-caltool="ct">
+  <summary>
+    <div>
+      <div class="acc-title">Color Temperature</div>
+      <div class="acc-sub">CCT / Δuv calibration</div>
+    </div>
+    <button class="an-chip an-chip-info" type="button" title="Information">Info</button>
+  </summary>
+  <div class="acc-body">
+    <div class="cal-tool-view tool-tab" id="caltool-ct">
+      <div class="cal-inline-topbar">
+        <div class="cal-inline-title">Color Temperature</div>
+        <div class="cal-inline-actions">
+          <button class="lux-icon cal-start-btn" type="button" data-cal-start="ct" title="Start camera">📷</button>
+          <button class="lux-icon cal-fs-btn" type="button" data-cal-fs="ct" title="Full Screen">⛶</button>
+        </div>
+      </div>
+
+      <div class="cal-placeholders">
+        <div class="cal-ph cal-ph-camera">
+          <div class="cal-ph-head">
+            <div class="cal-ph-title">Camera Placeholder</div>
+            <div class="cal-ph-sub">Live preview for color temperature sampling.</div>
+          </div>
+          <div class="cal-cam-wrap">
+            <canvas id="ct_cam_canvas" class="cal-cam-canvas" width="640" height="360"></canvas>
+            <div class="cal-cam-hud">
+              <div class="cal-cam-status" id="ct_cam_status">idle</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cal-ph cal-ph-values">
+          <div class="cal-ph-head">
+            <div class="cal-ph-title">Measurements</div>
+            <div class="cal-ph-sub">Values derived from the camera placeholder.</div>
+          </div>
+          
+  <div class="meas-card">
+    <div class="meas-row"><div class="meas-k">Estimated CCT</div><div class="meas-v" id="ct_val_cct">—</div></div>
+    <div class="meas-row"><div class="meas-k">Δuv</div><div class="meas-v" id="ct_val_duv">—</div></div>
+  </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</details><details class="acc" data-caltool="flicker">
+  <summary>
+    <div>
+      <div class="acc-title">Flicker Meter</div>
+      <div class="acc-sub">Frequency / flicker level</div>
+    </div>
+    <button class="an-chip an-chip-info" type="button" title="Information">Info</button>
+  </summary>
+  <div class="acc-body">
+    <div class="cal-tool-view tool-tab" id="caltool-flicker">
+      <div class="cal-inline-topbar">
+        <div class="cal-inline-title">Flicker Meter</div>
+        <div class="cal-inline-actions">
+          <button class="lux-icon cal-start-btn" type="button" data-cal-start="flicker" title="Start camera">📷</button>
+          <button class="lux-icon cal-fs-btn" type="button" data-cal-fs="flicker" title="Full Screen">⛶</button>
+        </div>
+      </div>
+
+      <div class="cal-placeholders">
+        <div class="cal-ph cal-ph-camera">
+          <div class="cal-ph-head">
+            <div class="cal-ph-title">Camera Placeholder</div>
+            <div class="cal-ph-sub">Live preview for flicker meter sampling.</div>
+          </div>
+          <div class="cal-cam-wrap">
+            <canvas id="flicker_cam_canvas" class="cal-cam-canvas" width="640" height="360"></canvas>
+            <div class="cal-cam-hud">
+              <div class="cal-cam-status" id="flicker_cam_status">idle</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cal-ph cal-ph-values">
+          <div class="cal-ph-head">
+            <div class="cal-ph-title">Measurements</div>
+            <div class="cal-ph-sub">Values derived from the camera placeholder.</div>
+          </div>
+          
+  <div class="meas-card">
+    <div class="meas-row"><div class="meas-k">Frequency (Hz)</div><div class="meas-v" id="flicker_val_hz">—</div></div>
+    <div class="meas-row"><div class="meas-k">Flicker %</div><div class="meas-v" id="flicker_val_pct">—</div></div>
+    <div class="meas-row"><div class="meas-k">Flicker index</div><div class="meas-v" id="flicker_val_fpct">—</div></div>
+  </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</details><details class="acc" data-caltool="spectrum">
+  <summary>
+    <div>
+      <div class="acc-title">Light Spectrometer</div>
+      <div class="acc-sub">Dominant wavelength / saturation</div>
+    </div>
+    <button class="an-chip an-chip-info" type="button" title="Information">Info</button>
+  </summary>
+  <div class="acc-body">
+    <div class="cal-tool-view tool-tab" id="caltool-spectrum">
+      <div class="cal-inline-topbar">
+        <div class="cal-inline-title">Light Spectrometer</div>
+        <div class="cal-inline-actions">
+          <button class="lux-icon cal-start-btn" type="button" data-cal-start="spectrum" title="Start camera">📷</button>
+          <button class="lux-icon cal-fs-btn" type="button" data-cal-fs="spectrum" title="Full Screen">⛶</button>
+        </div>
+      </div>
+
+      <div class="cal-placeholders">
+        <div class="cal-ph cal-ph-camera">
+          <div class="cal-ph-head">
+            <div class="cal-ph-title">Camera Placeholder</div>
+            <div class="cal-ph-sub">Live preview for light spectrometer sampling.</div>
+          </div>
+          <div class="cal-cam-wrap">
+            <canvas id="spec_cam_canvas" class="cal-cam-canvas" width="640" height="360"></canvas>
+            <div class="cal-cam-hud">
+              <div class="cal-cam-status" id="spectrum_cam_status">idle</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cal-ph cal-ph-values">
+          <div class="cal-ph-head">
+            <div class="cal-ph-title">Measurements</div>
+            <div class="cal-ph-sub">Values derived from the camera placeholder.</div>
+          </div>
+          
+  <div class="meas-card">
+    <div class="meas-row"><div class="meas-k">Dominant λ</div><div class="meas-v" id="spec_val_nm">—</div></div>
+    <div class="meas-row"><div class="meas-k">Saturation</div><div class="meas-v" id="spec_val_sat">—</div></div>
+  </div>
+  <div class="meas-list">
+    <div class="meas-row"><div class="meas-k">CIE x</div><div class="meas-v" id="spec_val_cx">—</div></div>
+    <div class="meas-row"><div class="meas-k">CIE y</div><div class="meas-v" id="spec_val_cy">—</div></div>
+  </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
 </details></div>
 <!-- Tool pages (placeholders for now) -->
 </div>
@@ -14747,5 +14788,334 @@ document.addEventListener('DOMContentLoaded', function(){
   window.__CalibrationCamStop = stop;
 })();
 </script>
+
+<script>
+/* === Calibration v20: unified per-tool camera + measurements (file-safe) === */
+(() => {
+  if (window.__CAL_V20__) return;
+  window.__CAL_V20__ = true;
+
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  const $ = (sel, root=document) => root.querySelector(sel);
+
+  // Outputs per tool (IDs in the DOM)
+  const OUT = {
+    lux: { lux: $("#lux_val_lux"), fc: $("#lux_val_fc"), ev: $("#lux_val_ev"), sa: $("#lux_scale_a"), sb: $("#lux_scale_b") },
+    ct: { cct: $("#ct_val_cct"), duv: $("#ct_val_duv") },
+    flicker: { hz: $("#flicker_val_hz"), pct: $("#flicker_val_pct"), idx: $("#flicker_val_fpct") },
+    spectrum: { nm: $("#spec_val_nm"), sat: $("#spec_val_sat"), cx: $("#spec_val_cx"), cy: $("#spec_val_cy") },
+  };
+
+  const statusEl = (tool) => document.getElementById(`${tool}_cam_status`);
+  const getCanvas = (tool) => document.getElementById({
+    lux: "lux_cam_canvas",
+    ct: "ct_cam_canvas",
+    flicker: "flicker_cam_canvas",
+    spectrum: "spec_cam_canvas",
+  }[tool] || "");
+
+  const state = {
+    tool: null,
+    stream: null,
+    video: null,
+    raf: 0,
+    lumaHist: [],
+    lastUpdateTs: 0,
+    lastValues: { lux:{}, ct:{}, flicker:{}, spectrum:{} }
+  };
+
+  function ensureVideo(){
+    if (state.video) return state.video;
+    const v = document.createElement("video");
+    v.setAttribute("playsinline",""); // iOS
+    v.muted = true;
+    v.autoplay = true;
+    v.style.position="fixed";
+    v.style.left="-99999px";
+    v.style.top="-99999px";
+    document.body.appendChild(v);
+    state.video = v;
+    return v;
+  }
+
+  function fmt(n, unit="", digits=0){
+    if (n == null || !isFinite(n)) return "—";
+    const v = (digits>0) ? n.toFixed(digits) : Math.round(n).toString();
+    return unit ? `${v} ${unit}` : v;
+  }
+
+  function srgbToLin(c){
+    c /= 255;
+    return (c <= 0.04045) ? (c/12.92) : Math.pow((c+0.055)/1.055, 2.4);
+  }
+
+  // Rough RGB -> xy (D65) and McCamy CCT. This is an approximation (no color calibration yet).
+  function estimateCCTandXY(r,g,b){
+    const R = srgbToLin(r), G = srgbToLin(g), B = srgbToLin(b);
+    // sRGB D65 matrix
+    const X = 0.4124*R + 0.3576*G + 0.1805*B;
+    const Y = 0.2126*R + 0.7152*G + 0.0722*B;
+    const Z = 0.0193*R + 0.1192*G + 0.9505*B;
+    const sum = X+Y+Z;
+    const x = sum ? X/sum : 0;
+    const y = sum ? Y/sum : 0;
+    // McCamy
+    const n = (x - 0.3320) / (0.1858 - y || 1e-6);
+    const cct = 449*Math.pow(n,3) + 3525*Math.pow(n,2) + 6823.3*n + 5520.33;
+    return {cct, x, y, Y};
+  }
+
+  function rgbToHsv(r,g,b){
+    r/=255; g/=255; b/=255;
+    const max=Math.max(r,g,b), min=Math.min(r,g,b);
+    const d=max-min;
+    let h=0;
+    if (d!==0){
+      if (max===r) h=((g-b)/d)%6;
+      else if (max===g) h=(b-r)/d + 2;
+      else h=(r-g)/d + 4;
+      h*=60; if (h<0) h+=360;
+    }
+    const s = max===0 ? 0 : d/max;
+    const v = max;
+    return {h,s,v};
+  }
+
+  function computeFromCanvas(canvas){
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    const w = canvas.width, h = canvas.height;
+    // Sample a central ROI (reduces noise and edge artifacts)
+    const rw = Math.max(10, Math.floor(w*0.08));
+    const rh = Math.max(10, Math.floor(h*0.08));
+    const rx = Math.floor(w/2 - rw/2);
+    const ry = Math.floor(h/2 - rh/2);
+    const img = ctx.getImageData(rx, ry, rw, rh).data;
+
+    let r=0,g=0,b=0;
+    const n = rw*rh;
+    for (let i=0;i<img.length;i+=4){
+      r += img[i]; g += img[i+1]; b += img[i+2];
+    }
+    r/=n; g/=n; b/=n;
+    const cctxy = estimateCCTandXY(r,g,b);
+    const hsv = rgbToHsv(r,g,b);
+    const luma = 0.2126*r + 0.7152*g + 0.0722*b;
+
+    return {r,g,b,luma, hsv, cctxy};
+  }
+
+  function updateOutputs(tool, m){
+    if (!tool || !m) return;
+    state.lastValues[tool] = m;
+
+    if (tool === "lux"){
+      // Map luma [0..255] to a wide lux-like range (placeholder until calibrated)
+      const lux = (m.luma/255) * 12000; // 0..12k lux
+      const fc = lux * 0.092903;
+      const ev = Math.log2(Math.max(1e-6, lux/2.5)); // rough
+      OUT.lux.lux && (OUT.lux.lux.textContent = fmt(lux, "lx"));
+      OUT.lux.fc && (OUT.lux.fc.textContent = fmt(fc, "fc"));
+      OUT.lux.ev && (OUT.lux.ev.textContent = fmt(ev, "", 1));
+      OUT.lux.sa && (OUT.lux.sa.textContent = `0 → 12k lx (auto)`);
+      OUT.lux.sb && (OUT.lux.sb.textContent = `ROI: center 8%`);
+    }
+
+    if (tool === "ct"){
+      const cct = m.cctxy.cct;
+      OUT.ct.cct && (OUT.ct.cct.textContent = fmt(cct, "K"));
+      // Δuv placeholder (needs full chromatic adaptation + Planckian locus)
+      const duv = (m.cctxy.y - 0.33) * 0.02;
+      OUT.ct.duv && (OUT.ct.duv.textContent = (isFinite(duv) ? duv.toFixed(4) : "—"));
+    }
+
+    if (tool === "spectrum"){
+      // Dominant wavelength placeholder (map hue to 380-700nm)
+      const nm = 380 + (m.hsv.h/360) * (700-380);
+      OUT.spectrum.nm && (OUT.spectrum.nm.textContent = fmt(nm, "nm"));
+      OUT.spectrum.sat && (OUT.spectrum.sat.textContent = fmt(m.hsv.s*100, "%"));
+      OUT.spectrum.cx && (OUT.spectrum.cx.textContent = (m.cctxy.x ? m.cctxy.x.toFixed(4) : "—"));
+      OUT.spectrum.cy && (OUT.spectrum.cy.textContent = (m.cctxy.y ? m.cctxy.y.toFixed(4) : "—"));
+    }
+
+    if (tool === "flicker"){
+      // Update flicker stats from luma history (placeholder)
+      const hist = state.lumaHist;
+      if (hist.length >= 10){
+        let min=Infinity,max=-Infinity;
+        for (const v of hist){ if (v<min) min=v; if (v>max) max=v; }
+        const pct = (max+min) ? ((max-min)/(max+min))*100 : 0;
+
+        // Estimate dominant frequency using zero-crossings around mean (very rough)
+        const mean = hist.reduce((a,b)=>a+b,0)/hist.length;
+        let crossings=0;
+        for (let i=1;i<hist.length;i++){
+          if ((hist[i-1]-mean) === 0) continue;
+          if ((hist[i-1]-mean) * (hist[i]-mean) < 0) crossings++;
+        }
+        const durationSec = (hist.length-1)/30; // assuming ~30fps
+        const hz = durationSec>0 ? (crossings/2)/durationSec : 0;
+
+        OUT.flicker.pct && (OUT.flicker.pct.textContent = fmt(pct, "%", 1));
+        OUT.flicker.hz && (OUT.flicker.hz.textContent = fmt(hz, "Hz", 1));
+        // Flicker index placeholder
+        OUT.flicker.idx && (OUT.flicker.idx.textContent = fmt(Math.min(1, pct/100), "", 2));
+      } else {
+        OUT.flicker.pct && (OUT.flicker.pct.textContent = "—");
+        OUT.flicker.hz && (OUT.flicker.hz.textContent = "—");
+        OUT.flicker.idx && (OUT.flicker.idx.textContent = "—");
+      }
+    }
+  }
+
+  function setStatus(tool, msg){
+    const el = statusEl(tool);
+    if (el) el.textContent = msg;
+  }
+
+  async function stopCamera(){
+    if (state.raf) cancelAnimationFrame(state.raf);
+    state.raf = 0;
+    if (state.video) {
+      try { state.video.pause(); } catch {}
+      state.video.srcObject = null;
+    }
+    if (state.stream) {
+      for (const t of state.stream.getTracks()) try { t.stop(); } catch {}
+    }
+    if (state.tool) setStatus(state.tool, "stopped");
+    state.stream = null;
+    state.tool = null;
+    state.lumaHist = [];
+  }
+
+  async function startCameraForTool(tool){
+    // Close previous tool camera to avoid conflicts
+    await stopCamera();
+
+    const canvas = getCanvas(tool);
+    if (!canvas) { alert("tool canvas missing"); return; }
+
+    const v = ensureVideo();
+    setStatus(tool, "requesting…");
+
+    const constraints = {
+      audio: false,
+      video: {
+        facingMode: { ideal: "environment" },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+        frameRate: { ideal: 30, max: 60 }
+      }
+    };
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      state.stream = stream;
+      state.tool = tool;
+
+      v.srcObject = stream;
+
+      await new Promise((res, rej) => {
+        const onOk = () => { cleanup(); res(); };
+        const onErr = (e) => { cleanup(); rej(e); };
+        const cleanup = () => {
+          v.removeEventListener("loadedmetadata", onOk);
+          v.removeEventListener("error", onErr);
+        };
+        v.addEventListener("loadedmetadata", onOk, { once: true });
+        v.addEventListener("error", onErr, { once: true });
+      });
+
+      try { await v.play(); } catch {}
+      setStatus(tool, "live");
+      state.lumaHist = [];
+
+      const ctx = canvas.getContext("2d");
+      const draw = () => {
+        if (!state.tool || state.tool !== tool) return; // tool switched
+        if (!state.stream) return;
+
+        const vw = v.videoWidth || 640;
+        const vh = v.videoHeight || 360;
+
+        // Fit video into canvas while preserving aspect
+        const cw = canvas.width, ch = canvas.height;
+        const vAspect = vw / vh;
+        const cAspect = cw / ch;
+        let dw, dh, dx, dy;
+        if (vAspect > cAspect) {
+          dh = ch; dw = dh * vAspect; dx = (cw - dw)/2; dy = 0;
+        } else {
+          dw = cw; dh = dw / vAspect; dx = 0; dy = (ch - dh)/2;
+        }
+        ctx.clearRect(0,0,cw,ch);
+        ctx.drawImage(v, dx, dy, dw, dh);
+
+        // Measurements ~10Hz to reduce CPU
+        const now = performance.now();
+        if (now - state.lastUpdateTs > 90) {
+          const m = computeFromCanvas(canvas);
+          // Flicker needs history
+          state.lumaHist.push(m.luma);
+          if (state.lumaHist.length > 120) state.lumaHist.shift();
+          updateOutputs(tool, m);
+          state.lastUpdateTs = now;
+        }
+
+        state.raf = requestAnimationFrame(draw);
+      };
+      state.raf = requestAnimationFrame(draw);
+
+    } catch (err) {
+      console.error(err);
+      await stopCamera();
+      setStatus(tool, "error");
+      const msg = (err && err.name) ? `${err.name}: ${err.message||""}` : String(err);
+      alert("Camera failed to start.
+
+Tip: use https:// (GitHub Pages) or http://localhost and allow Camera permission.
+
+Error: " + msg);
+    }
+  }
+
+  function requestFullscreenFor(tool){
+    const root = document.getElementById(`caltool-${tool}`);
+    if (!root) return;
+    const el = root.closest(".cal-tool-view") || root;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+    if (req) req.call(el);
+  }
+
+  // Bind buttons
+  $$( "[data-cal-start]" ).forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const tool = btn.getAttribute("data-cal-start");
+      startCameraForTool(tool);
+    }, { passive: true });
+  });
+
+  $$( "[data-cal-fs]" ).forEach(btn => {
+    btn.addEventListener("click", () => {
+      const tool = btn.getAttribute("data-cal-fs");
+      requestFullscreenFor(tool);
+    }, { passive: true });
+  });
+
+  // Stop camera when leaving Calibration tab (best-effort)
+  document.addEventListener("click", (e) => {
+    const t = e.target;
+    if (!(t instanceof Element)) return;
+    if (t.closest && t.closest(".tab-btn") && !t.closest(".tab-btn").classList.contains("active")) {
+      // If user clicked a different tab button, stop.
+      const txt = (t.textContent||"").toLowerCase();
+      if (txt.includes("analysis") || txt.includes("granules") || txt.includes("tools")) stopCamera();
+    }
+  }, true);
+
+  window.addEventListener("pagehide", stopCamera);
+})();
+</script>
+
 </body>
 </html>
