@@ -4,6 +4,10 @@
 <head>
 <!-- === Manor Dev Inspector Hook (early) === -->
 <script>
+window.__disableCTM = true;
+
+function onReady(fn){ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',fn,{once:true});} else {fn();} }
+
 (function(){
   if (window.__mdiHookInstalled) return;
   window.__mdiHookInstalled = true;
@@ -109,7 +113,7 @@
     const dx = (w-dw)/2;
     const dy = (h-dh)/2;
     ctx.clearRect(0,0,w,h);
-    ctx.drawImage(sCanvas, 0,0,vw,vh, dx,dy,dw,dh);
+    ctx.drawImage(video, 0,0,vw,vh, dx,dy,dw,dh);
   }
 
   function sample(video){
@@ -122,7 +126,7 @@
     // Center crop ROI
     const sx = Math.max(0, Math.floor(vw/2 - size/2));
     const sy = Math.max(0, Math.floor(vh/2 - size/2));
-    sCtx.drawImage(sCanvas, sx, sy, size, size, 0, 0, size, size);
+    sCtx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
     const img = sCtx.getImageData(0,0,size,size).data;
     let r=0,g=0,b=0,y=0;
     for(let i=0;i<img.length;i+=4){
@@ -5381,6 +5385,435 @@ body{
 .meas-v{font-variant-numeric:tabular-nums;font-weight:700;}
 .cal-start-btn{width:42px;height:42px;border-radius:999px;}
 
+
+/* === EV gauge (Calibration -> Lux Meter) === */
+.ev-card{ padding:12px; }
+.ev-gauge-wrap{ width:100%; display:flex; justify-content:center; }
+.ev-gauge{ width:min(360px, 100%); height:auto; overflow:visible; }
+.ev-arc{ fill:none; stroke: rgba(255,255,255,0.22); stroke-width:10; stroke-linecap:round; }
+.ev-tick{ stroke: rgba(255,255,255,0.35); stroke-width:2; }
+.ev-tick.major{ stroke-width:3; }
+.ev-label{ fill: rgba(255,255,255,0.75); font-size:10px; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+.ev-needle{ stroke: rgba(255,210,90,0.95); stroke-width:3.5; stroke-linecap:round;
+  transform-origin: 100px 100px;
+  transition: transform 140ms linear;
+}
+.ev-hub{ fill: rgba(255,210,90,0.95); }
+.ev-scale-note{ margin-top:6px; font-size:12px; opacity:.72; }
+
+
+/* === Dial / Gauge UI (Calibration → Values placeholder) === */
+.dial-card{
+  background: rgba(18, 22, 36, 0.72);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  padding: 14px 14px 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  backdrop-filter: blur(10px);
+}
+.dial-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.dial-title{font-weight:800;letter-spacing:0.2px}
+.dial-sub{opacity:0.7;font-size:12px;margin-top:2px}
+.dial-chip{
+  padding:6px 10px;border-radius:10px;
+  background: rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.10);
+  font-size:12px;opacity:0.9
+}
+.dial-gauge{position:relative;display:flex;align-items:center;justify-content:center;margin:8px 0 10px}
+.dial-svg{width:100%;max-width:360px;height:auto;display:block}
+.dial-center{
+  position:absolute;left:50%;top:58%;
+  transform:translate(-50%,-50%);
+  text-align:center;
+}
+.dial-center-label{opacity:0.75;font-size:12px;margin-bottom:2px}
+.dial-center-value{font-size:44px;font-weight:900;letter-spacing:-0.5px;line-height:1}
+.dial-center-value.big{font-size:52px}
+.dial-side{
+  position:absolute;bottom:8px;font-size:12px;font-weight:700;opacity:0.75;
+  text-transform:none;
+}
+.dial-left{left:10px}
+.dial-right{right:10px}
+.dial-needle{stroke:#ffcc66;stroke-width:3.2;stroke-linecap:round;filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6))}
+.dial-hub{fill:#ffcc66;stroke:rgba(0,0,0,0.35);stroke-width:2}
+
+#lux_ev_needle, #ctNeedle, #flNeedle, #specNeedle{
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transition: transform 140ms ease-out;
+}
+
+.dial-footer{margin-top:6px;display:flex;flex-direction:column;gap:6px}
+.dial-small{font-size:12px}
+.dial-small.muted{opacity:0.72}
+.dial-small-k{opacity:0.7;margin-right:6px}
+.dial-dot{margin:0 8px;opacity:0.5}
+
+.dial-meta3{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:10px;margin-top:6px;
+}
+.dial-meta-item{
+  background: rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px;
+  padding:10px 10px 8px;
+}
+.dial-meta-k{font-size:11px;opacity:0.7;margin-bottom:4px}
+.dial-meta-v{font-weight:800}
+
+#lux_ev_ticks .ev-tick{stroke:rgba(255,255,255,0.55);stroke-width:1.2}
+#lux_ev_ticks .ev-tick.major{stroke:rgba(255,255,255,0.85);stroke-width:1.8}
+#lux_ev_ticks text{fill:rgba(255,255,255,0.8);font-size:10px;font-weight:700;text-anchor:middle}
+
+#ctTicks .ct-tick{stroke:rgba(255,255,255,0.55);stroke-width:1.2}
+#ctTicks .ct-tick.major{stroke:rgba(255,255,255,0.85);stroke-width:1.8}
+#ctTicks text{fill:rgba(255,255,255,0.8);font-size:10px;font-weight:700;text-anchor:middle}
+
+#flTicks .fl-tick{stroke:rgba(255,255,255,0.55);stroke-width:1.2}
+#flTicks .fl-tick.major{stroke:rgba(255,255,255,0.85);stroke-width:1.8}
+#flTicks text{fill:rgba(255,255,255,0.8);font-size:10px;font-weight:700;text-anchor:middle}
+
+#specTicks .sp-tick{stroke:rgba(255,255,255,0.55);stroke-width:1.2}
+#specTicks .sp-tick.major{stroke:rgba(255,255,255,0.85);stroke-width:1.8}
+#specTicks text{fill:rgba(255,255,255,0.8);font-size:10px;font-weight:700;text-anchor:middle}
+
+.ct-duv{margin-top:6px}
+.ct-duv-label{font-size:12px;opacity:0.8;margin-bottom:6px}
+.ct-duv-num{font-weight:800;opacity:0.95}
+.ct-duv-bar{position:relative;height:16px;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.10);background:rgba(0,0,0,0.25)}
+.ct-duv-grad{position:absolute;inset:0;background:linear-gradient(90deg,#b91c1c 0%,#a855f7 25%,#ffffff 50%,#22c55e 75%,#16a34a 100%);opacity:0.9}
+.ct-duv-marker{position:absolute;top:-2px;width:0;height:20px;border-left:2px solid rgba(255,255,255,0.95);filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6))}
+.ct-duv-scale{display:flex;justify-content:space-between;font-size:10px;opacity:0.65;margin-top:6px}
+
+.fl-strip{margin-top:6px}
+.fl-strip-scale{display:flex;justify-content:space-between;font-size:10px;opacity:0.65;margin-bottom:6px}
+.fl-strip-bar{height:14px;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.10);background:rgba(0,0,0,0.25)}
+.fl-strip-fill{height:100%;background:linear-gradient(90deg,#3bd66a 0%,#ffd34d 55%,#ff5353 100%);width:0%}
+
+.spec-bars{margin-top:6px}
+.spec-bar-label{font-size:12px;opacity:0.8;margin-bottom:6px}
+.spec-bar-track{height:14px;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.10);background:rgba(0,0,0,0.25)}
+.spec-bar-fill{height:100%;background:linear-gradient(90deg,rgba(255,255,255,0.2),rgba(255,255,255,0.85));width:0%}
+
+
+/* Hidden capture elements for camera-based analyzers */
+#captureHub{position:absolute; width:2px; height:2px; opacity:0; pointer-events:none; left:-9999px; top:-9999px;}
+#captureHub video,#captureHub canvas{width:320px; height:240px;}
+
+
+/* === Legacy gauge look (match reference screenshots) === */
+
+.legacy-card{background:linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.03));
+  border:1px solid rgba(255,255,255,0.10); border-radius:18px; padding:14px 14px 16px; box-shadow:0 12px 30px rgba(0,0,0,0.35); position:relative; overflow:hidden;}
+.legacy-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;}
+.legacy-icon{width:34px;height:34px;border-radius:10px;background:rgba(0,0,0,0.30);display:flex;align-items:center;justify-content:center;font-size:18px}
+.legacy-top-center{flex:1; text-align:center; color:rgba(255,255,255,0.85); font-weight:600}
+.legacy-top-title{font-size:13px; opacity:0.9}
+.legacy-top-metric{font-size:12px; color:rgba(255,255,255,0.85)}
+.legacy-top-metric.small{font-size:11px; opacity:0.8}
+.legacy-top-actions{width:44px; display:flex; justify-content:flex-end}
+.legacy-btn{background:rgba(0,0,0,0.28); border:1px solid rgba(255,255,255,0.10); color:#fff; border-radius:10px; width:34px;height:34px; cursor:pointer}
+.legacy-gauge-wrap{position:relative; margin-top:4px; display:flex; justify-content:center; align-items:center}
+.legacy-gauge{width:100%; max-width:360px; height:auto}
+.legacy-center{position:absolute; left:50%; top:56%; transform:translate(-50%,-50%); text-align:center; pointer-events:none}
+.legacy-center-label{font-size:12px; color:rgba(255,255,255,0.75); margin-bottom:2px}
+.legacy-center-sub{font-size:11px; color:rgba(255,255,255,0.7)}
+.legacy-center-value{font-size:46px; font-weight:700; color:rgba(255,255,255,0.92); line-height:1}
+.legacy-center-value.big{font-size:56px}
+.legacy-center-value .unit{font-size:14px; font-weight:600; margin-left:6px; opacity:0.8}
+.ev-ticks text{fill:rgba(0,0,0,0.65); font-size:13px; font-weight:800}
+.legacy-mid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:10px}
+.legacy-box{background:rgba(0,0,0,0.22); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:10px}
+.legacy-box-title{font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:6px}
+.legacy-box-val{font-size:22px; font-weight:700; color:rgba(255,255,255,0.9)}
+.legacy-foot{margin-top:10px; color:rgba(255,255,255,0.55); font-size:12px}
+/* CT specifics */
+.legacy-ct .ct-side{position:absolute; top:34px; width:70px; font-size:12px; color:rgba(255,255,255,0.78); text-align:center}
+.legacy-ct .ct-left{left:0}
+.legacy-ct .ct-right{right:0}
+.legacy-ct .ct-side-title{font-weight:700; font-size:12px; margin-bottom:2px}
+.legacy-ct .ct-ticks text{fill:rgba(255,255,255,0.70); font-size:11px; font-weight:800}
+.ct-duv-row{margin-top:10px}
+.ct-duv-label{font-size:12px; color:rgba(255,255,255,0.78); margin-bottom:6px}
+.ct-duv-bar{position:relative; height:16px; border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.10); display:flex}
+.ct-duv-mag{flex:1; background:linear-gradient(90deg,#7b2cff,#b24bff)}
+.ct-duv-green{flex:1; background:linear-gradient(90deg,#b6ff6a,#34d399)}
+.ct-duv-zero{position:absolute; left:50%; top:-2px; width:2px; height:20px; background:rgba(255,255,255,0.85)}
+.ct-duv-ind{position:absolute; top:-3px; width:10px; height:22px; border-radius:6px; background:rgba(0,0,0,0.65); border:1px solid rgba(255,255,255,0.25); left:calc(50% - 5px)}
+.ct-duv-scale{display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.55); margin-top:6px}
+.ct-cie{margin-top:8px; font-size:12px; color:rgba(255,255,255,0.65)}
+/* Flicker */
+.legacy-fl .fl-ticks text{fill:rgba(0,0,0,0.70); font-size:12px; font-weight:800}
+.fl-sides{position:absolute; top:40px; left:12px; right:12px; display:flex; justify-content:space-between; font-weight:800; font-size:12px}
+.fl-side.low{color:#7CFC9A}
+.fl-side.high{color:#FF7B6E}
+.fl-strip{margin-top:10px}
+.fl-strip-bar{height:14px; border-radius:8px; background:rgba(255,255,255,0.14); border:1px solid rgba(255,255,255,0.10); overflow:hidden; position:relative}
+.fl-strip-fill{height:100%; width:0%; background:linear-gradient(90deg,#4ddc7a,#f1c40f,#ff6b5a)}
+.fl-strip-scale{display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.55); margin-top:6px}
+.fl-note{margin-top:10px; background:rgba(0,0,0,0.18); border:1px solid rgba(255,255,255,0.08); padding:10px 12px; border-radius:14px; font-size:12px; color:rgba(255,255,255,0.78); line-height:1.35}
+/* Spectrum */
+.legacy-spec .spec-corners{position:absolute; top:6px; left:10px; right:10px; display:flex; justify-content:space-between; font-size:12px}
+.legacy-spec .spec-corner{color:rgba(255,255,255,0.85)}
+.legacy-spec .spec-corner .muted{color:rgba(255,255,255,0.55); font-size:11px}
+.spec-ticks text{fill:rgba(0,0,0,0.70); font-size:12px; font-weight:800}
+.spec-sat{margin-top:10px}
+.spec-sat-bar{height:14px; border-radius:8px; background:rgba(255,255,255,0.14); border:1px solid rgba(255,255,255,0.10); overflow:hidden}
+.spec-sat-fill{height:100%; width:0%; background:linear-gradient(90deg,rgba(255,255,255,0.25),rgba(255,255,255,0.75))}
+.spec-sat-label{margin-top:6px; font-size:12px; color:rgba(255,255,255,0.70); text-align:center}
+
+
+/* === Calibration accordion header actions (camera/fullscreen) === */
+#tab-calibration summary .acc-actions{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-left:auto;
+}
+#tab-calibration summary{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+
+/* === Header buttons alignment + uniform sizing === */
+#tab-calibration details.acc > summary{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+#tab-calibration details.acc > summary > *:first-child{
+  min-width:0;
+}
+#tab-calibration summary .acc-actions{
+  margin-left:auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+}
+#tab-calibration summary .acc-actions button{
+  width:40px;
+  height:40px;
+  min-width:40px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  font-size:16px;
+  line-height:1;
+}
+#tab-calibration summary .acc-actions button.an-chip{
+  /* make Info chip look like same round icon */
+  font-weight:700;
+  letter-spacing:.2px;
+}
+#tab-calibration summary .acc-actions button.an-chip::after{
+  /* keep label compact; if text exists, it's centered */
+}
+
+
+/* === Calibration Info Modal (mobile-first, single scroll screen) === */
+.cal-info-modal{
+  position:fixed; inset:0; z-index:9999;
+  display:none;
+  align-items:center; justify-content:center;
+  padding:14px;
+}
+.cal-info-modal.is-open{ display:flex; }
+
+.cal-info-backdrop{
+  position:absolute; inset:0;
+  background:rgba(0,0,0,.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.cal-info-panel{
+  position:relative;
+  width:min(920px, 100%);
+  max-height: calc(100dvh - 28px);
+  margin:0 auto;
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(15,18,28,.82);
+  box-shadow: 0 24px 70px rgba(0,0,0,.55);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  transform: translateY(0);
+  touch-action: pan-y;
+}
+
+.cal-info-grab{
+  display:none;
+  width:46px; height:5px;
+  border-radius:999px;
+  background: rgba(255,255,255,.22);
+  margin:10px auto 4px;
+}
+
+.cal-info-head{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px;
+  padding:12px 14px;
+  border-bottom:1px solid rgba(255,255,255,.10);
+}
+.cal-info-title{
+  font-weight:800;
+  letter-spacing:.2px;
+  font-size:16px;
+  line-height:1.2;
+  min-width:0;
+}
+
+.cal-info-close{
+  width:40px; height:40px; border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  display:inline-flex; align-items:center; justify-content:center;
+}
+
+.cal-info-body{
+  padding:16px 18px 12px;
+  overflow:auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable both-edges;
+}
+
+/* Typo & layout inside the modal */
+.cal-info-body h2{ margin:10px 0 6px; font-size:16px; letter-spacing:.2px; }
+.cal-info-body h3{ margin:12px 0 6px; font-size:14px; letter-spacing:.2px; }
+.cal-info-body p{ margin:6px 0; opacity:.92; line-height:1.5; }
+.cal-info-body ul{ margin:6px 0 10px; padding-right:18px; }
+.cal-info-body li{ margin:4px 0; opacity:.92; line-height:1.45; }
+.cal-info-body ol{ margin:6px 0 10px; padding-right:18px; }
+.cal-info-body code{ background: rgba(255,255,255,.08); padding:2px 6px; border-radius:8px; }
+
+.cal-info-kv{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:10px;
+  margin:10px 0 12px;
+}
+.cal-info-card{
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.05);
+  border-radius:14px;
+  padding:10px 12px;
+}
+.cal-info-card .k{ font-size:12px; opacity:.78; }
+.cal-info-card .v{ font-size:13px; font-weight:700; margin-top:6px; line-height:1.35; }
+
+.cal-info-body .toc{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:10px 0 12px;
+}
+.cal-info-body .toc a{
+  text-decoration:none;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.05);
+  font-size:12px;
+  opacity:.92;
+}
+
+.cal-info-foot{
+  position:sticky;
+  bottom:0;
+  padding:12px 14px;
+  border-top:1px solid rgba(255,255,255,.10);
+  display:flex;
+  justify-content:flex-end;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(15,18,28,.55);
+}
+
+.cal-info-continue{
+  height:40px;
+  padding:0 16px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.08);
+  font-weight:800;
+  letter-spacing:.2px;
+}
+
+@media (max-width: 640px){
+  .cal-info-modal{
+    padding:0;
+    align-items:flex-end;
+    justify-content:stretch;
+  }
+  .cal-info-panel{
+    width:100%;
+    height:100dvh;
+    max-height:none;
+    border-radius:18px 18px 0 0;
+  }
+  .cal-info-grab{ display:block; }
+  .cal-info-head{ padding:12px 14px 10px; }
+  .cal-info-body{
+    padding:12px 14px 12px;
+    font-size:14px;
+  }
+  .cal-info-foot{
+    padding:12px 14px calc(12px + env(safe-area-inset-bottom));
+  }
+}
+
+/* === Global Info Icon Button === */
+button.an-chip-info{
+  width:38px;
+  height:38px;
+  min-width:38px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  font-size:16px;
+  line-height:1;
+  border:1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.92);
+  box-shadow: 0 10px 26px rgba(0,0,0,.20);
+}
+button.an-chip-info:hover{
+  background: rgba(255,255,255,.12);
+}
+button.an-chip-info:active{
+  transform: translateY(1px);
+}
+
+/* Chips/tags inside info panels: improve contrast on dark glass */
+.cal-info-body .toc a,
+.cal-info-body .cal-info-card{
+  border-color: rgba(255,255,255,.18);
+  background: rgba(255,255,255,.08);
+}
+.cal-info-body .toc a{
+  color: rgba(255,255,255,.95);
+}
+
+/* Step-by-step overlay chips (if present) */
+.tool-help-overlay .chip,
+.tool-help-overlay .toc a{
+  border-color: rgba(255,255,255,.18) !important;
+  background: rgba(255,255,255,.08) !important;
+  color: rgba(255,255,255,.95) !important;
+}
+
 </style>
 <script>
 /* === file:// safe self-source reader (avoids CORS) === */
@@ -6134,7 +6567,7 @@ function __readSelfSource(){
 <div class="acc-sub">Choose valid granule color</div>
 </div>
 <span class="an-chip">Picker</span>
-</summary>
+<button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary>
 <div class="acc-body">
 <div class="valid-mini-row">
 <div class="mini-rgb-indicator" id="valid-mini" title="Valid color">
@@ -6175,7 +6608,7 @@ function __readSelfSource(){
 <div class="acc-sub">Choose defect granule color</div>
 </div>
 <span class="an-chip">Picker</span>
-</summary>
+<button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary>
 <div class="acc-body">
 <div class="valid-mini-row">
 <div class="mini-rgb-indicator" id="defect-mini" title="Defect color">
@@ -6217,7 +6650,7 @@ function __readSelfSource(){
 <div class="acc-sub">Front / back camera simulation preview</div>
 </div>
 <span class="an-chip">Preview</span>
-</summary>
+<button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary>
 <div class="acc-body">
 <div style="display: flex; flex-direction: column; gap: 16px;">
 <div style="border: 1px solid var(--border); padding: 10px; border-radius: 12px; background-color: var(--surface);">
@@ -6238,7 +6671,7 @@ function __readSelfSource(){
 <div class="acc-sub">Valid / Defect colors and deltas</div>
 </div>
 <span class="an-chip">Colors</span>
-</summary>
+<button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary>
 <div class="acc-body">
 <div class="an-row"><div class="an-label">Valid RGB</div><div class="an-val" id="analysis-valid">RGB(128,128,128)</div></div>
 <div class="an-row"><div class="an-label">Defect RGB</div><div class="an-val" id="analysis-defect">RGB(128,128,128)</div></div>
@@ -6256,7 +6689,7 @@ function __readSelfSource(){
 <div class="acc-sub">Front/Rear lights + background boards</div>
 </div>
 <span class="an-chip">Light</span>
-</summary>
+<button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary>
 <div class="acc-body an-grid-2">
 <div>
 <div class="an-row"><div class="an-label">Front Light</div><div class="an-val" id="front-light-box">180</div></div>
@@ -6279,7 +6712,7 @@ function __readSelfSource(){
 <div class="acc-sub">Analog/Digital gain targets per view</div>
 </div>
 <span class="an-chip">Gain</span>
-</summary>
+<button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary>
 <div class="acc-body an-grid-2">
 <div>
 <div class="an-row"><div class="an-label">Front Analog</div><div class="an-val" id="gain-front-analog-val">128</div></div>
@@ -6306,7 +6739,7 @@ function __readSelfSource(){
 <div class="acc-sub">White balance, focus/bell check, data path</div>
 </div>
 <span class="an-chip">Cal</span>
-</summary>
+<button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary>
 <div class="acc-body">
 <div class="an-row">
 <div class="an-label">White Balance</div>
@@ -6333,7 +6766,7 @@ function __readSelfSource(){
 <div class="acc-sub">HF and WS sorting definitions</div>
 </div>
 <span class="an-chip">Sort</span>
-</summary>
+<button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary>
 <div class="acc-body">
 <!-- HF (keeps original IDs/JS bindings) -->
 <details class="acc">
@@ -6343,7 +6776,7 @@ function __readSelfSource(){
 <div class="acc-sub">Program + dominant channel + sensitivity</div>
 </div>
 <span class="an-chip">HF</span>
-</summary>
+<button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary>
 <div class="acc-body">
 <div class="an-row">
 <div class="an-label">Sorting Program</div>
@@ -6375,7 +6808,7 @@ function __readSelfSource(){
 <div class="acc-sub">Program parameters (copied from manual screenshots)</div>
 </div>
 <span class="an-chip">WS</span>
-</summary>
+<button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary>
 <div class="acc-body">
 <!-- Keep the same 3-row header like HF -->
 <div class="an-row">
@@ -6423,7 +6856,7 @@ function __readSelfSource(){
 <div class="tab-fixed-head"><h2>Calibration</h2></div>
 <div class="tab-scroll">
 <div class="cal-shell">
-<div class="acc-list" id="calAccList"><details class="acc" data-acc="camera"><summary><div><div class="acc-title">Camera</div><div class="acc-sub">Live view &amp; controls</div></div><button class="an-chip an-chip-info" title="Information" type="button">Info</button></summary>
+<div class="acc-list" id="calAccList"><details class="acc" data-acc="camera"><summary><div><div class="acc-title">Camera</div><div class="acc-sub">Live view &amp; controls</div></div><span class="acc-actions"><button class="lux-icon cal-fs-btn" onclick="event.preventDefault();event.stopPropagation()" title="Info" type="button">⛶</button><button onclick="event.preventDefault();event.stopPropagation();(window.showCalibrationInfo&&window.showCalibrationInfo('camera'));"  class="an-chip an-chip-info" aria-label="Info" title="Info" type="button">ℹ</button></span></summary>
 <!-- Camera capture status/preview (auto-injected) -->
 <div id="camCaptureStatus" style="margin:10px 0; font-size:13px; opacity:.85;"></div>
 <div id="camCapturePreview" style="display:none; margin:10px 0; padding:10px; border:1px solid rgba(255,255,255,.15); border-radius:12px;">
@@ -6434,12 +6867,6 @@ function __readSelfSource(){
 <div id="camCapturePreviewInner" style="margin-top:10px;"></div>
 </div>
 <div class="acc-body"><div class="tool-tab cal-tool-view" id="tab-camera">
-<div class="cal-inline-topbar">
-<div class="cal-inline-title">Camera</div>
-<div class="cal-inline-actions">
-<button class="lux-icon cal-fs-btn" title="Full Screen" type="button">⛶</button>
-</div>
-</div>
 <div class="cam-wrap">
 <div class="cam-pane active" id="camPaneLive">
 <div class="cam-card">
@@ -6483,203 +6910,503 @@ function __readSelfSource(){
 </div>
 </div>
 </div></div></details><details class="acc" data-caltool="lux">
-  <summary>
-    <div>
-      <div class="acc-title">Lux Meter</div>
-      <div class="acc-sub">Exposure / brightness reference</div>
-    </div>
-    <button class="an-chip an-chip-info" type="button" title="Information">Info</button>
-  </summary>
-  <div class="acc-body">
-    <div class="cal-tool-view tool-tab" id="caltool-lux">
-      <div class="cal-inline-topbar">
-        <div class="cal-inline-title">Lux Meter</div>
-        <div class="cal-inline-actions">
-          <button class="lux-icon cal-start-btn" type="button" data-cal-start="lux" title="Start camera">📷</button>
-          <button class="lux-icon cal-fs-btn" type="button" data-cal-fs="lux" title="Full Screen">⛶</button>
-        </div>
-      </div>
-
-      <div class="cal-placeholders">
-        <div class="cal-ph cal-ph-camera">
-          <div class="cal-ph-head">
-            <div class="cal-ph-title">Camera Placeholder</div>
-            <div class="cal-ph-sub">Live preview for lux meter sampling.</div>
-          </div>
-          <div class="cal-cam-wrap">
-            <canvas id="lux_cam_canvas" class="cal-cam-canvas" width="640" height="360"></canvas>
-            <div class="cal-cam-hud">
-              <div class="cal-cam-status" id="lux_cam_status">idle</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="cal-ph cal-ph-values">
-          <div class="cal-ph-head">
-            <div class="cal-ph-title">Measurements</div>
-            <div class="cal-ph-sub">Values derived from the camera placeholder.</div>
-          </div>
-          
-  <div class="meas-card">
-    <div class="meas-row"><div class="meas-k">Scale A</div><div class="meas-v" id="lux_scale_a">—</div></div>
-    <div class="meas-row"><div class="meas-k">Scale B</div><div class="meas-v" id="lux_scale_b">—</div></div>
-  </div>
-  <div class="meas-list">
-    <div class="meas-row"><div class="meas-k">Lux</div><div class="meas-v" id="lux_val_lux">—</div></div>
-    <div class="meas-row"><div class="meas-k">Foot‑candles</div><div class="meas-v" id="lux_val_fc">—</div></div>
-    <div class="meas-row"><div class="meas-k">EV (approx)</div><div class="meas-v" id="lux_val_ev">—</div></div>
-  </div>
-
-        </div>
-      </div>
-    </div>
-  </div>
+<summary>
+<div>
+<div class="acc-title">Lux Meter</div>
+<div class="acc-sub">Exposure / brightness reference</div>
+</div>
+<span class="acc-actions"><button class="lux-icon cal-start-btn" id="luxSwitchBtn" onclick="event.preventDefault();event.stopPropagation()" title="Info" type="button">📷</button><button class="lux-icon cal-fs-btn" data-cal-fs="lux" onclick="event.preventDefault();event.stopPropagation()" title="Info" type="button">⛶</button><button onclick="event.preventDefault();event.stopPropagation();(window.showCalibrationInfo&&window.showCalibrationInfo('lux'));"  class="an-chip an-chip-info" aria-label="Info" title="Info" type="button">ℹ</button></span></summary>
+<div class="acc-body">
+<div class="cal-tool-view tool-tab" id="caltool-lux">
+<div class="cal-placeholders">
+<div class="cal-ph cal-ph-camera">
+<div class="cal-cam-wrap">
+<canvas class="cal-cam-canvas" height="360" id="luxCanvas" width="640"></canvas>
+<div class="cal-cam-hud">
+<div class="cal-cam-status" id="luxStatus">idle</div>
+</div>
+</div>
+</div>
+<div class="cal-ph cal-ph-values">
+<div style="display:none">
+<input id="luxISO" max="3200" min="50" step="50" type="range" value="200"/><span id="luxISOVal">200</span>
+<input id="luxSpeed" max="240" min="15" step="1" type="range" value="60"/><span id="luxSpeedVal">1/60</span>
+<input id="luxAperture" max="80" min="14" step="1" type="range" value="28"/><span id="luxApertureVal">2.8</span><span id="luxApertureTxt">Aperture</span>
+<button id="luxFreezeBtn" type="button"></button>
+<button id="luxSaveBtn" type="button"></button>
+<button id="luxInfoBtn" type="button"></button>
+<div id="luxInfo"></div><button id="luxInfoClose" type="button"></button>
+</div>
+<div class="legacy-card legacy-ev cal-analog-hide" data-tool="lux">
+<div class="legacy-top">
+<div class="legacy-icon">⚙️</div>
+<div class="legacy-top-center">
+<div class="legacy-top-metric"><span id="luxLux">—</span> lux</div>
+<div class="legacy-top-metric small"><span id="luxFc">—</span> fc</div>
+</div>
+<div class="legacy-top-actions">
+<button class="legacy-btn" id="luxSaveUi" title="Save" type="button">💾</button>
+</div>
+</div>
+<div aria-label="Lux Meter Digital Readouts" class="cal-digital-grid">
+<div class="cal-digital-card">
+<div class="cal-digital-top">
+<div class="cal-digital-label">Illuminance</div>
+<div class="cal-digital-unit">lux</div>
+</div>
+<div class="cal-digital-value"><span id="luxLux">—</span></div>
+<div class="cal-digital-sub">Primary measurement (auto ROI center)</div>
+</div>
+<div class="cal-digital-card">
+<div class="cal-digital-top">
+<div class="cal-digital-label">Foot-candle</div>
+<div class="cal-digital-unit">fc</div>
+</div>
+<div class="cal-digital-value"><span id="luxFc">—</span></div>
+<div class="cal-digital-sub">Converted from lux</div>
+</div>
+<div class="cal-digital-card">
+<div class="cal-digital-top">
+<div class="cal-digital-label">Exposure Value</div>
+<div class="cal-digital-unit">EV (ISO 100)</div>
+</div>
+<div class="cal-digital-value"><span id="luxEV">—</span></div>
+<div class="cal-digital-sub">Matched to gauge scale</div>
+</div>
+</div>
+<div aria-label="Lux Meter Camera Settings" class="cal-digital-row">
+<div class="cal-digital-pill"><span class="cal-digital-label">Aperture</span> <strong id="luxApertureDisp">—</strong></div>
+<div class="cal-digital-pill"><span class="cal-digital-label">Shutter</span> <strong id="luxSpeedDisp">—</strong></div>
+<div class="cal-digital-pill"><span class="cal-digital-label">ISO</span> <strong id="luxISODisp">—</strong></div>
+</div>
+<div aria-label="Lux visual" class="cal-viz" id="luxViz">
+<div class="cal-viz-head">
+<div class="cal-viz-title">Light intensity</div>
+<div class="cal-viz-meta"><span id="luxVizMeta">—</span></div>
+</div>
+<div class="cal-viz-body">
+<div aria-hidden="true" class="cal-bar"><div class="fill" id="luxBarFill"></div></div>
+<div aria-hidden="true" class="cal-swatch" id="luxGlow"></div>
+<div class="cal-swatch-row">
+<div class="cal-chip"><span class="cal-dot" id="luxDot"></span><span>Scene</span></div>
+<div class="cal-risk" id="luxRisk">—</div>
+</div>
+</div>
+</div>
+<div class="legacy-gauge-wrap">
+<svg aria-hidden="true" class="legacy-gauge" viewbox="0 0 320 190">
+<path d="M 40 160 A 120 120 0 0 1 280 160" fill="none" stroke="rgba(255,255,255,0.18)" stroke-linecap="round" stroke-width="22"></path>
+<path d="M 40 160 A 120 120 0 0 1 280 160" fill="none" stroke="rgba(255,255,255,0.92)" stroke-linecap="round" stroke-width="22"></path>
+<g class="ev-ticks" dominant-baseline="middle" text-anchor="middle">
+<text x="52.0" y="152.0">-2</text>
+<text x="83.6" y="75.6">2</text>
+<text x="160.0" y="44.0">6</text>
+<text x="236.4" y="75.6">10</text>
+<text x="268.0" y="152.0">14</text>
+</g>
+<g class="legacy-needle">
+<line id="luxNeedle" stroke="#f2c05c" stroke-linecap="round" stroke-width="4" x1="160" x2="160" y1="160" y2="70"></line>
+<circle cx="160" cy="160" fill="#f2c05c" r="8"></circle>
+<rect fill="rgba(255,255,255,0.25)" height="16" rx="8" width="64" x="128" y="152"></rect>
+</g>
+</svg>
+<div class="legacy-center">
+<div class="legacy-center-label">ISO 100 EV</div>
+<div class="legacy-center-value"><span id="luxEV">—</span></div>
+</div>
+</div>
+<div class="legacy-mid">
+<div class="legacy-box">
+<div class="legacy-box-title">Aperture</div>
+<div class="legacy-box-val" id="luxApertureDisp">—</div>
+</div>
+<div class="legacy-box">
+<div class="legacy-box-title">Speed (s)</div>
+<div class="legacy-box-val" id="luxSpeedDisp">—</div>
+</div>
+<div class="legacy-box">
+<div class="legacy-box-title">ISO</div>
+<div class="legacy-box-val" id="luxISODisp">—</div>
+</div>
+</div>
+<div class="legacy-foot">
+<div class="legacy-foot-line"><span class="muted">0 → 12k lx (auto)</span> • <span class="muted">ROI: center 8%</span></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </details><details class="acc" data-caltool="ct">
-  <summary>
-    <div>
-      <div class="acc-title">Color Temperature</div>
-      <div class="acc-sub">CCT / Δuv calibration</div>
-    </div>
-    <button class="an-chip an-chip-info" type="button" title="Information">Info</button>
-  </summary>
-  <div class="acc-body">
-    <div class="cal-tool-view tool-tab" id="caltool-ct">
-      <div class="cal-inline-topbar">
-        <div class="cal-inline-title">Color Temperature</div>
-        <div class="cal-inline-actions">
-          <button class="lux-icon cal-start-btn" type="button" data-cal-start="ct" title="Start camera">📷</button>
-          <button class="lux-icon cal-fs-btn" type="button" data-cal-fs="ct" title="Full Screen">⛶</button>
-        </div>
-      </div>
-
-      <div class="cal-placeholders">
-        <div class="cal-ph cal-ph-camera">
-          <div class="cal-ph-head">
-            <div class="cal-ph-title">Camera Placeholder</div>
-            <div class="cal-ph-sub">Live preview for color temperature sampling.</div>
-          </div>
-          <div class="cal-cam-wrap">
-            <canvas id="ct_cam_canvas" class="cal-cam-canvas" width="640" height="360"></canvas>
-            <div class="cal-cam-hud">
-              <div class="cal-cam-status" id="ct_cam_status">idle</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="cal-ph cal-ph-values">
-          <div class="cal-ph-head">
-            <div class="cal-ph-title">Measurements</div>
-            <div class="cal-ph-sub">Values derived from the camera placeholder.</div>
-          </div>
-          
-  <div class="meas-card">
-    <div class="meas-row"><div class="meas-k">Estimated CCT</div><div class="meas-v" id="ct_val_cct">—</div></div>
-    <div class="meas-row"><div class="meas-k">Δuv</div><div class="meas-v" id="ct_val_duv">—</div></div>
-  </div>
-
-        </div>
-      </div>
-    </div>
-  </div>
+<summary>
+<div>
+<div class="acc-title">Color Temperature</div>
+<div class="acc-sub">CCT / Δuv calibration</div>
+</div>
+<span class="acc-actions"><button class="lux-icon cal-start-btn" id="ctSwitchBtn" onclick="event.preventDefault();event.stopPropagation()" title="Info" type="button">📷</button><button class="lux-icon cal-fs-btn" data-cal-fs="ct" onclick="event.preventDefault();event.stopPropagation()" title="Info" type="button">⛶</button><button onclick="event.preventDefault();event.stopPropagation();(window.showCalibrationInfo&&window.showCalibrationInfo('ct'));"  class="an-chip an-chip-info" aria-label="Info" title="Info" type="button">ℹ</button></span></summary>
+<div class="acc-body">
+<div class="cal-tool-view tool-tab" id="caltool-ct">
+<div class="cal-placeholders">
+<div class="cal-ph cal-ph-camera">
+<div class="cal-cam-wrap">
+<canvas class="cal-cam-canvas" height="360" id="ctCanvas" width="640"></canvas>
+<div class="cal-cam-hud">
+<div class="cal-cam-status" id="ctStatus">idle</div>
+</div>
+</div>
+</div>
+<div class="cal-ph cal-ph-values">
+<div style="display:none">
+<input id="ctDuvKnob" max="0.05" min="-0.05" step="0.001" type="range" value="0"/>
+<button id="ctFreezeBtn" type="button"></button>
+<button id="ctSaveBtn" type="button"></button>
+<button id="ctInfoBtn" type="button"></button>
+<div id="ctInfo"></div><button id="ctInfoClose" type="button"></button>
+<div id="ctWarnText"></div>
+<canvas height="360" id="ctOverlay" width="640"></canvas>
+</div>
+<div class="legacy-card legacy-ct cal-analog-hide" data-tool="ct">
+<div class="legacy-top">
+<div class="legacy-icon">🕯️</div>
+<div class="legacy-top-center">
+<div class="legacy-top-title">Full CTO</div>
+</div>
+<div class="legacy-top-actions">
+<button class="legacy-btn" id="ctSaveUi" title="Save" type="button">💾</button>
+</div>
+</div>
+<div aria-label="Color Temperature Digital Readouts" class="cal-digital-grid">
+<div class="cal-digital-card">
+<div class="cal-digital-top">
+<div class="cal-digital-label">CCT</div>
+<div class="cal-digital-unit">Kelvin</div>
+</div>
+<div class="cal-digital-value"><span id="ctKelvin">—</span></div>
+<div class="cal-digital-sub">Correlated color temperature</div>
+</div>
+<div class="cal-digital-card">
+<div class="cal-digital-top">
+<div class="cal-digital-label">Δuv</div>
+<div class="cal-digital-unit">unitless</div>
+</div>
+<div class="cal-digital-value"><span id="ctDuvVal">—</span></div>
+<div class="cal-digital-sub">Magenta (−) ↔ Green (+)</div>
+</div>
+<div class="cal-digital-card">
+<div class="cal-digital-top">
+<div class="cal-digital-label">CIE 1931</div>
+<div class="cal-digital-unit">x,y</div>
+</div>
+<div class="cal-digital-value"><span id="ctXY">—</span></div>
+<div class="cal-digital-sub">Chromaticity coordinates</div>
+</div>
+</div>
+<div aria-label="CCT visual" class="cal-viz" id="ctViz">
+<div class="cal-viz-head">
+<div class="cal-viz-title">White point preview</div>
+<div class="cal-viz-meta"><span id="ctVizMeta">—</span></div>
+</div>
+<div class="cal-viz-body">
+<div aria-hidden="true" class="cal-swatch" id="ctSwatch"></div>
+<div aria-hidden="true" class="cal-bar"><div class="fill" id="ctDuvFill"></div></div>
+<div class="cal-swatch-row">
+<div class="cal-chip"><span class="cal-dot" id="ctDot"></span><span>Kelvin tone</span></div>
+<div class="cal-risk" id="ctHint">—</div>
+</div>
+</div>
+</div>
+<div class="legacy-gauge-wrap">
+<div class="ct-side ct-left"><div class="ct-side-title">Warm</div><div>White</div></div>
+<div class="ct-side ct-right"><div class="ct-side-title">Cold</div><div>White</div></div>
+<svg aria-hidden="true" class="legacy-gauge" viewbox="0 0 320 190">
+<defs>
+<lineargradient id="ctGrad" x1="0" x2="1" y1="0" y2="0">
+<stop offset="0%" stop-color="#f4b24b"></stop>
+<stop offset="50%" stop-color="#eaeaea"></stop>
+<stop offset="100%" stop-color="#90b8ff"></stop>
+</lineargradient>
+</defs>
+<path d="M 40 160 A 120 120 0 0 1 280 160" fill="none" stroke="rgba(255,255,255,0.20)" stroke-linecap="round" stroke-width="18"></path>
+<path d="M 40 160 A 120 120 0 0 1 280 160" fill="none" stroke="url(#ctGrad)" stroke-linecap="round" stroke-width="18"></path>
+<g class="ct-ticks">
+<text x="70" y="146">3000</text>
+<text x="105" y="105">4000</text>
+<text x="150" y="82">5000</text>
+<text x="195" y="86">6000</text>
+<text x="236" y="116">7000</text>
+</g>
+<g class="legacy-needle">
+<line id="ctNeedle" stroke="#111" stroke-linecap="round" stroke-width="5" x1="160" x2="160" y1="160" y2="72"></line>
+<circle cx="160" cy="160" fill="#111" r="7"></circle>
+</g>
+</svg>
+<div class="legacy-center">
+<div class="legacy-center-label">Color Temperature</div>
+<div class="legacy-center-value"><span id="ctKelvin">—</span><span class="unit"> Kelvin</span></div>
+</div>
+</div>
+<div class="ct-duv-row">
+<div class="ct-duv-label">Δuv - Magenta/Green shift <span id="ctDuvVal">—</span></div>
+<div class="ct-duv-bar">
+<div class="ct-duv-mag"></div>
+<div class="ct-duv-green"></div>
+<div class="ct-duv-zero"></div>
+<div class="ct-duv-ind" id="ctDuvInd"></div>
+</div>
+<div class="ct-duv-scale">
+<span>-0.03</span><span>-0.02</span><span>-0.01</span><span>0</span><span>0.01</span><span>0.02</span><span>0.03</span>
+</div>
+</div>
+<div class="ct-cie">CIE 1931 xy (<span id="ctXY">—</span>)</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </details><details class="acc" data-caltool="flicker">
-  <summary>
-    <div>
-      <div class="acc-title">Flicker Meter</div>
-      <div class="acc-sub">Frequency / flicker level</div>
-    </div>
-    <button class="an-chip an-chip-info" type="button" title="Information">Info</button>
-  </summary>
-  <div class="acc-body">
-    <div class="cal-tool-view tool-tab" id="caltool-flicker">
-      <div class="cal-inline-topbar">
-        <div class="cal-inline-title">Flicker Meter</div>
-        <div class="cal-inline-actions">
-          <button class="lux-icon cal-start-btn" type="button" data-cal-start="flicker" title="Start camera">📷</button>
-          <button class="lux-icon cal-fs-btn" type="button" data-cal-fs="flicker" title="Full Screen">⛶</button>
-        </div>
-      </div>
-
-      <div class="cal-placeholders">
-        <div class="cal-ph cal-ph-camera">
-          <div class="cal-ph-head">
-            <div class="cal-ph-title">Camera Placeholder</div>
-            <div class="cal-ph-sub">Live preview for flicker meter sampling.</div>
-          </div>
-          <div class="cal-cam-wrap">
-            <canvas id="flicker_cam_canvas" class="cal-cam-canvas" width="640" height="360"></canvas>
-            <div class="cal-cam-hud">
-              <div class="cal-cam-status" id="flicker_cam_status">idle</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="cal-ph cal-ph-values">
-          <div class="cal-ph-head">
-            <div class="cal-ph-title">Measurements</div>
-            <div class="cal-ph-sub">Values derived from the camera placeholder.</div>
-          </div>
-          
-  <div class="meas-card">
-    <div class="meas-row"><div class="meas-k">Frequency (Hz)</div><div class="meas-v" id="flicker_val_hz">—</div></div>
-    <div class="meas-row"><div class="meas-k">Flicker %</div><div class="meas-v" id="flicker_val_pct">—</div></div>
-    <div class="meas-row"><div class="meas-k">Flicker index</div><div class="meas-v" id="flicker_val_fpct">—</div></div>
-  </div>
-
-        </div>
-      </div>
-    </div>
-  </div>
+<summary>
+<div>
+<div class="acc-title">Flicker Meter</div>
+<div class="acc-sub">Frequency / flicker level</div>
+</div>
+<span class="acc-actions"><button class="lux-icon cal-start-btn" id="flSwitchBtn" onclick="event.preventDefault();event.stopPropagation()" title="Info" type="button">📷</button><button class="lux-icon cal-fs-btn" data-cal-fs="flicker" onclick="event.preventDefault();event.stopPropagation()" title="Info" type="button">⛶</button><button onclick="event.preventDefault();event.stopPropagation();(window.showCalibrationInfo&&window.showCalibrationInfo('flicker'));"  class="an-chip an-chip-info" aria-label="Info" title="Info" type="button">ℹ</button></span></summary>
+<div class="acc-body">
+<div class="cal-tool-view tool-tab" id="caltool-flicker">
+<div class="cal-placeholders">
+<div class="cal-ph cal-ph-camera">
+<div class="cal-cam-wrap">
+<canvas class="cal-cam-canvas" height="360" id="flCanvas" width="640"></canvas>
+<div class="cal-cam-hud">
+<div class="cal-cam-status" id="flStatus">idle</div>
+</div>
+</div>
+</div>
+<div class="cal-ph cal-ph-values">
+<div style="display:none">
+<input id="flWindow" max="10" min="1" step="1" type="range" value="4"/>
+<button id="flFreezeBtn" type="button"></button>
+<button id="flSaveBtn" type="button"></button>
+<button id="flInfoBtn" type="button"></button>
+<div id="flInfo"></div><button id="flInfoClose" type="button"></button>
+</div>
+<div class="legacy-card legacy-fl cal-analog-hide" data-tool="flicker">
+<div class="legacy-top">
+<div class="legacy-icon">🟧</div>
+<div class="legacy-top-center">
+<div class="legacy-top-title">Flickering</div>
+</div>
+<div class="legacy-top-actions">
+<button class="legacy-btn" id="flSaveUi" title="Save" type="button">💾</button>
+</div>
+</div>
+<div aria-label="Flicker Meter Digital Readouts" class="cal-digital-grid">
+<div class="cal-digital-card">
+<div class="cal-digital-top">
+<div class="cal-digital-label">Flicker</div>
+<div class="cal-digital-unit">%</div>
+</div>
+<div class="cal-digital-value"><span id="flPct">—</span></div>
+<div class="cal-digital-sub">Percent modulation (estimate)</div>
+</div>
+<div class="cal-digital-card">
+<div class="cal-digital-top">
+<div class="cal-digital-label">Frequency</div>
+<div class="cal-digital-unit">Hz</div>
+</div>
+<div class="cal-digital-value"><span id="flFreq">—</span></div>
+<div class="cal-digital-sub">Dominant oscillation</div>
+</div>
+<div class="cal-digital-card">
+<div class="cal-digital-top">
+<div class="cal-digital-label">Note</div>
+<div class="cal-digital-unit">status</div>
+</div>
+<div class="cal-digital-value" style="font-size:16px; font-weight:700; line-height:1.25;"><span id="flNote">—</span></div>
+<div class="cal-digital-sub">Heuristic classification</div>
+</div>
+</div>
+<div aria-label="Flicker visual" class="cal-viz" id="flViz">
+<div class="cal-viz-head">
+<div class="cal-viz-title">Temporal modulation</div>
+<div class="cal-viz-meta"><span id="flVizMeta">—</span></div>
+</div>
+<div class="cal-viz-body">
+<div aria-hidden="true" class="cal-wave" id="flWaveViz">
+<div class="pulse"></div>
+<div class="mask"></div>
+</div>
+<div aria-hidden="true" class="cal-bar"><div class="fill" id="flBarFill"></div></div>
+<div class="cal-swatch-row">
+<div class="cal-risk" id="flRisk">—</div>
+<div class="cal-chip"><span class="cal-dot" id="flDot"></span><span>Stability</span></div>
+</div>
+</div>
+</div>
+<div class="legacy-gauge-wrap">
+<svg aria-hidden="true" class="legacy-gauge" viewbox="0 0 320 190">
+<defs>
+<lineargradient id="flGrad" x1="0" x2="1" y1="0" y2="0">
+<stop offset="0%" stop-color="#38c172"></stop>
+<stop offset="55%" stop-color="#f1c40f"></stop>
+<stop offset="100%" stop-color="#e74c3c"></stop>
+</lineargradient>
+</defs>
+<path d="M 40 160 A 120 120 0 0 1 280 160" fill="none" stroke="rgba(255,255,255,0.20)" stroke-linecap="round" stroke-width="22"></path>
+<path d="M 40 160 A 120 120 0 0 1 280 160" fill="none" stroke="url(#flGrad)" stroke-linecap="round" stroke-width="22"></path>
+<g class="fl-ticks">
+<text x="58" y="150">0</text>
+<text x="86" y="104">20</text>
+<text x="132" y="74">40</text>
+<text x="188" y="74">60</text>
+<text x="234" y="104">80</text>
+</g>
+<g class="legacy-needle">
+<line id="flNeedle" stroke="#111" stroke-linecap="round" stroke-width="5" x1="160" x2="160" y1="160" y2="70"></line>
+<circle cx="160" cy="160" fill="#111" r="7"></circle>
+</g>
+</svg>
+<div class="legacy-center">
+<div class="legacy-center-value big"><span id="flPct">—</span>%</div>
+<div class="legacy-center-label">Flickering</div>
+<div class="legacy-center-sub">Frequency <span id="flFreq">—</span></div>
+</div>
+<div class="fl-sides">
+<div class="fl-side low">LOW</div>
+<div class="fl-side high">HIGH</div>
+</div>
+</div>
+<div class="fl-strip">
+<div class="fl-strip-bar">
+<div class="fl-strip-fill" id="flStripFill"></div>
+</div>
+<div class="fl-strip-scale">
+<span>0</span><span>100</span><span>200</span><span>300</span><span>400</span>
+</div>
+</div>
+<div class="fl-note" id="flNote">—</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </details><details class="acc" data-caltool="spectrum">
-  <summary>
-    <div>
-      <div class="acc-title">Light Spectrometer</div>
-      <div class="acc-sub">Dominant wavelength / saturation</div>
-    </div>
-    <button class="an-chip an-chip-info" type="button" title="Information">Info</button>
-  </summary>
-  <div class="acc-body">
-    <div class="cal-tool-view tool-tab" id="caltool-spectrum">
-      <div class="cal-inline-topbar">
-        <div class="cal-inline-title">Light Spectrometer</div>
-        <div class="cal-inline-actions">
-          <button class="lux-icon cal-start-btn" type="button" data-cal-start="spectrum" title="Start camera">📷</button>
-          <button class="lux-icon cal-fs-btn" type="button" data-cal-fs="spectrum" title="Full Screen">⛶</button>
+<summary>
+<div>
+<div class="acc-title">Light Spectrometer</div>
+<div class="acc-sub">Dominant wavelength / saturation</div>
+</div>
+<span class="acc-actions"><button class="lux-icon cal-start-btn" id="specSwitchBtn" onclick="event.preventDefault();event.stopPropagation()" title="Info" type="button">📷</button><button class="lux-icon cal-fs-btn" data-cal-fs="spectrum" onclick="event.preventDefault();event.stopPropagation()" title="Info" type="button">⛶</button><button onclick="event.preventDefault();event.stopPropagation();(window.showCalibrationInfo&&window.showCalibrationInfo('spectrum'));"  class="an-chip an-chip-info" aria-label="Info" title="Info" type="button">ℹ</button></span></summary>
+<div class="acc-body">
+<div class="cal-tool-view tool-tab" id="caltool-spectrum">
+<div class="cal-placeholders">
+<div class="cal-ph cal-ph-camera">
+<div class="cal-cam-wrap">
+<canvas class="cal-cam-canvas" height="360" id="specCanvas" width="640"></canvas>
+<div class="cal-cam-hud">
+<div class="cal-cam-status" id="spectrum_cam_status">idle</div>
+</div>
+</div>
+</div>
+<div class="cal-ph cal-ph-values">
+<div style="display:none">
+<button id="specFreezeBtn" type="button"></button>
+<button id="specSaveBtn" type="button"></button>
+<button id="specInfoBtn" type="button"></button>
+<div id="specInfo"></div><button id="specInfoClose" type="button"></button>
+</div>
+<div class="legacy-card legacy-spec cal-analog-hide" data-tool="spectrum">
+<div class="legacy-top">
+<div class="legacy-top-center">
+<div class="legacy-top-title">Dominant Wavelength</div>
+</div>
+</div>
+<div aria-label="Spectrometer Digital Readouts" class="cal-digital-grid">
+<div class="cal-digital-card">
+<div class="cal-digital-top">
+<div class="cal-digital-label">Dominant λ</div>
+<div class="cal-digital-unit">nm</div>
+</div>
+<div class="cal-digital-value"><span id="specNm">—</span></div>
+<div class="cal-digital-sub">Dominant wavelength</div>
+</div>
+<div class="cal-digital-card">
+<div class="cal-digital-top">
+<div class="cal-digital-label">Saturation</div>
+<div class="cal-digital-unit">%</div>
+</div>
+<div class="cal-digital-value"><span id="specSat">—</span></div>
+<div class="cal-digital-sub">Relative chroma estimate</div>
+</div>
+<div class="cal-digital-card">
+<div class="cal-digital-top">
+<div class="cal-digital-label">Fill</div>
+<div class="cal-digital-unit">bar</div>
+</div>
+<div class="cal-digital-value" style="font-size:14px; font-weight:700;">
+          Saturation bar below
         </div>
-      </div>
-
-      <div class="cal-placeholders">
-        <div class="cal-ph cal-ph-camera">
-          <div class="cal-ph-head">
-            <div class="cal-ph-title">Camera Placeholder</div>
-            <div class="cal-ph-sub">Live preview for light spectrometer sampling.</div>
-          </div>
-          <div class="cal-cam-wrap">
-            <canvas id="spec_cam_canvas" class="cal-cam-canvas" width="640" height="360"></canvas>
-            <div class="cal-cam-hud">
-              <div class="cal-cam-status" id="spectrum_cam_status">idle</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="cal-ph cal-ph-values">
-          <div class="cal-ph-head">
-            <div class="cal-ph-title">Measurements</div>
-            <div class="cal-ph-sub">Values derived from the camera placeholder.</div>
-          </div>
-          
-  <div class="meas-card">
-    <div class="meas-row"><div class="meas-k">Dominant λ</div><div class="meas-v" id="spec_val_nm">—</div></div>
-    <div class="meas-row"><div class="meas-k">Saturation</div><div class="meas-v" id="spec_val_sat">—</div></div>
-  </div>
-  <div class="meas-list">
-    <div class="meas-row"><div class="meas-k">CIE x</div><div class="meas-v" id="spec_val_cx">—</div></div>
-    <div class="meas-row"><div class="meas-k">CIE y</div><div class="meas-v" id="spec_val_cy">—</div></div>
-  </div>
-
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="cal-digital-sub">Keeps existing saturation bar UI</div>
+</div>
+</div>
+<div aria-label="Spectrum visual" class="cal-viz" id="specViz">
+<div class="cal-viz-head">
+<div class="cal-viz-title">Dominant color preview</div>
+<div class="cal-viz-meta"><span id="specVizMeta">—</span></div>
+</div>
+<div class="cal-viz-body">
+<div aria-hidden="true" class="cal-swatch" id="specSwatch"></div>
+<div aria-hidden="true" class="cal-bar"><div class="fill" id="specBarFill"></div></div>
+<div class="cal-swatch-row">
+<div class="cal-chip"><span class="cal-dot" id="specDot"></span><span>λ / sat</span></div>
+<div class="cal-risk" id="specHint">—</div>
+</div>
+</div>
+</div>
+<div class="legacy-gauge-wrap">
+<div class="spec-corners">
+<div class="spec-corner"><div class="muted">Frequency</div><div id="specFreq">—</div></div>
+<div class="spec-corner right"><div class="muted">Period</div><div id="specPeriod">—</div></div>
+</div>
+<svg aria-hidden="true" class="legacy-gauge" viewbox="0 0 320 190">
+<defs>
+<lineargradient id="specGrad" x1="0" x2="1" y1="0" y2="0">
+<stop offset="0%" stop-color="#2e86de"></stop>
+<stop offset="35%" stop-color="#2ecc71"></stop>
+<stop offset="55%" stop-color="#f1c40f"></stop>
+<stop offset="75%" stop-color="#e67e22"></stop>
+<stop offset="100%" stop-color="#e74c3c"></stop>
+</lineargradient>
+</defs>
+<path d="M 40 160 A 120 120 0 0 1 280 160" fill="none" stroke="rgba(255,255,255,0.20)" stroke-linecap="round" stroke-width="24"></path>
+<path d="M 40 160 A 120 120 0 0 1 280 160" fill="none" stroke="url(#specGrad)" stroke-linecap="round" stroke-width="24"></path>
+<g class="spec-ticks">
+<text x="62" y="140">450</text>
+<text x="104" y="94">500</text>
+<text x="154" y="72">550</text>
+<text x="206" y="78">600</text>
+<text x="250" y="110">650</text>
+</g>
+<g class="legacy-needle">
+<line id="specNeedle" stroke="#111" stroke-linecap="round" stroke-width="5" x1="160" x2="160" y1="160" y2="66"></line>
+<circle cx="160" cy="160" fill="#111" r="7"></circle>
+</g>
+</svg>
+<div class="legacy-center">
+<div class="legacy-center-value"><span id="specNm">—</span></div>
+<div class="legacy-center-label">Nanometers (nm)</div>
+</div>
+</div>
+<div class="spec-sat">
+<div class="spec-sat-bar">
+<div class="spec-sat-fill" id="specSatFill"></div>
+</div>
+<div class="spec-sat-label">Color Saturation <span id="specSat">—</span>%</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </details></div>
 <!-- Tool pages (placeholders for now) -->
 </div>
@@ -6689,7 +7416,7 @@ function __readSelfSource(){
 <div class="tab-scroll">
 <h2 class="tab-title">Tools</h2>
 <div class="acc-list" id="toolsAccList">
-<details class="acc" data-acc="iot"><summary><div><div class="acc-title">Factory Live</div><div class="acc-sub">Live factory dashboard • Throughput &amp; data</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="tool-tab" id="tab-iot">
+<details class="acc" data-acc="iot"><summary><div><div class="acc-title">Factory Live</div><div class="acc-sub">Live factory dashboard • Throughput &amp; data</div></div><span class="an-chip">Open</span><button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary><div class="acc-body"><div class="tool-tab" id="tab-iot">
 <div class="iot-shell">
 <div class="iot-top">
 <div class="iot-title">
@@ -7471,7 +8198,7 @@ function __readSelfSource(){
   
 })();
 </script>
-</div></div></details><details class="acc" data-acc="upload"><summary><div><div class="acc-title">Upload</div><div class="acc-sub">Load samples &amp; datasets</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="tool-tab" id="tab-upload">
+</div></div></details><details class="acc" data-acc="upload"><summary><div><div class="acc-title">Upload</div><div class="acc-sub">Load samples &amp; datasets</div></div><span class="an-chip">Open</span><button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary><div class="acc-body"><div class="tool-tab" id="tab-upload">
 <div class="cam-wrap">
 <div class="cam-pane active" id="uploadPane">
 <div class="cam-card">
@@ -7505,7 +8232,7 @@ function __readSelfSource(){
 </div>
 </div>
 </div>
-</div></div></details><details class="acc" data-acc="saved"><summary><div><div class="acc-title">Saved</div><div class="acc-sub">Saved sessions &amp; results</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="tool-tab" id="tab-saved">
+</div></div></details><details class="acc" data-acc="saved"><summary><div><div class="acc-title">Saved</div><div class="acc-sub">Saved sessions &amp; results</div></div><span class="an-chip">Open</span><button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary><div class="acc-body"><div class="tool-tab" id="tab-saved">
 <h2 style="color:var(--accent); margin-bottom:6px;">Saved</h2>
 <details class="sv-acc acc">
 <summary>
@@ -7513,7 +8240,7 @@ function __readSelfSource(){
 <div class="acc-title">Saved QA</div>
 <div class="acc-sub">Reports saved from QA tab (local on this device)</div>
 </div>
-</summary>
+<button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary>
 <div class="sv-list" id="saved-qa-list"></div>
 </details>
 <details class="sv-acc acc">
@@ -7521,7 +8248,7 @@ function __readSelfSource(){
 <div>
 <div class="acc-title">Saved Granules</div>
 </div>
-</summary>
+<button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary>
 <div class="sv-list" id="saved-list"></div>
 </details>
 <details aria-hidden="true" class="sv-acc acc" style="display:none !important;" tabindex="-1">
@@ -7529,7 +8256,7 @@ function __readSelfSource(){
 <div>
 <div class="acc-title">Saved Setups</div>
 </div>
-</summary>
+<button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary>
 <div class="cam-card">
 <div class="cam-row">
 <input class="cam-input" id="setup-name" placeholder="Setup name..." type="text"/>
@@ -7538,7 +8265,7 @@ function __readSelfSource(){
 <div class="sv-list" id="setup-list" style="margin-top:8px;"></div>
 </div>
 </details>
-</div></div></details><details class="acc" data-acc="qa"><summary><div><div class="acc-title">QA</div><div class="acc-sub">Validation utilities</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="tool-tab" id="tab-qa">
+</div></div></details><details class="acc" data-acc="qa"><summary><div><div class="acc-title">QA</div><div class="acc-sub">Validation utilities</div></div><span class="an-chip">Open</span><button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary><div class="acc-body"><div class="tool-tab" id="tab-qa">
 <h2 style="color:var(--accent); margin:0 0 10px;">QA Calculations and Reports</h2>
 <!-- QA Guide (clickable help) -->
 <div style="display:flex; justify-content:flex-start; gap:10px; margin:0 0 10px;">
@@ -7942,7 +8669,11 @@ function __readSelfSource(){
     opts = opts || {};
     const k = keyOf(constraints);
     const force = !!opts.force;
-    if(_stream && !force){
+    
+    if(_stream && force){
+      stop();
+    }
+if(_stream && !force){
       // If constraints differ a lot, re-open (safer on Android)
       if(_constraintsKey && k && _constraintsKey !== k){
         stop();
@@ -7995,7 +8726,7 @@ function __readSelfSource(){
   
 })();
 </script>
-</div></div></details><details class="acc" data-acc="manuals"><summary><div><div class="acc-title">Video Manuals</div><div class="acc-sub">Training &amp; operation videos</div></div><span class="an-chip">Open</span></summary><div class="acc-body"><div class="tool-tab" id="tab-manuals">
+</div></div></details><details class="acc" data-acc="manuals"><summary><div><div class="acc-title">Video Manuals</div><div class="acc-sub">Training &amp; operation videos</div></div><span class="an-chip">Open</span><button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary><div class="acc-body"><div class="tool-tab" id="tab-manuals">
 <h2 style="color:var(--accent); margin-bottom:6px;">Video Manuals</h2>
 <p class="hint" style="margin-top:0;">
     בחר סרטון הדרכה כדי לפתוח אותו במסך גדול.
@@ -8018,10 +8749,10 @@ function __readSelfSource(){
 </div>
 </div>
 </div></div></details><details class="acc setup-acc" id="acc-setup">
-<summary><div><div class="acc-title">Setup <span class="setup-badge">★</span></div><div class="acc-sub">Setup tools &amp; onboarding</div></div></summary>
+<summary><div><div class="acc-title">Setup <span class="setup-badge">★</span></div><div class="acc-sub">Setup tools &amp; onboarding</div></div><button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary>
 <div class="acc-body"><span class="an-chip">Open</span><span>Setup</span>
 <details class="acc" id="acc-setup-version">
-<summary><span>Setup Version</span><span class="an-chip">Version</span></summary>
+<summary><span>Setup Version</span><span class="an-chip">Version</span><button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary>
 <div class="acc-body">
 <div class="sv-card" style="margin-top:8px;">
 <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
@@ -8034,7 +8765,7 @@ function __readSelfSource(){
 </div>
 </details>
 <details class="acc" id="acc-setup-onboarding">
-<summary><span>Onboarding</span><span class="an-chip">Help</span></summary>
+<summary><span>Onboarding</span><span class="an-chip">Help</span><button class="an-chip an-chip-info" type="button" title="Info" aria-label="Info">ℹ</button></summary>
 <div class="acc-body">
 <div class="sv-card" style="margin-top:8px;">
 <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
@@ -11675,13 +12406,15 @@ btn.addEventListener('click', closeGate);
 </script><script>
 /* === v52 Lux Meter: live camera + brightness-based lux estimate === */
 (function(){
+  const runWhenReady=(fn)=>{ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', fn, {once:true}); else fn(); };
+  runWhenReady(()=>{
   const details = document.querySelector('#calAccList details.acc[data-caltool="lux"]');
   if(!details) return;
 
   const video = document.getElementById('luxVideo');
   const canvas = document.getElementById('luxCanvas');
   const ctx = canvas ? canvas.getContext('2d', {willReadFrequently:true}) : null;
-  if(!video || !canvas || !ctx){ console.warn('[ct] missing video/canvas'); return; }
+  if(!video || !canvas || !ctx){ console.warn('[lux] missing video/canvas'); return; }
 
 
   const needle = document.getElementById('luxNeedle');
@@ -11802,7 +12535,7 @@ btn.addEventListener('click', closeGate);
   function estimateLuxFromFrame(){
     if(!video || !ctx || video.readyState < 2) return null;
     const w = canvas.width, h = canvas.height;
-    ctx.drawImage(sCanvas, 0, 0, w, h);
+    ctx.drawImage(video, 0, 0, w, h);
     const img = ctx.getImageData(0,0,w,h).data;
     let sum = 0;
     for(let i=0;i<img.length;i+=16){ // downsample
@@ -11828,12 +12561,15 @@ btn.addEventListener('click', closeGate);
   }
 
   function updateDial(ev, lux){
-    if(evEl) evEl.textContent = (ev>=0? ev.toFixed(1) : ev.toFixed(1));
-    if(luxEl) luxEl.textContent = lux.toFixed(0) + " lux";
-    if(fcEl) fcEl.textContent = (lux/10.764).toFixed(2) + " fc";
+    // Keep TEXT as numbers only (units already exist in the markup)
+    if(evEl) evEl.textContent = (Number(ev).toFixed(1));
+    if(luxEl) luxEl.textContent = (Number(lux).toFixed(0));
+    if(fcEl) fcEl.textContent = (Number(lux)/10.764).toFixed(2);
+
+    // SVG needle: rotate around the gauge center (160,160) — no CSS translate hacks
     if(needle){
       const ang = evToAngle(ev);
-      needle.style.transform = "translate(-50%,-95%) rotate(" + ang + "deg)";
+      needle.setAttribute('transform', "rotate(" + ang + " 160 160)");
     }
   }
 
@@ -11895,7 +12631,7 @@ btn.addEventListener('click', closeGate);
 
   function saveFrame(){
     if(!canvas || !ctx || !video || video.readyState < 2) return;
-    ctx.drawImage(sCanvas, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const a = document.createElement('a');
     a.download = 'lux_meter_frame.png';
     a.href = canvas.toDataURL('image/png');
@@ -11907,8 +12643,8 @@ btn.addEventListener('click', closeGate);
     facing = (facing === 'environment') ? 'user' : 'environment';
     updateTitle();
     stopCamera();
-    await startCamera();
-  }
+    startCamera();
+}
 
   // Open/close behavior
   details.addEventListener('toggle', () => {
@@ -11942,10 +12678,11 @@ btn.addEventListener('click', closeGate);
 
   updateSimUI();
 
+  });
 })();
 </script><script>
 /* === v54 Spectrometer: live camera + approximate dominant wavelength from hue === */
-(function(){
+onReady(function(){
   const details = document.querySelector('#calAccList details.acc[data-caltool="spectrum"]');
   if(!details) return;
 
@@ -11960,7 +12697,7 @@ btn.addEventListener('click', closeGate);
   const fEl = document.getElementById('specFreq');
   const pEl = document.getElementById('specPeriod');
   const sEl = document.getElementById('specSat');
-  const statusEl = document.getElementById('specStatus');
+  const statusEl = document.getElementById('spectrum_cam_status');
   const titleEl = details.querySelector('.lux-camera-title');
   const overlay = document.getElementById('specOverlay');
   const warnText = document.getElementById('specWarnText');
@@ -12034,7 +12771,7 @@ btn.addEventListener('click', closeGate);
   function estimate(){
     if(!video || !ctx || video.readyState < 2) return null;
     const w = canvas.width, h = canvas.height;
-    ctx.drawImage(sCanvas, 0, 0, w, h);
+    ctx.drawImage(video, 0, 0, w, h);
     const img = ctx.getImageData(0,0,w,h).data;
     let r=0,g=0,b=0;
     for(let i=0;i<img.length;i+=16){
@@ -12060,13 +12797,15 @@ btn.addEventListener('click', closeGate);
 
   function updateUI(v){
     if(!v) return;
-    if(nmEl) nmEl.textContent = Math.round(v.nm);
+    if(nmEl) nmEl.textContent = String(Math.round(v.nm));
     if(fEl) fEl.textContent = v.thz.toFixed(0) + " THz";
     if(pEl) pEl.textContent = v.fs.toFixed(2) + " fs";
-    if(sEl) sEl.textContent = v.sat.toFixed(0) + " %";
+    // Numbers only (the % sign is already in the markup)
+    if(sEl) sEl.textContent = v.sat.toFixed(0);
+
     if(needle){
       const ang = angleFromNm(v.nm);
-      needle.style.transform = "translate(-50%,-95%) rotate(" + ang + "deg)";
+      needle.setAttribute('transform', "rotate(" + ang + " 160 160)");
     }
   }
 
@@ -12125,7 +12864,7 @@ btn.addEventListener('click', closeGate);
 
   function saveFrame(){
     if(!canvas || !ctx || !video || video.readyState < 2) return;
-    ctx.drawImage(sCanvas, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const a = document.createElement('a');
     a.download = 'light_spectrometer_frame.png';
     a.href = canvas.toDataURL('image/png');
@@ -12136,8 +12875,8 @@ btn.addEventListener('click', closeGate);
     facing = (facing === 'environment') ? 'user' : 'environment';
     updateTitle();
     stopCamera();
-    await startCamera();
-  }
+    startCamera();
+}
 
   details.addEventListener('toggle', () => {
     if(details.open){
@@ -12162,11 +12901,11 @@ btn.addEventListener('click', closeGate);
   if(infoBtn) infoBtn.addEventListener('click', () => { info.hidden = false; });
   if(infoClose) infoClose.addEventListener('click', () => { info.hidden = true; });
 
-})();
+});
 </script>
 <script>
 /* === v55 Color Temperature: live camera + best-effort CCT/Δuv === */
-(function(){
+onReady(function(){
   const details = document.querySelector('#calAccList details.acc[data-caltool="ct"]');
   if(!details) return;
 
@@ -12179,6 +12918,7 @@ btn.addEventListener('click', closeGate);
   const kelvinEl = document.getElementById('ctKelvin');
   const xyEl = document.getElementById('ctXY');
   const duvEl = document.getElementById('ctDuvVal');
+  const duvInd = document.getElementById('ctDuvInd');
   const needle = document.getElementById('ctNeedle');
   const duvKnob = document.getElementById('ctDuvKnob');
   const statusEl = document.getElementById('ctStatus');
@@ -12215,7 +12955,7 @@ btn.addEventListener('click', closeGate);
   function estimate(){
     if(!video || !ctx || video.readyState < 2) return null;
     const w = canvas.width, h = canvas.height;
-    ctx.drawImage(sCanvas, 0, 0, w, h);
+    ctx.drawImage(video, 0, 0, w, h);
     const img = ctx.getImageData(0,0,w,h).data;
 
     let r=0,g=0,b=0;
@@ -12253,31 +12993,41 @@ btn.addEventListener('click', closeGate);
   }
 
   function angleFromKelvin(k){
-    // 2500..7500 -> -120..120
-    const t = (clamp(k,2500,7500)-2500)/5000;
-    return -120 + t*240;
+    // Map the *visual* tick range (3000..7000) to the arc (-120..120).
+    // Values outside are clamped so the needle never leaves the dial.
+    const CCT_MIN = 3000;
+    const CCT_MAX = 7000;
+    const t = (clamp(k, CCT_MIN, CCT_MAX) - CCT_MIN) / (CCT_MAX - CCT_MIN);
+    return -120 + t * 240;
   }
 
   function updateUI(v){
     if(!v) return;
+
+    // When too dark / invalid, reset to safe defaults (centered & unclipped)
     if(v.kelvin==null){
-      if(kelvinEl) kelvinEl.textContent = "----";
-      if(xyEl) xyEl.textContent = "(---, ---)";
-      if(duvEl) duvEl.textContent = "--";
-      if(needle) needle.style.transform = "translate(-50%,-95%) rotate(-120deg)";
-      if(duvKnob) duvKnob.style.left = "50%";
+      if(kelvinEl) kelvinEl.textContent = "—";
+      if(xyEl) xyEl.textContent = "—";
+      if(duvEl) duvEl.textContent = "—";
+      if(needle) needle.setAttribute('transform', "rotate(-120 160 160)");
+      if(duvInd) duvInd.style.left = "calc(50% - 5px)";
       return;
     }
-    if(kelvinEl) kelvinEl.textContent = Math.round(v.kelvin);
-    if(xyEl) xyEl.textContent = "(" + v.x.toFixed(3) + ", " + v.y.toFixed(3) + ")";
+
+    if(kelvinEl) kelvinEl.textContent = String(Math.round(v.kelvin));
+    if(xyEl) xyEl.textContent = v.x.toFixed(3) + ", " + v.y.toFixed(3);
     if(duvEl) duvEl.textContent = (v.duv>=0?"+":"") + v.duv.toFixed(3);
+
+    // Needle: pure SVG rotation around center
     if(needle){
       const ang = angleFromKelvin(v.kelvin);
-      needle.style.transform = "translate(-50%,-95%) rotate(" + ang + "deg)";
+      needle.setAttribute('transform', "rotate(" + ang + " 160 160)");
     }
-    if(duvKnob){
-      const t = (clamp(v.duv,-0.02,0.02) + 0.02) / 0.04; // 0..1
-      duvKnob.style.left = (t*100) + "%";
+
+    // Δuv indicator: move the visible marker inside the bar (not the hidden input)
+    if(duvInd){
+      const t = (clamp(v.duv, -0.03, 0.03) + 0.03) / 0.06; // 0..1
+      duvInd.style.left = "calc(" + (t*100).toFixed(3) + "% - 5px)";
     }
   }
 
@@ -12290,18 +13040,28 @@ btn.addEventListener('click', closeGate);
   }
 
   async function startCamera(){
-    if(stream) return;
-    if(!navigator.mediaDevices || !window.CameraManager.getUserMedia){
+    // Be aggressive: always (re)open a fresh stream for flicker
+    try{ stopCamera(); }catch(_){}
+    if(!navigator.mediaDevices){
       setStatus("Camera: not supported");
       return;
     }
     try{
       setStatus("Camera: starting...");
-      stream = await window.CameraManager.getUserMedia({
-        video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: false
-      }, {force:true});
-      if(!video){ console.warn('[camera] video element missing'); return; }
+      if(window.CameraManager && window.CameraManager.getUserMedia){
+        // force: reopen even if another tool is running
+        stream = await window.CameraManager.getUserMedia({
+          video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false
+        }, {force:true});
+      } else {
+        // fallback: direct getUserMedia
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false
+        });
+      }
+if(!video){ console.warn('[camera] video element missing'); return; }
       video.srcObject = stream;
       await video.play();
       updateTitle();
@@ -12338,8 +13098,8 @@ btn.addEventListener('click', closeGate);
     facing = (facing === 'environment') ? 'user' : 'environment';
     updateTitle();
     stopCamera();
-    await startCamera();
-  }
+    startCamera();
+}
 
   details.addEventListener('toggle', () => {
     if(details.open){
@@ -12362,15 +13122,29 @@ btn.addEventListener('click', closeGate);
   if(infoBtn) infoBtn.addEventListener('click', () => { if(info) info.hidden = false; });
   if(infoClose) infoClose.addEventListener('click', () => { if(info) info.hidden = true; });
 
-})();
+});
 </script>
 <script>
 /* === v55 Flicker Meter: live camera + brightness variation estimate === */
-(function(){
+onReady(function(){
   const details = document.querySelector('#calAccList details.acc[data-caltool="flicker"]');
   if(!details) return;
 
-  const video = document.getElementById('flVideo');
+  let video = document.getElementById('flVideo');
+  // If the shared hidden video isn't in the DOM yet, create a local hidden video inside this tool.
+  if(!video){
+    video = document.createElement('video');
+    video.autoplay = true;
+    video.playsInline = true;
+    video.muted = true;
+    video.setAttribute('playsinline','');
+    video.setAttribute('muted','');
+    video.style.display = 'none';
+    try{
+      const wrap = details.querySelector('.cal-cam-wrap') || details.querySelector('.cal-placeholders') || details;
+      wrap && wrap.prepend(video);
+    }catch(_){}
+  }
   const canvas = document.getElementById('flCanvas');
   const ctx = canvas ? canvas.getContext('2d', {willReadFrequently:true}) : null;
 
@@ -12378,6 +13152,8 @@ btn.addEventListener('click', closeGate);
 
   const pctEl = document.getElementById('flPct');
   const freqEl = document.getElementById('flFreq');
+  const needle = document.getElementById('flNeedle');
+  const noteEl = document.getElementById('flNote');
   const notePct = document.getElementById('flNotePct');
   const stripFill = document.getElementById('flStripFill');
   const wave = document.getElementById('flWave');
@@ -12416,7 +13192,7 @@ btn.addEventListener('click', closeGate);
   function sampleBrightness(){
     if(!video || !ctx || video.readyState < 2) return null;
     const w = canvas.width, h = canvas.height;
-    ctx.drawImage(sCanvas, 0, 0, w, h);
+    ctx.drawImage(video, 0, 0, w, h);
     const img = ctx.getImageData(0,0,w,h).data;
     let sum=0;
     for(let i=0;i<img.length;i+=32){
@@ -12467,16 +13243,35 @@ btn.addEventListener('click', closeGate);
 
   function updateUI(est){
     if(!pctEl) return;
-    pctEl.textContent = est.pct.toFixed(0) + "%";
-    if(notePct) notePct.textContent = est.pct.toFixed(0);
-    if(stripFill) stripFill.style.width = clamp(est.pct,0,100) + "%";
+
+    // Numbers only (units are already in the HTML)
+    const pct = clamp(est.pct, 0, 100);
+    pctEl.textContent = pct.toFixed(0);
+    if(notePct) notePct.textContent = pct.toFixed(0);
+
+    // Dial needle (0..100 -> -120..120)
+    if(needle){
+      const ang = -120 + (pct/100)*240;
+      needle.setAttribute('transform', "rotate(" + ang + " 160 160)");
+    }
+
+    // Strip fill (0..100%)
+    if(stripFill) stripFill.style.width = pct.toFixed(1) + "%";
+
+    // Frequency label
     if(freqEl){
       if(est.freq && est.freq>0){
         freqEl.textContent = est.freq.toFixed(1) + " Hz";
       }else{
-        freqEl.textContent = "--";
+        freqEl.textContent = "—";
       }
     }
+
+    // Status note (simple qualitative label)
+    if(noteEl){
+      noteEl.textContent = (pct < 10) ? "LOW flicker" : (pct < 30) ? "Moderate flicker" : "HIGH flicker";
+    }
+
     drawWave();
   }
 
@@ -12555,12 +13350,12 @@ btn.addEventListener('click', closeGate);
     facing = (facing === 'environment') ? 'user' : 'environment';
     updateTitle();
     stopCamera();
-    await startCamera();
-  }
+    startCamera();
+}
 
   function saveSnapshot(){
     if(!canvas || !ctx || !video || video.readyState < 2) return;
-    ctx.drawImage(sCanvas, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const a = document.createElement('a');
     a.download = 'flicker_meter_frame.png';
     a.href = canvas.toDataURL('image/png');
@@ -12590,7 +13385,7 @@ btn.addEventListener('click', closeGate);
   if(infoBtn) infoBtn.addEventListener('click', () => { if(info) info.hidden = false; });
   if(infoClose) infoClose.addEventListener('click', () => { if(info) info.hidden = true; });
 
-})();
+});
 </script>
 <script>
 /* === AV12: Intro gate enable "Got it, continue" reliably === */
@@ -13196,7 +13991,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </style>
 <script id="v61_flicker_needle_driver">
 /* Drive the Flicker needle from the already-updating #flPct text.
-   Keeps the original algorithm intact — just visualizes it like the reference. */
+   (Visual-only) Rotate the SVG needle around the dial center (160,160). */
 (function(){
   function clamp(x,a,b){ return Math.max(a, Math.min(b,x)); }
   function parsePct(){
@@ -13210,13 +14005,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if(!needle) return;
     var p = parsePct();
     if(p==null || isNaN(p)){
-      needle.style.transform = "translate(-50%,-95%) rotate(-120deg)";
+      needle.setAttribute('transform', "rotate(-120 160 160)");
       return;
     }
     p = clamp(p, 0, 100);
-    // Match Spectrum needle convention (-120..120 degrees)
     var ang = -120 + (p/100)*240;
-    needle.style.transform = "translate(-50%,-95%) rotate(" + ang.toFixed(1) + "deg)";
+    needle.setAttribute('transform', "rotate(" + ang.toFixed(1) + " 160 160)");
   }
   setInterval(tick, 250);
 })();
@@ -13229,6 +14023,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if(!root) return;
 
   // Elements
+  if(window.__disableCTM) return;
   const gauge = root.querySelector('#ctm-gauge');
   if(!gauge){ console.warn("[ctm] gauge missing"); return; }
   const gctx = gauge.getContext('2d');
@@ -13409,8 +14204,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function startCamera(){
-    await stopCamera();
-    const constraints = {
+    stopCamera();
+const constraints = {
       video: {
         facingMode: { ideal: facing },
         width: { ideal: 1280 },
@@ -13442,7 +14237,7 @@ document.addEventListener('DOMContentLoaded', () => {
     work.width = tw;
     work.height = th;
 
-    wctx.drawImage(sCanvas, x0, y0, rw, rh, 0, 0, tw, th);
+    wctx.drawImage(video, x0, y0, rw, rh, 0, 0, tw, th);
     const img = wctx.getImageData(0,0,tw,th).data;
 
     let sumR=0,sumG=0,sumB=0,sumY=0,n=0;
@@ -13513,7 +14308,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if(fsBtn) fsBtn.addEventListener('click', toggleFullscreen);
   if(switchBtn) switchBtn.addEventListener('click', async ()=>{
     facing = (facing === 'environment') ? 'user' : 'environment';
-    try{ await startCamera(); }catch(e){ console.error(e); }
+    try{ startCamera();
+}catch(e){ console.error(e); }
   });
   if(saveBtn) saveBtn.addEventListener('click', ()=>{
     const data = { kelvin: Math.round(smooth.cct), duv: +smooth.duv.toFixed(4), x:+smooth.x.toFixed(4), y:+smooth.y.toFixed(4), ts:new Date().toISOString() };
@@ -13530,17 +14326,19 @@ document.addEventListener('DOMContentLoaded', () => {
   if(details){
     const onToggle = async ()=>{
       if(details.open){
-        try{ drawGauge(smooth.cct); await startCamera(); refreshAfterLayout(); }catch(e){ console.error(e); }
+        try{ drawGauge(smooth.cct); startCamera();
+refreshAfterLayout(); }catch(e){ console.error(e); }
       }else{
-        await stopCamera();
-      }
+        stopCamera();
+}
     };
     details.addEventListener('toggle', onToggle);
     // if already open on load
     if(details.open) { setTimeout(onToggle, 50); }
   }else{
     // fallback: start immediately
-    setTimeout(async ()=>{ try{ drawGauge(smooth.cct); await startCamera(); }catch(e){ console.error(e); } }, 150);
+    setTimeout(async ()=>{ try{ drawGauge(smooth.cct); startCamera();
+}catch(e){ console.error(e); } }, 150);
   }
 
 })();
@@ -13633,7 +14431,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Metering
   function logAverageLuminance(){
     const w=canvas.width,h=canvas.height;
-    ctx.drawImage(sCanvas,0,0,w,h);
+    ctx.drawImage(video,0,0,w,h);
     const d=ctx.getImageData(0,0,w,h).data;
     let sumLog=0,sumW=0;
     const cx=w/2,cy=h/2,maxR=Math.hypot(cx,cy);
@@ -13702,8 +14500,8 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    await stopCamera();
-    setDebug("Opening camera…", true);
+    stopCamera();
+setDebug("Opening camera…", true);
 
     const tries = [
       { video:{ facingMode:{ideal:facing}, width:{ideal:1280}, height:{ideal:720} }, audio:false },
@@ -13767,15 +14565,16 @@ document.addEventListener('DOMContentLoaded', () => {
   el("luxm_saveBtn").onclick=()=>{
     if(!sCanvas.width) return;
     const c=document.createElement("canvas");
-    c.width=sCanvas.width; c.height=sCanvas.height;
-    c.getContext("2d").drawImage(sCanvas,0,0);
+    c.width=canvas.width; c.height=canvas.height;
+    c.getContext("2d").drawImage(canvas,0,0);
     const a=document.createElement("a");
     a.download=`luxmeter_${Date.now()}.png`;
     a.href=c.toDataURL("image/png");
     a.click();
   };
 
-  btnFlip.onclick=async ()=>{ facing = (facing==="environment") ? "user" : "environment"; camOverlay.classList.remove("hidden"); await startCamera(); };
+  btnFlip.onclick=async ()=>{ facing = (facing==="environment") ? "user" : "environment"; camOverlay.classList.remove("hidden"); startCamera();
+};
   btnInfo.onclick=()=>alert("אם המצלמה נשארת שחורה: 1) חייב HTTPS/localhost, 2) חייב לאשר הרשאת מצלמה, 3) בתוך iOS WebView לפעמים יש חסימה.");
   camStartBtn.onclick=()=>startCamera();
   camOverlay.addEventListener("click",(e)=>{ if(e.target===camOverlay) startCamera(); });
@@ -13951,7 +14750,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(sCanvas.width === 0) return null;
     const targetW = 72, targetH = 48;
     work.width = targetW; work.height = targetH;
-    wctx.drawImage(sCanvas, 0, 0, targetW, targetH);
+    wctx.drawImage(video, 0, 0, targetW, targetH);
     const img = wctx.getImageData(0,0,targetW,targetH).data;
     let sum = 0;
     for(let i=0;i<img.length;i+=4){
@@ -14164,6 +14963,190 @@ Measurements are estimated from camera brightness over time.`);
 #tab-calibration #caltool-ct .ct-ui .ctm-body{
   width:100%;
 }
+
+/* === Digital Calibration UI (MANOR ENGINEERING) === */
+.cal-digital-grid{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap:10px;
+  margin:12px 0 6px;
+}
+@media (max-width: 900px){
+  .cal-digital-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 520px){
+  .cal-digital-grid{ grid-template-columns: 1fr; }
+}
+.cal-digital-card{
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  border-radius:14px;
+  padding:10px 12px;
+  box-shadow: 0 10px 22px rgba(0,0,0,.18);
+  backdrop-filter: blur(10px);
+}
+.cal-digital-top{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:10px;
+}
+.cal-digital-label{
+  font-size:12px;
+  opacity:.78;
+  letter-spacing:.2px;
+}
+.cal-digital-unit{
+  font-size:12px;
+  opacity:.70;
+  margin-left:6px;
+}
+.cal-digital-value{
+  font-size:26px;
+  line-height:1.1;
+  font-weight:800;
+  letter-spacing:.2px;
+  font-variant-numeric: tabular-nums;
+}
+.cal-digital-sub{
+  margin-top:6px;
+  font-size:12px;
+  opacity:.75;
+  font-variant-numeric: tabular-nums;
+}
+.cal-digital-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.05);
+  font-size:12px;
+  opacity:.9;
+}
+.cal-digital-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:10px;
+}
+.cal-analog-hide .legacy-gauge-wrap{ display:none !important; }
+
+
+/* === Enhanced Digital Visuals (Calibration) === */
+.cal-viz{
+  margin-top:10px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.04);
+  overflow:hidden;
+}
+.cal-viz-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 12px;
+  border-bottom:1px solid rgba(255,255,255,.10);
+}
+.cal-viz-title{ font-size:12px; opacity:.8; }
+.cal-viz-meta{ font-size:12px; opacity:.72; font-variant-numeric: tabular-nums; }
+
+.cal-bar{
+  height:14px;
+  border-radius:999px;
+  background: rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.10);
+  overflow:hidden;
+}
+.cal-bar > .fill{
+  height:100%;
+  width:0%;
+  border-radius:999px;
+  background: linear-gradient(90deg, rgba(255,255,255,.20), rgba(255,255,255,.55));
+  box-shadow: 0 0 18px rgba(255,255,255,.18);
+  transition: width .18s ease;
+}
+.cal-viz-body{ padding:10px 12px 12px; display:grid; gap:10px; }
+
+.cal-swatch{
+  height:54px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.14);
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.25), rgba(255,255,255,.06));
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
+}
+.cal-swatch-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.cal-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.05);
+  font-size:12px;
+  opacity:.92;
+}
+.cal-dot{
+  width:10px; height:10px; border-radius:999px;
+  background: rgba(255,255,255,.75);
+  box-shadow: 0 0 14px rgba(255,255,255,.22);
+}
+
+.cal-wave{
+  position:relative;
+  height:54px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.04);
+  overflow:hidden;
+}
+.cal-wave::before{
+  content:"";
+  position:absolute; inset:0;
+  background:
+    radial-gradient(circle at 10% 60%, rgba(255,255,255,.18), transparent 45%),
+    radial-gradient(circle at 35% 40%, rgba(255,255,255,.14), transparent 45%),
+    radial-gradient(circle at 60% 65%, rgba(255,255,255,.12), transparent 45%),
+    radial-gradient(circle at 85% 35%, rgba(255,255,255,.10), transparent 45%);
+  opacity:.9;
+  transform: translateX(0);
+}
+.cal-wave .mask{
+  position:absolute; inset:0;
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,.10));
+  mix-blend-mode: multiply;
+}
+.cal-wave .pulse{
+  position:absolute; left:-20%; top:0; bottom:0;
+  width:40%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.20), transparent);
+  filter: blur(0.3px);
+  opacity:.75;
+  animation: calPulse 1.6s linear infinite;
+}
+@keyframes calPulse{ from{ transform: translateX(0);} to{ transform: translateX(300%);} }
+
+.cal-risk{
+  border-radius:999px;
+  padding:6px 10px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.05);
+  font-size:12px;
+  opacity:.92;
+}
+
+
+/* === Fix: visuals must not block camera controls === */
+.cal-viz, .cal-viz * { pointer-events: none; }
+
 </style>
 <!-- === Tool Information Overlay === -->
 <div aria-hidden="true" class="info-ov hidden" id="toolInfoOverlay">
@@ -14200,50 +15183,190 @@ Measurements are estimated from camera brightness over time.`);
   let currentTool = '';
 
   const CONTENT = {
-    camera: {
-      title: 'Camera — Live view & controls',
-      steps: [
-        `This tool opens the live camera stream and shows a preview in the center frame.
+  camera: {
+    title: 'Camera — live preview & basic checks',
+    html: `
+      <div class="toc">
+        <a href="#cam-what">What it does</a>
+        <a href="#cam-whatsee">What to look for</a>
+        <a href="#cam-not">What NOT to expect</a>
+        <a href="#cam-ui">UI parts</a>
+      </div>
 
-Tip: run the page via http://localhost to allow camera permissions smoothly.`,
-        `Controls:
-• Full Screen button (⛶) toggles the tool view to full screen.
-• The RGB readout panel updates based on the pixel under the sampling cursor (if enabled).`,
-        `If the camera does not start:
-• Check browser permissions for Camera
-• Close other apps using the camera
-• Refresh and try again`
-      ]
-    },
-    lux: {
-      title: 'Lux Meter — Exposure / brightness reference',
-      steps: [
-        'Use this tool to read brightness/exposure reference values and compare scenes.',
-        `Workflow:\n• Point the camera at the target\n• Observe the stability of readings\n• Use it to validate exposure before other calibration steps`
-      ]
-    },
-    cct: {
-      title: 'Color Temperature — CCT / Δuv calibration',
-      steps: [
-        'Use this tool to calibrate white balance: correlated color temperature (CCT) and Δuv.',
-        `Workflow:\n• Use a neutral target\n• Adjust settings until CCT/Δuv is within your desired range`
-      ]
-    },
-    flicker: {
-      title: 'Flicker Meter — Frequency / flicker level',
-      steps: [
-        'Use this tool to detect flicker frequency and estimate flicker level for LED/lighting.',
-        'Tip: steady the camera and avoid motion for more stable readings.'
-      ]
-    },
-    spectro: {
-      title: 'Light Spectrometer — Dominant wavelength / saturation',
-      steps: [
-        'Use this tool to estimate dominant wavelength and saturation for the observed light.',
-        `Workflow:\n• Capture a stable sample\n• Compare wavelength shifts across settings`
-      ]
-    }
-  };
+      <h2 id="cam-what">What it does</h2>
+      <p>This tool shows the live camera stream and gives you quick visual feedback before you rely on any measurements.</p>
+
+      <div class="cal-info-kv">
+        <div class="cal-info-card"><div class="k">Best use</div><div class="v">Focus / exposure sanity check before Lux / CCT / Flicker</div></div>
+        <div class="cal-info-card"><div class="k">Common issue</div><div class="v">Auto-exposure makes measurements “jump”</div></div>
+      </div>
+
+      <h2 id="cam-whatsee">What to look for</h2>
+      <ul>
+        <li><strong>Stable exposure</strong>: brightness should not “pump” up/down every second.</li>
+        <li><strong>Sharp details</strong>: if the image is blurry, ROI-based readings will be noisy.</li>
+        <li><strong>No clipping</strong>: avoid pure white areas (overexposed) in the region you measure.</li>
+      </ul>
+
+      <h2 id="cam-not">What NOT to expect</h2>
+      <ul>
+        <li>This is not a calibrated photometric camera view.</li>
+        <li>Colors are affected by white-balance and the phone / camera ISP.</li>
+      </ul>
+
+      <h2 id="cam-ui">UI parts</h2>
+      <ul>
+        <li><strong>Full Screen (⛶)</strong>: use it to inspect focus/exposure in the same lighting as your measurements.</li>
+        <li><strong>Live readouts</strong>: small numeric panels are indicators only (not lab-grade).</li>
+      </ul>
+    `
+  },
+
+  lux: {
+    title: 'Lux Meter — brightness indicator (relative)',
+    html: `
+      <div class="toc">
+        <a href="#lux-what">What it does</a>
+        <a href="#lux-th">Thresholds</a>
+        <a href="#lux-how">How it should look</a>
+        <a href="#lux-ui">UI parts</a>
+        <a href="#lux-meas">Measurements</a>
+      </div>
+
+      <h2 id="lux-what">What it does</h2>
+      <p><strong>Lux Meter</strong> gives a <em>relative</em> brightness score derived from the image. It helps you confirm that lighting is stable and sufficient for calibration steps.</p>
+
+      <h2 id="lux-th">Thresholds (practical)</h2>
+      <ul>
+        <li><strong>Too dark</strong>: values low and noisy → expect unstable CCT / flicker detection.</li>
+        <li><strong>Good zone</strong>: values stable (small fluctuations) → safe to proceed.</li>
+        <li><strong>Too bright / clipped</strong>: if highlights clip, the meter becomes misleading.</li>
+      </ul>
+
+      <h2 id="lux-how">How it should look</h2>
+      <ul>
+        <li>When you keep the camera still, the value should “breathe” slightly, not jump wildly.</li>
+        <li>Moving the light source closer/farther should change the value smoothly.</li>
+      </ul>
+
+      <h2 id="lux-ui">UI parts</h2>
+      <ul>
+        <li><strong>ROI box</strong>: the reading is taken from the measurement region (not the whole frame).</li>
+        <li><strong>Value</strong>: the main number is the brightness indicator.</li>
+        <li><strong>Trend</strong>: if a mini-graph exists, look for a flat line in stable light.</li>
+      </ul>
+
+      <h2 id="lux-meas">Measurements inside</h2>
+      <ul>
+        <li>Computed from luma (brightness) in a small ROI.</li>
+        <li>It’s useful for comparisons and stability checks, not for certified lux output.</li>
+      </ul>
+    `
+  },
+
+  cct: {
+    title: 'Color Temperature (CCT) — approximate',
+    html: `
+      <div class="toc">
+        <a href="#cct-what">What it does</a>
+        <a href="#cct-good">What’s “good”</a>
+        <a href="#cct-bad">What to ignore</a>
+        <a href="#cct-ui">UI parts</a>
+      </div>
+
+      <h2 id="cct-what">What it does</h2>
+      <p><strong>CCT</strong> estimates the color temperature (Kelvin) from the camera image. It’s an approximation to help you detect obvious warm/cool shifts.</p>
+
+      <h2 id="cct-good">What’s “good”</h2>
+      <ul>
+        <li>In stable lighting, the CCT should not swing rapidly.</li>
+        <li>Changing the light source (warm bulb → daylight) should change CCT clearly.</li>
+      </ul>
+
+      <h2 id="cct-bad">What to ignore / not rely on</h2>
+      <ul>
+        <li>Absolute accuracy: camera white-balance can bias the result.</li>
+        <li>Mixed lighting: results become a blend, not a true temperature.</li>
+        <li>Strong colored surfaces in ROI will skew readings.</li>
+      </ul>
+
+      <h2 id="cct-ui">UI parts</h2>
+      <ul>
+        <li><strong>ROI</strong>: keep it on a neutral area (gray/white card is best).</li>
+        <li><strong>CCT [K]</strong>: main estimate.</li>
+        <li><strong>RGB/XYZ</strong> (if shown): internal indicators to understand drift.</li>
+      </ul>
+    `
+  },
+
+  flicker: {
+    title: 'Flicker — detect light modulation',
+    html: `
+      <div class="toc">
+        <a href="#fl-what">What it does</a>
+        <a href="#fl-th">Thresholds</a>
+        <a href="#fl-look">What to look for</a>
+        <a href="#fl-ui">UI parts</a>
+      </div>
+
+      <h2 id="fl-what">What it does</h2>
+      <p>Detects temporal brightness modulation (common with PWM LEDs or AC-powered lamps). Useful to confirm whether lighting will cause measurement instability.</p>
+
+      <h2 id="fl-th">Thresholds (practical)</h2>
+      <ul>
+        <li><strong>No flicker / low</strong>: stable reading, safe for most steps.</li>
+        <li><strong>Medium</strong>: you may see jitter in CCT / lux; avoid fast measurements.</li>
+        <li><strong>High</strong>: strong PWM; calibration results can be unreliable.</li>
+      </ul>
+
+      <h2 id="fl-look">What to look for</h2>
+      <ul>
+        <li>A consistent detected frequency (doesn’t jump every second).</li>
+        <li>Modulation staying low in “good” lighting.</li>
+      </ul>
+
+      <h2 id="fl-ui">UI parts</h2>
+      <ul>
+        <li><strong>Signal / graph</strong>: brightness over time.</li>
+        <li><strong>Frequency [Hz]</strong>: estimated dominant component.</li>
+        <li><strong>Modulation</strong>: how strong the flicker is.</li>
+      </ul>
+    `
+  },
+
+  spectro: {
+    title: 'Spectrum Proxy — visual-only (Hue → wavelength)',
+    html: `
+      <div class="toc">
+        <a href="#sp-what">What it does</a>
+        <a href="#sp-use">When to use</a>
+        <a href="#sp-not">When NOT to use</a>
+        <a href="#sp-ui">UI parts</a>
+      </div>
+
+      <h2 id="sp-what">What it does</h2>
+      <p>This is a <strong>visual proxy</strong>: it maps the dominant <em>Hue</em> in the ROI to an approximate wavelength range. It helps you quickly see “where on the color wheel” the light looks.</p>
+
+      <h2 id="sp-use">When to use</h2>
+      <ul>
+        <li>Quick check: is the ROI roughly warm/cool/greenish?</li>
+        <li>Comparing two lighting setups visually.</li>
+      </ul>
+
+      <h2 id="sp-not">When NOT to use</h2>
+      <ul>
+        <li>Do not treat this as a spectrometer.</li>
+        <li>Do not use under mixed lighting or colorful ROI content.</li>
+      </ul>
+
+      <h2 id="sp-ui">UI parts</h2>
+      <ul>
+        <li><strong>ROI</strong>: keep it on a clean light patch (avoid textured colors).</li>
+        <li><strong>Hue / wavelength</strong>: a friendly visual estimate only.</li>
+      </ul>
+    `
+  }
+};
 
   function normalizeTool(acc){
     const a = (acc||'').toLowerCase();
@@ -14282,19 +15405,33 @@ Tip: run the page via http://localhost to allow camera permissions smoothly.`,
     setHidden(true);
   }
 
-  // Click on Info chip
-  document.addEventListener('click', (e)=>{
-    const b = e.target && e.target.closest ? e.target.closest('.an-chip-info') : null;
-    if(!b) return;
-    // prevent accordion toggle
-    e.preventDefault();
-    e.stopPropagation();
-    const details = b.closest('details');
-    const acc = details ? (details.getAttribute('data-acc') || details.dataset.acc) : '';
-    openForTool(acc);
-  }, true);
+  // Global Info button handler (all tabs, all accordions)
+document.addEventListener('click', (e)=>{
+  const b = e.target && e.target.closest ? e.target.closest('button.an-chip-info') : null;
+  if(!b) return;
 
-  // Close controls
+  e.preventDefault();
+  e.stopPropagation();
+
+  const details = b.closest('details');
+  if(!details) return;
+
+  // Calibration tab uses the scrollable Calibration Info modal
+  if(details.closest && details.closest('#tab-calibration')){
+    const rawKey = (details.getAttribute('data-caltool') || details.getAttribute('data-acc') || 'camera').trim();
+    const KEYMAP = { camer:'camera', camera:'camera', main:'camera', lux:'lux', cct:'cct', ct:'cct', flicker:'flicker', spectrum:'spectro', spectro:'spectro', spec:'spectro' };
+    const key = KEYMAP[rawKey] || rawKey;
+    if(window.showCalibrationInfo) window.showCalibrationInfo(key);
+    return;
+  }
+
+  // Other tabs use the generic step-by-step overlay (existing behavior)
+  const acc = (details.getAttribute('data-acc') || '').trim();
+  if(typeof openForTool === 'function') openForTool(acc);
+}, true);
+
+
+// Close controls
   ov.addEventListener('click', (e)=>{
     const closeEl = e.target && e.target.closest ? e.target.closest('[data-info-close="1"]') : null;
     if(closeEl){
@@ -14801,7 +15938,6 @@ document.addEventListener('DOMContentLoaded', function(){
   window.__CalibrationCamStop = stop;
 })();
 </script>
-
 <script>
 /* === Calibration v20: unified per-tool camera + measurements (file-safe) === */
 (() => {
@@ -14812,7 +15948,185 @@ document.addEventListener('DOMContentLoaded', function(){
   const $ = (sel, root=document) => root.querySelector(sel);
 
   // Outputs per tool (IDs in the DOM)
-  const OUT = {
+  
+  // --- EV gauge (Lux Meter) ---
+  const EV_GAUGE = {
+    min: -2,
+    max: 16,
+    angleMin: -120, // degrees
+    angleMax: 120,
+    needle: null,
+    ticks: null,
+    inited: false,
+  };
+
+  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+  function evToAngle(ev){
+    const v = clamp(ev, EV_GAUGE.min, EV_GAUGE.max);
+    const t = (v - EV_GAUGE.min) / (EV_GAUGE.max - EV_GAUGE.min);
+    return EV_GAUGE.angleMin + t * (EV_GAUGE.angleMax - EV_GAUGE.angleMin);
+  }
+
+  function initEVGauge(){
+    if (EV_GAUGE.inited) return;
+    EV_GAUGE.needle = document.getElementById("lux_ev_needle");
+    EV_GAUGE.ticks  = document.getElementById("lux_ev_ticks");
+    if (!EV_GAUGE.needle || !EV_GAUGE.ticks) return;
+
+    // Build ticks: major every 2 EV, minor every 1 EV
+    const makeTick = (ev, isMajor) => {
+      const ang = (Math.PI/180) * evToAngle(ev);
+      const cx=120, cy=130;
+      const r1 = isMajor ? 78 : 82;
+      const r2 = 92;
+      const x1 = cx + Math.cos(ang)*r1;
+      const y1 = cy + Math.sin(ang)*r1;
+      const x2 = cx + Math.cos(ang)*r2;
+      const y2 = cy + Math.sin(ang)*r2;
+      const ln = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      ln.setAttribute("x1", x1.toFixed(2));
+      ln.setAttribute("y1", y1.toFixed(2));
+      ln.setAttribute("x2", x2.toFixed(2));
+      ln.setAttribute("y2", y2.toFixed(2));
+      ln.setAttribute("class", "ev-tick" + (isMajor ? " major" : ""));
+      EV_GAUGE.ticks.appendChild(ln);
+
+      if (isMajor){
+        const txr = 64;
+        const tx = cx + Math.cos(ang)*txr;
+        const ty = cy + Math.sin(ang)*txr + 4;
+        const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        t.setAttribute("x", tx.toFixed(2));
+        t.setAttribute("y", ty.toFixed(2));
+        t.setAttribute("text-anchor", "middle");
+        t.setAttribute("class", "ev-label");
+        t.textContent = String(ev);
+        EV_GAUGE.ticks.appendChild(t);
+      }
+    };
+
+    for (let ev = EV_GAUGE.min; ev <= EV_GAUGE.max; ev += 1){
+      makeTick(ev, ev % 2 === 0);
+    }
+
+    EV_GAUGE.inited = true;
+  }
+
+  function setEVNeedle(ev){
+    if (!EV_GAUGE.inited) initEVGauge();
+    if (!EV_GAUGE.needle) return;
+    if (!isFinite(ev)) return;
+    const ang = evToAngle(ev);
+    EV_GAUGE.needle.style.transform = `rotate(${ang}deg)`;
+  }
+
+
+  // --- Additional dials (CCT / Flicker / Spectrum) ---
+  const CT_GAUGE = { inited:false, min:2500, max:8000, angleMin:-160, angleMax:-20, needle:null, ticks:null };
+  const FL_GAUGE = { inited:false, min:0, max:100, angleMin:-160, angleMax:-20, needle:null, ticks:null };
+  const SP_GAUGE = { inited:false, min:450, max:650, angleMin:-160, angleMax:-20, needle:null, ticks:null };
+
+  const lerp = (a,b,t)=>a+(b-a)*t;
+
+  function makeTicks(svgGroup, min, max, majorStep, minorStep, angleMin, angleMax, clsBase){
+    const make = (val, isMajor) => {
+      const t = (val - min) / (max - min);
+      const angDeg = angleMin + t*(angleMax-angleMin);
+      const ang = (Math.PI/180)*angDeg;
+      const cx=120, cy=130;
+      const r1 = isMajor ? 78 : 82;
+      const r2 = 92;
+      const x1 = cx + Math.cos(ang)*r1;
+      const y1 = cy + Math.sin(ang)*r1;
+      const x2 = cx + Math.cos(ang)*r2;
+      const y2 = cy + Math.sin(ang)*r2;
+      const ln = document.createElementNS("http://www.w3.org/2000/svg","line");
+      ln.setAttribute("x1", x1.toFixed(2)); ln.setAttribute("y1", y1.toFixed(2));
+      ln.setAttribute("x2", x2.toFixed(2)); ln.setAttribute("y2", y2.toFixed(2));
+      ln.setAttribute("class", `${clsBase}-tick` + (isMajor ? " major" : ""));
+      svgGroup.appendChild(ln);
+
+      if (isMajor){
+        const txr = 64;
+        const tx = cx + Math.cos(ang)*txr;
+        const ty = cy + Math.sin(ang)*txr + 4;
+        const txt = document.createElementNS("http://www.w3.org/2000/svg","text");
+        txt.setAttribute("x", tx.toFixed(2)); txt.setAttribute("y", ty.toFixed(2));
+        txt.setAttribute("text-anchor","middle");
+        const label = (clsBase==="ct") ? Math.round(val/1000)*1000 : Math.round(val);
+        txt.textContent = label;
+        svgGroup.appendChild(txt);
+      }
+    };
+
+    for (let v=min; v<=max+1e-9; v+=minorStep){
+      const isMajor = Math.abs((v-min) % majorStep) < 1e-6;
+      make(v, isMajor);
+    }
+  }
+
+  function initCTGauge(){
+    if (CT_GAUGE.inited) return;
+    CT_GAUGE.needle = document.getElementById("ctNeedle");
+    CT_GAUGE.ticks  = document.getElementById("ctTicks");
+    if (!CT_GAUGE.needle || !CT_GAUGE.ticks) return;
+    makeTicks(CT_GAUGE.ticks, CT_GAUGE.min, CT_GAUGE.max, 1000, 500, CT_GAUGE.angleMin, CT_GAUGE.angleMax, "ct");
+    CT_GAUGE.inited = true;
+  }
+  function setCTNeedle(cct){
+    initCTGauge();
+    if (!CT_GAUGE.needle || !isFinite(cct)) return;
+    const v=clamp(cct, CT_GAUGE.min, CT_GAUGE.max);
+    const t=(v-CT_GAUGE.min)/(CT_GAUGE.max-CT_GAUGE.min);
+    const ang=CT_GAUGE.angleMin + t*(CT_GAUGE.angleMax-CT_GAUGE.angleMin);
+    CT_GAUGE.needle.style.transform = `rotate(${ang}deg)`;
+  }
+
+  function initFLGauge(){
+    if (FL_GAUGE.inited) return;
+    FL_GAUGE.needle = document.getElementById("flNeedle");
+    FL_GAUGE.ticks  = document.getElementById("flTicks");
+    if (!FL_GAUGE.needle || !FL_GAUGE.ticks) return;
+    makeTicks(FL_GAUGE.ticks, FL_GAUGE.min, FL_GAUGE.max, 20, 10, FL_GAUGE.angleMin, FL_GAUGE.angleMax, "fl");
+    FL_GAUGE.inited = true;
+  }
+  function setFLNeedle(pct){
+    initFLGauge();
+    if (!FL_GAUGE.needle || !isFinite(pct)) return;
+    const v=clamp(pct, FL_GAUGE.min, FL_GAUGE.max);
+    const t=(v-FL_GAUGE.min)/(FL_GAUGE.max-FL_GAUGE.min);
+    const ang=FL_GAUGE.angleMin + t*(FL_GAUGE.angleMax-FL_GAUGE.angleMin);
+    FL_GAUGE.needle.style.transform = `rotate(${ang}deg)`;
+    const strip = document.getElementById("fl_strip_fill");
+    if (strip) strip.style.width = `${clamp(v,0,100)}%`;
+    const sev = document.getElementById("fl_sev_text");
+    if (sev){
+      sev.textContent = (v < 10) ? "Very low flickering" :
+                        (v < 25) ? "Low flickering" :
+                        (v < 50) ? "Moderate flickering" :
+                        "High flickering";
+    }
+  }
+
+  function initSPGauge(){
+    if (SP_GAUGE.inited) return;
+    SP_GAUGE.needle = document.getElementById("specNeedle");
+    SP_GAUGE.ticks  = document.getElementById("specTicks");
+    if (!SP_GAUGE.needle || !SP_GAUGE.ticks) return;
+    makeTicks(SP_GAUGE.ticks, SP_GAUGE.min, SP_GAUGE.max, 50, 25, SP_GAUGE.angleMin, SP_GAUGE.angleMax, "sp");
+    SP_GAUGE.inited = true;
+  }
+  function setSPNeedle(nm){
+    initSPGauge();
+    if (!SP_GAUGE.needle || !isFinite(nm)) return;
+    const v=clamp(nm, SP_GAUGE.min, SP_GAUGE.max);
+    const t=(v-SP_GAUGE.min)/(SP_GAUGE.max-SP_GAUGE.min);
+    const ang=SP_GAUGE.angleMin + t*(SP_GAUGE.angleMax-SP_GAUGE.angleMin);
+    SP_GAUGE.needle.style.transform = `rotate(${ang}deg)`;
+  }
+
+const OUT = {
     lux: { lux: $("#lux_val_lux"), fc: $("#lux_val_fc"), ev: $("#lux_val_ev"), sa: $("#lux_scale_a"), sb: $("#lux_scale_b") },
     ct: { cct: $("#ct_val_cct"), duv: $("#ct_val_duv") },
     flicker: { hz: $("#flicker_val_hz"), pct: $("#flicker_val_pct"), idx: $("#flicker_val_fpct") },
@@ -14855,6 +16169,31 @@ document.addEventListener('DOMContentLoaded', function(){
     if (n == null || !isFinite(n)) return "—";
     const v = (digits>0) ? n.toFixed(digits) : Math.round(n).toString();
     return unit ? `${v} ${unit}` : v;
+  }
+
+
+  // --- UI smoothing (stabilize live readouts; keeps computation raw) ---
+  const UI_UPDATE_MS = 160; // ~6Hz UI updates (stable display)
+
+  const SMOOTH = {
+    // 0.05 = very stable (slow), 0.30 = very responsive (more jitter)
+    lux: 0.08,
+    ev: 0.08,
+    cct: 0.10,
+    duv: 0.10,
+    spec: 0.12,
+    xy: 0.10,
+    flicker: 0.18,
+  };
+  state.smooth = Object.create(null);
+
+  function smoothVal(key, raw, alpha){
+    if (raw == null || !isFinite(raw)) return raw;
+    const a = (alpha == null) ? 0.15 : alpha;
+    const prev = state.smooth[key];
+    const next = (prev == null || !isFinite(prev)) ? raw : (a * raw + (1 - a) * prev);
+    state.smooth[key] = next;
+    return next;
   }
 
   function srgbToLin(c){
@@ -14921,33 +16260,61 @@ document.addEventListener('DOMContentLoaded', function(){
     if (!tool || !m) return;
     state.lastValues[tool] = m;
 
+    const now = performance.now();
+    state._lastUI = state._lastUI || Object.create(null);
+    const due = (now - (state._lastUI[tool] || 0)) >= UI_UPDATE_MS;
+    if (due) state._lastUI[tool] = now;
+
     if (tool === "lux"){
       // Map luma [0..255] to a wide lux-like range (placeholder until calibrated)
       const lux = (m.luma/255) * 12000; // 0..12k lux
       const fc = lux * 0.092903;
       const ev = Math.log2(Math.max(1e-6, lux/2.5)); // rough
-      OUT.lux.lux && (OUT.lux.lux.textContent = fmt(lux, "lx"));
-      OUT.lux.fc && (OUT.lux.fc.textContent = fmt(fc, "fc"));
-      OUT.lux.ev && (OUT.lux.ev.textContent = fmt(ev, "", 1));
+      const luxS = smoothVal("lux.lux", lux, SMOOTH.lux);
+      const fcS  = smoothVal("lux.fc", fc, SMOOTH.lux);
+      const evS  = smoothVal("lux.ev", ev, SMOOTH.ev);
+      // Always update needle (but it is already smoothed + has a short transition)
+      setEVNeedle(evS);
+      if (due){
+        OUT.lux.lux && (OUT.lux.lux.textContent = fmt(luxS, "lx"));
+        OUT.lux.fc && (OUT.lux.fc.textContent = fmt(fcS, "fc"));
+        OUT.lux.ev && (OUT.lux.ev.textContent = fmt(evS, "", 1));
+      }
       OUT.lux.sa && (OUT.lux.sa.textContent = `0 → 12k lx (auto)`);
       OUT.lux.sb && (OUT.lux.sb.textContent = `ROI: center 8%`);
     }
 
     if (tool === "ct"){
       const cct = m.cctxy.cct;
-      OUT.ct.cct && (OUT.ct.cct.textContent = fmt(cct, "K"));
+      const cctS = smoothVal("ct.cct", cct, SMOOTH.cct);
+      setCTNeedle(cctS);
+
+      if (due){ OUT.ct.cct && (OUT.ct.cct.textContent = fmt(cctS, "K")); }
       // Δuv placeholder (needs full chromatic adaptation + Planckian locus)
       const duv = (m.cctxy.y - 0.33) * 0.02;
-      OUT.ct.duv && (OUT.ct.duv.textContent = (isFinite(duv) ? duv.toFixed(4) : "—"));
+      const duvS = (isFinite(duv) ? smoothVal("ct.duv", duv, SMOOTH.duv) : duv);
+      const duvMarker = document.getElementById("ct_duv_marker");
+      if (duvMarker && isFinite(duvS)){
+        // map [-0.03..0.03] to [0..100]%
+        const t = (clamp(duvS, -0.03, 0.03) + 0.03) / 0.06;
+        duvMarker.style.left = `${(t*100).toFixed(1)}%`;
+      }
+
+      if (due){ OUT.ct.duv && (OUT.ct.duv.textContent = (isFinite(duvS) ? duvS.toFixed(4) : "—")); }
     }
 
     if (tool === "spectrum"){
       // Dominant wavelength placeholder (map hue to 380-700nm)
       const nm = 380 + (m.hsv.h/360) * (700-380);
-      OUT.spectrum.nm && (OUT.spectrum.nm.textContent = fmt(nm, "nm"));
-      OUT.spectrum.sat && (OUT.spectrum.sat.textContent = fmt(m.hsv.s*100, "%"));
-      OUT.spectrum.cx && (OUT.spectrum.cx.textContent = (m.cctxy.x ? m.cctxy.x.toFixed(4) : "—"));
-      OUT.spectrum.cy && (OUT.spectrum.cy.textContent = (m.cctxy.y ? m.cctxy.y.toFixed(4) : "—"));
+      const nmS = smoothVal("spec.nm", nm, SMOOTH.spec);
+      setSPNeedle(nmS);
+      OUT.spectrum.nm && (OUT.spectrum.nm.textContent = fmt(nmS, "nm"));
+      const satS = smoothVal("spec.sat", m.hsv.s*100, SMOOTH.spec);
+      OUT.spectrum.sat && (OUT.spectrum.sat.textContent = fmt(satS, "%"));
+      const satFill = document.getElementById("spec_sat_fill");
+      if (satFill && isFinite(satS)) satFill.style.width = `${clamp(satS,0,100).toFixed(0)}%`;
+      OUT.spectrum.cx && (OUT.spectrum.cx.textContent = (m.cctxy.x ? smoothVal("spec.x", m.cctxy.x, SMOOTH.xy).toFixed(4) : "—"));
+      OUT.spectrum.cy && (OUT.spectrum.cy.textContent = (m.cctxy.y ? smoothVal("spec.y", m.cctxy.y, SMOOTH.xy).toFixed(4) : "—"));
     }
 
     if (tool === "flicker"){
@@ -14968,10 +16335,12 @@ document.addEventListener('DOMContentLoaded', function(){
         const durationSec = (hist.length-1)/30; // assuming ~30fps
         const hz = durationSec>0 ? (crossings/2)/durationSec : 0;
 
-        OUT.flicker.pct && (OUT.flicker.pct.textContent = fmt(pct, "%", 1));
-        OUT.flicker.hz && (OUT.flicker.hz.textContent = fmt(hz, "Hz", 1));
+        const pctS = smoothVal("fl.pct", pct, SMOOTH.flicker);
+        setFLNeedle(pctS);
+        OUT.flicker.pct && (OUT.flicker.pct.textContent = fmt(pctS, "%", 1));
+        OUT.flicker.hz && (OUT.flicker.hz.textContent = fmt(smoothVal("fl.hz", hz, SMOOTH.flicker), "Hz", 1));
         // Flicker index placeholder
-        OUT.flicker.idx && (OUT.flicker.idx.textContent = fmt(Math.min(1, pct/100), "", 2));
+        OUT.flicker.idx && (OUT.flicker.idx.textContent = fmt(smoothVal("fl.idx", Math.min(1, pct/100), SMOOTH.flicker), "", 2));
       } else {
         OUT.flicker.pct && (OUT.flicker.pct.textContent = "—");
         OUT.flicker.hz && (OUT.flicker.hz.textContent = "—");
@@ -15003,9 +16372,8 @@ document.addEventListener('DOMContentLoaded', function(){
 
   async function startCameraForTool(tool){
     // Close previous tool camera to avoid conflicts
-    await stopCamera();
-
-    const canvas = getCanvas(tool);
+    stopCamera();
+const canvas = getCanvas(tool);
     if (!canvas) { alert("tool canvas missing"); return; }
 
     const v = ensureVideo();
@@ -15066,7 +16434,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
         // Measurements ~10Hz to reduce CPU
         const now = performance.now();
-        if (now - state.lastUpdateTs > 90) {
+        if (now - state.lastUpdateTs > 160) {
           const m = computeFromCanvas(canvas);
           // Flicker needs history
           state.lumaHist.push(m.luma);
@@ -15081,8 +16449,8 @@ document.addEventListener('DOMContentLoaded', function(){
 
     } catch (err) {
       console.error(err);
-      await stopCamera();
-      setStatus(tool, "error");
+      stopCamera();
+setStatus(tool, "error");
       const msg = (err && err.name) ? `${err.name}: ${err.message||""}` : String(err);
       alert(`Camera failed to start.
 
@@ -15129,6 +16497,667 @@ Error: ${msg}`);
   window.addEventListener("pagehide", stopCamera);
 })();
 </script>
+<!-- Hidden capture hub (do not remove): used by Lux/CT/Flicker/Spectrum analyzers -->
+<div aria-hidden="true" id="captureHub">
+<video autoplay="" id="luxVideo" muted="" playsinline=""></video>
+<canvas height="240" id="luxCanvas" width="320"></canvas>
+<video autoplay="" id="ctVideo" muted="" playsinline=""></video>
+<canvas height="240" id="ctCanvas" width="320"></canvas>
+<video autoplay="" id="flVideo" muted="" playsinline=""></video>
+<canvas height="240" id="flCanvas" width="320"></canvas>
+<video autoplay="" id="specVideo" muted="" playsinline=""></video>
+<canvas height="240" id="specCanvas" width="320"></canvas>
+</div>
+<div id="ctm-gauge" style="display:none"></div>
+<script>
+/* UI sync helpers for legacy gauges (visual only) */
+(function(){
+  function num(x){ const v=parseFloat(String(x).replace(/[^0-9.+-]/g,'')); return Number.isFinite(v)?v:null; }
+  function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
 
-</body>
+  function sync(){
+    // Lux boxes
+    const apVal = document.getElementById('luxApertureVal');
+    const spVal = document.getElementById('luxSpeedVal');
+    const isoVal = document.getElementById('luxISOVal');
+    if(apVal && document.getElementById('luxApertureDisp')) document.getElementById('luxApertureDisp').textContent = apVal.textContent || '—';
+    if(spVal && document.getElementById('luxSpeedDisp')) document.getElementById('luxSpeedDisp').textContent = spVal.textContent || '—';
+    if(isoVal && document.getElementById('luxISODisp')) document.getElementById('luxISODisp').textContent = isoVal.textContent || '—';
+
+    // CT DUV indicator: map -0.03..0.03 to 0..100%
+    const duv = document.getElementById('ctDuvVal');
+    const ind = document.getElementById('ctDuvInd');
+    if(duv && ind){
+      const v=num(duv.textContent);
+      if(v!==null){
+        const pct = clamp((v + 0.03)/0.06, 0, 1);
+        ind.style.left = `calc(${(pct*100).toFixed(1)}% - 5px)`;
+      }
+    }
+
+    // Flicker strip fill: map 0..100% to width, and hue zone already in gradient
+    const fl = document.getElementById('flPct');
+    const flFill = document.getElementById('flStripFill');
+    if(fl && flFill){
+      const v=num(fl.textContent);
+      if(v!==null) flFill.style.width = clamp(v,0,100).toFixed(0)+'%';
+    }
+
+    // Spectrum saturation fill
+    const sat = document.getElementById('specSat');
+    const satFill = document.getElementById('specSatFill');
+    if(sat && satFill){
+      const v=num(sat.textContent);
+      if(v!==null) satFill.style.width = clamp(v,0,100).toFixed(0)+'%';
+    }
+  }
+
+  // run often but light
+  setInterval(sync, 200);
+})();
+</script>
+<script>
+/* === Calibration Visuals Updater === */
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+  const num=(s)=>{
+    if(s==null) return NaN;
+    const t = (""+s).replace(/[^\d.\-]/g,"");
+    const v = parseFloat(t);
+    return Number.isFinite(v)?v:NaN;
+  };
+
+  // Approx Kelvin -> RGB (Tanner Helland style, simplified)
+  function kelvinToRgb(k){
+    let temp = clamp(k, 1000, 40000) / 100;
+    let r,g,b;
+    if(temp <= 66){
+      r = 255;
+      g = 99.4708025861 * Math.log(temp) - 161.1195681661;
+      b = temp <= 19 ? 0 : 138.5177312231 * Math.log(temp - 10) - 305.0447927307;
+    } else {
+      r = 329.698727446 * Math.pow(temp - 60, -0.1332047592);
+      g = 288.1221695283 * Math.pow(temp - 60, -0.0755148492);
+      b = 255;
+    }
+    r = clamp(Math.round(r),0,255);
+    g = clamp(Math.round(g),0,255);
+    b = clamp(Math.round(b),0,255);
+    return {r,g,b};
+  }
+
+  // Approx wavelength (nm) -> RGB (Dan Bruton inspired)
+  function wavelengthToRgb(wl){
+    wl = clamp(wl, 380, 780);
+    let r=0,g=0,b=0;
+    if(wl>=380 && wl<440){ r=-(wl-440)/(440-380); g=0; b=1; }
+    else if(wl<490){ r=0; g=(wl-440)/(490-440); b=1; }
+    else if(wl<510){ r=0; g=1; b=-(wl-510)/(510-490); }
+    else if(wl<580){ r=(wl-510)/(580-510); g=1; b=0; }
+    else if(wl<645){ r=1; g=-(wl-645)/(645-580); b=0; }
+    else { r=1; g=0; b=0; }
+    // intensity factor at edges
+    let f=1;
+    if(wl<420) f = 0.3 + 0.7*(wl-380)/(420-380);
+    else if(wl>700) f = 0.3 + 0.7*(780-wl)/(780-700);
+    const gamma=0.8;
+    const to8 = (c)=>clamp(Math.round(255*Math.pow(c*f, gamma)),0,255);
+    return {r:to8(r), g:to8(g), b:to8(b)};
+  }
+
+  function rgbToCss({r,g,b}, a=1){ return `rgba(${r},${g},${b},${a})`; }
+
+  function setSwatch(el, rgb, strength=1){
+    if(!el) return;
+    const c1 = rgbToCss(rgb, 0.35*strength);
+    const c2 = rgbToCss(rgb, 0.12*strength);
+    const c3 = rgbToCss({r:255,g:255,b:255}, 0.08);
+    el.style.background = `radial-gradient(circle at 25% 30%, ${c1}, transparent 55%), radial-gradient(circle at 70% 65%, ${c2}, transparent 60%), linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)), ${c3}`;
+    el.style.boxShadow = `inset 0 0 0 1px rgba(0,0,0,.22), 0 10px 24px rgba(0,0,0,.22)`;
+  }
+
+  function setDot(dot, rgb){
+    if(!dot) return;
+    dot.style.background = rgbToCss(rgb, 0.95);
+    dot.style.boxShadow = `0 0 16px ${rgbToCss(rgb,0.28)}, 0 0 2px rgba(255,255,255,.18) inset`;
+  }
+
+  // Lux visual
+  function updateLux(){
+    const lux = num($("luxLux")?.textContent);
+    const ev  = num($("luxEV")?.textContent);
+    const fill = $("luxBarFill");
+    const glow = $("luxGlow");
+    const meta = $("luxVizMeta");
+    const dot  = $("luxDot");
+    const risk = $("luxRisk");
+
+    if(meta) meta.textContent = Number.isFinite(lux) ? `${Math.round(lux)} lux · EV ${Number.isFinite(ev)?ev:"—"}` : "—";
+    // map 0..12000 lux -> 0..100%
+    const pct = Number.isFinite(lux) ? clamp(lux/12000, 0, 1) : 0;
+    if(fill) fill.style.width = `${Math.round(pct*100)}%`;
+
+    // brightness tint: cooler for low, warmer for high (subtle)
+    const k = 2500 + (1-pct)*2500 + pct*2500; // 5000-ish range
+    const rgb = kelvinToRgb(k);
+    setSwatch(glow, rgb, 0.9);
+    setDot(dot, rgb);
+
+    if(risk){
+      if(!Number.isFinite(lux)) risk.textContent = "No data";
+      else if(lux < 50) risk.textContent = "Very dim";
+      else if(lux < 300) risk.textContent = "Indoor / low";
+      else if(lux < 2000) risk.textContent = "Bright indoor";
+      else if(lux < 10000) risk.textContent = "Outdoor shade";
+      else risk.textContent = "Direct / very bright";
+    }
+  }
+
+  // CCT visual
+  function updateCT(){
+    const k = num($("ctKelvin")?.textContent);
+    const duv = num($("ctDuvVal")?.textContent);
+    const sw = $("ctSwatch");
+    const dot = $("ctDot");
+    const meta = $("ctVizMeta");
+    const fill = $("ctDuvFill");
+    const hint = $("ctHint");
+
+    if(meta) meta.textContent = Number.isFinite(k) ? `${Math.round(k)} K · Δuv ${Number.isFinite(duv)?duv.toFixed(4):"—"}` : "—";
+
+    if(Number.isFinite(k)){
+      const rgb = kelvinToRgb(k);
+      // apply duv tint: negative -> magenta, positive -> green
+      const t = Number.isFinite(duv) ? clamp(duv/0.03, -1, 1) : 0;
+      const mag = {r:255,g:120,b:210};
+      const grn = {r:120,g:255,b:160};
+      const tint = t<0 ? mag : grn;
+      const amt = Math.abs(t)*0.35;
+      const mix = {
+        r: Math.round(rgb.r*(1-amt) + tint.r*amt),
+        g: Math.round(rgb.g*(1-amt) + tint.g*amt),
+        b: Math.round(rgb.b*(1-amt) + tint.b*amt),
+      };
+      setSwatch(sw, mix, 1);
+      setDot(dot, mix);
+      if(hint){
+        if(k < 3300) hint.textContent = "Warm (tungsten-like)";
+        else if(k < 5000) hint.textContent = "Neutral";
+        else hint.textContent = "Cool (daylight-like)";
+      }
+    } else {
+      if(hint) hint.textContent = "No data";
+    }
+
+    if(fill){
+      // map duv [-0.03..0.03] to 0..100 (center=50)
+      const t = Number.isFinite(duv) ? clamp((duv+0.03)/0.06, 0, 1) : 0.5;
+      fill.style.width = `${Math.round(t*100)}%`;
+      // show direction tint in bar
+      const c = Number.isFinite(duv) ? (duv<0 ? "rgba(255,120,210,.45)" : "rgba(120,255,160,.45)") : "rgba(255,255,255,.25)";
+      fill.style.background = `linear-gradient(90deg, rgba(255,255,255,.12), ${c})`;
+    }
+  }
+
+  // Flicker visual
+  function updateFlicker(){
+    const pct = num($("flPct")?.textContent);
+    const hz = num($("flFreq")?.textContent);
+    const meta = $("flVizMeta");
+    const fill = $("flBarFill");
+    const risk = $("flRisk");
+    const dot  = $("flDot");
+    const wave = $("flWaveViz");
+
+    if(meta) meta.textContent = (Number.isFinite(pct) || Number.isFinite(hz)) ? `${Number.isFinite(pct)?pct.toFixed(1):"—"}% · ${Number.isFinite(hz)?hz.toFixed(1):"—"} Hz` : "—";
+
+    // 0..80% -> bar
+    const t = Number.isFinite(pct) ? clamp(pct/80, 0, 1) : 0;
+    if(fill) fill.style.width = `${Math.round(t*100)}%`;
+
+    // risk color
+    let rgb = {r:170,g:255,b:190};
+    let label = "Stable / low";
+    if(Number.isFinite(pct)){
+      if(pct < 10){ rgb={r:170,g:255,b:190}; label="Stable / low"; }
+      else if(pct < 25){ rgb={r:255,g:230,b:150}; label="Noticeable"; }
+      else if(pct < 45){ rgb={r:255,g:190,b:120}; label="High"; }
+      else { rgb={r:255,g:140,b:140}; label="Severe"; }
+    } else {
+      label="No data";
+      rgb={r:200,g:200,b:200};
+    }
+    if(risk) risk.textContent = label;
+    setDot(dot, rgb);
+    if(fill) fill.style.background = `linear-gradient(90deg, rgba(255,255,255,.14), ${rgbToCss(rgb,0.55)})`;
+
+    if(wave){
+      // change wave intensity by flicker
+      const op = Number.isFinite(pct) ? clamp(0.35 + pct/60, 0.35, 0.95) : 0.35;
+      wave.style.opacity = op;
+    }
+  }
+
+  // Spectrum visual
+  function updateSpectrum(){
+    const nm = num($("specNm")?.textContent);
+    const sat = num($("specSat")?.textContent);
+    const sw = $("specSwatch");
+    const dot = $("specDot");
+    const meta = $("specVizMeta");
+    const fill = $("specBarFill");
+    const hint = $("specHint");
+
+    if(meta) meta.textContent = (Number.isFinite(nm) || Number.isFinite(sat)) ? `${Number.isFinite(nm)?Math.round(nm):"—"} nm · ${Number.isFinite(sat)?sat.toFixed(0):"—"}%` : "—";
+
+    if(Number.isFinite(nm)){
+      const rgb = wavelengthToRgb(nm);
+      const s = Number.isFinite(sat) ? clamp(sat/100, 0, 1) : 0.6;
+      // desaturate towards white
+      const mix = {
+        r: Math.round(rgb.r*s + 255*(1-s)*0.15),
+        g: Math.round(rgb.g*s + 255*(1-s)*0.15),
+        b: Math.round(rgb.b*s + 255*(1-s)*0.15),
+      };
+      setSwatch(sw, mix, 1);
+      setDot(dot, mix);
+      if(hint){
+        if(nm < 490) hint.textContent = "Blue-ish";
+        else if(nm < 560) hint.textContent = "Green-ish";
+        else if(nm < 610) hint.textContent = "Yellow/Orange";
+        else hint.textContent = "Red-ish";
+      }
+    } else {
+      if(hint) hint.textContent = "No data";
+    }
+
+    if(fill){
+      const t = Number.isFinite(sat) ? clamp(sat/100, 0, 1) : 0;
+      fill.style.width = `${Math.round(t*100)}%`;
+      if(Number.isFinite(nm)){
+        const rgb = wavelengthToRgb(nm);
+        fill.style.background = `linear-gradient(90deg, rgba(255,255,255,.14), ${rgbToCss(rgb,0.55)})`;
+      }
+    }
+  }
+
+  // Observe text updates
+  const ids = ["luxLux","luxEV","ctKelvin","ctDuvVal","ctXY","flPct","flFreq","flNote","specNm","specSat"];
+  const obs = new MutationObserver(()=>{ updateLux(); updateCT(); updateFlicker(); updateSpectrum(); });
+  ids.forEach(id=>{
+    const el=$(id);
+    if(el) obs.observe(el, {subtree:true, childList:true, characterData:true});
+  });
+
+  // initial
+  updateLux(); updateCT(); updateFlicker(); updateSpectrum();
+})();
+</script>
+<div aria-hidden="true" class="cal-info-modal" id="calInfoModal">
+<div class="cal-info-backdrop" data-cal-info-close="1"></div>
+<div aria-labelledby="calInfoTitle" aria-modal="true" class="cal-info-panel" role="dialog">
+<div class="cal-info-head">
+<div class="cal-info-title" id="calInfoTitle">Info</div>
+<button aria-label="Close" class="cal-info-close" data-cal-info-close="1" type="button">✕</button>
+</div>
+<div class="cal-info-body" id="calInfoBody"></div>
+<div class="cal-info-foot">
+<button class="cal-info-continue" data-cal-info-close="1" type="button">Close</button>
+</div>
+</div>
+</div>
+<script>
+(function(){
+  const modal = document.getElementById('calInfoModal');
+  const bodyEl = document.getElementById('calInfoBody');
+  const titleEl = document.getElementById('calInfoTitle');
+  if(!modal || !bodyEl || !titleEl) return;
+
+  const CONTENT = {
+    camera: { title: `Camera — מדריך`, html: `
+    <h2>מה זה המסך הזה</h2>
+    <p>זהו מסך תצוגת מצלמה כללית. הוא משמש כמקור וידאו משותף לכל כלי הקליברציה. אין כאן מדידות, רק Preview ותפעול מסך מלא.</p>
+    <div class="toc"><a href="#cam-buttons">כפתורים</a><a href="#cam-notes">הערות</a></div>
+    <h3 id="cam-buttons">כפתורים</h3>
+    <ul>
+      <li><strong>⛶ Full Screen</strong> — הגדלה למסך מלא.</li>
+    </ul>
+    <h3 id="cam-notes">הערות</h3>
+    <ul>
+      <li>אם כלי אחר משתמש במצלמה, ייתכן שתראה את אותו סטרים.</li>
+      <li>לבדיקת איכות תמונה (פוקוס/חשיפה) לפני מדידות.</li>
+    </ul>
+    ` },
+    lux: { title: `Lux Meter — מדריך מלא`, html: `
+        <h2>מה הכלי מודד ולמה זה חשוב</h2>
+        <p><strong>Lux Meter</strong> נותן לך אינדיקציה לעוצמת התאורה בסצנה על בסיס תמונת המצלמה (ROI מרכזי). זה שימושי לקליברציה, בדיקות איכות, והשוואות בין עמדות/גופי תאורה — במיוחד כשאתה רוצה מספר “אחיד” שמאפשר להבין האם התאורה יציבה ומספיקה.</p>
+
+        <div class="toc">
+          <a href="#lux-buttons">כפתורים</a>
+          <a href="#lux-metrics">מדידות</a>
+          <a href="#lux-visuals">ויזואליזציה</a>
+          <a href="#lux-howto">איך להשתמש</a>
+          <a href="#lux-notes">הערות/דיוק</a>
+        </div>
+
+        <h3 id="lux-buttons">כפתורים</h3>
+        <ul>
+          <li><strong>📷 Camera</strong> — מפעיל/מכבה את המצלמה עבור הכלי. כאשר המצלמה פועלת, המדידות מתעדכנות בזמן אמת.</li>
+          <li><strong>⛶ Full Screen</strong> — מציג את התצוגה במסך מלא לשם בדיקה נוחה (למשל למיקוד ה-ROI או לצפייה באחידות תאורה).</li>
+          <li><strong>Freeze</strong> — מקפיא מצב (פריים/נתונים) כדי שתוכל לקרוא ערכים בלי “ריצוד” של המדידה בזמן כיוון התאורה. לחיצה נוספת מחזירה Live.</li>
+          <li><strong>Save</strong> — שמירת Snapshot (מסגרת/תמונה + ערכים) לצורך תיעוד או השוואה בין נקודות.</li>
+        </ul>
+
+        <h3 id="lux-metrics">מדידות</h3>
+        <p>הכלי מציג כמה ערכי מפתח. כולם “דיגיטליים” ומתעדכנים:</p>
+        <div class="cal-info-kv">
+          <div class="cal-info-card"><div class="k">Illuminance</div><div class="v"><strong>Lux (lx)</strong> — עוצמת הארה. ערך גבוה יותר = יותר אור על המשטח/האובייקט.</div></div>
+          <div class="cal-info-card"><div class="k">Foot-candle</div><div class="v"><strong>fc</strong> — המרה סטנדרטית מ-lux (בקירוב: 1 fc ≈ 10.764 lux). שימושי כשעובדים מול מפרטים אמריקאיים.</div></div>
+          <div class="cal-info-card"><div class="k">Exposure Value</div><div class="v"><strong>EV (ISO 100)</strong> — אינדיקציה לחשיפה ביחס לסקאלה. EV עוזר להבין אם הסטאפ “כהה/בהיר” בהקשר צילום.</div></div>
+        </div>
+        <p>בנוסף, מוצגים ערכי מצלמה/סטאפ (אפרצ'ר/שאטֶר/ISO) כדי להבין האם שינוי חשיפה גורם לשינוי מדידה.</p>
+
+        <h3 id="lux-visuals">מה אתה רואה על המסך (קומפוננטות)</h3>
+        <ul>
+          <li><strong>Intensity Bar</strong> — פס שממפה עוצמה יחסית בטווח מוגדר (לרוב 0→12k). זה “אינדיקטור” מהיר להבין אם אתה באזור הנכון.</li>
+          <li><strong>Glow / Swatch</strong> — המחשה צבעונית של “עוצמה” (בהיר/כהה) כדי שיהיה קל להבין מגמה גם בלי לקרוא מספרים.</li>
+          <li><strong>Scene label</strong> — טקסט תיאורי (Indoor/Outdoor וכו’) לפי טווחים. זה מזרז החלטות בזמן קליברציה.</li>
+        </ul>
+
+        <h3 id="lux-howto">איך להשתמש נכון (Workflow מומלץ)</h3>
+        <ol>
+          <li>הפעל מצלמה (📷) ותן למערכת להתייצב 1–2 שניות.</li>
+          <li>קבע מיקום סטנדרטי של המצלמה והאובייקט (מרחק/זווית) כדי להשוות מדידות.</li>
+          <li>כוון תאורה עד שאתה מקבל טווח Lux רצוי. השתמש ב-Freeze לקריאה יציבה.</li>
+          <li>אם צריך תיעוד — לחץ Save ושמור “לפני/אחרי”.</li>
+        </ol>
+
+        <h3 id="lux-notes">הערות על דיוק ומה משפיע על המדידה</h3>
+        <ul>
+          <li><strong>חשיפה אוטומטית</strong> (ISO/שאטֶר) יכולה לשנות את התמונה ולכן את המדד. לכן מוצגים ערכי מצלמה.</li>
+          <li><strong>ROI</strong> — המדידה מבוססת אזור מרכזי; שינוי מהיר באובייקט במרכז ישפיע יותר.</li>
+          <li><strong>השתקפויות</strong> וחומרי גלם מבריקים יכולים “לנפח” ערכים ביחס למציאות.</li>
+          <li>למדידה תקנית — צריך לוקסמטר ייעודי. כאן זה כלי קליברציה/אינדיקציה מבוסס מצלמה.</li>
+        </ul>
+        ` },
+    ct: { title: `Color Temperature — מדריך מלא (CCT / Δuv / xy)`, html: `
+        <h2>מה הכלי מודד</h2>
+        <p><strong>Color Temperature</strong> מספק הערכה של טמפרטורת צבע (<strong>CCT</strong>) ואת הסטיית גוון הירוק/מג׳נטה (<strong>Δuv</strong>), בנוסף לנקודת כרומטיות <strong>CIE 1931 xy</strong>. זה מאפשר להבין “איזה לבן” יש לך (חם/קר) והאם יש Cast ירוק/מג׳נטה שמפריע.</p>
+
+        <div class="toc">
+          <a href="#ct-buttons">כפתורים</a>
+          <a href="#ct-metrics">מדידות</a>
+          <a href="#ct-visuals">ויזואליזציה</a>
+          <a href="#ct-howto">איך להשתמש</a>
+          <a href="#ct-notes">הערות/דיוק</a>
+        </div>
+
+        <h3 id="ct-buttons">כפתורים</h3>
+        <ul>
+          <li><strong>📷 Camera</strong> — הפעלה/כיבוי מצלמה לכלי.</li>
+          <li><strong>⛶ Full Screen</strong> — מסך מלא.</li>
+          <li><strong>Freeze</strong> — הקפאת פריים כדי לקרוא CCT/Δuv בצורה יציבה.</li>
+          <li><strong>Save</strong> — שמירת snapshot עם הערכים.</li>
+        </ul>
+
+        <h3 id="ct-metrics">מדידות ומה הן אומרות</h3>
+        <div class="cal-info-kv">
+          <div class="cal-info-card"><div class="k">CCT (Kelvin)</div><div class="v"><strong>תיאור:</strong> 2700–3200K חם (טונגסטן), 4000–5000K ניטרלי, 5600–6500K יום/קר.</div></div>
+          <div class="cal-info-card"><div class="k">Δuv</div><div class="v"><strong>תיאור:</strong> ערך שלילי נוטה למג׳נטה, חיובי לירוק. גם סטייה קטנה מורגשת בצילום/ראייה.</div></div>
+          <div class="cal-info-card"><div class="k">CIE 1931 xy</div><div class="v"><strong>תיאור:</strong> זוג מספרים (x,y) שמתאר נקודת צבע באופן גאומטרי (שימושי להשוואה מדויקת).</div></div>
+        </div>
+
+        <h3 id="ct-visuals">קומפוננטות ויזואליות</h3>
+        <ul>
+          <li><strong>White Point Swatch</strong> — תצוגה של “הלבן” המחושב לפי Kelvin, עם הטיה עדינה לפי Δuv (ירוק/מג׳נטה).</li>
+          <li><strong>Δuv Bar</strong> — פס שממחיש את הכיוון והעוצמה של הסטייה. מרכז=0. שמאלה = מג׳נטה, ימינה = ירוק.</li>
+          <li><strong>Kelvin tone</strong> — נקודה/צ׳יפ שמראה באופן אינטואיטיבי אם אתה חם/קר.</li>
+        </ul>
+
+        <h3 id="ct-howto">איך לעבוד איתו (Calibration)</h3>
+        <ol>
+          <li>הפעל מצלמה וודא שהסצנה מכילה אזור “לבן”/אפור ניטרלי במרכז ה-ROI.</li>
+          <li>כוון גופי תאורה/טמפ׳ צבע עד שה-CCT מגיע לערך הרצוי (למשל 5000K).</li>
+          <li>אם יש Cast — תקן דרך פילטרים/איזון/גוף תאורה עד ש-Δuv מתקרב ל-0.</li>
+          <li>Freeze לקריאה יציבה, ואז Save לתיעוד.</li>
+        </ol>
+
+        <h3 id="ct-notes">הערות על מגבלות</h3>
+        <ul>
+          <li><strong>סצנה לא ניטרלית</strong> (אובייקט צבעוני) תטה את המדידה.</li>
+          <li><strong>כיוונון WB במצלמה</strong> יכול להשפיע — מומלץ להבין אם יש עיבוד.</li>
+          <li>כמו כל מדידה מבוססת מצלמה: זה כלי קליברציה/אינדיקציה — לא ספקטרומטר תקני.</li>
+        </ul>
+        ` },
+    flicker: { title: `Flicker Meter — מדריך מלא (ריצוד / תדר / יציבות)`, html: `
+        <h2>מטרת הכלי</h2>
+        <p><strong>Flicker Meter</strong> נועד לזהות ריצוד (תנודתיות בזמן) של מקורות תאורה — במיוחד LED/דרייברים/פלורסנט. ריצוד יכול לגרום ל-banding, עייפות עיניים, וסטיות באיכות תמונה ובאלגוריתמים.</p>
+
+        <div class="toc">
+          <a href="#fl-buttons">כפתורים</a>
+          <a href="#fl-metrics">מדידות</a>
+          <a href="#fl-visuals">ויזואליזציה</a>
+          <a href="#fl-howto">איך למדוד</a>
+          <a href="#fl-notes">טיפים</a>
+        </div>
+
+        <h3 id="fl-buttons">כפתורים</h3>
+        <ul>
+          <li><strong>📷 Camera</strong> — מפעיל/מכבה מצלמה עבור מדידת flicker.</li>
+          <li><strong>⛶ Full Screen</strong> — לצפייה מדויקת יותר במצלמה/תופעות.</li>
+          <li><strong>Freeze</strong> — מקפיא חלון מדידה כדי להשוות בין מצבים/דרייברים.</li>
+          <li><strong>Save</strong> — שומר snapshot עם הערכים (תיעוד בדיקות).</li>
+        </ul>
+
+        <h3 id="fl-metrics">מדידות</h3>
+        <div class="cal-info-kv">
+          <div class="cal-info-card"><div class="k">Flicker %</div><div class="v"><strong>מה זה:</strong> הערכת “כמה חזק” הריצוד. ערך נמוך (למשל &lt;10%) לרוב נחשב יציב.</div></div>
+          <div class="cal-info-card"><div class="k">Frequency (Hz)</div><div class="v"><strong>מה זה:</strong> התדר הדומיננטי של התנודות (למשל 50/60Hz והרמוניות, או תדרי PWM).</div></div>
+          <div class="cal-info-card"><div class="k">Note / Risk</div><div class="v"><strong>מה זה:</strong> סיווג איכותי: Stable / Noticeable / High / Severe לפי טווחים.</div></div>
+        </div>
+
+        <h3 id="fl-visuals">קומפוננטות על המסך</h3>
+        <ul>
+          <li><strong>Wave preview</strong> — המחשה אינטואיטיבית של “חוסר יציבות” (לא אוסצילוסקופ אמיתי, אלא ויזואל שמאפשר להבין מגמה מהר).</li>
+          <li><strong>Risk label</strong> — תווית סטטוס שמסכמת האם מדובר בריצוד בעייתי.</li>
+          <li><strong>Intensity bar</strong> — פס שמתמלא לפי רמת הריצוד (בטווח עבודה טיפוסי).</li>
+        </ul>
+
+        <h3 id="fl-howto">איך למדוד נכון</h3>
+        <ol>
+          <li>הנח את המצלמה מול מקור התאורה או על משטח לבן שמואר ממנו (כדי “לבודד” את התאורה).</li>
+          <li>ודא שהפריים יציב (בלי תנועה) והימנע מאוטו-חשיפה אגרסיבית אם אפשר.</li>
+          <li>תן לכלי 2–3 שניות להתייצב ואז קרא את Frequency + %.</li>
+          <li>השווה בין מצבים (PWM/Driver/דימר) עם Freeze ו-Save.</li>
+        </ol>
+
+        <h3 id="fl-notes">טיפים חשובים</h3>
+        <ul>
+          <li><strong>Banding במצלמה</strong> יכול להופיע גם כשבני אדם לא רואים — לכן זה כלי חשוב לתעשייה.</li>
+          <li>מקורות 50/60Hz יראו לעיתים תדרים כפולים/הרמוניות לפי שיטת המדידה.</li>
+          <li>אם אתה רואה תוצאות קופצות — נסה Freeze, או שינוי זווית/מרחק, או תאורה אחידה יותר.</li>
+        </ul>
+        ` },
+    spectrum: { title: `Light Spectrometer — מדריך מלא (Dominant λ / Saturation)`, html: `
+        <h2>מה הכלי נותן</h2>
+        <p><strong>Light Spectrometer</strong> כאן הוא הערכה מבוססת תמונה של <strong>אורך גל דומיננטי</strong> (nm) ושל <strong>רוויה</strong>. זה לא ספקטרומטר פיזי, אבל הוא מעולה להשוואה מהירה בין מצבי תאורה/פילטרים/צבע דומיננטי.</p>
+
+        <div class="toc">
+          <a href="#sp-buttons">כפתורים</a>
+          <a href="#sp-metrics">מדידות</a>
+          <a href="#sp-visuals">ויזואליזציה</a>
+          <a href="#sp-howto">שימוש</a>
+          <a href="#sp-notes">הערות</a>
+        </div>
+
+        <h3 id="sp-buttons">כפתורים</h3>
+        <ul>
+          <li><strong>📷 Camera</strong> — מפעיל/מכבה מצלמה לכלי.</li>
+          <li><strong>⛶ Full Screen</strong> — מסך מלא.</li>
+          <li><strong>Freeze</strong> — הקפאת תצוגה/ערכים.</li>
+          <li><strong>Save</strong> — snapshot לתיעוד.</li>
+        </ul>
+
+        <h3 id="sp-metrics">מדידות</h3>
+        <div class="cal-info-kv">
+          <div class="cal-info-card"><div class="k">Dominant λ (nm)</div><div class="v"><strong>מה זה:</strong> אורך גל משוער של הצבע הבולט ביותר (למשל 450 כחול, 530 ירוק, 610 אדום).</div></div>
+          <div class="cal-info-card"><div class="k">Saturation (%)</div><div class="v"><strong>מה זה:</strong> כמה “צבע” יש ביחס ללבן/אפור. רוויה גבוהה = צבע נקי וחזק יותר.</div></div>
+        </div>
+
+        <h3 id="sp-visuals">קומפוננטות</h3>
+        <ul>
+          <li><strong>Dominant color swatch</strong> — בלוק צבע שממחיש את ה-nm המחושב.</li>
+          <li><strong>Saturation bar</strong> — פס שממולא לפי רוויה. יחד עם זה נשאר גם הפס המקורי של Saturation.</li>
+          <li><strong>Hue hint</strong> — טקסט “Blue/Green/Red-ish” לפי טווחי nm.</li>
+        </ul>
+
+        <h3 id="sp-howto">איך להשתמש</h3>
+        <ol>
+          <li>הצג אובייקט/משטח צבע במרכז הפריים (או תאורה צבעונית).</li>
+          <li>הפעל מצלמה ותן למדידה להתייצב.</li>
+          <li>השווה בין פילטרים/LEDים שונים: nm אמור לזוז בהתאם, והרווייה תשתנה לפי נקיון הצבע.</li>
+        </ol>
+
+        <h3 id="sp-notes">הערות</h3>
+        <ul>
+          <li>תאורה מעורבת (שני צבעים חזקים) יכולה להטות “דומיננטי” לפי מה שנמצא ב-ROI.</li>
+          <li>איזון לבן/עיבוד מצלמה יכול להשפיע על nm/רוויה.</li>
+        </ul>
+        ` }
+  };
+
+  function open(key){
+  const item = CONTENT[key];
+  if(!item) return;
+
+  titleEl.textContent = item.title || 'Info';
+
+  // Support both formats: item.html (string) OR item.steps (array of strings)
+  if(item.html){
+    bodyEl.innerHTML = item.html;
+  }else if(Array.isArray(item.steps)){
+    bodyEl.innerHTML = item.steps.map((x)=>`<p>${String(x).replace(/\n/g,'<br>')}</p>`).join('');
+  }else{
+    bodyEl.innerHTML = '<p>אין תוכן זמין עבור פריט זה.</p>';
+  }
+
+  // reset scroll & any drag transform
+  try{ bodyEl.scrollTop = 0; }catch(_){}
+  try{ modal.querySelector('.cal-info-panel')?.style && (modal.querySelector('.cal-info-panel').style.transform = ''); }catch(_){}
+
+  modal.classList.add('is-open');
+  modal.setAttribute('aria-hidden','false');
+  document.body.style.overflow = 'hidden';
+}
+  function close(){
+  modal.classList.remove('is-open');
+  modal.setAttribute('aria-hidden','true');
+  document.body.style.overflow = '';
+  try{ modal.querySelector('.cal-info-panel')?.style && (modal.querySelector('.cal-info-panel').style.transform = ''); }catch(_){}
+}
+
+// Mobile gesture: swipe down on header/handle to close (doesn't interfere with content scrolling)
+const panel = modal.querySelector('.cal-info-panel');
+const head = modal.querySelector('.cal-info-head');
+const grab = modal.querySelector('.cal-info-grab');
+
+let drag = {active:false, y0:0, t0:0, dy:0};
+
+function resetPanelTransform(){
+  if(!panel) return;
+  panel.style.transition = '';
+  panel.style.transform = '';
+}
+
+function startDrag(ev){
+  if(!panel) return;
+  if(!modal.classList.contains('is-open')) return;
+  if(ev.pointerType && ev.pointerType !== 'touch') return; // touch only
+  drag.active = true;
+  drag.dy = 0;
+  drag.y0 = ev.clientY;
+  drag.t0 = performance.now();
+  panel.style.transition = 'none';
+  try{ panel.setPointerCapture(ev.pointerId); }catch(_){}
+}
+
+function moveDrag(ev){
+  if(!drag.active || !panel) return;
+  const dy = Math.max(0, ev.clientY - drag.y0);
+  drag.dy = dy;
+  if(dy > 0){
+    panel.style.transform = `translateY(${dy}px)`;
+  }
+}
+
+function endDrag(ev){
+  if(!drag.active || !panel) return;
+  drag.active = false;
+
+  const dt = Math.max(1, performance.now() - drag.t0);
+  const v = drag.dy / dt; // px per ms
+  const shouldClose = (drag.dy > 120) || (v > 0.9 && drag.dy > 40);
+
+  panel.style.transition = 'transform 220ms ease';
+
+  if(shouldClose){
+    close();
+    // close() resets body overflow; also reset transform after
+    setTimeout(()=>resetPanelTransform(), 240);
+  }else{
+    panel.style.transform = 'translateY(0)';
+    setTimeout(()=>resetPanelTransform(), 240);
+  }
+}
+
+// Pointer events on header/handle (safe on mobile)
+[head, grab].forEach(el=>{
+  if(!el) return;
+  el.addEventListener('pointerdown', startDrag, {passive:true});
+  el.addEventListener('pointermove', moveDrag, {passive:true});
+  el.addEventListener('pointerup', endDrag, {passive:true});
+  el.addEventListener('pointercancel', endDrag, {passive:true});
+});
+
+
+  modal.addEventListener('click', (e)=>{
+    if(e.target && e.target.closest && e.target.closest('[data-cal-info-close]')) close();
+  });
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape' && modal.classList.contains('is-open')) close();
+  });
+
+  // Bind info buttons (header and legacy ones if exist)
+  const binds = [
+    {key:'camera', ids:['camInfoBtn','cameraInfoBtn']},
+    {key:'lux', ids:['luxInfoBtn','luxInfoBtn2']},
+    {key:'ct', ids:['ctInfoBtn']},
+    {key:'flicker', ids:['flInfoBtn']},
+    {key:'spectrum', ids:['specInfoBtn']}
+  ];
+
+  binds.forEach(b=>{
+    b.ids.forEach(id=>{
+      const el = document.getElementById(id);
+      if(el){
+        el.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); open(b.key); }, true);
+      }
+    });
+  });
+
+  // Also bind any Info chip inside calibration summaries
+  document.querySelectorAll('#tab-calibration summary button.an-chip').forEach(btn=>{
+    const det = btn.closest('details.acc');
+    const key = det?.getAttribute('data-caltool') || det?.getAttribute('data-acc');
+    if(!key) return;
+    btn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); open(key); }, true);
+  });
+
+
+  // Expose API for Info buttons
+  window.showCalibrationInfo = open;
+  window.closeCalibrationInfo = close;
+})();
+</script></body>
 </html>
