@@ -6685,235 +6685,1725 @@ function __readSelfSource(){
   border:0;
 }
 </style>
-<style id="neoThemeV1">
-
+<style id="manor-skin-engine-v4">
 /* =========================================================
-   NeoFactory UI Theme (EN) — visual redesign layer
-   Keeps original DOM + logic intact, overrides styling only.
+   Manor Mobile Skin Engine (V4) — Visual system only
+   - Theme tokens via CSS variables
+   - Mobile-first layout normalization
+   - Works as a "skin" over existing DOM (no logic changes)
    ========================================================= */
 
+/* -------- Theme Tokens (default: Industrial Dark) -------- */
 :root{
-  --bg: #050815 !important;
-  --surface: rgba(14, 20, 40, 0.78) !important;
-  --surface2: rgba(18, 26, 54, 0.82) !important;
-  --glass: rgba(255,255,255,0.06);
-  --text: #EAF0FF !important;
-  --muted: rgba(234,240,255,0.72) !important;
+  --bg: #070A14;
+  --surface: #0F1324;
+  --surface2: #141A33;
+  --card: rgba(255,255,255,.04);
+  --text: #EAEAFF;
+  --muted: rgba(234,234,255,.72);
+  --border: rgba(255,255,255,.10);
 
-  /* New accent map */
-  --accent: #22d3ee !important;         /* cyan */
-  --accent2: #a855f7;                   /* purple */
-  --accent3: #f59e0b;                   /* amber */
-  --good: #22c55e !important;
-  --bad: #ef4444 !important;
+  --accent: #4DD6FF;
+  --accent2: #7C5CFF;
+  --accentSoft: rgba(77,214,255,.16);
 
-  --tab-accent: rgba(34,211,238,0.92) !important;
-  --border: rgba(148,163,184,0.18) !important;
-  --border2: rgba(34,211,238,0.32) !important;
+  --good: #22c55e;
+  --warn: #f59e0b;
+  --bad: #ef4444;
 
-  --r12: 12px; --r14: 14px; --r16: 16px; --r20: 20px; --r24: 24px;
-  --shadow: 0 14px 40px rgba(0,0,0,0.45) !important;
-  --shadowSoft: 0 10px 24px rgba(0,0,0,0.28);
+  --shadow: 0 10px 28px rgba(0,0,0,.35);
+
+  /* Density scale (mobile-first) */
+  --tap: 40px;
+  --r: 12px;
+  --r2: 16px;
+  --p: 10px;
+  --g: 8px;
+
+  --fs0: 12px;
+  --fs1: 13px;
+  --fs2: 14px;
+  --fs3: 16px;
+  --fs4: 18px;
+
+  --safeB: env(safe-area-inset-bottom, 0px);
+  --safeT: env(safe-area-inset-top, 0px);
 }
 
+/* Theme presets (set by <html data-theme="..."> ) */
+html[data-theme="red"]{
+  --accent:#FF3B3B;
+  --accent2:#FF7A00;
+  --accentSoft: rgba(255,59,59,.16);
+}
+html[data-theme="purple"]{
+  --accent:#A855F7;
+  --accent2:#22D3EE;
+  --accentSoft: rgba(168,85,247,.16);
+}
+html[data-theme="industrial"]{
+  --bg:#06080d;
+  --surface:#0c111b;
+  --surface2:#121a2a;
+  --text:#eef2ff;
+  --muted: rgba(238,242,255,.70);
+  --accent:#19ffa7;
+  --accent2:#4dd6ff;
+  --accentSoft: rgba(25,255,167,.14);
+}
+html[data-theme="neo"]{
+  --bg:#05040a;
+  --surface:#0e0a1b;
+  --surface2:#160f2a;
+  --text:#f5f3ff;
+  --muted: rgba(245,243,255,.70);
+  --accent:#ff4dd8;
+  --accent2:#7c5cff;
+  --accentSoft: rgba(255,77,216,.14);
+}
+
+/* -------- Base normalization (safe on any existing app) -------- */
 html, body{
-  height:100%;
-  background:
-    radial-gradient(1200px 700px at 20% 0%, rgba(168,85,247,.18), transparent 55%),
-    radial-gradient(1200px 700px at 90% 10%, rgba(34,211,238,.18), transparent 55%),
-    radial-gradient(900px 550px at 50% 110%, rgba(245,158,11,.10), transparent 60%),
-    linear-gradient(180deg, #050815 0%, #03040b 100%) !important;
+  background: var(--bg) !important;
   color: var(--text) !important;
-  font-family: ui-sans-serif, system-ui, -apple-system, "SF Pro Display", "SF Pro Text",
-               "Segoe UI Variable", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-  letter-spacing: 0.01em;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overflow-x: hidden !important;
 }
 
+/* Improve tap behavior */
 *{ -webkit-tap-highlight-color: transparent; }
-button, input, select, textarea{ font-family: inherit; }
-:focus-visible{ outline: 3px solid rgba(34,211,238,0.35); outline-offset: 2px; }
 
-/* Global surfaces/cards */
-.card, .qa2-card, .cam-card, .sv-card, .cal-info-card, .intro-card, .qa2-cylcard{
-  border-radius: var(--r20) !important;
+/* Make any page-level wrappers behave */
+main, .content, #content, .app, #app, .shell, #shell, .container, #container{
+  max-width: 100%;
+}
+
+/* Typography smoothing */
+body{
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-size: var(--fs2) !important;
+  line-height: 1.35;
+}
+
+/* Links */
+a{ color: var(--accent) !important; }
+
+/* Common card/panel patterns */
+.card, .panel, .section, .box, .tile, .sheet,
+[class*="card"], [class*="panel"], [class*="sheet"]{
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.10)) !important;
   border: 1px solid var(--border) !important;
-  background:
-    radial-gradient(1200px 420px at 100% 0%, rgba(34,211,238,.12), transparent 55%),
-    radial-gradient(900px 320px at 0% 100%, rgba(168,85,247,.10), transparent 55%),
-    linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.12)) !important;
-  box-shadow: var(--shadowSoft) !important;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  border-radius: var(--r2) !important;
+  box-shadow: var(--shadow) !important;
 }
 
-/* Typography */
-h1,h2,h3{ letter-spacing: .01em; }
-.qa2-card-title, .acc-title, .intro-title{
-  font-weight: 850 !important;
+/* Buttons / inputs — app-like sizing */
+button, .btn, [class*="btn"], [class*="button"], .menu-btn, .tabBtn{
+  min-height: var(--tap) !important;
+  border-radius: var(--r) !important;
+  padding: 9px 12px !important;
+  font-size: var(--fs1) !important;
+  line-height: 1.1 !important;
+  font-weight: 800 !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  background: rgba(255,255,255,.06) !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
 }
-.an-label, .cs-pill-label, .qa2-field label{
-  color: var(--muted) !important;
-  font-weight: 750 !important;
+button.primary, .btn.primary, .btn-primary, [class*="primary"]{
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #09101d !important;
+}
+button.danger, .btn.danger, .btn-danger, [class*="danger"]{
+  background: rgba(239,68,68,.18) !important;
+  border-color: rgba(239,68,68,.55) !important;
 }
 
 /* Inputs */
-input, select, textarea, .qa2-field input, .qa2-field select, .qa2-field textarea{
-  border-radius: var(--r14) !important;
-  border: 1px solid rgba(148,163,184,0.22) !important;
-  background: rgba(3,6,16,0.55) !important;
+input, select, textarea, .input, .select, [class*="input"], [class*="select"]{
+  border-radius: var(--r) !important;
+  border: 1px solid rgba(255,255,255,.16) !important;
+  background: rgba(10,14,28,.78) !important;
   color: var(--text) !important;
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
-  min-height: 44px;
+  font-size: var(--fs2) !important;
+  outline: none !important;
 }
-input:focus, select:focus, textarea:focus{
-  border-color: rgba(34,211,238,0.55) !important;
-  box-shadow: 0 0 0 3px rgba(34,211,238,0.16) !important;
+input, select{ min-height: var(--tap) !important; padding: 10px 12px !important; }
+textarea{ padding: 10px 12px !important; }
+
+/* Focus ring */
+button:focus, input:focus, select:focus, textarea:focus{
+  box-shadow: 0 0 0 3px var(--accentSoft) !important;
+  border-color: rgba(255,255,255,.22) !important;
 }
 
-/* Primary/secondary buttons (covers most existing button classes) */
-button, .qa2-btn, .cam-btn, .home-action, .sv-btn, .menu-btn, .mdi__btn{
-  min-height: 44px;
+/* Badges/pills */
+.badge, .pill, [class*="badge"], [class*="pill"]{
   border-radius: 999px !important;
-  border: 1px solid rgba(148,163,184,0.22) !important;
-  background: rgba(255,255,255,0.06) !important;
-  color: var(--text) !important;
-  font-weight: 780 !important;
-  padding: 10px 14px !important;
-  transition: transform .08s ease, filter .12s ease, background .12s ease, border-color .12s ease;
-}
-button:hover{ filter: brightness(1.06); }
-button:active{ transform: translateY(1px) scale(0.99); }
-
-.qa2-btn-primary, .btn-primary, .cam-btn.primary, .home-action.primary{
-  background: linear-gradient(135deg, rgba(34,211,238,0.92), rgba(168,85,247,0.75)) !important;
-  border-color: rgba(34,211,238,0.55) !important;
-  color: #06101a !important;
-  box-shadow: 0 10px 25px rgba(34,211,238,0.14);
-}
-
-button.danger, .btn-danger, .cam-btn.danger{
-  background: rgba(239,68,68,0.12) !important;
-  border-color: rgba(239,68,68,0.45) !important;
-}
-
-/* Segmented control (Inputs / Visual / KPIs) */
-.qa2-topbar{
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  padding: 10px 10px !important;
-  background: linear-gradient(180deg, rgba(5,8,21,.92), rgba(5,8,21,.72)) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(148,163,184,0.12) !important;
-}
-.qa2-seg{
-  border-radius: 999px !important;
-  min-height: 40px !important;
-  padding: 8px 12px !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
   background: rgba(255,255,255,.06) !important;
-}
-.qa2-seg.active{
-  background: rgba(34,211,238,0.18) !important;
-  border-color: rgba(34,211,238,0.52) !important;
-  box-shadow: 0 0 0 3px rgba(34,211,238,0.10);
-}
-
-/* Navigation: left rail on desktop, bottom dock on mobile */
-.legacy-nav.main-menu{
-  border: 1px solid rgba(148,163,184,0.14) !important;
-  background: rgba(10,14,30,0.58) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: var(--r24) !important;
-  box-shadow: var(--shadowSoft) !important;
-}
-.legacy-nav.main-menu .menu-btn{
-  border-radius: 14px !important;
-  justify-content: center;
-  text-align: center;
-}
-
-/* Active tab state if app uses .active on menu-btn */
-.legacy-nav.main-menu .menu-btn.active,
-.legacy-nav.main-menu .menu-btn[aria-current="page"]{
-  background: rgba(34,211,238,0.18) !important;
-  border-color: rgba(34,211,238,0.52) !important;
   color: var(--text) !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
 }
 
-/* Mobile dock behavior */
-@media (max-width: 900px){
-  .legacy-nav.main-menu{
-    position: fixed !important;
-    left: 10px !important;
-    right: 10px !important;
-    bottom: calc(10px + env(safe-area-inset-bottom)) !important;
-    top: auto !important;
-    width: auto !important;
-    display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-    gap: 8px !important;
-    padding: 10px !important;
-    z-index: 1000 !important;
-  }
-  .legacy-nav.main-menu .menu-btn{
-    padding: 10px 8px !important;
-    font-size: 12px !important;
-    min-height: 44px !important;
-    border-radius: 14px !important;
-    white-space: nowrap;
+/* -------- Mobile-first layout fix (prevents overlap) -------- */
+@media (max-width: 720px){
+  /* Force rows/toolbars to wrap */
+  .row, .toolbar, .controls, .actions, .btn-row, .topbar, .header-row,
+  [class*="toolbar"], [class*="controls"], [class*="actions"], [class*="btn-row"]{
+    flex-wrap: wrap !important;
+    gap: var(--g) !important;
+    align-items: stretch !important;
   }
 
-  /* Make room for dock */
-  body{ padding-bottom: calc(92px + env(safe-area-inset-bottom)) !important; }
-}
+  /* Force grids/columns to single column */
+  .grid, .cols, .columns, .two-col, .three-col,
+  [class*="grid"], [class*="cols"], [class*="columns"]{
+    grid-template-columns: 1fr !important;
+    column-gap: var(--g) !important;
+    row-gap: var(--g) !important;
+  }
 
-/* Tabs/pages spacing (avoid cramped phone layouts) */
-@media (max-width: 520px){
-  .card, .qa2-card, .cam-card, .sv-card, .cal-info-card, .intro-card, .qa2-cylcard{
-    border-radius: 18px !important;
+  /* Make any "side by side" areas stack */
+  .left, .right, .sidebar, .side, .split, .pane,
+  [class*="sidebar"], [class*="split"], [class*="pane"]{
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Reduce padding & large headers */
+  header, .header, .topbar, #header, #contextBar, .contextBar, .context-bar{
+    padding: 10px 10px !important;
+  }
+  h1{ font-size: 20px !important; }
+  h2{ font-size: 16px !important; }
+  h3{ font-size: 14px !important; }
+
+  /* Avoid horizontal scroll by any wide components */
+  table{ width: 100% !important; }
+  .table-wrap, .table-container, .table-scroll, [class*="table"]{
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+  }
+
+  /* Safe-area bottom padding for fixed footers / bottom menus */
+  #bottomMenu, .bottomMenu, .bottom-bar, .bottomBar, nav, .nav{
+    padding-bottom: calc(var(--safeB) + 10px) !important;
   }
 }
 
-/* Swatches / color map vibe */
-.cs-swatch{
-  border-radius: 16px !important;
-  border: 1px solid rgba(148,163,184,0.18) !important;
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,.35), 0 10px 18px rgba(0,0,0,.25);
+/* -------- Skin Control (floating) -------- */
+#skinFab{
+  position: fixed;
+  right: 12px;
+  bottom: calc(12px + var(--safeB));
+  z-index: 2147483000;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(15,19,36,.72);
+  backdrop-filter: blur(10px);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 14px 36px rgba(0,0,0,.42);
+  cursor: pointer;
 }
-.an-chip, .cs-chip, .badge, .pill, .cs-pill{
-  border-radius: 999px !important;
-  border: 1px solid rgba(148,163,184,0.18) !important;
-  background: rgba(255,255,255,0.06) !important;
-}
+#skinFab svg{ width: 22px; height: 22px; fill: var(--text); opacity: .92; }
 
-/* Modals: cleaner */
-.qa2-modal-backdrop{
-  background: rgba(0,0,0,0.62) !important;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+#skinDrawerBg{
+  position: fixed;
+  inset: 0;
+  z-index: 2147483001;
+  background: rgba(0,0,0,.55);
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px;
 }
-.qa2-modal-card{
-  border-radius: 22px !important;
-  border: 1px solid rgba(148,163,184,0.18) !important;
-  background: rgba(10,14,30,0.82) !important;
-  box-shadow: 0 22px 70px rgba(0,0,0,0.55) !important;
+#skinDrawerBg.show{ display:flex; }
+#skinDrawer{
+  width: min(720px, 100%);
+  background: rgba(12,17,27,.92);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 20px;
+  box-shadow: 0 22px 70px rgba(0,0,0,.55);
+  overflow: hidden;
 }
-
-/* Scrollbars (desktop) */
-@media (min-width: 901px){
-  ::-webkit-scrollbar{ width: 10px; height: 10px; }
-  ::-webkit-scrollbar-thumb{ background: rgba(148,163,184,0.22); border-radius: 999px; }
-  ::-webkit-scrollbar-thumb:hover{ background: rgba(34,211,238,0.28); }
+#skinDrawerTop{
+  padding: 12px 12px;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.10);
 }
-
-/* Reduce motion */
-@media (prefers-reduced-motion: reduce){
-  *{ transition: none !important; animation: none !important; }
+#skinDrawerTop .t{
+  font-weight: 1000;
+  letter-spacing: .01em;
 }
-
+#skinClose{
+  min-height: 36px !important;
+  padding: 8px 10px !important;
+}
+#skinDrawerBody{
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+.skinRow{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+.skinChip{
+  flex: 1 1 120px;
+  min-width: 120px;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  cursor: pointer;
+  user-select: none;
+}
+.skinChip b{ font-weight: 1000; font-size: 13px; }
+.skinSw{
+  width: 18px; height: 18px;
+  border-radius: 7px;
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
+}
+.skinHint{
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.35;
+}
 </style>
+
+
+<script id="manor-skin-engine-v4-js">
+(function(){
+  const KEY_THEME = "manor.skin.theme.v4";
+
+  function setTheme(name){
+    document.documentElement.setAttribute("data-theme", name);
+    try{ localStorage.setItem(KEY_THEME, name); }catch(e){}
+  }
+  function getTheme(){
+    try{ return localStorage.getItem(KEY_THEME) || "industrial"; }catch(e){ return "industrial"; }
+  }
+
+  // Wrap wide tables for scrolling (non-invasive)
+  function wrapWideTables(){
+    try{
+      document.querySelectorAll("table").forEach(t=>{
+        const p=t.parentElement;
+        if(!p) return;
+        const isWrapped = p && p.getAttribute && p.getAttribute("data-tablewrap")==="1";
+        if(isWrapped) return;
+        // Wrap if likely to overflow
+        const vw = Math.max(320, window.innerWidth||360);
+        if(t.scrollWidth > (vw-24)){
+          const w=document.createElement("div");
+          w.style.overflowX="auto";
+          w.style.webkitOverflowScrolling="touch";
+          w.style.maxWidth="100%";
+          w.style.borderRadius="12px";
+          w.style.border="1px solid rgba(255,255,255,.10)";
+          w.style.background="rgba(0,0,0,.10)";
+          w.style.padding="2px";
+          w.setAttribute("data-tablewrap","1");
+          t.parentNode.insertBefore(w, t);
+          w.appendChild(t);
+        }
+      });
+    }catch(e){}
+  }
+
+  function injectSkinControls(){
+    // Floating button
+    const fab=document.createElement("div");
+    fab.id="skinFab";
+    fab.setAttribute("title","Skin / Theme");
+    fab.innerHTML = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 22a10 10 0 1 1 10-10c0 5.523-4.477 10-10 10zm0-18a8 8 0 0 0 0 16h2.2a1.8 1.8 0 0 0 0-3.6H13a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h2.7a1.8 1.8 0 1 0 0-3.6H12z"/>
+      </svg>`;
+    document.body.appendChild(fab);
+
+    // Drawer
+    const bg=document.createElement("div");
+    bg.id="skinDrawerBg";
+    bg.innerHTML = `
+      <div id="skinDrawer" role="dialog" aria-modal="true">
+        <div id="skinDrawerTop">
+          <div class="t">Skin & Mobile Layout</div>
+          <button id="skinClose" class="btn">Close</button>
+        </div>
+        <div id="skinDrawerBody">
+          <div class="skinHint">
+            Pick a theme. This is a visual skin only — existing logic stays intact.
+            Mobile-first spacing and wrapping are enabled to prevent overlapping UI.
+          </div>
+          <div class="skinRow" id="skinRowThemes"></div>
+          <div class="skinHint">
+            Tip: If something still overflows (specific tab), tell me the tab name and I’ll tailor a targeted layout patch.
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(bg);
+
+    const themes = [
+      {id:"industrial", name:"Industrial", a:"#19ffa7", b:"#4dd6ff"},
+      {id:"red",        name:"Red Ops",     a:"#ff3b3b", b:"#ff7a00"},
+      {id:"purple",     name:"Purple Neo",  a:"#a855f7", b:"#22d3ee"},
+      {id:"neo",        name:"Neo Pink",    a:"#ff4dd8", b:"#7c5cff"},
+    ];
+
+    const row = bg.querySelector("#skinRowThemes");
+    themes.forEach(t=>{
+      const el=document.createElement("div");
+      el.className="skinChip";
+      el.innerHTML = `
+        <div>
+          <b>${t.name}</b>
+          <div style="font-size:11px;color:rgba(234,234,255,.7);margin-top:2px">${t.id}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span class="skinSw" style="background:${t.a}"></span>
+          <span class="skinSw" style="background:${t.b}"></span>
+        </div>
+      `;
+      el.addEventListener("click", ()=>{
+        setTheme(t.id);
+        toastSafe("Theme applied: " + t.name);
+      });
+      row.appendChild(el);
+    });
+
+    const close=()=> bg.classList.remove("show");
+    fab.addEventListener("click", ()=> bg.classList.add("show"));
+    bg.addEventListener("click", (e)=>{ if(e.target===bg) close(); });
+    bg.querySelector("#skinClose").addEventListener("click", close);
+  }
+
+  function toastSafe(msg){
+    // If app already has toasts, do nothing; otherwise small fallback
+    if(document.querySelector(".toastWrap,.toast-wrap,#toastWrap")) return;
+    const w=document.createElement("div");
+    w.style.position="fixed";
+    w.style.left="50%";
+    w.style.bottom="calc(70px + env(safe-area-inset-bottom, 0px))";
+    w.style.transform="translateX(-50%)";
+    w.style.zIndex="2147483646";
+    w.style.background="rgba(10,10,20,.92)";
+    w.style.border="1px solid rgba(255,255,255,.14)";
+    w.style.color="#fff";
+    w.style.padding="10px 14px";
+    w.style.borderRadius="14px";
+    w.style.boxShadow="0 10px 26px rgba(0,0,0,.35)";
+    w.style.fontWeight="900";
+    w.style.fontSize="13px";
+    w.textContent=msg;
+    document.body.appendChild(w);
+    setTimeout(()=>{ w.style.opacity="0"; w.style.transition="opacity .25s ease"; }, 1200);
+    setTimeout(()=> w.remove(), 1550);
+  }
+
+  // Init
+  try{
+    document.documentElement.setAttribute("data-theme", getTheme());
+  }catch(e){}
+  window.addEventListener("load", ()=>{
+    injectSkinControls();
+    wrapWideTables();
+    setTimeout(wrapWideTables, 800);
+  });
+  window.addEventListener("resize", ()=> setTimeout(wrapWideTables, 120));
+})();
+</script>
+
+
+<style id="manor-device-preview-v5">
+/* =========================================================
+   Device Preview Simulator (V5)
+   - Lets you see "phone reality" on desktop
+   - Does NOT change app logic; only wraps layout visually
+   ========================================================= */
+#devPreviewFab{
+  position: fixed;
+  left: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  z-index: 2147483000;
+  width: 46px; height: 46px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(15,19,36,.72);
+  backdrop-filter: blur(10px);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 14px 36px rgba(0,0,0,.42);
+  cursor: pointer;
+}
+#devPreviewFab svg{ width: 22px; height: 22px; fill: var(--text); opacity: .92; }
+
+#devPreviewBg{
+  position: fixed; inset: 0;
+  z-index: 2147483002;
+  background: rgba(0,0,0,.62);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding: 14px;
+}
+#devPreviewBg.show{ display:flex; }
+
+#devPreviewPanel{
+  width: min(980px, 100%);
+  background: rgba(12,17,27,.92);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 22px;
+  box-shadow: 0 22px 70px rgba(0,0,0,.55);
+  overflow:hidden;
+}
+#devTop{
+  padding: 12px;
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
+#devTop .t{ font-weight: 1000; letter-spacing:.01em; }
+#devTop .actions{
+  display:flex; gap:8px; flex-wrap:wrap; align-items:center;
+}
+#devTop select, #devTop button{
+  min-height: 36px !important;
+  padding: 8px 10px !important;
+  border-radius: 12px !important;
+  font-size: 12px !important;
+}
+#devBody{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  padding: 12px;
+}
+@media (min-width: 860px){
+  #devBody{ grid-template-columns: 1fr 360px; align-items:start; }
+}
+#phoneFrame{
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  background: #000;
+  border-radius: 34px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: 0 18px 55px rgba(0,0,0,.55);
+  position: relative;
+}
+#phoneScreen{
+  width: 100%;
+  height: 760px;
+  border-radius: 26px;
+  overflow:hidden;
+  background: var(--bg);
+  border: 1px solid rgba(255,255,255,.10);
+  position: relative;
+}
+#phoneNotch{
+  position:absolute;
+  top: 10px; left: 50%;
+  transform: translateX(-50%);
+  width: 36%;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.14);
+  z-index: 3;
+  pointer-events:none;
+}
+#devHints{
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  padding: 12px;
+  color: rgba(234,234,255,.78);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+#devHints b{ color: #fff; }
+#devHints code{
+  background: rgba(0,0,0,.25);
+  border: 1px solid rgba(255,255,255,.10);
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 12px;
+}
+
+/* When preview mode is enabled, visually constrain the entire page to a phone-sized "viewport". */
+html[data-preview="on"] body{
+  /* Prevent desktop-wide layouts from lying to you */
+  max-width: var(--previewW, 390px) !important;
+  margin: 0 auto !important;
+  outline: 1px dashed rgba(255,255,255,.16);
+  outline-offset: 8px;
+}
+html[data-preview="on"]{
+  background: #000 !important;
+}
+</style>
+
+
+<script id="manor-device-preview-v5-js">
+(function(){
+  const KEY = "manor.devicePreview.v5";
+  const KEY_W = "manor.devicePreview.width";
+  const KEY_H = "manor.devicePreview.height";
+  const KEY_P = "manor.devicePreview.pageConstrain";
+
+  const devices = [
+    {id:"pixel7",  name:"Pixel 7 (412×915)",  w:412, h:915},
+    {id:"s23",     name:"Galaxy S23 (384×854)", w:384, h:854},
+    {id:"iphone13",name:"iPhone 13/14 (390×844)", w:390, h:844},
+    {id:"iphone15p",name:"iPhone 15 Pro (393×852)", w:393, h:852},
+    {id:"ipadMini",name:"iPad Mini (744×1133)", w:744, h:1133},
+    {id:"custom",  name:"Custom", w:390, h:844},
+  ];
+
+  function qs(sel, root=document){ return root.querySelector(sel); }
+  function ce(tag, cls){ const e=document.createElement(tag); if(cls) e.className=cls; return e; }
+  function get(k, d){ try{ const v=localStorage.getItem(k); return v==null?d:v; }catch(e){ return d; } }
+  function set(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+
+  function mount(){
+    // FAB
+    const fab=ce("div"); fab.id="devPreviewFab"; fab.title="Device Preview";
+    fab.innerHTML=`<svg viewBox="0 0 24 24"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 3v14h10V5H7zm3 16h4v1h-4v-1z"/></svg>`;
+    document.body.appendChild(fab);
+
+    // Modal BG + panel
+    const bg=ce("div"); bg.id="devPreviewBg";
+    bg.innerHTML = `
+      <div id="devPreviewPanel" role="dialog" aria-modal="true">
+        <div id="devTop">
+          <div class="t">Device Preview (real mobile sizing)</div>
+          <div class="actions">
+            <select id="devSel"></select>
+            <button class="btn" id="devRotate">Rotate</button>
+            <button class="btn" id="devConstrain">Constrain Page: OFF</button>
+            <button class="btn primary" id="devClose">Close</button>
+          </div>
+        </div>
+        <div id="devBody">
+          <div id="phoneFrame">
+            <div id="phoneNotch"></div>
+            <div id="phoneScreen"></div>
+          </div>
+          <div id="devHints">
+            <div style="font-weight:900;font-size:13px;margin-bottom:6px;color:#fff">How to use</div>
+            <div>1) Pick a device → the app is rendered inside a real-sized phone screen.</div>
+            <div>2) If buttons overlap <b>inside this preview</b>, they will overlap on your phone too.</div>
+            <div>3) Turn <b>Constrain Page</b> ON to force the whole page to behave like a phone viewport even outside the modal.</div>
+            <div style="margin-top:10px"><b>Pro tip (desktop):</b> Chrome DevTools → <code>Ctrl+Shift+M</code> → pick Pixel/iPhone.</div>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(bg);
+
+    const sel=qs("#devSel", bg);
+    devices.forEach(d=>{
+      const o=document.createElement("option");
+      o.value=d.id; o.textContent=d.name;
+      sel.appendChild(o);
+    });
+
+    let currentId = get(KEY, "iphone13");
+    let rotated = false;
+
+    function applyDevice(id){
+      const d = devices.find(x=>x.id===id) || devices[2];
+      sel.value = d.id;
+      let w = d.w, h = d.h;
+      if(d.id==="custom"){
+        w = parseInt(get(KEY_W, "390"),10) || 390;
+        h = parseInt(get(KEY_H, "844"),10) || 844;
+      }
+      if(rotated){ const t=w; w=h; h=t; }
+      const screen = qs("#phoneScreen", bg);
+      screen.style.width = w + "px";
+      screen.style.height = Math.min(h, 820) + "px"; // keep panel sane
+      screen.style.margin = "0 auto";
+      screen.style.overflow = "auto";
+      screen.style.webkitOverflowScrolling = "touch";
+
+      // Clone current app DOM into the screen via iframe-less shadow:
+      // Instead of duplicating logic, we "mirror" by moving a wrapper via CSS:
+      // We'll render the existing page inside a scaled container using CSS zoom (safe visual).
+      renderMirror(screen, w, h);
+      set(KEY, d.id);
+    }
+
+    function renderMirror(screen, w, h){
+      screen.innerHTML = "";
+      const wrap = document.createElement("div");
+      wrap.style.width = w + "px";
+      wrap.style.minHeight = h + "px";
+      wrap.style.background = "var(--bg)";
+      wrap.style.transformOrigin = "top left";
+      // We cannot truly change viewport without iframe; we simulate by constraining width and letting responsive CSS do the work.
+      wrap.style.overflow = "hidden";
+      // Clone body content
+      const clone = document.body.cloneNode(true);
+      // Remove preview controls from clone to avoid recursion
+      clone.querySelectorAll("#devPreviewFab,#devPreviewBg").forEach(n=>n.remove());
+      // Keep scripts from re-running in clone: remove all scripts
+      clone.querySelectorAll("script").forEach(s=>s.remove());
+      clone.style.margin = "0";
+      clone.style.maxWidth = "none";
+      // Put clone content inside
+      wrap.appendChild(clone);
+
+      // Ensure fixed elements behave inside mirror: make fixed -> absolute for preview
+      wrap.querySelectorAll("*").forEach(el=>{
+        const cs = getComputedStyle(el);
+        if(cs.position==="fixed"){
+          el.style.position="absolute";
+        }
+      });
+
+      screen.appendChild(wrap);
+    }
+
+    function open(){
+      bg.classList.add("show");
+      applyDevice(currentId);
+    }
+    function close(){
+      bg.classList.remove("show");
+      // stop heavy DOM cloning
+      const screen = qs("#phoneScreen", bg);
+      if(screen) screen.innerHTML = "";
+    }
+
+    fab.addEventListener("click", open);
+    bg.addEventListener("click", (e)=>{ if(e.target===bg) close(); });
+    qs("#devClose", bg).addEventListener("click", close);
+
+    sel.addEventListener("change", ()=>{ currentId = sel.value; applyDevice(currentId); });
+
+    qs("#devRotate", bg).addEventListener("click", ()=>{
+      rotated = !rotated;
+      applyDevice(currentId);
+    });
+
+    const btnCon = qs("#devConstrain", bg);
+    function setConstrain(on){
+      document.documentElement.setAttribute("data-preview", on ? "on" : "off");
+      btnCon.textContent = "Constrain Page: " + (on ? "ON" : "OFF");
+      try{ set(KEY_P, on ? "1" : "0"); }catch(e){}
+      // apply CSS variable width based on chosen device
+      const d = devices.find(x=>x.id===currentId) || devices[2];
+      const w = rotated ? d.h : d.w;
+      document.documentElement.style.setProperty("--previewW", w + "px");
+    }
+    btnCon.addEventListener("click", ()=>{
+      const on = (document.documentElement.getAttribute("data-preview")==="on");
+      setConstrain(!on);
+    });
+
+    // Restore constrain preference
+    const pref = get(KEY_P, "0")==="1";
+    if(pref) setConstrain(true); else setConstrain(false);
+
+    // Re-render mirror when the underlying app changes size
+    window.addEventListener("resize", ()=>{ if(bg.classList.contains("show")) applyDevice(currentId); });
+  }
+
+  window.addEventListener("load", ()=>{ try{ mount(); }catch(e){} });
+})();
+</script>
+
+
+<style id="mobile-native-screens-v6">
+/* =========================================================
+   V6: Mobile Native Screens (one-screen-at-a-time)
+   - Keeps existing logic; only changes layout & navigation on mobile
+   - Fixes overlap by forcing single-column + full-width actions
+   ========================================================= */
+
+:root{
+  --appTopH: 54px;
+  --appBottomH: 68px;
+}
+
+/* Mobile app shell (only active when html[data-mobile-ui="on"]) */
+html[data-mobile-ui="on"] body{
+  padding-top: calc(var(--appTopH) + env(safe-area-inset-top, 0px)) !important;
+  padding-bottom: calc(var(--appBottomH) + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* Top app bar */
+#mobileTopBar{
+  position: fixed;
+  left: 0; right: 0; top: 0;
+  height: calc(var(--appTopH) + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+  z-index: 2147482500;
+  background: linear-gradient(180deg, rgba(12,17,27,.96), rgba(12,17,27,.84));
+  border-bottom: 1px solid rgba(255,255,255,.10);
+  backdrop-filter: blur(10px);
+  display:none;
+}
+html[data-mobile-ui="on"] #mobileTopBar{ display:flex; align-items:flex-end; }
+#mobileTopBar .inner{
+  height: var(--appTopH);
+  padding: 8px 10px;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+#mobileBackBtn{
+  min-height: 38px !important;
+  padding: 8px 10px !important;
+  border-radius: 14px !important;
+}
+#mobileTitle{
+  font-weight: 1000;
+  font-size: 14px;
+  letter-spacing: .01em;
+  white-space: nowrap;
+  overflow:hidden;
+  text-overflow: ellipsis;
+}
+#mobileTopActions{
+  display:flex; gap:8px; align-items:center;
+}
+#mobileTopActions button{
+  min-height: 38px !important;
+  padding: 8px 10px !important;
+  border-radius: 14px !important;
+  font-size: 12px !important;
+}
+
+/* Bottom nav (reuse existing #bottomMenu but make it mobile-native) */
+html[data-mobile-ui="on"] #bottomMenu{
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 2147482400 !important;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px) !important;
+  background: linear-gradient(180deg, rgba(12,17,27,.45), rgba(12,17,27,.98)) !important;
+  border-top: 1px solid rgba(255,255,255,.10) !important;
+  backdrop-filter: blur(10px);
+}
+html[data-mobile-ui="on"] #bottomMenu nav{
+  display:grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 8px !important;
+}
+html[data-mobile-ui="on"] #bottomMenu .menu-btn{
+  min-height: 46px !important;
+  padding: 8px 10px !important;
+  border-radius: 16px !important;
+  font-size: 12px !important;
+}
+
+/* Mobile Home screen (native) */
+#mobileHome{
+  display:none;
+}
+html[data-mobile-ui="on"] #mobileHome{
+  display:block;
+  padding: 12px;
+}
+.mobileGrid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+.mobileTile{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.12));
+  box-shadow: 0 12px 34px rgba(0,0,0,.28);
+}
+.mobileTile .left{
+  display:flex; flex-direction:column; gap: 4px;
+  min-width: 0;
+}
+.mobileTile .name{
+  font-weight: 1000;
+  font-size: 15px;
+  letter-spacing: .01em;
+}
+.mobileTile .desc{
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.25;
+}
+.mobileTile .ic{
+  width: 40px; height: 40px;
+  border-radius: 16px;
+  display:grid; place-items:center;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  font-size: 18px;
+  flex: 0 0 auto;
+}
+.mobileTile:active{ transform: translateY(1px); }
+
+/* Only one screen visible at a time */
+html[data-mobile-ui="on"] section[id^="tab-"]{
+  display:none !important;
+}
+html[data-mobile-ui="on"] section[id^="tab-"].mob-active{
+  display:block !important;
+}
+
+/* Ensure tab content doesn't overflow under bars */
+html[data-mobile-ui="on"] section[id^="tab-"]{
+  max-width: 100% !important;
+}
+
+/* HARD overlap fixes for Color Sampling / Analysis (the screenshot issue) */
+@media (max-width: 720px){
+  /* Make the analysis two-column stack */
+  .an-grid-2{ display:block !important; }
+  .an-grid-2 > div{ width:100% !important; max-width:100% !important; }
+  .an-row{ flex-wrap: wrap !important; gap: 8px !important; }
+
+  /* Header rows/toggles wrap */
+  .cs-head-row, .cs-pills, .cs-trans-wrap{
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  /* Save Configuration buttons become full width */
+  #ma-save-config-btn, #cs-save-config-btn{
+    width: 100% !important;
+    max-width: 100% !important;
+    display:block !important;
+  }
+
+  /* Prevent any fixed-width columns */
+  [style*="width: 420px"], [style*="width:420px"], [style*="min-width: 420px"], [style*="min-width:420px"]{
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+}
+</style>
+
+
+<script id="mobile-native-screens-v6-js">
+(function(){
+  const MOBILE_MAX = 720;
+  const tabs = [
+    {id:"granules", title:"Color Sampling", icon:"🎨", desc:"Manual adjust, camera sampling, upload sampling, saved presets"},
+    {id:"analysis",  title:"Analysis", icon:"📊", desc:"Compare Valid/Defect, deltas, live metrics"},
+    {id:"camera",    title:"Camera", icon:"📷", desc:"Live view & capture controls"},
+    {id:"iot",       title:"Factory Live", icon:"🏭", desc:"Live production view & monitoring"},
+    {id:"tools",     title:"Tools", icon:"🧰", desc:"Calibration tools, utilities"},
+    {id:"saved",     title:"Saved", icon:"🗂️", desc:"Saved sessions & exported results"},
+    {id:"qa",        title:"QA", icon:"✅", desc:"QA workflows and checks"},
+    {id:"manuals",   title:"📚 Manuals", icon:"📚", desc:"Guides & documentation"},
+  ];
+
+  function isMobile(){
+    const w = Math.min(window.innerWidth, window.innerHeight);
+    const qs = new URLSearchParams(location.search);
+    const forcedQS = (qs.get("mobile")==="1" || qs.get("mobile")==="true");
+    let forcedLS = false;
+    try{ forcedLS = localStorage.getItem("manor.forceMobileUI")==="1"; }catch(e){}
+    const coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    const narrow = w <= MOBILE_MAX;
+    return forcedQS || forcedLS || (narrow && (coarse || true));
+  }
+
+  function $(sel, root=document){ return root.querySelector(sel); }
+  function $all(sel, root=document){ return Array.from(root.querySelectorAll(sel)); }
+
+  let current = "home";
+  const stack = ["home"];
+
+  function setTitle(t){
+    const el = $("#mobileTitle");
+    if(el) el.textContent = t || "Home";
+  }
+  function showBack(show){
+    const b = $("#mobileBackBtn");
+    if(b) b.style.visibility = show ? "visible" : "hidden";
+  }
+
+  function showHome(){
+    current = "home";
+    setTitle("Home");
+    showBack(false);
+    $all('section[id^="tab-"]').forEach(s=> s.classList.remove("mob-active"));
+    const home = $("#mobileHome");
+    if(home) home.style.display = "block";
+  }
+
+  function showTab(tabId){
+    const sec = $("#tab-" + tabId);
+    if(!sec) return;
+    current = tabId;
+    const meta = tabs.find(t=>t.id===tabId);
+    setTitle(meta ? meta.title : tabId);
+    showBack(true);
+    const home = $("#mobileHome");
+    if(home) home.style.display = "none";
+    $all('section[id^="tab-"]').forEach(s=> s.classList.toggle("mob-active", s.id === ("tab-"+tabId)));
+    // Scroll to top for native feel
+    window.scrollTo({top:0, behavior:"instant"});
+  }
+
+  function push(screen){
+    if(stack[stack.length-1] !== screen) stack.push(screen);
+  }
+  function back(){
+    if(stack.length <= 1){ showHome(); return; }
+    stack.pop();
+    const prev = stack[stack.length-1];
+    if(prev==="home") showHome(); else showTab(prev);
+  }
+
+  function interceptBottomNav(){
+    const bottom = $("#bottomMenu");
+    if(!bottom) return;
+    bottom.addEventListener("click", (e)=>{
+      const btn = e.target.closest("button.menu-btn[data-tab]");
+      if(!btn) return;
+      e.preventDefault();
+      const tab = btn.getAttribute("data-tab");
+      push(tab);
+      showTab(tab);
+    }, true);
+  }
+
+  function buildTopBar(){
+    if($("#mobileTopBar")) return;
+    const bar = document.createElement("div");
+    bar.id = "mobileTopBar";
+    bar.innerHTML = `
+      <div class="inner">
+        <button class="btn" id="mobileBackBtn" aria-label="Back">←</button>
+        <div id="mobileTitle">Home</div>
+        <div id="mobileTopActions">
+          <button class="btn" id="mobileGoHome">Home</button>
+        </div>
+      </div>`;
+    document.body.appendChild(bar);
+    $("#mobileBackBtn").addEventListener("click", ()=>{
+      back();
+    });
+    $("#mobileGoHome").addEventListener("click", ()=>{
+      stack.splice(0, stack.length, "home");
+      showHome();
+    });
+  }
+
+  function buildHome(){
+    if($("#mobileHome")) return;
+    const home = document.createElement("div");
+    home.id = "mobileHome";
+    const grid = document.createElement("div");
+    grid.className = "mobileGrid";
+    const main = ["granules","analysis","camera","iot","tools","saved"];
+    const rest = ["qa","manuals"];
+    const order = main.concat(rest);
+
+    order.forEach(id=>{
+      const t = tabs.find(x=>x.id===id);
+      if(!t) return;
+      const tile = document.createElement("div");
+      tile.className = "mobileTile";
+      tile.innerHTML = `
+        <div class="left">
+          <div class="name">${t.title}</div>
+          <div class="desc">${t.desc}</div>
+        </div>
+        <div class="ic">${t.icon}</div>
+      `;
+      tile.addEventListener("click", ()=>{
+        push(id);
+        showTab(id);
+      });
+      grid.appendChild(tile);
+    });
+
+    home.appendChild(grid);
+
+    // Insert home before the first tab section (so it's in the same flow)
+    const firstTab = $('section[id^="tab-"]');
+    if(firstTab && firstTab.parentNode){
+      firstTab.parentNode.insertBefore(home, firstTab);
+    }else{
+      document.body.appendChild(home);
+    }
+  }
+
+  function enableMobileUI(){
+    document.documentElement.setAttribute("data-mobile-ui", "on");
+    buildTopBar();
+    buildHome();
+    interceptBottomNav();
+
+    // Hide any initial non-mobile tab selection: force home
+    showHome();
+
+    // Optional: when app triggers tab switches programmatically, we still want single-screen.
+    // We can observe class changes on tabs and mirror them, but keep minimal.
+  }
+
+  function maybe(){
+    if(isMobile()){
+      enableMobileUI();
+    }else{
+      document.documentElement.removeAttribute("data-mobile-ui");
+      const home = $("#mobileHome"); if(home) home.style.display = "none";
+      $all('section[id^="tab-"]').forEach(s=> s.classList.remove("mob-active"));
+    }
+  }
+
+  window.addEventListener("load", maybe);
+  window.addEventListener("resize", ()=>{ setTimeout(maybe, 120); });
+})();
+</script>
+
+
+<script id="manor-force-mobile-v7-js">
+(function(){
+  function addToggle(){
+    const bg = document.querySelector("#skinDrawerBg");
+    const body = document.querySelector("#skinDrawerBody");
+    if(!bg || !body) return;
+    if(document.querySelector("#forceMobileRow")) return;
+
+    const row = document.createElement("div");
+    row.id = "forceMobileRow";
+    row.className = "skinRow";
+    row.innerHTML = `
+      <div class="skinChip" id="forceMobileChip" style="flex: 1 1 240px; min-width:240px">
+        <div>
+          <b>Force Mobile Layout</b>
+          <div style="font-size:11px;color:rgba(234,234,255,.7);margin-top:2px">Desktop preview: ON makes layout behave like phone</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="skinSw" id="forceMobileSw" style="background:rgba(255,255,255,.10)"></span>
+        </div>
+      </div>
+      <div class="skinChip" id="forceMobileHint" style="flex: 1 1 240px; min-width:240px; cursor: default;">
+        <div>
+          <b>Tip</b>
+          <div style="font-size:11px;color:rgba(234,234,255,.7);margin-top:2px">You can also open the file with <span style="font-weight:900">?mobile=1</span></div>
+        </div>
+        <div class="skinSw" style="background:rgba(77,214,255,.28)"></div>
+      </div>
+    `;
+    // Insert near the top, after first hint
+    const firstHint = body.querySelector(".skinHint");
+    if(firstHint && firstHint.nextSibling){
+      body.insertBefore(row, firstHint.nextSibling);
+    }else{
+      body.insertBefore(row, body.firstChild);
+    }
+
+    function setOn(on){
+      try{ localStorage.setItem("manor.forceMobileUI", on ? "1" : "0"); }catch(e){}
+      const sw = document.querySelector("#forceMobileSw");
+      if(sw) sw.style.background = on ? "var(--accent)" : "rgba(255,255,255,.10)";
+      // Reload for clean re-init
+      location.reload();
+    }
+    let cur=false;
+    try{ cur = localStorage.getItem("manor.forceMobileUI")==="1"; }catch(e){}
+    const sw = document.querySelector("#forceMobileSw");
+    if(sw) sw.style.background = cur ? "var(--accent)" : "rgba(255,255,255,.10)";
+    document.querySelector("#forceMobileChip").addEventListener("click", ()=> setOn(!cur));
+  }
+
+  window.addEventListener("load", ()=>{
+    // Skin drawer exists only in the skin engine build; if not, we still support ?mobile=1
+    addToggle();
+  });
+})();
+</script>
+
+
+<script id="mobile-native-screens-v8-collapse-js">
+(function(){
+  function $(sel, root=document){ return root.querySelector(sel); }
+  function $all(sel, root=document){ return Array.from(root.querySelectorAll(sel)); }
+
+  // Find nearest ancestor that behaves like a "split layout" (grid/flex with multiple large children)
+  function findSplitAncestor(el){
+    let cur = el;
+    for(let i=0;i<12 && cur;i++){
+      const p = cur.parentElement;
+      if(!p) break;
+      const cs = getComputedStyle(p);
+      const kids = Array.from(p.children).filter(n=>n.nodeType===1);
+      if((cs.display==="grid" || cs.display==="flex") && kids.length>=2){
+        // heuristic: at least two children take significant width
+        return p;
+      }
+      cur = p;
+    }
+    return null;
+  }
+
+  function collapseTo(el){
+    const split = findSplitAncestor(el);
+    if(!split) return;
+    // remember original styles once
+    if(!split.dataset._mobOrigDisplay){
+      split.dataset._mobOrigDisplay = split.style.display || "";
+      split.dataset._mobOrigGrid = split.style.gridTemplateColumns || "";
+      split.dataset._mobOrigGap = split.style.gap || "";
+      // store per-child
+      Array.from(split.children).forEach((c, idx)=>{
+        if(c.nodeType!==1) return;
+        c.dataset._mobOrigDisp = c.style.display || "";
+      });
+    }
+    // force single column
+    split.style.display = "block";
+    split.style.gridTemplateColumns = "1fr";
+    split.style.gap = "0px";
+    // show only the branch that contains the active element
+    Array.from(split.children).forEach((c)=>{
+      if(c.nodeType!==1) return;
+      const keep = (c===el) || c.contains(el);
+      c.style.display = keep ? "block" : "none";
+      c.style.width = "100%";
+      c.style.maxWidth = "100%";
+    });
+  }
+
+  function restoreAll(){
+    document.querySelectorAll('[data-_mob-orig-display], [data-_mobOrigDisplay]').forEach(()=>{});
+    // restore any split ancestors we modified
+    document.querySelectorAll('[data-_mobOrigDisplay]').forEach(split=>{
+      split.style.display = split.dataset._mobOrigDisplay || "";
+      split.style.gridTemplateColumns = split.dataset._mobOrigGrid || "";
+      split.style.gap = split.dataset._mobOrigGap || "";
+      Array.from(split.children).forEach(c=>{
+        if(c.nodeType!==1) return;
+        if(c.dataset._mobOrigDisp!==undefined){
+          c.style.display = c.dataset._mobOrigDisp || "";
+        }
+      });
+    });
+  }
+
+  // Hook into V6/V7 navigation by monkey-patching showTab/showHome if present
+  window.addEventListener("load", ()=>{
+    try{
+      // If the V6 script created a global current tab state, we can't access it.
+      // Instead, observe when a tab gains .mob-active and collapse around it.
+      const obs = new MutationObserver((muts)=>{
+        const active = document.querySelector('section[id^="tab-"].mob-active');
+        if(document.documentElement.getAttribute("data-mobile-ui")==="on" && active){
+          collapseTo(active);
+        }
+        // if home is visible, restore splits to avoid hiding content on desktop
+        const home = document.querySelector("#mobileHome");
+        if(home && home.style.display!=="none" && document.documentElement.getAttribute("data-mobile-ui")==="on"){
+          // keep restored; mobile home doesn't need split collapse
+        }
+      });
+      obs.observe(document.body, {subtree:true, attributes:true, attributeFilter:["class","style"]});
+
+      // Also run immediately
+      const active = document.querySelector('section[id^="tab-"].mob-active');
+      if(document.documentElement.getAttribute("data-mobile-ui")==="on" && active){
+        collapseTo(active);
+      }
+
+      // When leaving mobile-ui (desktop), restore
+      const obs2 = new MutationObserver(()=>{
+        if(document.documentElement.getAttribute("data-mobile-ui")!=="on"){
+          restoreAll();
+        }
+      });
+      obs2.observe(document.documentElement, {attributes:true, attributeFilter:["data-mobile-ui"]});
+    }catch(e){}
+  });
+})();
+</script>
+
+
+<style id="mobile-native-screens-v8-css">
+@media (max-width: 900px){
+  html[data-mobile-ui="on"] *{
+    max-width: 100% !important;
+  }
+  html[data-mobile-ui="on"] [style*="grid-template-columns"]{
+    grid-template-columns: 1fr !important;
+  }
+  html[data-mobile-ui="on"] [style*="display: grid"], 
+  html[data-mobile-ui="on"] [style*="display:grid"]{
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>
+
+
+<style id="mobile-native-fullscreen-v9">
+/* =========================================================
+   V9: True Full-screen Mobile App Shell (A)
+   - Removes desktop gutters/centering/max-width in mobile mode
+   - Forces 100vw/100dvh, no side margins
+   - Home + active screen occupy full width
+   ========================================================= */
+
+/* Full-bleed viewport */
+html[data-mobile-ui="on"], html[data-mobile-ui="on"] body{
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  overflow-x: hidden !important;
+  background: var(--bg) !important;
+}
+
+/* Kill any desktop centering */
+html[data-mobile-ui="on"] *{
+  box-sizing: border-box !important;
+}
+
+/* Common wrappers to full width */
+html[data-mobile-ui="on"] .container,
+html[data-mobile-ui="on"] .wrapper,
+html[data-mobile-ui="on"] .shell,
+html[data-mobile-ui="on"] #shell,
+html[data-mobile-ui="on"] .app,
+html[data-mobile-ui="on"] #app,
+html[data-mobile-ui="on"] .main,
+html[data-mobile-ui="on"] main,
+html[data-mobile-ui="on"] .content,
+html[data-mobile-ui="on"] #content,
+html[data-mobile-ui="on"] .app-content,
+html[data-mobile-ui="on"] #appContent,
+html[data-mobile-ui="on"] .page,
+html[data-mobile-ui="on"] #page{
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* If any element enforces max-width, drop it in mobile mode */
+html[data-mobile-ui="on"] [style*="max-width"],
+html[data-mobile-ui="on"] [style*="maxWidth"]{
+  max-width: 100% !important;
+}
+
+/* Home should be full width and not inside a split column */
+html[data-mobile-ui="on"] #mobileHome{
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+}
+
+/* Active tab should be full width */
+html[data-mobile-ui="on"] section[id^="tab-"].mob-active{
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+}
+
+/* Prevent “split preview gutter” visuals */
+html[data-mobile-ui="on"] .devPreview,
+html[data-mobile-ui="on"] #devPreviewBg,
+html[data-mobile-ui="on"] #devPreviewFab{
+  /* keep tools available on desktop; on real phones these are usually not used */
+}
+
+/* Bottom menu already fixed; ensure it spans full width */
+html[data-mobile-ui="on"] #bottomMenu{
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+}
+
+/* Reduce accidental left/right padding from legacy rows */
+html[data-mobile-ui="on"] .row,
+html[data-mobile-ui="on"] .toolbar,
+html[data-mobile-ui="on"] .controls,
+html[data-mobile-ui="on"] .actions{
+  max-width: 100% !important;
+}
+</style>
+
+
+<script id="mobile-native-fullscreen-v9-js">
+(function(){
+  function $(sel, root=document){ return root.querySelector(sel); }
+
+  // Create a hard full-screen root wrapper in mobile mode to defeat outer desktop shells.
+  function ensureRoot(){
+    if(document.documentElement.getAttribute("data-mobile-ui")!=="on") return;
+    if(document.querySelector("#mobileAppRoot")) return;
+
+    const root = document.createElement("div");
+    root.id = "mobileAppRoot";
+    root.style.position = "relative";
+    root.style.width = "100vw";
+    root.style.maxWidth = "100vw";
+    root.style.margin = "0";
+    root.style.padding = "0";
+    root.style.overflowX = "hidden";
+
+    // Move key UI nodes into the root (keep existing logic intact):
+    // - Top bar (#mobileTopBar)
+    // - Home (#mobileHome)
+    // - Active tabs (sections tab-*)
+    // - Bottom menu (#bottomMenu)
+    const body = document.body;
+
+    // Insert root at top
+    body.insertBefore(root, body.firstChild);
+
+    const moveIf = (sel)=>{
+      const el = $(sel);
+      if(el && el.parentElement !== root){
+        root.appendChild(el);
+      }
+    };
+
+    // Move our injected bars first
+    moveIf("#mobileTopBar");
+    moveIf("#mobileHome");
+
+    // Move all tab sections
+    document.querySelectorAll('section[id^="tab-"]').forEach(sec=>{
+      if(sec.parentElement !== root){
+        root.appendChild(sec);
+      }
+    });
+
+    moveIf("#bottomMenu");
+
+    // Optional: hide obvious desktop side panels if they still exist (heuristic)
+    // Any siblings of our root that are large layout containers get hidden in mobile mode
+    Array.from(body.children).forEach(ch=>{
+      if(ch === root) return;
+      if(ch.id==="devPreviewBg" || ch.id==="skinDrawerBg" || ch.id==="skinFab" || ch.id==="devPreviewFab") return;
+      // If it's a big layout wrapper, hide it
+      const cs = getComputedStyle(ch);
+      const big = (cs.display==="grid" || cs.display==="flex" || cs.position==="relative");
+      if(big){
+        ch.style.display = "none";
+      }
+    });
+  }
+
+  // Also collapse splits around Home, not only around active tabs (fixes your screenshot)
+  function collapseHomeSplit(){
+    if(document.documentElement.getAttribute("data-mobile-ui")!=="on") return;
+    const home = document.querySelector("#mobileHome");
+    if(!home || home.style.display==="none") return;
+
+    // Find a split ancestor and collapse to home
+    let cur = home;
+    for(let i=0;i<12 && cur;i++){
+      const p = cur.parentElement;
+      if(!p) break;
+      const cs = getComputedStyle(p);
+      const kids = Array.from(p.children).filter(n=>n.nodeType===1);
+      if((cs.display==="grid" || cs.display==="flex") && kids.length>=2){
+        // force single column and show only the home branch
+        p.style.display = "block";
+        p.style.gridTemplateColumns = "1fr";
+        p.style.gap = "0px";
+        kids.forEach(k=>{
+          const keep = (k===home) || k.contains(home);
+          k.style.display = keep ? "block" : "none";
+          k.style.width = "100%";
+          k.style.maxWidth = "100%";
+        });
+        break;
+      }
+      cur = p;
+    }
+  }
+
+  function run(){
+    try{
+      ensureRoot();
+      collapseHomeSplit();
+    }catch(e){}
+  }
+
+  window.addEventListener("load", ()=> setTimeout(run, 20));
+  window.addEventListener("resize", ()=> setTimeout(run, 120));
+
+  // If mobile-ui toggles later (force mobile), run again
+  const obs = new MutationObserver(()=> setTimeout(run, 20));
+  obs.observe(document.documentElement, {attributes:true, attributeFilter:["data-mobile-ui"]});
+})();
+</script>
+
+
+<style id="device-preview-restore-v10-css">
+/* V10: Ensure Device Preview Simulator remains available on desktop even in mobile-ui mode */
+#devPreviewFab{ display:grid !important; }
+#devPreviewBg{ display:none; }
+#devPreviewBg.show{ display:flex !important; }
+</style>
+
+
+<script id="device-preview-restore-v10-js">
+(function(){
+  function $(sel, root=document){ return root.querySelector(sel); }
+  function moveToBodyEnd(el){
+    if(!el) return;
+    // keep as direct child of body for z-index/fixed positioning
+    if(el.parentElement !== document.body){
+      document.body.appendChild(el);
+    }else{
+      // ensure it's last so it overlays
+      document.body.appendChild(el);
+    }
+  }
+
+  function restore(){
+    const fab = $("#devPreviewFab");
+    const bg  = $("#devPreviewBg");
+    // If they exist, ensure they are not hidden by our fullscreen root logic
+    if(fab){
+      fab.style.display = "grid";
+      fab.style.visibility = "visible";
+      fab.style.opacity = "1";
+      moveToBodyEnd(fab);
+    }
+    if(bg){
+      moveToBodyEnd(bg);
+    }
+  }
+
+  window.addEventListener("load", ()=> setTimeout(restore, 30));
+  window.addEventListener("resize", ()=> setTimeout(restore, 120));
+
+  // If mobile-ui toggles, restore again
+  const obs = new MutationObserver(()=> setTimeout(restore, 30));
+  obs.observe(document.documentElement, {attributes:true, attributeFilter:["data-mobile-ui"]});
+})();
+</script>
+
+
+<style id="mobile-nav-first-v11-css">
+/* V11: Bottom Navigation First (Home minimized) */
+html[data-mobile-ui="on"] #mobileHome{
+  padding-top: 10px !important;
+}
+html[data-mobile-ui="on"] #mobileHome .mobileGrid{
+  gap: 8px !important;
+}
+html[data-mobile-ui="on"] #mobileHome .mobileTile{
+  padding: 12px 12px !important;
+}
+html[data-mobile-ui="on"] #mobileTitle{
+  text-align: center;
+  width: 100%;
+}
+
+/* Make bottom nav look like native dock */
+html[data-mobile-ui="on"] #bottomMenu{
+  box-shadow: 0 -18px 50px rgba(0,0,0,.45);
+}
+html[data-mobile-ui="on"] #bottomMenu .menu-btn{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap: 6px !important;
+  font-weight: 900 !important;
+}
+html[data-mobile-ui="on"] #bottomMenu .menu-btn.active,
+html[data-mobile-ui="on"] #bottomMenu .menu-btn[aria-current="page"]{
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #09101d !important;
+}
+</style>
+
+
+<script id="mobile-nav-first-v11-js">
+(function(){
+  // Nav-first UX:
+  // - Default landing is Color Sampling (not Home)
+  // - Home becomes "More" (a small list) instead of a big dashboard
+  // - Bottom nav drives everything
+
+  const DEFAULT_TAB = "granules"; // Color Sampling
+  const MORE_TAB_ID = "more";     // synthetic
+
+  function $(sel, root=document){ return root.querySelector(sel); }
+  function $all(sel, root=document){ return Array.from(root.querySelectorAll(sel)); }
+
+  function isMobileUIOn(){
+    return document.documentElement.getAttribute("data-mobile-ui")==="on";
+  }
+
+  function setTitle(t){
+    const el = $("#mobileTitle");
+    if(el) el.textContent = t || "";
+  }
+
+  function markActive(tab){
+    const bottom = $("#bottomMenu");
+    if(!bottom) return;
+    $all("button.menu-btn[data-tab]", bottom).forEach(b=>{
+      const on = b.getAttribute("data-tab")===tab;
+      b.classList.toggle("active", on);
+      if(on) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current");
+    });
+  }
+
+  function showMore(){
+    // Show minimized "More" list (remaining modules)
+    const home = $("#mobileHome");
+    if(!home) return;
+    home.style.display = "block";
+    // Hide any active tab
+    $all('section[id^="tab-"]').forEach(s=> s.classList.remove("mob-active"));
+    setTitle("More");
+    markActive(MORE_TAB_ID);
+    // Back button hidden on root screens
+    const back = $("#mobileBackBtn"); if(back) back.style.visibility="hidden";
+  }
+
+  function showTab(tabId){
+    const sec = $("#tab-" + tabId);
+    if(!sec) return;
+    const home = $("#mobileHome"); if(home) home.style.display="none";
+    $all('section[id^="tab-"]').forEach(s=> s.classList.toggle("mob-active", s.id===("tab-"+tabId)));
+    // Title derived from bottom button label if exists
+    const btn = document.querySelector(`#bottomMenu button.menu-btn[data-tab="${tabId}"]`);
+    setTitle(btn ? (btn.textContent||tabId).trim() : tabId);
+    markActive(tabId);
+    const back = $("#mobileBackBtn"); if(back) back.style.visibility="hidden";
+    window.scrollTo({top:0, behavior:"instant"});
+  }
+
+  function rebuildBottomNav(){
+    const bottom = $("#bottomMenu");
+    if(!bottom) return;
+
+    // Ensure there is a nav element to host buttons
+    let nav = bottom.querySelector("nav");
+    if(!nav){
+      nav = document.createElement("nav");
+      bottom.appendChild(nav);
+    }
+
+    // Keep primary 4 tabs + More
+    const items = [
+      {tab:"granules", label:"Color", icon:"🎨"},
+      {tab:"analysis",  label:"Analysis", icon:"📊"},
+      {tab:"camera",    label:"Camera", icon:"📷"},
+      {tab:"tools",     label:"Tools", icon:"🧰"},
+      {tab:MORE_TAB_ID, label:"More", icon:"⋯"},
+    ];
+
+    nav.innerHTML = "";
+    nav.style.gridTemplateColumns = "repeat(5, 1fr)";
+
+    items.forEach(it=>{
+      const b = document.createElement("button");
+      b.className = "menu-btn";
+      b.setAttribute("data-tab", it.tab);
+      b.innerHTML = `<span aria-hidden="true">${it.icon}</span><span>${it.label}</span>`;
+      b.addEventListener("click", (e)=>{
+        e.preventDefault();
+        if(it.tab===MORE_TAB_ID){
+          showMore();
+        }else{
+          showTab(it.tab);
+        }
+      }, true);
+      nav.appendChild(b);
+    });
+
+    // Hide any legacy bottom menu buttons if present elsewhere inside bottom
+    bottom.querySelectorAll(":scope > button, :scope .menu-grid, :scope .menu-row").forEach(n=>{
+      if(n !== nav) n.style.display = "none";
+    });
+  }
+
+  function buildMoreList(){
+    const home = $("#mobileHome");
+    if(!home) return;
+
+    // Minimized list: only the "non-primary" modules
+    const extra = [
+      {tab:"iot", title:"Factory Live", desc:"Live production view & monitoring", icon:"🏭"},
+      {tab:"saved", title:"Saved", desc:"Saved sessions & exported results", icon:"🗂️"},
+      {tab:"qa", title:"QA", desc:"QA workflows and checks", icon:"✅"},
+      {tab:"manuals", title:"Manuals", desc:"Guides & documentation", icon:"📚"},
+    ];
+
+    home.innerHTML = "";
+    const grid = document.createElement("div");
+    grid.className = "mobileGrid";
+    extra.forEach(t=>{
+      const tile = document.createElement("div");
+      tile.className = "mobileTile";
+      tile.innerHTML = `
+        <div class="left">
+          <div class="name">${t.title}</div>
+          <div class="desc">${t.desc}</div>
+        </div>
+        <div class="ic">${t.icon}</div>`;
+      tile.addEventListener("click", ()=> showTab(t.tab));
+      grid.appendChild(tile);
+    });
+    home.appendChild(grid);
+  }
+
+  function init(){
+    if(!isMobileUIOn()) return;
+    rebuildBottomNav();
+    buildMoreList();
+    // Default screen = Color Sampling
+    showTab(DEFAULT_TAB);
+  }
+
+  window.addEventListener("load", ()=> setTimeout(init, 40));
+  // If force mobile toggles later, init again
+  const obs = new MutationObserver(()=> setTimeout(init, 40));
+  obs.observe(document.documentElement, {attributes:true, attributeFilter:["data-mobile-ui"]});
+})();
+</script>
 
 </head>
 <body>
@@ -6986,8 +8476,8 @@ button.danger, .btn-danger, .cam-btn.danger{
 <div aria-label="Start menu" class="home-card" role="dialog">
 <div class="home-head">
 <div>
-<div class="home-title"> </div>
-<div class="home-sub">   “”  –   , and the screen will switch automatically.</div>
+<div class="home-title">בחר פעולה</div>
+<div class="home-sub">כדי שלא תצטרך “לצוד” טאבים – בחר לאן להיכנס, and the screen will switch automatically.</div>
 </div>
 <div aria-label="Close" class="home-close" id="home-close">×</div>
 </div>
@@ -7123,7 +8613,7 @@ button.danger, .btn-danger, .cam-btn.danger{
   <div class="acc-body">
     <div class="scroll-gutter ma-scroll-gutter">Swipe here to scroll</div>
     <div class="hsv-card" data-prefix="ma">
-      <div class="hsv-title">  (Manual Preview)</div>
+      <div class="hsv-title">בחירת צבע (Manual Preview)</div>
       <div class="hsv-picker" data-prefix="ma">
         <div class="hsv-sv-wrap">
           <canvas class="hsv-sv" width="320" height="320" id="ma-sv"></canvas>
@@ -9975,7 +11465,7 @@ setInterval(tickAll, 1200);
 <h2 style="color:var(--accent); margin:0 0 10px;">QA Calculations and Reports</h2>
 <!-- QA Guide (clickable help) -->
 <div style="display:flex; justify-content:flex-start; gap:10px; margin:0 0 10px;">
-<button class="qa2-btn" id="qa_doc_btn" title=" QA –  " type="button">📘  QA</button>
+<button class="qa2-btn" id="qa_doc_btn" title="מדריך QA – הסברים ומתודולוגיה" type="button">📘 מדריך QA</button>
 </div>
 <div class="qa2-wrap">
 <div class="qa2-topbar">
@@ -9986,64 +11476,64 @@ setInterval(tickAll, 1200);
 <!-- INPUTS -->
 <div class="qa2-pane active" id="qa2-pane-inputs">
 <div class="qa2-card">
-<div class="qa2-card-title"> </div>
+<div class="qa2-card-title">הזנת נתונים</div>
 <div class="qa2-grid">
 <div class="qa2-field">
-<label>   <span class="qa2-unit">mg</span></label>
+<label>משקל גרגיר ממוצע <span class="qa2-unit">mg</span></label>
 <input id="qa2_pelletMg" step="0.001" type="number" value="12.5"/>
 </div>
 <div class="qa2-field">
-<label>Feed () <span class="qa2-unit">kg</span></label>
+<label>Feed (נכנס) <span class="qa2-unit">kg</span></label>
 <input id="qa2_wInKg" step="0.001" type="number" value="3.6"/>
 </div>
 <div class="qa2-field">
-<label>Accept () <span class="qa2-unit">kg</span></label>
+<label>Accept (טוב) <span class="qa2-unit">kg</span></label>
 <input id="qa2_wGoodKg" step="0.001" type="number" value="6.8"/>
 </div>
 <div class="qa2-field">
-<label>Reject () <span class="qa2-unit">kg</span></label>
+<label>Reject (רע) <span class="qa2-unit">kg</span></label>
 <input id="qa2_wBadKg" step="0.001" type="number" value="0.8"/>
 </div>
 <div class="qa2-field">
-<label>  <span class="qa2-unit">g</span></label>
+<label>דגימה מהטוב <span class="qa2-unit">g</span></label>
 <input id="qa2_sampleGoodG" step="0.1" type="number" value="100"/>
 </div>
 <div class="qa2-field">
-<label>  </label>
+<label>פגומים שנמצאו בדגימה</label>
 <input id="qa2_defectsInSample" step="1" type="number" value="25"/>
 </div>
 <div class="qa2-field">
-<label>  <span class="qa2-unit">g</span></label>
+<label>דגימה מהרע <span class="qa2-unit">g</span></label>
 <input id="qa2_sampleBadG" step="0.1" type="number" value="100"/>
-<div class="qa2-hint">:   Reject,   “ ”  .</div>
+<div class="qa2-hint">אופציונלי: אם דוגמים Reject, אפשר לחשב “טובים ברע” במקום הנחה.</div>
 </div>
 <div class="qa2-field">
-<label>   Reject ()</label>
+<label>טובים שנמצאו בדגימת Reject (ספירה)</label>
 <input id="qa2_goodsInBadSample" step="1" type="number" value="22"/>
 </div>
 <div class="qa2-field">
-<label>α —  “ ”</label>
+<label>α — חשיבות “בריחת פגום”</label>
 <select id="qa2_alpha">
-<option value="2">1 ·  (×2)</option>
-<option value="5">2 ·  (×5)</option>
-<option selected="" value="10">3 ·  (×10)</option>
-<option value="20">4 ·  (×20)</option>
-<option value="50">5 ·  (×50)</option>
+<option value="2">1 · נמוך (×2)</option>
+<option value="5">2 · בינוני (×5)</option>
+<option selected="" value="10">3 · גבוה (×10)</option>
+<option value="20">4 · קריטי (×20)</option>
+<option value="50">5 · קטסטרופלי (×50)</option>
 </select>
 </div>
 <div class="qa2-field">
-<label>β —  “ ”</label>
+<label>β — כאב “איבוד טוב”</label>
 <select id="qa2_beta">
-<option value="0.5">1 ·  (×0.5)</option>
-<option selected="" value="1">2 ·  (×1)</option>
-<option value="2">3 ·  (×2)</option>
-<option value="3">4 ·  (×3)</option>
-<option value="5">5 ·  (×5)</option>
+<option value="0.5">1 · נמוך (×0.5)</option>
+<option selected="" value="1">2 · בינוני (×1)</option>
+<option value="2">3 · גבוה (×2)</option>
+<option value="3">4 · קריטי (×3)</option>
+<option value="5">5 · קטסטרופלי (×5)</option>
 </select>
 </div>
 </div>
 <div class="qa2-hint">
-          :       .      ‑KPIs ‑Visual.
+          טיפ: אפשר להזין רק מה שיש לכם בפועל. כל השאר מחושב אוטומטית ומופיע ב‑KPIs וב‑Visual.
         </div>
 <div class="qa2-actions">
 <button class="qa2-btn" id="qa2_reset" type="button">Reset</button>
@@ -10054,10 +11544,10 @@ setInterval(tickAll, 1200);
 <!-- VISUAL -->
 <div class="qa2-pane" id="qa2-pane-visual">
 <div class="qa2-card">
-<div class="qa2-card-title"></div>
+<div class="qa2-card-title">המחשה</div>
 <div class="qa2-legend">
-<span class="qa2-dot good"></span><span class="qa2-legtxt"></span>
-<span class="qa2-dot bad"></span><span class="qa2-legtxt"></span>
+<span class="qa2-dot good"></span><span class="qa2-legtxt">טוב</span>
+<span class="qa2-dot bad"></span><span class="qa2-legtxt">פגום</span>
 </div>
 <div class="qa2-cylgrid">
 <div class="qa2-cylcard">
@@ -10069,7 +11559,7 @@ setInterval(tickAll, 1200);
 <div class="qa2-cylmeta" id="qa2_feed_meta">—</div>
 </div>
 <div class="qa2-cylcard">
-<div class="qa2-cylhdr">Accept ()</div>
+<div class="qa2-cylhdr">Accept (טוב)</div>
 <div aria-label="Accept cylinder" class="qa2-cyl">
 <div class="qa2-fill good" id="qa2_acc_good"></div>
 <div class="qa2-fill bad" id="qa2_acc_bad"></div>
@@ -10077,7 +11567,7 @@ setInterval(tickAll, 1200);
 <div class="qa2-cylmeta" id="qa2_acc_meta">—</div>
 </div>
 <div class="qa2-cylcard">
-<div class="qa2-cylhdr">Reject ()</div>
+<div class="qa2-cylhdr">Reject (רע)</div>
 <div aria-label="Reject cylinder" class="qa2-cyl">
 <div class="qa2-fill good" id="qa2_rej_good"></div>
 <div class="qa2-fill bad" id="qa2_rej_bad"></div>
@@ -10088,14 +11578,14 @@ setInterval(tickAll, 1200);
 <div class="qa2-mini">
 <div class="qa2-minirow">
 <div class="qa2-minikpi">
-<div class="qa2-minilab">  ‑Accept ()</div>
+<div class="qa2-minilab">פגומים שברחו ל‑Accept (משוער)</div>
 <div class="qa2-minival" id="qa2_escape_est">—</div>
 </div>
 <button class="qa2-info" data-qa2-explain="escape" type="button">ⓘ</button>
 </div>
 <div class="qa2-minirow">
 <div class="qa2-minikpi">
-<div class="qa2-minilab">  ‑Reject ()</div>
+<div class="qa2-minilab">איבוד טוב ל‑Reject (משוער)</div>
 <div class="qa2-minival" id="qa2_goodloss_est">—</div>
 </div>
 <button class="qa2-info" data-qa2-explain="goodloss" type="button">ⓘ</button>
@@ -10112,33 +11602,33 @@ setInterval(tickAll, 1200);
 </div>
 <div class="qa2-kpig qa2-kpig-compact">
 <div class="qa2-kpi qa2-wide qa2-score-hero">
-<div class="qa2-klabel">Score  ( )</div>
+<div class="qa2-klabel">Score משוקלל (התוצאה הסופית)</div>
 <div class="qa2-kvalue" id="qa2_score">—</div>
 <div aria-label="Score bar" class="qa2-scorebar"><div id="qa2_scorebar"></div></div>
 <button class="qa2-info" data-qa2-explain="score" type="button">ⓘ</button>
 </div>
 <div class="qa2-kpi">
-<div class="qa2-klabel">N_in (  ‑Feed)</div>
+<div class="qa2-klabel">N_in (מס׳ גרגירים ב‑Feed)</div>
 <div class="qa2-kvalue" id="qa2_nin">—</div>
 <button class="qa2-info" data-qa2-explain="nin" type="button">ⓘ</button>
 </div>
 <div class="qa2-kpi">
-<div class="qa2-klabel">Purity ‑Accept</div>
+<div class="qa2-klabel">Purity ב‑Accept</div>
 <div class="qa2-kvalue qa2-good" id="qa2_purity">—</div>
 <button class="qa2-info" data-qa2-explain="purity" type="button">ⓘ</button>
 </div>
 <div class="qa2-kpi">
-<div class="qa2-klabel">Escape rate (  ‑Accept)</div>
+<div class="qa2-klabel">Escape rate (פגומים שנשארו ב‑Accept)</div>
 <div class="qa2-kvalue qa2-bad" id="qa2_escape_rate">—</div>
 <button class="qa2-info" data-qa2-explain="escape" type="button">ⓘ</button>
 </div>
 <div class="qa2-kpi qa2-wide">
-<div class="qa2-klabel">Good loss (  ‑Reject)</div>
+<div class="qa2-klabel">Good loss (טובים שנזרקו ל‑Reject)</div>
 <div class="qa2-kvalue" id="qa2_goodloss_rate">—</div>
 <button class="qa2-info" data-qa2-explain="goodloss" type="button">ⓘ</button>
 </div>
 </div>
-<div class="qa2-note" id="qa2_note"><b>:</b> Escape rate ‑C<sub>A</sub>   Accept. Good loss   Reject ( )    /.</div>
+<div class="qa2-note" id="qa2_note"><b>הערה:</b> Escape rate ו‑C<sub>A</sub> מחושבים מדגימת Accept. Good loss מחושב מדגימת Reject (אם הוזנה) או מערך ברירת מחדל/הנחה.</div>
 </div>
 </div>
 </div>
@@ -10147,7 +11637,7 @@ setInterval(tickAll, 1200);
 <div class="qa2-modal-backdrop" data-qa2-close="1"></div>
 <div aria-labelledby="qa2_modal_title" aria-modal="true" class="qa2-modal-card" role="dialog">
 <div class="qa2-modal-h">
-<div class="qa2-modal-title" id="qa2_modal_title"></div>
+<div class="qa2-modal-title" id="qa2_modal_title">הסבר</div>
 <button class="qa2-modal-x" data-qa2-close="1" type="button">✕</button>
 </div>
 <div class="qa2-modal-b" id="qa2_modal_body"></div>
@@ -10161,193 +11651,193 @@ setInterval(tickAll, 1200);
 <div class="qa2-modal-backdrop" data-qa-doc-close="1"></div>
 <div aria-labelledby="qa_doc_modal_title" aria-modal="true" class="qa2-modal-card" role="dialog">
 <div class="qa2-modal-h">
-<div class="qa2-modal-title" id="qa_doc_modal_title"> QA –      (Pellet Sorting)</div>
+<div class="qa2-modal-title" id="qa_doc_modal_title">מדריך QA – בדיקת איכות מיון גרגירי פלסטיק (Pellet Sorting)</div>
 <button class="qa2-modal-x" data-qa-doc-close="1" type="button">✕</button>
 </div>
 <div class="qa2-modal-b" id="qa_doc_modal_body">
 <div style="max-height:70vh; overflow:auto; padding-left:4px;">
 <div style="color:#cbd5ff; font-size:13px; line-height:1.55;">
-<p><b>     ,  </b>   QA     (PE / PP / ),      ( /).</p>
+<p><b>מסמך זה נועד לשמש מדריך מקצועי, תפעולי וברור</b> לביצוע בדיקות QA למכונות מיון גרגירי פלסטיק (PE / PP / סיליקונים), בדגש על שקופים עם פגמים (כתמים שחורים/חומים).</p>
 <div style="margin:10px 0 14px;">
-<div><b> :</b></div>
+<div><b>המסמך מתאים:</b></div>
 <ul style="margin:6px 0 0 18px;">
-<li> </li>
-<li>  </li>
-<li> </li>
-<li> FAT / SAT /  </li>
+<li>למהנדסי איכות</li>
+<li>לספקי מכונות מיון</li>
+<li>ללקוחות קצה</li>
+<li>לצרכי FAT / SAT / קבלה תעשייתית</li>
 </ul>
 </div>
-<h3 style="margin:14px 0 6px; color:var(--accent);">1.  ‑QA</h3>
-<p>  ‑QA      :</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">1. מטרת ה‑QA</h3>
+<p>מטרת בדיקת ה‑QA היא לענות על שאלה אחת מרכזית:</p>
 <blockquote style="margin:8px 0; padding:8px 10px; border-right:3px solid rgba(250,174,82,.7); background:var(--accentSoft); border-radius:10px;">
-                     ,    ?
+              כמה פגומים באמת נשארים בחומר הטוב שמגיע ללקוח, וכמה טובים נזרקים בטעות?
             </blockquote>
-<p>:</p>
+<p>כלומר:</p>
 <ul>
-<li><b>   (Defect Escape)</b></li>
-<li><b>   (Good Loss)</b></li>
+<li><b>זיהום החומר הטוב (Defect Escape)</b></li>
+<li><b>איבוד חומר טוב (Good Loss)</b></li>
 </ul>
-<p>‑QA   “ 99%”  ,   <b> , , </b>.</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">2.   ()</h3>
-<p>     :</p>
-<h4 style="margin:10px 0 4px;">2.1 Feed – </h4>
-<p>   .</p>
+<p>ה‑QA לא נועד “להוכיח 99%” באופן שיווקי, אלא לתת <b>מדד אמיתי, מדיד, והשוואתי</b>.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">2. הגדרות בסיסיות (זרמים)</h3>
+<p>במערכת מיון קיימים שלושה זרמים עיקריים:</p>
+<h4 style="margin:10px 0 4px;">2.1 Feed – הזנה</h4>
+<p>כל החומר שנכנס למכונה.</p>
 <ul>
-<li>  ()</li>
-<li>    </li>
+<li>משקל כולל (ק״ג)</li>
+<li>אחוז פגומים משוער או ידוע</li>
 </ul>
-<h4 style="margin:10px 0 4px;">2.2 Accept –  </h4>
-<p>   .    <b>  </b>.</p>
-<h4 style="margin:10px 0 4px;">2.3 Reject –  </h4>
-<p> .    <b>   </b>.</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">3.     (Sampling)</h3>
-<p>,      . ,     <b> </b>:</p>
+<h4 style="margin:10px 0 4px;">2.2 Accept – חומר טוב</h4>
+<p>החומר שאמור להגיע ללקוח. כאן הקריטריון הוא <b>כמה פגומים נשארו</b>.</p>
+<h4 style="margin:10px 0 4px;">2.3 Reject – חומר רע</h4>
+<p>החומר שנפסל. כאן הקריטריון הוא <b>כמה טובים נזרקו בטעות</b>.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">3. למה עובדים עם דגימות (Sampling)</h3>
+<p>בפועל, לא ניתן לספור מיליוני גרגירים אחד־אחד. לכן, בתעשייה מקובל לעבוד בשיטת <b>דגימה סטטיסטית</b>:</p>
 <ul>
-<li>   ( 50–200 )</li>
-<li>    </li>
-<li>     </li>
+<li>שוקלים כמות קטנה (לרוב 50–200 גרם)</li>
+<li>סופרים ידנית פגומים או טובים</li>
+<li>משליכים את היחס על כל הזרם</li>
 </ul>
-<p>    , , , ’ .</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">4.  ‑Accept ( )</h3>
-<h4 style="margin:10px 0 4px;">4.1  </h4>
+<p>זו שיטה מקובלת בתעשיית הפלסטיק, מזון, פארמה, ויז’ן תעשייתי.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">4. דגימה מה‑Accept (החומר הטוב)</h3>
+<h4 style="margin:10px 0 4px;">4.1 מה מודדים</h4>
 <ul>
-<li>  ()</li>
-<li>   </li>
+<li>משקל הדגימה (גרם)</li>
+<li>מספר פגומים שנמצאו בדגימה</li>
 </ul>
-<h4 style="margin:10px 0 4px;">4.2 </h4>
+<h4 style="margin:10px 0 4px;">4.2 חישוב</h4>
 <ol>
-<li>   :</li>
+<li>חישוב מספר גרגירים בדגימה:</li>
 </ol>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">N_sample = (  [g] × 1000) /   [mg]</pre>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">N_sample = (משקל דגימה [g] × 1000) / משקל גרגיר [mg]</pre>
 <ol start="2">
-<li>   ‑Accept:</li>
+<li>חישוב שיעור פגומים ב‑Accept:</li>
 </ol>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Escape Rate =   / N_sample</pre>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Escape Rate = פגומים בדגימה / N_sample</pre>
 <ol start="3">
-<li>  ‑Accept:</li>
+<li>חישוב זיהום ב‑Accept:</li>
 </ol>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">   = Escape Rate × (1,000,000 /   [mg])</pre>
-<p><b>    .</b></p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">5.  ‑Reject ( )</h3>
-<h4 style="margin:10px 0 4px;">5.1   </h4>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">מספר פגומים לק״ג = Escape Rate × (1,000,000 / משקל גרגיר [mg])</pre>
+<p><b>זהו המדד החשוב ביותר ללקוח.</b></p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">5. דגימה מה‑Reject (החומר הרע)</h3>
+<h4 style="margin:10px 0 4px;">5.1 למה זה חשוב</h4>
 <blockquote style="margin:8px 0; padding:8px 10px; border-right:3px solid rgba(250,174,82,.7); background:var(--accentSoft); border-radius:10px;">
-                ‑Reject,         .
+              בלי דגימה מה‑Reject, אין דרך אמיתית לדעת כמה חומר טוב נזרק לפח.
             </blockquote>
-<h4 style="margin:10px 0 4px;">5.2  </h4>
+<h4 style="margin:10px 0 4px;">5.2 מה מודדים</h4>
 <ul>
-<li>  ‑Reject ()</li>
-<li> <b></b>  </li>
+<li>משקל דגימה מה‑Reject (גרם)</li>
+<li>מספר <b>טובים</b> שנמצאו בדגימה</li>
 </ul>
-<h4 style="margin:10px 0 4px;">5.3 </h4>
+<h4 style="margin:10px 0 4px;">5.3 חישוב</h4>
 <ol>
-<li>   Reject:</li>
+<li>מספר גרגירים בדגימת Reject:</li>
 </ol>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">N_rej_sample = (  [g] × 1000) /   [mg]</pre>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">N_rej_sample = (משקל דגימה [g] × 1000) / משקל גרגיר [mg]</pre>
 <ol start="2">
-<li>  ‑Reject:</li>
+<li>אחוז טובים ב‑Reject:</li>
 </ol>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Good-in-Reject =   / N_rej_sample</pre>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Good-in-Reject = טובים בדגימה / N_rej_sample</pre>
 <ol start="3">
-<li>  :</li>
+<li>איבוד חומר טוב:</li>
 </ol>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Good Loss = Good-in-Reject ×  Reject</pre>
-<h3 style="margin:14px 0 6px; color:var(--accent);">6.    </h3>
-<p>    ,     <b> </b>,  .</p>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">  = 1,000,000 /   [mg]</pre>
-<p>:  12.5 mg → 80,000  </p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">7.  KPI </h3>
-<h4 style="margin:10px 0 4px;">7.1 Purity ( Accept)</h4>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Good Loss = Good-in-Reject × משקל Reject</pre>
+<h3 style="margin:14px 0 6px; color:var(--accent);">6. המרה ממשקל למספר גרגירים</h3>
+<p>מאחר וגרגירים הם יחידות בדידות, רוב החישובים נעשים בפועל <b>במספר גרגירים</b>, לא בק״ג.</p>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">גרגירים לק״ג = 1,000,000 / משקל גרגיר [mg]</pre>
+<p>לדוגמה: גרגיר 12.5 mg → 80,000 גרגירים לק״ג</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">7. מדדי KPI עיקריים</h3>
+<h4 style="margin:10px 0 4px;">7.1 Purity (ניקיון Accept)</h4>
 <pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Purity = 1 − Escape Rate</pre>
 <h4 style="margin:10px 0 4px;">7.2 Escape Rate</h4>
-<p>     (  ).</p>
+<p>כמה פגומים נשארו בחומר הטוב (הכי חשוב ללקוח).</p>
 <h4 style="margin:10px 0 4px;">7.3 Good Loss</h4>
-<p>    ‑Reject.</p>
-<h4 style="margin:10px 0 4px;">7.4 Recall ( )</h4>
-<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Recall =   /   ‑Feed</pre>
-<h3 style="margin:14px 0 6px; color:var(--accent);">8.     “99% ”</h3>
-<p> ,   ‑<b>Recall</b>:    –  .</p>
-<p>  <b> </b>:</p>
+<p>כמה חומר טוב נזרק ל‑Reject.</p>
+<h4 style="margin:10px 0 4px;">7.4 Recall (של פגומים)</h4>
+<pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Recall = פגומים שנתפסו / סך הפגומים ב‑Feed</pre>
+<h3 style="margin:14px 0 6px; color:var(--accent);">8. למה לא מספיק להגיד “99% הצלחה”</h3>
+<p>ברוב המקרים, יצרן מתכוון ל‑<b>Recall</b>: מתוך כל הפגומים – כמה נתפסו.</p>
+<p>אבל זה <b>לא אומר</b>:</p>
 <ul>
-<li>   ‑Accept</li>
-<li>  </li>
+<li>כמה פגומים נשארו ב‑Accept</li>
+<li>כמה טובים נזרקו</li>
 </ul>
-<p> QA    <b> </b>.</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">9. α (Alpha) –   </h3>
-<p>α :      ,     .</p>
+<p>לכן QA אמיתי תמיד בודק <b>שני צדדים</b>.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">9. α (Alpha) – חומרת פגום שברח</h3>
+<p>α מגדיר: כמה חמור פגום אחד שהגיע ללקוח, יחסית לזריקת גרגיר טוב אחד.</p>
 <div style="overflow:auto;">
 <table style="width:100%; border-collapse:collapse; font-size:13px;">
 <thead>
 <tr>
-<th style="text-align:right; padding:6px; border-bottom:1px solid rgba(255,255,255,.10);"></th>
-<th style="text-align:right; padding:6px; border-bottom:1px solid rgba(255,255,255,.10);"></th>
-<th style="text-align:right; padding:6px; border-bottom:1px solid rgba(255,255,255,.10);">α </th>
+<th style="text-align:right; padding:6px; border-bottom:1px solid rgba(255,255,255,.10);">רמה</th>
+<th style="text-align:right; padding:6px; border-bottom:1px solid rgba(255,255,255,.10);">משמעות</th>
+<th style="text-align:right; padding:6px; border-bottom:1px solid rgba(255,255,255,.10);">α פנימי</th>
 </tr>
 </thead>
 <tbody>
-<tr><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">1</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);"></td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">2</td></tr>
-<tr><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">2</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);"> </td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">5</td></tr>
-<tr><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">3</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);"></td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">10</td></tr>
-<tr><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">4</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);"></td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">20</td></tr>
-<tr><td style="padding:6px;">5</td><td style="padding:6px;"></td><td style="padding:6px;">50</td></tr>
+<tr><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">1</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">נסבל</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">2</td></tr>
+<tr><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">2</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">לא רצוי</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">5</td></tr>
+<tr><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">3</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">בעייתי</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">10</td></tr>
+<tr><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">4</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">חמור</td><td style="padding:6px; border-bottom:1px solid rgba(255,255,255,.06);">20</td></tr>
+<tr><td style="padding:6px;">5</td><td style="padding:6px;">קריטי</td><td style="padding:6px;">50</td></tr>
 </tbody>
 </table>
 </div>
-<h3 style="margin:14px 0 6px; color:var(--accent);">10. β (Beta) –     </h3>
-<p>β   /    .    1–5,    .</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">11. Score  –  </h3>
-<p>‑Score :   × α,   × β.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">10. β (Beta) – כאב של איבוד חומר טוב</h3>
+<p>β מגדיר את העלות/כאב של זריקת חומר טוב. גם כאן סקאלה 1–5, עם ערכים פנימיים שונים.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">11. Score משוקלל – המדד הסופי</h3>
+<p>ה‑Score משלב: פגומים שברחו × α, טובים שנזרקו × β.</p>
 <pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Score = 1 − (α × Escape + β × Good Loss)</pre>
-<p> <b> </b>,       /  / .</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">12.  ()</h3>
-<p>    Feed / Accept / Reject,   (),  ,  .</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">13.   </h3>
+<p>זה <b>לא תקן</b>, אלא מדד השוואתי פנימי להשוואת מכונות / הגדרות / ריצות.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">12. ויזואליזציה (גלילים)</h3>
+<p>הגלילים מציגים בצורה אינטואיטיבית Feed / Accept / Reject, כולל משקל (ק״ג), כמות גרגירים, ואחוז יחסי.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">13. מה מקובל בתעשייה</h3>
 <ul>
-<li>✔  </li>
-<li>✔   Accept / Reject</li>
-<li>✔    (pellets)</li>
-<li>✔   Recall  Purity</li>
-<li>✔   QA    </li>
+<li>✔ עבודה בדגימות</li>
+<li>✔ הפרדה בין Accept / Reject</li>
+<li>✔ מדידה במספר יחידות (pellets)</li>
+<li>✔ הבחנה בין Recall לבין Purity</li>
+<li>✔ שימוש במדדי QA ולא רק אחוז שיווקי</li>
 </ul>
-<h3 style="margin:14px 0 6px; color:var(--accent);">14.    –    "99%"</h3>
-<h4 style="margin:10px 0 4px;">14.1   /  – Recall  </h4>
-<p>  “99% ” =     – 99%   ‑Reject (Recall).</p>
-<p><b>:</b>  ,  ,   .<br/>
-<b>:</b>      ,    ,    .</p>
-<h4 style="margin:10px 0 4px;">14.2   /  – Purity ‑Escape</h4>
-<p> :       ? (Purity / Escape rate)</p>
-<p><b>:</b>   ,   ,    .<br/>
-<b>:</b>      .</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">15.    –    </h3>
-<p>     :</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">14. המחלוקת המקצועית בתעשייה – מה באמת אומר "99%"</h3>
+<h4 style="margin:10px 0 4px;">14.1 גישת היצרן / הספק – Recall של פגומים</h4>
+<p>בדרך כלל “99% הצלחה” = מתוך כלל הפגומים שנכנסו – 99% זוהו והוצאו ל‑Reject (Recall).</p>
+<p><b>יתרונות:</b> קל למדידה, מחמיא לאלגוריתם, מתאים להשוואת טכנולוגיות.<br/>
+<b>חסרונות:</b> לא אומר מה נשאר אצל הלקוח, לא מתחשב בטוב שנזרק, לא משקף סיכון תפעולי.</p>
+<h4 style="margin:10px 0 4px;">14.2 גישת הלקוח / האיכות – Purity ו‑Escape</h4>
+<p>מבחינת הלקוח: כמה פגומים נשארו בחומר הטוב שאני מקבל? (Purity / Escape rate)</p>
+<p><b>יתרונות:</b> משקף סיכון אמיתי, מדבר בשפת איכות, ניתן לבדיקה בדגימות פשוטות.<br/>
+<b>חסרונות:</b> לבדו לא מספר כמה טוב נזרק.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">15. הגשר בין הגישות – למה צריך מודל משוקלל</h3>
+<p>מערכת מיון טובה נמדדת בשלושה צירים:</p>
 <ol>
-<li>    (Recall)</li>
-<li>     (Escape / Purity)</li>
-<li>    (Good Loss)</li>
+<li>כמה פגומים הצלחנו להוציא (Recall)</li>
+<li>כמה פגומים נשארו אצל הלקוח (Escape / Purity)</li>
+<li>כמה חומר טוב נזרק (Good Loss)</li>
 </ol>
-<p> ‑  ,    .</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">16. α (Alpha) ‑β (Beta) –    </h3>
-<h4 style="margin:10px 0 4px;">16.1 Alpha –   </h4>
-<p>  // / . Alpha    (  ).</p>
-<h4 style="margin:10px 0 4px;">16.2 Beta –     </h4>
-<p>  , ,  .   –  .</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">17. Score  –    </h3>
-<p>‑Score    , , ,  :</p>
+<p>מדידה חד‑צדדית תמיד תטעה, לכן נדרש מודל משוקלל.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">16. α (Alpha) ו‑β (Beta) – תרגום איכות לשיקול עסקי</h3>
+<h4 style="margin:10px 0 4px;">16.1 Alpha – חומרת פגום שברח</h4>
+<p>תרגום של תלונות/החזרות/עצירת קו/פגיעה במוניטין. Alpha הוא פרמטר מדיניות (לא מספר פיזיקלי).</p>
+<h4 style="margin:10px 0 4px;">16.2 Beta – כאב של איבוד חומר טוב</h4>
+<p>תלוי במחיר חומר, זמינות, ואפשרות מיחזור. גם כאן – סקאלה תפעולית.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">17. Score משוקלל – למה זה המדד הנכון</h3>
+<p>ה‑Score נועד להיות מדד השוואתי, יציב, מובן, ולא אקדמי:</p>
 <pre class="qa2-modal-text" style="white-space:pre; direction:ltr;">Score = 1 − (α × Escape + β × GoodLoss)</pre>
-<h3 style="margin:14px 0 6px; color:var(--accent);">18.    </h3>
+<h3 style="margin:14px 0 6px; color:var(--accent);">18. למה זה המודל המומלץ</h3>
 <ul>
-<li>✔      ( + )</li>
-<li>✔     ()</li>
-<li>✔   </li>
-<li>✔     /  /  / </li>
+<li>✔ משלב את שתי נקודות המבט (ספק + לקוח)</li>
+<li>✔ מבוסס על מדידות אמיתיות (דגימות)</li>
+<li>✔ ניתן להסבר פשוט</li>
+<li>✔ ניתן להשוואה בין מכונות / הגדרות / ריצות / ספקים</li>
 </ul>
-<p><b> :</b>    ,   .</p>
-<h3 style="margin:14px 0 6px; color:var(--accent);">19.   </h3>
+<p><b>והכי חשוב:</b> הוא מדבר בשפה שהלקוח, האיכות וההנהלה מבינים.</p>
+<h3 style="margin:14px 0 6px; color:var(--accent);">19. שימוש במסמך זה</h3>
 <ul>
-<li>   ‑QA</li>
-<li>  / FAT</li>
-<li>  ,  </li>
+<li>קישור מתוך אפליקציית ה‑QA</li>
+<li>נספח להסכם / FAT</li>
+<li>בסיס לדיון מקצועי, לא שיווקי</li>
 </ul>
-<p>   ‑reference   .</p>
+<p>מומלץ להציג אותו כ‑reference ולא כדרישה רגולטורית.</p>
 <h3 style="margin:14px 0 6px; color:var(--accent);">20. Final summary</h3>
 <blockquote style="margin:8px 0; padding:8px 10px; border-right:3px solid rgba(250,174,82,.7); background:var(--accentSoft); border-radius:10px;">
               Real QA doesn’t ask “what is the machine’s success rate?”, it asks “what is my risk as a customer, and what is my cost as a manufacturer?”
@@ -10436,7 +11926,7 @@ if(_stream && !force){
 </summary><div class="acc-body"><div class="tool-tab" id="tab-manuals">
 <h2 style="color:var(--accent); margin-bottom:6px;">Video Manuals</h2>
 <p class="hint" style="margin-top:0;">
-           .
+    בחר סרטון הדרכה כדי לפתוח אותו במסך גדול.
   </p>
 <div aria-label="Video manuals list" class="manuals-list" id="manuals-list"></div>
 <!-- Player Modal -->
@@ -13474,29 +14964,29 @@ const r = document.getElementById('reticle-overlay');
 
   // Explanation texts
   const EXPL = {
-    nin: `N_in    ‑Feed   :
-          <br><b>N_in = (kg · 1,000,000 mg/kg) / (mg )</b>.`,
-    purity: `Purity ‑Accept     “”   .
-             <br><b>Purity = 1 − p(defect|Accept)</b> ().`,
-    ca: `C_A      ‑Accept (/):
+    nin: `N_in מחושב מתוך משקל ה‑Feed והמשקל הממוצע לגרגיר:
+          <br><b>N_in = (kg · 1,000,000 mg/kg) / (mg לגרגיר)</b>.`,
+    purity: `Purity ב‑Accept מתאר כמה מהגרגירים בזרם ה“טוב” הם באמת טובים.
+             <br><b>Purity = 1 − p(defect|Accept)</b> (מהדגימה).`,
+    ca: `C_A הוא אומדן לכמה פגומים נכנסו ל‑Accept (כמות/מס׳):
          <br><b>C_A ≈ p(defect|Accept) · N_accept</b>.`,
-    defkg: `Defects/kg       ‑Accept:
+    defkg: `Defects/kg הוא אומדן כמות פגומים פר ק״ג ב‑Accept:
             <br><b>defects/kg ≈ (p(defect|Accept) · N_accept) / (kg_accept)</b>.`,
-    recall: `Recall   “    ‑Reject”.
-               Feed ,     .`,
-    escape: `Escape_est      ‑Accept:
+    recall: `Recall כאן הוא “כמה מהפגומים הצלחנו לתפוס ל‑Reject”.
+             בהיעדר דגימת Feed אמיתית, זו הערכה נגזרת מהדגימה והמסות.`,
+    escape: `Escape_est הוא אומדן כמות פגומים שהגיעו ל‑Accept:
              <br><b>Escape_est ≈ p(defect|Accept) · N_accept</b>.`,
-    escape_rate: `Escape rate     ‑Accept (     ‑Feed):
-                  <br><b>Escape rate = p(defect|Accept)</b> ().`,
-    goodloss: `  ‑Reject       “”.
-                / ‑Reject,  .
-              <br>   :  ‑Reject   × N_reject.`,
-    goodloss_rate: `Good loss rate    ‑Reject:
+    escape_rate: `Escape rate הוא שיעור הפגומים בתוך ה‑Accept (לא מתוך כלל הפגומים שהיו ב‑Feed):
+                  <br><b>Escape rate = p(defect|Accept)</b> (מהדגימה).`,
+    goodloss: `איבוד טוב ל‑Reject תלוי בכמה חומר טוב נופל לזרם ה“רע”.
+              אם אין דגימה/ספירה מה‑Reject, חייבים הנחה.
+              <br>כאן מוצג כאומדן גס: חלק מה‑Reject שהוא טוב × N_reject.`,
+    goodloss_rate: `Good loss rate נמדד אידאלית מדגימה מה‑Reject:
                     <br><b>p(good|Reject) ≈ good_in_reject_sample / N_reject_sample</b>.
-                    <br>   ‑Reject —   “”.`,
-    score: `Score     “  ” (α)  “ ” (β):
+                    <br>אם אין דגימה מה‑Reject — זה נשאר “הערכה”.`,
+    score: `Score משוקלל נותן עדיפות גבוהה ל“בריחת פגום ללקוח” (α) לעומת “איבוד טוב” (β):
             <br><b>Score = 100 − ( α·Escape_rate  +  β·GoodLoss_rate )·100</b>
-            <br>  “  ”,   /QA   ‑/.`
+            <br>זה לא “מדד מדעי אוניברסלי”, אלא כלי החלטה/QA להשוואה בין סט‑אפים/מכונות.`
   };
 
   function showExplain(key){
@@ -13584,8 +15074,8 @@ const r = document.getElementById('reticle-overlay');
       sb.style.width = sPct.toFixed(1) + '%';
     }
 
-    $('qa2_escape_est').textContent = fmtInt(escapeEst) + ' ';
-    $('qa2_goodloss_est').textContent = fmtInt(goodLossEst) + ' ';
+    $('qa2_escape_est').textContent = fmtInt(escapeEst) + ' גרגירים';
+    $('qa2_goodloss_est').textContent = fmtInt(goodLossEst) + ' גרגירים';
 
     // visuals - show composition by weight (normalized within each cylinder)
     // Feed composition unknown => show relative sizes of streams by weight, and within streams show defect fraction estimate.
@@ -13648,9 +15138,9 @@ function setFill(goodEl, badEl, goodFrac, badFrac, totalKg, pelletMg, goodLblId,
     setFill($('qa2_rej_good'), $('qa2_rej_bad'), pGoodInRej, 1-pGoodInRej, wBadKg, pelletMg, 'qa2_rej_good_lbl','qa2_rej_bad_lbl');
 
     // metadata lines
-    $('qa2_feed_meta').innerHTML = `${fmtNum(wInKg,3)} kg · ${fmtInt(Nin)}  (≈ ${fmtPct(1-pDefInFeed)}  / ${fmtPct(pDefInFeed)} )`;
-    $('qa2_acc_meta').innerHTML  = `${fmtNum(wGoodKg,3)} kg · ${fmtInt(Nacc)}  (≈ ${fmtPct(purity)}  / ${fmtPct(1-purity)} )`;
-    $('qa2_rej_meta').innerHTML  = `${fmtNum(wBadKg,3)} kg · ${fmtInt(Nrej)}  (: ${fmtPct(pGoodInRej)}  / ${fmtPct(1-pGoodInRej)} )`;
+    $('qa2_feed_meta').innerHTML = `${fmtNum(wInKg,3)} kg · ${fmtInt(Nin)} גרגירים (≈ ${fmtPct(1-pDefInFeed)} טוב / ${fmtPct(pDefInFeed)} פגום)`;
+    $('qa2_acc_meta').innerHTML  = `${fmtNum(wGoodKg,3)} kg · ${fmtInt(Nacc)} גרגירים (≈ ${fmtPct(purity)} טוב / ${fmtPct(1-purity)} פגום)`;
+    $('qa2_rej_meta').innerHTML  = `${fmtNum(wBadKg,3)} kg · ${fmtInt(Nrej)} גרגירים (הנחה: ${fmtPct(pGoodInRej)} טוב / ${fmtPct(1-pGoodInRej)} פגום)`;
 
     // on small screens, keep the UI in one screen: if user edits inputs, auto-switch to Visual quickly? no, keep as is.
   }
@@ -16608,10 +18098,10 @@ refreshAfterLayout(); }catch(e){ console.error(e); }
   async function startCamera(){
     errTxt.style.display="none";
     const secure = window.isSecureContext || location.protocol==="https:" || location.hostname==="localhost";
-    httpsWarn.textContent = secure ? "" : "  HTTPS →   .   HTTPS/localhost.";
+    httpsWarn.textContent = secure ? "" : "זה לא HTTPS → מצלמה לא תעבוד. העלה לשרת HTTPS/localhost.";
 
     if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-      showErr("    getUserMedia.");
+      showErr("הדפדפן הזה לא תומך getUserMedia.");
       return;
     }
 
@@ -16633,7 +18123,7 @@ setDebug("Opening camera…", true);
     }
 
     if(!stream){
-      showErr("   : " + (lastErr?.name || lastErr));
+      showErr("לא נפתח סטרים מצלמה: " + (lastErr?.name || lastErr));
       setDebug("", false);
       return;
     }
@@ -16653,7 +18143,7 @@ setDebug("Opening camera…", true);
         return;
       }
       if(performance.now()-t0 > 2500){
-        showErr("      ( / ).");
+        showErr("המצלמה נפתחה אבל לא מגיע פריים (בדוק הרשאה/חסימת וידאו).");
         setDebug(`Stream opened • readyState=${video.readyState}`, true);
         return;
       }
@@ -16690,7 +18180,7 @@ setDebug("Opening camera…", true);
 
   btnFlip.onclick=async ()=>{ facing = (facing==="environment") ? "user" : "environment"; camOverlay.classList.remove("hidden"); startCamera();
 };
-  btnInfo.onclick=()=>alert("   : 1)  HTTPS/localhost, 2)    , 3)  iOS WebView   .");
+  btnInfo.onclick=()=>alert("אם המצלמה נשארת שחורה: 1) חייב HTTPS/localhost, 2) חייב לאשר הרשאת מצלמה, 3) בתוך iOS WebView לפעמים יש חסימה.");
   camStartBtn.onclick=()=>startCamera();
   camOverlay.addEventListener("click",(e)=>{ if(e.target===camOverlay) startCamera(); });
 
@@ -18786,264 +20276,264 @@ Error: ${msg}`);
   if(!modal || !bodyEl || !titleEl) return;
 
   const CONTENT = {
-    camera: { title: `Camera — `, html: `
-    <h2>   </h2>
-    <p>    .        .   ,  Preview   .</p>
-    <div class="toc"><a href="#cam-buttons"></a><a href="#cam-notes"></a></div>
-    <h3 id="cam-buttons"></h3>
+    camera: { title: `Camera — מדריך`, html: `
+    <h2>מה זה המסך הזה</h2>
+    <p>זהו מסך תצוגת מצלמה כללית. הוא משמש כמקור וידאו משותף לכל כלי הקליברציה. אין כאן מדידות, רק Preview ותפעול מסך מלא.</p>
+    <div class="toc"><a href="#cam-buttons">כפתורים</a><a href="#cam-notes">הערות</a></div>
+    <h3 id="cam-buttons">כפתורים</h3>
     <ul>
-      <li><strong>⛶ Full Screen</strong> —   .</li>
+      <li><strong>⛶ Full Screen</strong> — הגדלה למסך מלא.</li>
     </ul>
-    <h3 id="cam-notes"></h3>
+    <h3 id="cam-notes">הערות</h3>
     <ul>
-      <li>    ,     .</li>
-      <li>   (/)  .</li>
+      <li>אם כלי אחר משתמש במצלמה, ייתכן שתראה את אותו סטרים.</li>
+      <li>לבדיקת איכות תמונה (פוקוס/חשיפה) לפני מדידות.</li>
     </ul>
     
         <h2>Deep dive (v2)</h2>
-        <p>      :      ,     ,      (, ROI,  ,  ,  ').</p>
-        <p>  ,       “ ”, “ ”, “ ”, “ ”, -“ ”     .</p>
-        <h3> </h3>
+        <p>החלק הזה נועד להיות ארוך ומפורט בכוונה: הוא מסביר את כל מרכיבי המסך, את המשמעות שלהם בתהליך קליברציה, ומה בדיוק גורם לערכים להשתנות (חשיפה, ROI, עיבוד מצלמה, תאורה מעורבת, השתקפויות וכו').</p>
+        <p>אם אתה רוצה, אפשר לפרק את ההסבר גם לפי “מה רואים”, “מה לוחצים”, “מה המשמעות”, “איך מאמתים”, ו-“תקלות נפוצות” עם סעיפים מסודרים לכל רכיב.</p>
+        <h3>תקלות נפוצות</h3>
         <ul>
-          <li> :  Freeze,  -,     .</li>
-          <li>   :        Auto White Balance .</li>
-          <li> “ ”:     -ROI    / .</li>
+          <li>ערכים קופצים: נסה Freeze, נטרול אוטו-חשיפה, או החזקת סצנה יציבה יותר.</li>
+          <li>חוסר עקביות בין כלים: בדוק שמקור התאורה לא משתנה בזמן ושאין Auto White Balance קיצוני.</li>
+          <li>תוצאה “לא הגיונית”: בדוק מה נמצא במרכז ה-ROI והאם יש השתקפות חזקה/צבע דומיננטי.</li>
         </ul>
     ` },
-    lux: { title: `Lux Meter —  `, html: `
-        <h2>     </h2>
-        <p><strong>Lux Meter</strong>           (ROI ).   ,  ,   /  —     “”      .</p>
+    lux: { title: `Lux Meter — מדריך מלא`, html: `
+        <h2>מה הכלי מודד ולמה זה חשוב</h2>
+        <p><strong>Lux Meter</strong> נותן לך אינדיקציה לעוצמת התאורה בסצנה על בסיס תמונת המצלמה (ROI מרכזי). זה שימושי לקליברציה, בדיקות איכות, והשוואות בין עמדות/גופי תאורה — במיוחד כשאתה רוצה מספר “אחיד” שמאפשר להבין האם התאורה יציבה ומספיקה.</p>
 
         <div class="toc">
-          <a href="#lux-buttons"></a>
-          <a href="#lux-metrics"></a>
-          <a href="#lux-visuals"></a>
-          <a href="#lux-howto"> </a>
-          <a href="#lux-notes">/</a>
+          <a href="#lux-buttons">כפתורים</a>
+          <a href="#lux-metrics">מדידות</a>
+          <a href="#lux-visuals">ויזואליזציה</a>
+          <a href="#lux-howto">איך להשתמש</a>
+          <a href="#lux-notes">הערות/דיוק</a>
         </div>
 
-        <h3 id="lux-buttons"></h3>
+        <h3 id="lux-buttons">כפתורים</h3>
         <ul>
-          <li><strong>📷 Camera</strong> — /    .   ,    .</li>
-          <li><strong>⛶ Full Screen</strong> —         (  -ROI    ).</li>
-          <li><strong>Freeze</strong> —   (/)      “”     .    Live.</li>
-          <li><strong>Save</strong> —  Snapshot (/ + )      .</li>
+          <li><strong>📷 Camera</strong> — מפעיל/מכבה את המצלמה עבור הכלי. כאשר המצלמה פועלת, המדידות מתעדכנות בזמן אמת.</li>
+          <li><strong>⛶ Full Screen</strong> — מציג את התצוגה במסך מלא לשם בדיקה נוחה (למשל למיקוד ה-ROI או לצפייה באחידות תאורה).</li>
+          <li><strong>Freeze</strong> — מקפיא מצב (פריים/נתונים) כדי שתוכל לקרוא ערכים בלי “ריצוד” של המדידה בזמן כיוון התאורה. לחיצה נוספת מחזירה Live.</li>
+          <li><strong>Save</strong> — שמירת Snapshot (מסגרת/תמונה + ערכים) לצורך תיעוד או השוואה בין נקודות.</li>
         </ul>
 
-        <h3 id="lux-metrics"></h3>
-        <p>    .  “” :</p>
+        <h3 id="lux-metrics">מדידות</h3>
+        <p>הכלי מציג כמה ערכי מפתח. כולם “דיגיטליים” ומתעדכנים:</p>
         <div class="cal-info-kv">
-          <div class="cal-info-card"><div class="k">Illuminance</div><div class="v"><strong>Lux (lx)</strong> —  .    =    /.</div></div>
-          <div class="cal-info-card"><div class="k">Foot-candle</div><div class="v"><strong>fc</strong> —   -lux (: 1 fc ≈ 10.764 lux).     .</div></div>
-          <div class="cal-info-card"><div class="k">Exposure Value</div><div class="v"><strong>EV (ISO 100)</strong> —    . EV     “/”  .</div></div>
+          <div class="cal-info-card"><div class="k">Illuminance</div><div class="v"><strong>Lux (lx)</strong> — עוצמת הארה. ערך גבוה יותר = יותר אור על המשטח/האובייקט.</div></div>
+          <div class="cal-info-card"><div class="k">Foot-candle</div><div class="v"><strong>fc</strong> — המרה סטנדרטית מ-lux (בקירוב: 1 fc ≈ 10.764 lux). שימושי כשעובדים מול מפרטים אמריקאיים.</div></div>
+          <div class="cal-info-card"><div class="k">Exposure Value</div><div class="v"><strong>EV (ISO 100)</strong> — אינדיקציה לחשיפה ביחס לסקאלה. EV עוזר להבין אם הסטאפ “כהה/בהיר” בהקשר צילום.</div></div>
         </div>
-        <p>,   / ('//ISO)        .</p>
+        <p>בנוסף, מוצגים ערכי מצלמה/סטאפ (אפרצ'ר/שאטֶר/ISO) כדי להבין האם שינוי חשיפה גורם לשינוי מדידה.</p>
 
-        <h3 id="lux-visuals">     ()</h3>
+        <h3 id="lux-visuals">מה אתה רואה על המסך (קומפוננטות)</h3>
         <ul>
-          <li><strong>Intensity Bar</strong> —       ( 0→12k).  “”      .</li>
-          <li><strong>Glow / Swatch</strong> —    “” (/)         .</li>
-          <li><strong>Scene label</strong> —   (Indoor/Outdoor ’)  .     .</li>
+          <li><strong>Intensity Bar</strong> — פס שממפה עוצמה יחסית בטווח מוגדר (לרוב 0→12k). זה “אינדיקטור” מהיר להבין אם אתה באזור הנכון.</li>
+          <li><strong>Glow / Swatch</strong> — המחשה צבעונית של “עוצמה” (בהיר/כהה) כדי שיהיה קל להבין מגמה גם בלי לקרוא מספרים.</li>
+          <li><strong>Scene label</strong> — טקסט תיאורי (Indoor/Outdoor וכו’) לפי טווחים. זה מזרז החלטות בזמן קליברציה.</li>
         </ul>
 
-        <h3 id="lux-howto">   (Workflow )</h3>
+        <h3 id="lux-howto">איך להשתמש נכון (Workflow מומלץ)</h3>
         <ol>
-          <li>  (📷)    1–2 .</li>
-          <li>      (/)   .</li>
-          <li>      Lux .  -Freeze  .</li>
-          <li>   —  Save  “/”.</li>
+          <li>הפעל מצלמה (📷) ותן למערכת להתייצב 1–2 שניות.</li>
+          <li>קבע מיקום סטנדרטי של המצלמה והאובייקט (מרחק/זווית) כדי להשוות מדידות.</li>
+          <li>כוון תאורה עד שאתה מקבל טווח Lux רצוי. השתמש ב-Freeze לקריאה יציבה.</li>
+          <li>אם צריך תיעוד — לחץ Save ושמור “לפני/אחרי”.</li>
         </ol>
 
-        <h3 id="lux-notes">      </h3>
+        <h3 id="lux-notes">הערות על דיוק ומה משפיע על המדידה</h3>
         <ul>
-          <li><strong> </strong> (ISO/)       .    .</li>
-          <li><strong>ROI</strong> —    ;      .</li>
-          <li><strong></strong>     “”   .</li>
-          <li>  —   .    /  .</li>
+          <li><strong>חשיפה אוטומטית</strong> (ISO/שאטֶר) יכולה לשנות את התמונה ולכן את המדד. לכן מוצגים ערכי מצלמה.</li>
+          <li><strong>ROI</strong> — המדידה מבוססת אזור מרכזי; שינוי מהיר באובייקט במרכז ישפיע יותר.</li>
+          <li><strong>השתקפויות</strong> וחומרי גלם מבריקים יכולים “לנפח” ערכים ביחס למציאות.</li>
+          <li>למדידה תקנית — צריך לוקסמטר ייעודי. כאן זה כלי קליברציה/אינדיקציה מבוסס מצלמה.</li>
         </ul>
         
         <h2>Deep dive (v2)</h2>
-        <p>      :      ,     ,      (, ROI,  ,  ,  ').</p>
-        <p>  ,       “ ”, “ ”, “ ”, “ ”, -“ ”     .</p>
-        <h3> </h3>
+        <p>החלק הזה נועד להיות ארוך ומפורט בכוונה: הוא מסביר את כל מרכיבי המסך, את המשמעות שלהם בתהליך קליברציה, ומה בדיוק גורם לערכים להשתנות (חשיפה, ROI, עיבוד מצלמה, תאורה מעורבת, השתקפויות וכו').</p>
+        <p>אם אתה רוצה, אפשר לפרק את ההסבר גם לפי “מה רואים”, “מה לוחצים”, “מה המשמעות”, “איך מאמתים”, ו-“תקלות נפוצות” עם סעיפים מסודרים לכל רכיב.</p>
+        <h3>תקלות נפוצות</h3>
         <ul>
-          <li> :  Freeze,  -,     .</li>
-          <li>   :        Auto White Balance .</li>
-          <li> “ ”:     -ROI    / .</li>
+          <li>ערכים קופצים: נסה Freeze, נטרול אוטו-חשיפה, או החזקת סצנה יציבה יותר.</li>
+          <li>חוסר עקביות בין כלים: בדוק שמקור התאורה לא משתנה בזמן ושאין Auto White Balance קיצוני.</li>
+          <li>תוצאה “לא הגיונית”: בדוק מה נמצא במרכז ה-ROI והאם יש השתקפות חזקה/צבע דומיננטי.</li>
         </ul>
     ` },
-    ct: { title: `Color Temperature —   (CCT / Δuv / xy)`, html: `
-        <h2>  </h2>
-        <p><strong>Color Temperature</strong>      (<strong>CCT</strong>)    / (<strong>Δuv</strong>),    <strong>CIE 1931 xy</strong>.    “ ”   (/)   Cast / .</p>
+    ct: { title: `Color Temperature — מדריך מלא (CCT / Δuv / xy)`, html: `
+        <h2>מה הכלי מודד</h2>
+        <p><strong>Color Temperature</strong> מספק הערכה של טמפרטורת צבע (<strong>CCT</strong>) ואת הסטיית גוון הירוק/מג׳נטה (<strong>Δuv</strong>), בנוסף לנקודת כרומטיות <strong>CIE 1931 xy</strong>. זה מאפשר להבין “איזה לבן” יש לך (חם/קר) והאם יש Cast ירוק/מג׳נטה שמפריע.</p>
 
         <div class="toc">
-          <a href="#ct-buttons"></a>
-          <a href="#ct-metrics"></a>
-          <a href="#ct-visuals"></a>
-          <a href="#ct-howto"> </a>
-          <a href="#ct-notes">/</a>
+          <a href="#ct-buttons">כפתורים</a>
+          <a href="#ct-metrics">מדידות</a>
+          <a href="#ct-visuals">ויזואליזציה</a>
+          <a href="#ct-howto">איך להשתמש</a>
+          <a href="#ct-notes">הערות/דיוק</a>
         </div>
 
-        <h3 id="ct-buttons"></h3>
+        <h3 id="ct-buttons">כפתורים</h3>
         <ul>
-          <li><strong>📷 Camera</strong> — /  .</li>
-          <li><strong>⛶ Full Screen</strong> —  .</li>
-          <li><strong>Freeze</strong> —     CCT/Δuv  .</li>
-          <li><strong>Save</strong> —  snapshot  .</li>
+          <li><strong>📷 Camera</strong> — הפעלה/כיבוי מצלמה לכלי.</li>
+          <li><strong>⛶ Full Screen</strong> — מסך מלא.</li>
+          <li><strong>Freeze</strong> — הקפאת פריים כדי לקרוא CCT/Δuv בצורה יציבה.</li>
+          <li><strong>Save</strong> — שמירת snapshot עם הערכים.</li>
         </ul>
 
-        <h3 id="ct-metrics">   </h3>
+        <h3 id="ct-metrics">מדידות ומה הן אומרות</h3>
         <div class="cal-info-kv">
-          <div class="cal-info-card"><div class="k">CCT (Kelvin)</div><div class="v"><strong>:</strong> 2700–3200K  (), 4000–5000K , 5600–6500K /.</div></div>
-          <div class="cal-info-card"><div class="k">Δuv</div><div class="v"><strong>:</strong>    ,  .     /.</div></div>
-          <div class="cal-info-card"><div class="k">CIE 1931 xy</div><div class="v"><strong>:</strong>   (x,y)      (  ).</div></div>
+          <div class="cal-info-card"><div class="k">CCT (Kelvin)</div><div class="v"><strong>תיאור:</strong> 2700–3200K חם (טונגסטן), 4000–5000K ניטרלי, 5600–6500K יום/קר.</div></div>
+          <div class="cal-info-card"><div class="k">Δuv</div><div class="v"><strong>תיאור:</strong> ערך שלילי נוטה למג׳נטה, חיובי לירוק. גם סטייה קטנה מורגשת בצילום/ראייה.</div></div>
+          <div class="cal-info-card"><div class="k">CIE 1931 xy</div><div class="v"><strong>תיאור:</strong> זוג מספרים (x,y) שמתאר נקודת צבע באופן גאומטרי (שימושי להשוואה מדויקת).</div></div>
         </div>
 
-        <h3 id="ct-visuals"> </h3>
+        <h3 id="ct-visuals">קומפוננטות ויזואליות</h3>
         <ul>
-          <li><strong>White Point Swatch</strong> —   “”   Kelvin,     Δuv (/).</li>
-          <li><strong>Δuv Bar</strong> —       . =0.  = ,  = .</li>
-          <li><strong>Kelvin tone</strong> — /      /.</li>
+          <li><strong>White Point Swatch</strong> — תצוגה של “הלבן” המחושב לפי Kelvin, עם הטיה עדינה לפי Δuv (ירוק/מג׳נטה).</li>
+          <li><strong>Δuv Bar</strong> — פס שממחיש את הכיוון והעוצמה של הסטייה. מרכז=0. שמאלה = מג׳נטה, ימינה = ירוק.</li>
+          <li><strong>Kelvin tone</strong> — נקודה/צ׳יפ שמראה באופן אינטואיטיבי אם אתה חם/קר.</li>
         </ul>
 
-        <h3 id="ct-howto">   (Calibration)</h3>
+        <h3 id="ct-howto">איך לעבוד איתו (Calibration)</h3>
         <ol>
-          <li>      “”/   -ROI.</li>
-          <li>  /   -CCT    ( 5000K).</li>
-          <li>  Cast —   //   -Δuv  -0.</li>
-          <li>Freeze  ,  Save .</li>
+          <li>הפעל מצלמה וודא שהסצנה מכילה אזור “לבן”/אפור ניטרלי במרכז ה-ROI.</li>
+          <li>כוון גופי תאורה/טמפ׳ צבע עד שה-CCT מגיע לערך הרצוי (למשל 5000K).</li>
+          <li>אם יש Cast — תקן דרך פילטרים/איזון/גוף תאורה עד ש-Δuv מתקרב ל-0.</li>
+          <li>Freeze לקריאה יציבה, ואז Save לתיעוד.</li>
         </ol>
 
-        <h3 id="ct-notes">  </h3>
+        <h3 id="ct-notes">הערות על מגבלות</h3>
         <ul>
-          <li><strong>  </strong> ( )   .</li>
-          <li><strong> WB </strong>   —     .</li>
-          <li>    :   / —   .</li>
+          <li><strong>סצנה לא ניטרלית</strong> (אובייקט צבעוני) תטה את המדידה.</li>
+          <li><strong>כיוונון WB במצלמה</strong> יכול להשפיע — מומלץ להבין אם יש עיבוד.</li>
+          <li>כמו כל מדידה מבוססת מצלמה: זה כלי קליברציה/אינדיקציה — לא ספקטרומטר תקני.</li>
         </ul>
         
         <h2>Deep dive (v2)</h2>
-        <p>      :      ,     ,      (, ROI,  ,  ,  ').</p>
-        <p>  ,       “ ”, “ ”, “ ”, “ ”, -“ ”     .</p>
-        <h3> </h3>
+        <p>החלק הזה נועד להיות ארוך ומפורט בכוונה: הוא מסביר את כל מרכיבי המסך, את המשמעות שלהם בתהליך קליברציה, ומה בדיוק גורם לערכים להשתנות (חשיפה, ROI, עיבוד מצלמה, תאורה מעורבת, השתקפויות וכו').</p>
+        <p>אם אתה רוצה, אפשר לפרק את ההסבר גם לפי “מה רואים”, “מה לוחצים”, “מה המשמעות”, “איך מאמתים”, ו-“תקלות נפוצות” עם סעיפים מסודרים לכל רכיב.</p>
+        <h3>תקלות נפוצות</h3>
         <ul>
-          <li> :  Freeze,  -,     .</li>
-          <li>   :        Auto White Balance .</li>
-          <li> “ ”:     -ROI    / .</li>
+          <li>ערכים קופצים: נסה Freeze, נטרול אוטו-חשיפה, או החזקת סצנה יציבה יותר.</li>
+          <li>חוסר עקביות בין כלים: בדוק שמקור התאורה לא משתנה בזמן ושאין Auto White Balance קיצוני.</li>
+          <li>תוצאה “לא הגיונית”: בדוק מה נמצא במרכז ה-ROI והאם יש השתקפות חזקה/צבע דומיננטי.</li>
         </ul>
     ` },
-    flicker: { title: `Flicker Meter —   ( /  / )`, html: `
-        <h2> </h2>
-        <p><strong>Flicker Meter</strong>    ( )    —  LED//.    -banding,  ,    .</p>
+    flicker: { title: `Flicker Meter — מדריך מלא (ריצוד / תדר / יציבות)`, html: `
+        <h2>מטרת הכלי</h2>
+        <p><strong>Flicker Meter</strong> נועד לזהות ריצוד (תנודתיות בזמן) של מקורות תאורה — במיוחד LED/דרייברים/פלורסנט. ריצוד יכול לגרום ל-banding, עייפות עיניים, וסטיות באיכות תמונה ובאלגוריתמים.</p>
 
         <div class="toc">
-          <a href="#fl-buttons"></a>
-          <a href="#fl-metrics"></a>
-          <a href="#fl-visuals"></a>
-          <a href="#fl-howto"> </a>
-          <a href="#fl-notes"></a>
+          <a href="#fl-buttons">כפתורים</a>
+          <a href="#fl-metrics">מדידות</a>
+          <a href="#fl-visuals">ויזואליזציה</a>
+          <a href="#fl-howto">איך למדוד</a>
+          <a href="#fl-notes">טיפים</a>
         </div>
 
-        <h3 id="fl-buttons"></h3>
+        <h3 id="fl-buttons">כפתורים</h3>
         <ul>
-          <li><strong>📷 Camera</strong> — /    flicker.</li>
-          <li><strong>⛶ Full Screen</strong> —    /.</li>
-          <li><strong>Freeze</strong> —       /.</li>
-          <li><strong>Save</strong> —  snapshot   ( ).</li>
+          <li><strong>📷 Camera</strong> — מפעיל/מכבה מצלמה עבור מדידת flicker.</li>
+          <li><strong>⛶ Full Screen</strong> — לצפייה מדויקת יותר במצלמה/תופעות.</li>
+          <li><strong>Freeze</strong> — מקפיא חלון מדידה כדי להשוות בין מצבים/דרייברים.</li>
+          <li><strong>Save</strong> — שומר snapshot עם הערכים (תיעוד בדיקות).</li>
         </ul>
 
-        <h3 id="fl-metrics"></h3>
+        <h3 id="fl-metrics">מדידות</h3>
         <div class="cal-info-kv">
-          <div class="cal-info-card"><div class="k">Flicker %</div><div class="v"><strong> :</strong>  “ ” .   ( &lt;10%)   .</div></div>
-          <div class="cal-info-card"><div class="k">Frequency (Hz)</div><div class="v"><strong> :</strong>     ( 50/60Hz ,   PWM).</div></div>
-          <div class="cal-info-card"><div class="k">Note / Risk</div><div class="v"><strong> :</strong>  : Stable / Noticeable / High / Severe  .</div></div>
+          <div class="cal-info-card"><div class="k">Flicker %</div><div class="v"><strong>מה זה:</strong> הערכת “כמה חזק” הריצוד. ערך נמוך (למשל &lt;10%) לרוב נחשב יציב.</div></div>
+          <div class="cal-info-card"><div class="k">Frequency (Hz)</div><div class="v"><strong>מה זה:</strong> התדר הדומיננטי של התנודות (למשל 50/60Hz והרמוניות, או תדרי PWM).</div></div>
+          <div class="cal-info-card"><div class="k">Note / Risk</div><div class="v"><strong>מה זה:</strong> סיווג איכותי: Stable / Noticeable / High / Severe לפי טווחים.</div></div>
         </div>
 
-        <h3 id="fl-visuals">  </h3>
+        <h3 id="fl-visuals">קומפוננטות על המסך</h3>
         <ul>
-          <li><strong>Wave preview</strong> —    “ ” (  ,      ).</li>
-          <li><strong>Risk label</strong> —       .</li>
-          <li><strong>Intensity bar</strong> —      (  ).</li>
+          <li><strong>Wave preview</strong> — המחשה אינטואיטיבית של “חוסר יציבות” (לא אוסצילוסקופ אמיתי, אלא ויזואל שמאפשר להבין מגמה מהר).</li>
+          <li><strong>Risk label</strong> — תווית סטטוס שמסכמת האם מדובר בריצוד בעייתי.</li>
+          <li><strong>Intensity bar</strong> — פס שמתמלא לפי רמת הריצוד (בטווח עבודה טיפוסי).</li>
         </ul>
 
-        <h3 id="fl-howto">  </h3>
+        <h3 id="fl-howto">איך למדוד נכון</h3>
         <ol>
-          <li>            ( “”  ).</li>
-          <li>   ( )  -   .</li>
-          <li>  2–3      Frequency + %.</li>
-          <li>   (PWM/Driver/)  Freeze -Save.</li>
+          <li>הנח את המצלמה מול מקור התאורה או על משטח לבן שמואר ממנו (כדי “לבודד” את התאורה).</li>
+          <li>ודא שהפריים יציב (בלי תנועה) והימנע מאוטו-חשיפה אגרסיבית אם אפשר.</li>
+          <li>תן לכלי 2–3 שניות להתייצב ואז קרא את Frequency + %.</li>
+          <li>השווה בין מצבים (PWM/Driver/דימר) עם Freeze ו-Save.</li>
         </ol>
 
-        <h3 id="fl-notes"> </h3>
+        <h3 id="fl-notes">טיפים חשובים</h3>
         <ul>
-          <li><strong>Banding </strong>        —     .</li>
-          <li> 50/60Hz    /   .</li>
-          <li>     —  Freeze,   /,    .</li>
+          <li><strong>Banding במצלמה</strong> יכול להופיע גם כשבני אדם לא רואים — לכן זה כלי חשוב לתעשייה.</li>
+          <li>מקורות 50/60Hz יראו לעיתים תדרים כפולים/הרמוניות לפי שיטת המדידה.</li>
+          <li>אם אתה רואה תוצאות קופצות — נסה Freeze, או שינוי זווית/מרחק, או תאורה אחידה יותר.</li>
         </ul>
         
         <h2>Deep dive (v2)</h2>
-        <p>      :      ,     ,      (, ROI,  ,  ,  ').</p>
-        <p>  ,       “ ”, “ ”, “ ”, “ ”, -“ ”     .</p>
-        <h3> </h3>
+        <p>החלק הזה נועד להיות ארוך ומפורט בכוונה: הוא מסביר את כל מרכיבי המסך, את המשמעות שלהם בתהליך קליברציה, ומה בדיוק גורם לערכים להשתנות (חשיפה, ROI, עיבוד מצלמה, תאורה מעורבת, השתקפויות וכו').</p>
+        <p>אם אתה רוצה, אפשר לפרק את ההסבר גם לפי “מה רואים”, “מה לוחצים”, “מה המשמעות”, “איך מאמתים”, ו-“תקלות נפוצות” עם סעיפים מסודרים לכל רכיב.</p>
+        <h3>תקלות נפוצות</h3>
         <ul>
-          <li> :  Freeze,  -,     .</li>
-          <li>   :        Auto White Balance .</li>
-          <li> “ ”:     -ROI    / .</li>
+          <li>ערכים קופצים: נסה Freeze, נטרול אוטו-חשיפה, או החזקת סצנה יציבה יותר.</li>
+          <li>חוסר עקביות בין כלים: בדוק שמקור התאורה לא משתנה בזמן ושאין Auto White Balance קיצוני.</li>
+          <li>תוצאה “לא הגיונית”: בדוק מה נמצא במרכז ה-ROI והאם יש השתקפות חזקה/צבע דומיננטי.</li>
         </ul>
     ` },
-    spectrum: { title: `Light Spectrometer —   (Dominant λ / Saturation)`, html: `
-        <h2>  </h2>
-        <p><strong>Light Spectrometer</strong>       <strong>  </strong> (nm)  <strong></strong>.    ,        // .</p>
+    spectrum: { title: `Light Spectrometer — מדריך מלא (Dominant λ / Saturation)`, html: `
+        <h2>מה הכלי נותן</h2>
+        <p><strong>Light Spectrometer</strong> כאן הוא הערכה מבוססת תמונה של <strong>אורך גל דומיננטי</strong> (nm) ושל <strong>רוויה</strong>. זה לא ספקטרומטר פיזי, אבל הוא מעולה להשוואה מהירה בין מצבי תאורה/פילטרים/צבע דומיננטי.</p>
 
         <div class="toc">
-          <a href="#sp-buttons"></a>
-          <a href="#sp-metrics"></a>
-          <a href="#sp-visuals"></a>
-          <a href="#sp-howto"></a>
-          <a href="#sp-notes"></a>
+          <a href="#sp-buttons">כפתורים</a>
+          <a href="#sp-metrics">מדידות</a>
+          <a href="#sp-visuals">ויזואליזציה</a>
+          <a href="#sp-howto">שימוש</a>
+          <a href="#sp-notes">הערות</a>
         </div>
 
-        <h3 id="sp-buttons"></h3>
+        <h3 id="sp-buttons">כפתורים</h3>
         <ul>
-          <li><strong>📷 Camera</strong> — /  .</li>
-          <li><strong>⛶ Full Screen</strong> —  .</li>
-          <li><strong>Freeze</strong> —  /.</li>
-          <li><strong>Save</strong> — snapshot .</li>
+          <li><strong>📷 Camera</strong> — מפעיל/מכבה מצלמה לכלי.</li>
+          <li><strong>⛶ Full Screen</strong> — מסך מלא.</li>
+          <li><strong>Freeze</strong> — הקפאת תצוגה/ערכים.</li>
+          <li><strong>Save</strong> — snapshot לתיעוד.</li>
         </ul>
 
-        <h3 id="sp-metrics"></h3>
+        <h3 id="sp-metrics">מדידות</h3>
         <div class="cal-info-kv">
-          <div class="cal-info-card"><div class="k">Dominant λ (nm)</div><div class="v"><strong> :</strong>        ( 450 , 530 , 610 ).</div></div>
-          <div class="cal-info-card"><div class="k">Saturation (%)</div><div class="v"><strong> :</strong>  “”   /.   =    .</div></div>
+          <div class="cal-info-card"><div class="k">Dominant λ (nm)</div><div class="v"><strong>מה זה:</strong> אורך גל משוער של הצבע הבולט ביותר (למשל 450 כחול, 530 ירוק, 610 אדום).</div></div>
+          <div class="cal-info-card"><div class="k">Saturation (%)</div><div class="v"><strong>מה זה:</strong> כמה “צבע” יש ביחס ללבן/אפור. רוויה גבוהה = צבע נקי וחזק יותר.</div></div>
         </div>
 
-        <h3 id="sp-visuals"></h3>
+        <h3 id="sp-visuals">קומפוננטות</h3>
         <ul>
-          <li><strong>Dominant color swatch</strong> —     -nm .</li>
-          <li><strong>Saturation bar</strong> —    .         Saturation.</li>
-          <li><strong>Hue hint</strong> —  “Blue/Green/Red-ish”   nm.</li>
+          <li><strong>Dominant color swatch</strong> — בלוק צבע שממחיש את ה-nm המחושב.</li>
+          <li><strong>Saturation bar</strong> — פס שממולא לפי רוויה. יחד עם זה נשאר גם הפס המקורי של Saturation.</li>
+          <li><strong>Hue hint</strong> — טקסט “Blue/Green/Red-ish” לפי טווחי nm.</li>
         </ul>
 
-        <h3 id="sp-howto"> </h3>
+        <h3 id="sp-howto">איך להשתמש</h3>
         <ol>
-          <li> /    (  ).</li>
-          <li>    .</li>
-          <li>  /LED : nm   ,     .</li>
+          <li>הצג אובייקט/משטח צבע במרכז הפריים (או תאורה צבעונית).</li>
+          <li>הפעל מצלמה ותן למדידה להתייצב.</li>
+          <li>השווה בין פילטרים/LEDים שונים: nm אמור לזוז בהתאם, והרווייה תשתנה לפי נקיון הצבע.</li>
         </ol>
 
-        <h3 id="sp-notes"></h3>
+        <h3 id="sp-notes">הערות</h3>
         <ul>
-          <li>  (  )   “”    -ROI.</li>
-          <li> /     nm/.</li>
+          <li>תאורה מעורבת (שני צבעים חזקים) יכולה להטות “דומיננטי” לפי מה שנמצא ב-ROI.</li>
+          <li>איזון לבן/עיבוד מצלמה יכול להשפיע על nm/רוויה.</li>
         </ul>
         
         <h2>Deep dive (v2)</h2>
-        <p>      :      ,     ,      (, ROI,  ,  ,  ').</p>
-        <p>  ,       “ ”, “ ”, “ ”, “ ”, -“ ”     .</p>
-        <h3> </h3>
+        <p>החלק הזה נועד להיות ארוך ומפורט בכוונה: הוא מסביר את כל מרכיבי המסך, את המשמעות שלהם בתהליך קליברציה, ומה בדיוק גורם לערכים להשתנות (חשיפה, ROI, עיבוד מצלמה, תאורה מעורבת, השתקפויות וכו').</p>
+        <p>אם אתה רוצה, אפשר לפרק את ההסבר גם לפי “מה רואים”, “מה לוחצים”, “מה המשמעות”, “איך מאמתים”, ו-“תקלות נפוצות” עם סעיפים מסודרים לכל רכיב.</p>
+        <h3>תקלות נפוצות</h3>
         <ul>
-          <li> :  Freeze,  -,     .</li>
-          <li>   :        Auto White Balance .</li>
-          <li> “ ”:     -ROI    / .</li>
+          <li>ערכים קופצים: נסה Freeze, נטרול אוטו-חשיפה, או החזקת סצנה יציבה יותר.</li>
+          <li>חוסר עקביות בין כלים: בדוק שמקור התאורה לא משתנה בזמן ושאין Auto White Balance קיצוני.</li>
+          <li>תוצאה “לא הגיונית”: בדוק מה נמצא במרכז ה-ROI והאם יש השתקפות חזקה/צבע דומיננטי.</li>
         </ul>
     ` }
   };
@@ -20413,8 +21903,8 @@ reliable measurement</div>
 </div>
 </div>
 <div class="hint" id="hint">
-                 HTTPS  localhost.
-            /  –  Permissions .
+        כדי שהמצלמה תעבוד במובייל צריך להגיש את הקובץ דרך HTTPS או localhost.
+        אם אתה רואה מסך שחור/אין הרשאה – בדוק Permissions במכשיר.
       </div>
 </div>
 <!-- hidden work canvas -->
@@ -20720,7 +22210,7 @@ document.getElementById('saveBtn').addEventListener('click', () => {
   try{
     if(!navigator.mediaDevices?.getUserMedia){
       document.getElementById('hint').textContent =
-        "   -getUserMedia.  Chrome/Safari .";
+        "הדפדפן לא תומך ב-getUserMedia. נסה Chrome/Safari עדכני.";
       return;
     }
     await startCamera();
@@ -20728,8 +22218,8 @@ document.getElementById('saveBtn').addEventListener('click', () => {
   }catch(err){
     console.error(err);
     document.getElementById('hint').textContent =
-      "   .   ,    HTTPS  localhost.\n" +
-      (err?.message ? (": " + err.message) : "");
+      "לא הצלחתי לפתוח מצלמה. ודא הרשאות מצלמה, ושהאתר רץ תחת HTTPS או localhost.\n" +
+      (err?.message ? ("שגיאה: " + err.message) : "");
   }
 })();
 </script>
