@@ -1,6 +1,7 @@
 {
-  "name": "Color Picker",
-  "short_name": "ColorPicker",
+  "name": "Color Whisper",
+  "short_name": "Whisper",
+  "description": "Instant color sampling & calibration.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -2,9 +2,10 @@
 <html lang="en" dir="ltr">
 <!-- version: ms20 -->
 <head>
+  <link rel="manifest" href="manifest.json">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Color Picker • ms19</title>
+  <title>Color Whisper</title>
   <meta name="app-build" content="ms19">
   <style>
 
@@ -2788,13 +2789,17 @@ body{ overflow-y: auto !important; } /* keep vertical scroll if needed */
 </style>
 
   <meta name="theme-color" content="#0b0f14">
-  <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="ColorPicker">
+  <meta name="apple-mobile-web-app-title" content="Color Whisper">
   <link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
+<div id="ms33-badge" style="position:fixed;top:10px;left:10px;z-index:999997;
+background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.14);color:rgba(255,255,255,.75);
+font:12px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial;padding:6px 10px;border-radius:999px;backdrop-filter:blur(8px)">
+  Color Whisper • ms33
+</div>
 
 <script>
 // ===== GLOBAL Transparent Flag (single source of truth) =====
@@ -8709,66 +8714,54 @@ function renderDash(){
 </script>
 
 <style>
-  /* --- PWA Install Gate (ms32) --- */
+  /* --- PWA Install Gate (ms33) --- */
   #pwaGate{position:fixed;inset:0;z-index:999999;background:rgba(5,8,12,.78);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:18px}
-  #pwaCard{width:min(520px,100%);border-radius:18px;background:rgba(17,24,39,.92);border:1px solid rgba(255,255,255,.10);box-shadow:0 20px 60px rgba(0,0,0,.45);color:#e5e7eb;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
-  #pwaCard .hd{padding:18px 18px 10px}
-  #pwaCard h1{margin:0 0 6px;font-size:20px;letter-spacing:.2px}
-  #pwaCard p{margin:0;color:rgba(229,231,235,.82);font-size:13px;line-height:1.35}
-  #pwaSteps{padding:12px 18px 0;display:grid;gap:10px}
+  #pwaGate[hidden]{display:none}
+  #pwaCard{width:min(560px,100%);border-radius:20px;background:rgba(17,24,39,.92);border:1px solid rgba(255,255,255,.12);box-shadow:0 22px 70px rgba(0,0,0,.55);color:#e5e7eb;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;overflow:hidden;position:relative}
+  #pwaTop{display:flex;gap:14px;align-items:center;padding:18px 18px 12px}
+  #pwaIcon{width:56px;height:56px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);display:grid;place-items:center;overflow:hidden}
+  #pwaIcon img{width:100%;height:100%;object-fit:cover}
+  #pwaTitleWrap h1{margin:0 0 4px;font-size:20px;letter-spacing:.2px}
+  #pwaTitleWrap p{margin:0;color:rgba(229,231,235,.82);font-size:13px;line-height:1.35}
+  #pwaSteps{padding:8px 18px 0;display:grid;gap:10px}
   .pwaStep{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:rgba(229,231,235,.9)}
   .pwaStep .k{color:rgba(229,231,235,.75)}
   #pwaBarWrap{margin:14px 18px 0;height:10px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
   #pwaBar{height:100%;width:0%}
   #pwaBtns{display:flex;gap:10px;flex-wrap:wrap;padding:16px 18px 18px}
-  .pwaBtn{appearance:none;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#e5e7eb;border-radius:12px;padding:10px 12px;font-weight:600;font-size:13px;cursor:pointer}
+  .pwaBtn{appearance:none;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#e5e7eb;border-radius:12px;padding:10px 12px;font-weight:700;font-size:13px;cursor:pointer}
   .pwaBtn.primary{background:rgba(59,130,246,.22);border-color:rgba(59,130,246,.45)}
   .pwaBtn:disabled{opacity:.55;cursor:not-allowed}
   #pwaNote{padding:0 18px 16px;color:rgba(229,231,235,.75);font-size:12px}
-  /* Debug strip */
-  #pwaDebug{position:fixed;left:12px;right:12px;bottom:12px;z-index:999998;
-    background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.14);
-    color:#e5e7eb;border-radius:14px;padding:10px 12px;font:12px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial;
-    display:flex;gap:10px;align-items:center;justify-content:space-between}
-  #pwaDebug code{color:#fff;background:rgba(255,255,255,.08);padding:3px 6px;border-radius:8px}
-  #pwaDebug .left{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  #pwaDebug .right{display:flex;gap:8px;align-items:center}
-  #pwaDebug button{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:#e5e7eb;border-radius:10px;padding:6px 8px;font-weight:700;cursor:pointer}
+  #pwaVer{position:absolute;top:10px;right:12px;font-size:11px;color:rgba(229,231,235,.55)}
 </style>
 
-<div id="pwaGate" role="dialog" aria-modal="true" aria-label="Install app" style="display:none">
-  <div id="pwaCard">
-    <div class="hd">
-      <h1>Welcome</h1>
-      <p>Install this tool as an app for faster launch, offline caching, and full‑screen mode.</p>
+<div id="pwaGate" hidden>
+  <div id="pwaCard" role="dialog" aria-modal="true" aria-label="Install app">
+    <div id="pwaVer">ms33</div>
+    <div id="pwaTop">
+      <div id="pwaIcon"><img src="icon-192.png" alt="Color Whisper icon"></div>
+      <div id="pwaTitleWrap">
+        <h1>Welcome to Color Whisper</h1>
+        <p>Instant color sampling & calibration. Install for faster launch and full-screen mode.</p>
+      </div>
     </div>
+
     <div id="pwaSteps">
-      <div class="pwaStep"><span>Browser</span><span class="k" id="pwaBrowser">…</span></div>
-      <div class="pwaStep"><span>Service Worker</span><span class="k" id="pwaSW">…</span></div>
-      <div class="pwaStep"><span>Manifest</span><span class="k" id="pwaMan">…</span></div>
-      <div class="pwaStep"><span>Installability</span><span class="k" id="pwaInst">…</span></div>
+      <div class="pwaStep"><span>Service Worker</span><span class="k" id="pwaSW">checking…</span></div>
+      <div class="pwaStep"><span>Manifest</span><span class="k" id="pwaMan">checking…</span></div>
+      <div class="pwaStep"><span>Install</span><span class="k" id="pwaInst">waiting…</span></div>
+      <div class="pwaStep"><span>Auto-close</span><span class="k" id="pwaTimer">10s</span></div>
     </div>
+
     <div id="pwaBarWrap"><div id="pwaBar"></div></div>
-    <div id="pwaNote" id="pwaTip">Tip: on desktop Chrome, install is often in ⋮ menu → “Install app”.</div>
+    <div id="pwaNote">Tip: On Chrome/Edge, install can appear in the ⋮ menu as “Install app”. On iOS: Share → Add to Home Screen.</div>
+
     <div id="pwaBtns">
       <button class="pwaBtn primary" id="pwaInstallBtn" disabled>Install</button>
-      <button class="pwaBtn" id="pwaContinueBtn">Continue in browser</button>
-      <button class="pwaBtn" id="pwaResetBtn" title="Clear PWA gate dismissal">Reset gate</button>
+      <button class="pwaBtn" id="pwaContinueBtn">Continue</button>
+      <button class="pwaBtn" id="pwaResetBtn">Reset</button>
     </div>
-  </div>
-</div>
-
-<div id="pwaDebug">
-  <div class="left">
-    <span>PWA</span>
-    <span>SW:<code id="dbgSW">?</code></span>
-    <span>Manifest:<code id="dbgMan">?</code></span>
-    <span>Prompt:<code id="dbgPrompt">?</code></span>
-    <span>Mode:<code id="dbgMode">browser</code></span>
-  </div>
-  <div class="right">
-    <button id="dbgShow">Show Install</button>
-    <button id="dbgClear">Clear Site Data</button>
   </div>
 </div>
 
@@ -8781,170 +8774,150 @@ function renderDash(){
   const continueBtn = $("pwaContinueBtn");
   const resetBtn = $("pwaResetBtn");
 
-  const dbgSW = $("dbgSW"), dbgMan=$("dbgMan"), dbgPrompt=$("dbgPrompt"), dbgMode=$("dbgMode");
-  const showBtn=$("dbgShow"), clearBtn=$("dbgClear");
-
-  const isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
-  dbgMode.textContent = isStandalone ? "standalone" : "browser";
-
-  // Dismiss logic (per-day)
   const dayKey = "pwaGateDismissedDay";
   const today = new Date().toISOString().slice(0,10);
 
+  let deferredPrompt = null;
+  let countdown = 10;
+  let countdownInt = null;
+
   function setBar(p){ bar.style.width = Math.max(0,Math.min(100,p)) + "%"; }
-  function setBarColor(ok){
-    bar.style.background = ok ? "rgba(34,197,94,.9)" : "rgba(59,130,246,.9)";
+  function setBarOk(ok){ bar.style.background = ok ? "rgba(34,197,94,.9)" : "rgba(59,130,246,.9)"; }
+
+  async function checkManifest(){
+    try {
+      const r = await fetch("./manifest.json", {cache:"no-store"});
+      $("pwaMan").textContent = r.ok ? "loaded" : ("HTTP " + r.status);
+      return r.ok;
+    } catch(e) {
+      $("pwaMan").textContent = "fetch failed";
+      return false;
+    }
   }
 
-  let deferredPrompt = null;
-
-  // --- SW status ---
   async function checkSW(){
     if (!('serviceWorker' in navigator)) {
       $("pwaSW").textContent = "not supported";
-      dbgSW.textContent = "no";
       return false;
     }
-    try{
+    try {
       const reg = await navigator.serviceWorker.getRegistration();
       const controlled = !!navigator.serviceWorker.controller;
-      $("pwaSW").textContent = (reg ? (controlled ? "active+controlled" : "active (not controlling yet)") : "not registered");
-      dbgSW.textContent = reg ? (controlled ? "ok" : "wait") : "no";
-      return reg && controlled;
-    }catch(e){
+      $("pwaSW").textContent = reg ? (controlled ? "active+controlled" : "active (reload once)") : "not registered";
+      return !!(reg && controlled);
+    } catch(e) {
       $("pwaSW").textContent = "error";
-      dbgSW.textContent = "err";
       return false;
     }
   }
 
-  // --- Manifest status ---
-  async function checkManifest(){
-    try{
-      const res = await fetch("./manifest.json", {cache:"no-store"});
-      const ok = res.ok;
-      $("pwaMan").textContent = ok ? "loaded" : ("HTTP " + res.status);
-      dbgMan.textContent = ok ? "ok" : ("HTTP"+res.status);
-      return ok;
-    }catch(e){
-      $("pwaMan").textContent = "fetch failed";
-      dbgMan.textContent = "err";
-      return false;
-    }
+  function startCountdown(){
+    $("pwaTimer").textContent = countdown + "s";
+    countdownInt = setInterval(()=>{
+      countdown -= 1;
+      $("pwaTimer").textContent = Math.max(0,countdown) + "s";
+      setBar(100 * (1 - (countdown/10)));
+      if (countdown <= 0) {
+        clearInterval(countdownInt);
+        // Auto-close after 10s (keeps ability to install via menu later)
+        localStorage.setItem(dayKey, today);
+        gate.hidden = true;
+      }
+    }, 1000);
   }
 
-  function setBrowserLine(){
-    const ua = navigator.userAgent;
-    const isIOS = /iPad|iPhone|iPod/.test(ua);
-    const isChrome = /Chrome\//.test(ua) && !/Edg\//.test(ua);
-    $("pwaBrowser").textContent = isIOS ? "iOS Safari/WebKit" : (isChrome ? "Chrome" : "Browser");
-  }
-
-  // --- Install prompt hooks ---
   window.addEventListener('beforeinstallprompt', (e)=>{
     e.preventDefault();
     deferredPrompt = e;
-    dbgPrompt.textContent = "ready";
-    $("pwaInst").textContent = "prompt available";
+    $("pwaInst").textContent = "prompt ready ✅";
     installBtn.disabled = false;
   });
 
   window.addEventListener('appinstalled', ()=>{
-    dbgPrompt.textContent = "installed";
     $("pwaInst").textContent = "installed ✅";
-    setBar(100); setBarColor(true);
-    setTimeout(()=>{ gate.style.display="none"; }, 800);
+    setBar(100); setBarOk(true);
+    setTimeout(()=> gate.hidden = true, 800);
   });
 
   installBtn.addEventListener('click', async ()=>{
-    if (!deferredPrompt){
-      $("pwaInst").textContent = "no prompt (try ⋮ menu)";
+    if (!deferredPrompt) {
+      $("pwaInst").textContent = "no prompt (use ⋮ menu)";
       return;
     }
     $("pwaInst").textContent = "opening prompt…";
     deferredPrompt.prompt();
-    const choice = await deferredPrompt.userChoice.catch(()=>null);
+    try {
+      const choice = await deferredPrompt.userChoice;
+      $("pwaInst").textContent = "user: " + choice.outcome;
+    } catch(e) {
+      $("pwaInst").textContent = "done";
+    }
     deferredPrompt = null;
-    dbgPrompt.textContent = choice ? choice.outcome : "done";
-    $("pwaInst").textContent = choice ? ("user: " + choice.outcome) : "done";
+    installBtn.disabled = true;
   });
 
   continueBtn.addEventListener('click', ()=>{
     localStorage.setItem(dayKey, today);
-    gate.style.display = "none";
+    gate.hidden = true;
   });
 
   resetBtn.addEventListener('click', ()=>{
     localStorage.removeItem(dayKey);
-    gate.style.display = "none";
-    setTimeout(()=>showGate(true), 50);
-  });
-
-  // Debug actions
-  showBtn.addEventListener('click', ()=>showGate(true));
-  clearBtn.addEventListener('click', async ()=>{
-    // Best-effort clear
-    try{
-      localStorage.clear();
-      sessionStorage.clear();
-      if ('caches' in window) {
-        const keys = await caches.keys();
-        await Promise.all(keys.map(k=>caches.delete(k)));
-      }
-      if ('serviceWorker' in navigator) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map(r=>r.unregister()));
-      }
-    }catch(e){}
-    location.reload();
+    gate.hidden = true;
+    setTimeout(()=> showGate(true), 50);
   });
 
   async function showGate(force){
-    if (isStandalone) return; // don't show if already installed
+    // Don't show in standalone
+    const isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+    if (isStandalone) return;
+
     const dismissed = localStorage.getItem(dayKey) === today;
     if (dismissed && !force) return;
 
-    gate.style.display = "flex";
-    setBar(10); setBarColor(false);
-    setBrowserLine();
-    $("pwaInst").textContent = "checking…";
-    dbgPrompt.textContent = deferredPrompt ? "ready" : "no";
+    gate.hidden = false;
+    setBarOk(false);
+    setBar(0);
 
-    const m = await checkManifest();
-    setBar(35);
+    // Start countdown immediately (8-10s requested; we use 10s)
+    countdown = 10;
+    if (countdownInt) clearInterval(countdownInt);
+    startCountdown();
+
+    // Checks
+    const mOk = await checkManifest();
+    setBar(20);
     const swOk = await checkSW();
-    setBar(60);
+    setBar(40);
 
     // iOS hint
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     if (isIOS) {
       $("pwaInst").textContent = "iOS: Share → Add to Home Screen";
       installBtn.disabled = true;
-      dbgPrompt.textContent = "ios";
     } else {
       if (!deferredPrompt) {
-        $("pwaInst").textContent = "if eligible: use ⋮ menu → Install app";
+        $("pwaInst").textContent = swOk && mOk ? "use ⋮ menu → Install app" : "fix SW/manifest then try";
       }
     }
+
     // If SW not controlling yet, suggest reload
     if (!swOk) {
-      $("pwaInst").textContent = "Reload once to let SW control, then try ⋮ menu";
+      $("pwaInst").textContent = "Reload once so SW controls, then install";
     }
-    setBar(90);
   }
 
-  // Register SW (static)
+  // Register SW
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', ()=>{
       navigator.serviceWorker.register('./sw.js').catch(()=>{});
-      setTimeout(()=>{ checkSW(); }, 800);
+      // give controller a moment on first load
+      setTimeout(()=>{ checkSW(); }, 900);
     });
-  } else {
-    dbgSW.textContent = "no";
   }
 
-  // Initial
-  setTimeout(()=>showGate(false), 250);
+  // Auto show
+  setTimeout(()=> showGate(false), 250);
 })();
 </script>
 </body>
