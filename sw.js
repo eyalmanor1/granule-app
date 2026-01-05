@@ -1,30 +1,49 @@
-const CACHE_NAME = "color-whisper-v3";
-const CORE = ["./","./index.html","./manifest.json",
-  "./icon-192.png","./icon-512.png",
-  "./apple-touch-icon-120.png","./apple-touch-icon-152.png","./apple-touch-icon-167.png","./apple-touch-icon-180.png"
+const CACHE_NAME = 'vsa-cache-v1';
+const ASSETS = [
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-512-maskable.png'
 ];
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()));
+self.addEventListener('install', (event) => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.addAll(ASSETS);
+    self.skipWaiting();
+  })());
 });
 
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.map(k => k===CACHE_NAME ? null : caches.delete(k))))
-      .then(()=>self.clients.claim())
-  );
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k => (k === CACHE_NAME ? null : caches.delete(k))));
+    self.clients.claim();
+  })());
 });
 
-self.addEventListener("fetch", (event) => {
+self.addEventListener('fetch', (event) => {
   const req = event.request;
-  if (req.method !== "GET") return;
-  event.respondWith(
-    caches.match(req).then((cached) => {
-      const fetchPromise = fetch(req).then((res) => {
-        caches.open(CACHE_NAME).then(c=>c.put(req, res.clone())).catch(()=>{});
-        return res;
-      }).catch(() => cached || caches.match("./index.html"));
-      return cached || fetchPromise;
-    })
-  );
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    const cached = await cache.match(req, {ignoreSearch:true});
+    if (cached) return cached;
+    try{
+      const res = await fetch(req);
+      // Cache same-origin GET requests
+      if (req.method === 'GET' && new URL(req.url).origin === self.location.origin) {
+        cache.put(req, res.clone());
+      }
+      return res;
+    }catch(e){
+      // Fallback to cached index for navigation
+      if (req.mode === 'navigate') {
+        const idx = await cache.match('./index.html');
+        if (idx) return idx;
+      }
+      throw e;
+    }
+  })());
 });
