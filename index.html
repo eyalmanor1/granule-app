@@ -2800,6 +2800,7 @@ body{ overflow-y: auto !important; } /* keep vertical scroll if needed */
   <link rel="apple-touch-icon" href="apple-touch-icon-180.png">
 </head>
 <body>
+<div id="appRoot">
 <script>
 // ===== GLOBAL Transparent Flag (single source of truth) =====
 (function(){
@@ -8715,7 +8716,58 @@ function renderDash(){
 <style>
   <style>
   <style>
-  /* --- PWA Install Gate (ms36) --- */
+  /* --- PWA Install Gate (ms37) --- */
+
+  /* Mobile WOW mode: fullscreen terminal installer (ms37) */
+  #cwWin { max-width: 740px; }
+  #cwLog { text-shadow: 0 0 10px rgba(59,130,246,.18); }
+  @media (max-width: 820px){
+    #pwaGate { padding: 0; background: rgba(6,8,12,.88); backdrop-filter: blur(14px); }
+    #cwWin { width: 100%; height: 100%; border-radius: 0; border-left: none; border-right:none; border-top:none; border-bottom:none; box-shadow: none; }
+    #cwTitlebar { padding: 14px 14px; }
+    #cwTitlebar .name { font-size: 15px; }
+    #cwBody { grid-template-columns: 1fr; }
+    #cwTabs { margin: 0 0 12px; }
+    #cwMain { padding: 14px; }
+    #cwMain h3 { font-size: 14px; }
+    #cwLog {
+      height: calc(100vh - 210px);
+      min-height: 320px;
+      font-size: 14px;
+      line-height: 1.45;
+      background: rgba(0,0,0,.55);
+      border-color: rgba(255,255,255,.12);
+    }
+    #cwStatus { font-size: 13px; }
+    #cwBarOuter { height: 14px; }
+    #cwFooter { padding: 14px; position: sticky; bottom: 0; }
+    #cwFooter .hint { display:none; } /* cleaner mobile terminal look */
+    #cwBtns .cwBtn { padding: 12px 16px; font-size: 14px; border-radius: 12px; }
+    /* subtle scanline effect */
+    #cwWin::before{
+      content:"";
+      position:absolute; inset:0;
+      pointer-events:none;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,.03) 0px,
+        rgba(255,255,255,.03) 1px,
+        rgba(0,0,0,0) 3px,
+        rgba(0,0,0,0) 6px
+      );
+      mix-blend-mode: overlay;
+      opacity:.22;
+    }
+    #cwWin { position: relative; }
+  }
+
+
+
+  /* Hard visual gate: app is hidden until install flow completes (ms37) */
+  body.cw-installing { overflow: hidden !important; }
+  body.cw-installing #appRoot { display: none !important; }
+
+
 
   /* Mobile / small screens: show details properly (ms36) */
   #cwTabs{display:none;gap:8px;align-items:center;justify-content:flex-start;margin:0 0 10px}
@@ -8784,6 +8836,7 @@ function renderDash(){
   #iosCard .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
 </style>
 
+</div>
 <div id="pwaGate">
   <div id="cwWin" role="dialog" aria-modal="true" aria-label="Install Color Whisper">
     <div id="cwTitlebar">
@@ -8791,7 +8844,7 @@ function renderDash(){
         <div id="cwAppIcon"><img src="icon-192.png" alt="Color Whisper icon"></div>
         <div class="name">Color Whisper Setup</div>
       </div>
-      <div class="ver">ms36</div>
+      <div class="ver">ms37</div>
     </div>
 
     <div id="cwBody">
@@ -8988,7 +9041,7 @@ function renderDash(){
         etaEl.textContent = "~0s";
         setPct(100);
         localStorage.setItem(dayKey, today);
-        setTimeout(()=>{ document.getElementById("pwaGate").hidden = true; }, 650);
+        setTimeout(()=>{ document.getElementById("pwaGate").hidden = true; document.body.classList.remove("cw-installing"); document.body.classList.remove("cw-installing"); }, 650);
       }
     }, tickMs);
   }
@@ -9036,17 +9089,18 @@ function renderDash(){
     iosSteps.style.display="none";
     // keep them on page; they can switch to the home screen icon manually
     localStorage.setItem(dayKey, today);
-    document.getElementById("pwaGate").hidden = true;
+    document.getElementById("pwaGate").hidden = true; document.body.classList.remove("cw-installing");
   });
 
   function init(){
+    document.body.classList.add("cw-installing");
     // Do not show inside standalone
     const isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
-    if (isStandalone) return;
+    if (isStandalone){ document.body.classList.remove("cw-installing"); return; }
 
     // Show gate unless already dismissed today
     const dismissed = localStorage.getItem(dayKey) === today;
-    if (dismissed) return;
+    if (dismissed){ document.body.classList.remove("cw-installing"); return; }
 
     appendLine("[setup] Ready. Click Install to begin.");
     hintEl.textContent = isIOS()
