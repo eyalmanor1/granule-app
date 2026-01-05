@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Color Whisper Setup</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b0f14">
@@ -101,6 +101,12 @@
     #cwDoneCard p{margin:0 0 12px;color:rgba(229,231,235,.78);font-size:13px;line-height:1.4}
     #cwDoneCard .row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     #cwDoneCard .small{font-size:11px;color:rgba(229,231,235,.6)}
+
+    /* cwAndroidFix */
+    html,body{overflow:hidden}
+    /* Prevent accidental selection/scroll while installer is running */
+    body{-webkit-user-select:none;user-select:none}
+
 </style>
 </head>
 <body>
@@ -109,7 +115,7 @@
 (function(){
   try {
     if (localStorage.getItem("cw_installed_once") === "1") {
-      location.replace("./app.html");
+      location.replace("./app.html?v=ms39");
     }
   } catch(e) {}
 })();
@@ -175,6 +181,8 @@
   </div>
 
 <script>
+/* cwForceSwUpdate */
+if ("serviceWorker" in navigator) { navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{}); }
 (function(){
   const $ = (id)=>document.getElementById(id);
   const log = $("cwLog");
@@ -286,7 +294,7 @@ const pctEl = $("cwPct");
         if (done){ done.style.display="flex"; }
         if (!isIOS()){
           if (doneMsg) doneMsg.textContent = "Opening the app…";
-          setTimeout(()=>location.replace("./app.html"), 1200);
+          setTimeout(()=>location.replace("./app.html?v=ms39"), 1200);
         } else {
           if (doneMsg) doneMsg.textContent = "Now open the new Home Screen icon."; 
         }
@@ -297,7 +305,7 @@ const pctEl = $("cwPct");
 
   // If already installed and opened from icon, go straight to app
   if (isStandalone()) {
-    location.replace("./app.html");
+    location.replace("./app.html?v=ms39");
     return;
   }
 
@@ -317,7 +325,7 @@ const pctEl = $("cwPct");
     try{ localStorage.setItem("cw_installed_once","1"); }catch(e){}
     if (done){ done.style.display="flex"; }
     if (doneMsg) doneMsg.textContent = "Opening the app…";
-    setTimeout(()=>location.replace("./app.html"), 900);
+    setTimeout(()=>location.replace("./app.html?v=ms39"), 900);
   });
 
   appendLine("[setup] Ready. Tap Install to continue.");
@@ -359,7 +367,7 @@ const pctEl = $("cwPct");
   if (openNow){
     openNow.addEventListener('click', ()=>{
       try{ localStorage.setItem("cw_installed_once","1"); }catch(e){}
-      location.replace("./app.html");
+      location.replace("./app.html?v=ms39");
     });
   }
 
