@@ -1,24 +1,11 @@
 <!doctype html>
 <html lang="en" dir="ltr">
-<!-- version: ms30 -->
+<!-- version: ms31 -->
 <head>
-<script id="ms30-install-guard">
-(function() {
-  try {
-    const isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
-    const installed = localStorage.getItem('vsa_installed') === '1';
-    if (!isStandalone && !installed) {
-      // Block app from loading before installation is completed
-      location.replace('./index.html');
-    }
-  } catch (e) {}
-})();
-</script>
-
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Vision System Autopilot (VSA) • ms30</title>
-  <meta name="app-build" content="ms29">
+  <title>Color Picker • ms29</title>
+  <meta name="app-build" content="ms31">
   <style>
 
     :root{
@@ -2987,7 +2974,75 @@ body{ overflow-y: auto !important; } /* keep vertical scroll if needed */
 </head>
 <body>
 
-<main class="phone" id="appRoot">
+<!-- ===== ms29: PWA Install Gate ===== -->
+<div class="pwaGate" id="pwaInstallGate" aria-hidden="true">
+  <div class="pwaCard" role="dialog" aria-modal="true" aria-label="Install App">
+    <div class="pwaTop">
+      <div class="pwaBrand">
+        <div class="pwaRow" style="gap:12px">
+          <div class="pwaLogo" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v6"/><path d="M12 22v-6"/><path d="M2 12h6"/><path d="M22 12h-6"/><path d="M7.5 7.5l3 3"/><path d="M16.5 16.5l-3-3"/><path d="M16.5 7.5l-3 3"/><path d="M7.5 16.5l3-3"/>
+            </svg>
+          </div>
+          <div style="min-width:0">
+            <h2 class="pwaTitle">Welcome</h2>
+            <div class="pwaSub">Install this tool as an app for faster launch, offline caching, and full‑screen mode.</div>
+          </div>
+        </div>
+        <div class="pwaMini">
+          <div class="pill" id="pwaEnvPill">Browser</div>
+        </div>
+      </div>
+
+      <div class="pwaSteps" aria-label="Install progress">
+        <div class="pwaStep active" id="pwaStep1"><div class="pwaRow"><span class="pwaDot"></span><span class="k">Preparing</span></div><span class="v" id="pwaV1">0%</span></div>
+        <div class="pwaStep" id="pwaStep2"><div class="pwaRow"><span class="pwaDot"></span><span class="k">Downloading</span></div><span class="v" id="pwaV2">—</span></div>
+        <div class="pwaStep" id="pwaStep3"><div class="pwaRow"><span class="pwaDot"></span><span class="k">Installing</span></div><span class="v" id="pwaV3">—</span></div>
+      </div>
+
+      <div class="pwaProg" aria-hidden="true"><i id="pwaProgBar"></i></div>
+      <div class="pwaHint" id="pwaHint">
+        Tip: after install, open from your <b>Home Screen</b> for the full app experience.
+      </div>
+    </div>
+
+    <div class="pwaActions">
+      <button class="pwaBtn" id="pwaInstallBtn" type="button">Install</button>
+      <button class="pwaBtn secondary" id="pwaLaterBtn" type="button">Continue in browser</button>
+      <button class="pwaBtn" id="pwaOpenBtn" type="button" style="display:none">Open app</button>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+// ===== GLOBAL Transparent Flag (single source of truth) =====
+(function(){
+  // If some script already defined getTransparentFlag(), reuse it.
+  if(typeof window.getTransparentFlag === 'function') return;
+  if(typeof window.getTransparentFlag !== 'function'){
+    window.getTransparentFlag = function(){
+      try{
+        if(window.__appFlags && typeof window.__appFlags.transparent === 'boolean'){
+          return !!window.__appFlags.transparent;
+        }
+      }catch(_){}
+      try{
+        const cb = document.getElementById('transparentToggle');
+        if(cb && typeof cb.checked === 'boolean') return !!cb.checked;
+      }catch(_){}
+      try{
+        const v = localStorage.getItem('transparentFlag');
+        if(v !== null) return v === '1';
+      }catch(_){}
+      return false;
+    };
+  }
+})();
+</script>
+<main class="phone">
   
     
 
@@ -8876,17 +8931,348 @@ function renderDash(){
 
 
 
-<script id="ms30-sw">
-(function() {
-  if (!('serviceWorker' in navigator)) return;
-  // Register SW for offline + caching
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('./sw.js').catch(function(e) {
-      console.warn('SW register failed', e);
-    });
+<script id="ms29-pwa-js">
+(function(){
+  "use strict";
+
+  const BUILD = "ms29";
+
+  // --- Helpers
+  const $ = (id)=>document.getElementById(id);
+  const gate = $("pwaInstallGate");
+  if(!gate) return;
+
+  const step1 = $("pwaStep1"), step2 = $("pwaStep2"), step3 = $("pwaStep3");
+  const v1 = $("pwaV1"), v2 = $("pwaV2"), v3 = $("pwaV3");
+  const bar = $("pwaProgBar");
+  const hint = $("pwaHint");
+  const btnInstall = $("pwaInstallBtn");
+  const btnLater = $("pwaLaterBtn");
+  const btnOpen = $("pwaOpenBtn");
+  const envPill = $("pwaEnvPill");
+
+  const ua = navigator.userAgent || "";
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isAndroid = /Android/i.test(ua);
+
+  function isStandalone(){
+    try{
+      if(window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
+      if(window.navigator && "standalone" in window.navigator) return !!window.navigator.standalone; // iOS Safari
+    }catch(_){}
+    return false;
+  }
+
+  function setGate(on){
+    gate.classList.toggle("on", !!on);
+    gate.setAttribute("aria-hidden", on ? "false" : "true");
+    if(on){
+      try{ document.body.style.overflow = "hidden"; }catch(_){}
+    }else{
+      try{ document.body.style.overflow = ""; }catch(_){}
+    }
+  }
+
+  function markStep(el, state){
+    el.classList.remove("active","done");
+    if(state==="active") el.classList.add("active");
+    if(state==="done") el.classList.add("done");
+  }
+
+  function setProg(p){
+    const pp = Math.max(0, Math.min(100, p|0));
+    bar.style.width = pp + "%";
+  }
+
+  function nowDayKey(){
+    const d = new Date();
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  }
+
+  // --- PWA bits: inline manifest + inline service worker (Blob)
+  function ensureManifest(){
+    try{
+      if(document.querySelector('link[rel="manifest"]')) return;
+      const manifest = {
+        name: "Color Picker",
+        short_name: "ColorPicker",
+        start_url: "./?pwa=1",
+        scope: "./",
+        display: "standalone",
+        background_color: "#020617",
+        theme_color: "#020617",
+        description: "Industrial color sampling + calibration tool.",
+        icons: [
+          { src: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%20192%20192%22%3E%0A%3Cdefs%3E%0A%3CradialGradient%20id%3D%22g%22%20cx%3D%2230%25%22%20cy%3D%2230%25%22%20r%3D%2280%25%22%3E%0A%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ffffff%22%20stop-opacity%3D%22.28%22%2F%3E%0A%3Cstop%20offset%3D%220.45%22%20stop-color%3D%22%235ae6ff%22%20stop-opacity%3D%22.22%22%2F%3E%0A%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23020617%22%2F%3E%0A%3C%2FradialGradient%3E%0A%3C%2Fdefs%3E%0A%3Crect%20width%3D%22192%22%20height%3D%22192%22%20rx%3D%2244%22%20fill%3D%22url%28%23g%29%22%2F%3E%0A%3Cpath%20d%3D%22M96%2026v32M96%20166v-32M26%2096h32M166%2096h-32M62%2062l20%2020M130%20130l-20-20M130%2062l-20%2020M62%20130l20-20%22%20stroke%3D%22%23ffffff%22%20stroke-opacity%3D%22.9%22%20stroke-width%3D%2210%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%0A%3C%2Fsvg%3E", sizes: "192x192", type: "image/svg+xml", purpose: "any" },
+          { src: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%20192%20192%22%3E%0A%3Cdefs%3E%0A%3CradialGradient%20id%3D%22g%22%20cx%3D%2230%25%22%20cy%3D%2230%25%22%20r%3D%2280%25%22%3E%0A%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ffffff%22%20stop-opacity%3D%22.28%22%2F%3E%0A%3Cstop%20offset%3D%220.45%22%20stop-color%3D%22%235ae6ff%22%20stop-opacity%3D%22.22%22%2F%3E%0A%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23020617%22%2F%3E%0A%3C%2FradialGradient%3E%0A%3C%2Fdefs%3E%0A%3Crect%20width%3D%22192%22%20height%3D%22192%22%20rx%3D%2244%22%20fill%3D%22url%28%23g%29%22%2F%3E%0A%3Cpath%20d%3D%22M96%2026v32M96%20166v-32M26%2096h32M166%2096h-32M62%2062l20%2020M130%20130l-20-20M130%2062l-20%2020M62%20130l20-20%22%20stroke%3D%22%23ffffff%22%20stroke-opacity%3D%22.9%22%20stroke-width%3D%2210%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%0A%3C%2Fsvg%3E", sizes: "512x512", type: "image/svg+xml", purpose: "any" }
+        ]
+      };
+      const blob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("link");
+      link.rel = "manifest";
+      link.href = url;
+      document.head.appendChild(link);
+
+      // Theme color for install UI
+      let tc = document.querySelector('meta[name="theme-color"]');
+      if(!tc){
+        tc = document.createElement("meta");
+        tc.setAttribute("name","theme-color");
+        document.head.appendChild(tc);
+      }
+      tc.setAttribute("content","#020617");
+    }catch(_{}){}
+  }
+
+  function ensureServiceWorker(){
+    try{
+      if(!("serviceWorker" in navigator)) return;
+      // Use a versioned SW so updates propagate.
+      const CACHE = "cpwa-" + BUILD;
+      const swSrc = `
+        const CACHE = ${JSON.stringify("cpwa-"+BUILD)};
+        self.addEventListener('install', (e)=> {
+          e.waitUntil((async()=>{
+            self.skipWaiting();
+            const c = await caches.open(CACHE);
+            try{ await c.addAll(['./']); }catch(_){}
+          })());
+        });
+        self.addEventListener('activate', (e)=> {
+          e.waitUntil((async()=>{
+            const keys = await caches.keys();
+            await Promise.all(keys.map(k => (k===CACHE)?null:caches.delete(k)));
+            self.clients.claim();
+          })());
+        });
+        self.addEventListener('fetch', (e)=> {
+          const req = e.request;
+          if(req.method !== 'GET') return;
+          e.respondWith((async()=>{
+            const cache = await caches.open(CACHE);
+            const cached = await cache.match(req, {ignoreSearch:false});
+            if(cached) return cached;
+            try{
+              const fresh = await fetch(req);
+              // Best effort cache for same-origin only
+              try{
+                const url = new URL(req.url);
+                if(url.origin === self.location.origin){
+                  cache.put(req, fresh.clone());
+                }
+              }catch(_){}
+              return fresh;
+            }catch(err){
+              // Offline fallback: try root
+              const root = await cache.match('./');
+              return root || new Response('Offline', {status: 200, headers:{'Content-Type':'text/plain'}});
+            }
+          })());
+        });
+      `;
+      const swBlob = new Blob([swSrc], {type:"text/javascript"});
+      const swUrl = URL.createObjectURL(swBlob);
+      navigator.serviceWorker.register(swUrl, {scope:"./"}).catch(()=>{});
+    }catch(_){}
+  }
+
+  ensureManifest();
+  ensureServiceWorker();
+
+  // --- Install prompt handling
+  let deferredPrompt = null;
+
+  window.addEventListener("beforeinstallprompt", (e)=>{
+    try{
+      e.preventDefault();
+      deferredPrompt = e;
+      // Enable install
+      btnInstall.disabled = false;
+      if(envPill) envPill.textContent = isAndroid ? "Android" : "Installable";
+    }catch(_){}
   });
+
+  window.addEventListener("appinstalled", ()=>{
+    try{
+      localStorage.setItem("pwaInstalled","1");
+      hint.innerHTML = "Installed ✔️  Launch from your <b>Home Screen</b> for full-screen mode.";
+      btnInstall.style.display = "none";
+      btnLater.style.display = "none";
+      btnOpen.style.display = "";
+      // short delay then auto-close gate
+      setTimeout(()=>{ setGate(false); }, 700);
+    }catch(_){}
+  });
+
+  function decideShowGate(){
+    try{
+      if(isStandalone()) return false;
+      if(localStorage.getItem("pwaInstalled")==="1") return false;
+
+      // If dismissed today, don't nag
+      const k = "pwaGateDismissedDay";
+      const day = nowDayKey();
+      if(localStorage.getItem(k) === day) return false;
+
+      return true;
+    }catch(_){
+      return true;
+    }
+  }
+
+  function setEnvPill(){
+    if(!envPill) return;
+    if(isStandalone()) envPill.textContent = "App";
+    else if(isIOS) envPill.textContent = "iOS Safari";
+    else if(isAndroid) envPill.textContent = "Android";
+    else envPill.textContent = "Browser";
+  }
+  setEnvPill();
+
+  function runFakeProgress(mode){
+    // mode: "prep" / "download" / "install"
+    const t0 = performance.now();
+    const total = 1200;
+    markStep(step1,"active"); markStep(step2,""); markStep(step3,"");
+    v2.textContent = "—"; v3.textContent = "—";
+    setProg(0);
+    v1.textContent = "0%";
+
+    function tick(now){
+      const dt = Math.min(1, (now - t0)/total);
+      const p = Math.round(dt * 100);
+      v1.textContent = p + "%";
+      setProg(p * 0.33);
+      if(dt < 1){
+        requestAnimationFrame(tick);
+      }else{
+        markStep(step1,"done");
+        markStep(step2,"active");
+        v2.textContent = "0%";
+        // stage 2
+        const t1 = performance.now();
+        const total2 = 1700;
+        const tick2 = (now2)=>{
+          const dt2 = Math.min(1, (now2 - t1)/total2);
+          const p2 = Math.round(dt2 * 100);
+          v2.textContent = p2 + "%";
+          setProg(33 + p2*0.42);
+          if(dt2 < 1){
+            requestAnimationFrame(tick2);
+          }else{
+            markStep(step2,"done");
+            markStep(step3,"active");
+            v3.textContent = "0%";
+            const t2 = performance.now();
+            const total3 = 1400;
+            const tick3 = (now3)=>{
+              const dt3 = Math.min(1, (now3 - t2)/total3);
+              const p3 = Math.round(dt3 * 100);
+              v3.textContent = p3 + "%";
+              setProg(75 + p3*0.25);
+              if(dt3 < 1){
+                requestAnimationFrame(tick3);
+              }else{
+                markStep(step3,"done");
+                setProg(100);
+              }
+            };
+            requestAnimationFrame(tick3);
+          }
+        };
+        requestAnimationFrame(tick2);
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  async function handleInstall(){
+    btnInstall.disabled = true;
+    btnLater.disabled = true;
+    runFakeProgress();
+
+    // iOS: no prompt; show instructions
+    if(!deferredPrompt){
+      if(isIOS){
+        hint.innerHTML = "On iPhone/iPad: tap <b>Share</b> → <b>Add to Home Screen</b> → <b>Add</b>. Then launch from the Home Screen.";
+        btnInstall.textContent = "Got it";
+        btnInstall.disabled = false;
+        btnInstall.onclick = ()=>{
+          try{ localStorage.setItem("pwaGateDismissedDay", nowDayKey()); }catch(_){}
+          setGate(false);
+        };
+        return;
+      }
+
+      // Not installable (desktop / policy)
+      hint.innerHTML = "Install prompt isn't available here. If your browser supports PWA install, use the browser menu → <b>Install App</b>.";
+      btnInstall.disabled = false;
+      btnLater.disabled = false;
+      return;
+    }
+
+    // Use the native prompt
+    try{
+      await deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+
+      if(choice && choice.outcome === "accepted"){
+        hint.innerHTML = "Installing… once done, launch from your <b>Home Screen</b>.";
+        // appinstalled event should follow, but sometimes it's delayed
+        setTimeout(()=>{
+          btnOpen.style.display = "";
+          btnInstall.style.display = "none";
+          btnLater.style.display = "none";
+        }, 900);
+      }else{
+        hint.innerHTML = "Install canceled. You can continue in the browser, or try again later.";
+        btnInstall.disabled = false;
+        btnLater.disabled = false;
+        // mark dismissed today
+        try{ localStorage.setItem("pwaGateDismissedDay", nowDayKey()); }catch(_){}
+      }
+    }catch(_){
+      hint.innerHTML = "Could not open install prompt. You can continue in the browser.";
+      btnInstall.disabled = false;
+      btnLater.disabled = false;
+    }
+  }
+
+  function handleLater(){
+    try{ localStorage.setItem("pwaGateDismissedDay", nowDayKey()); }catch(_){}
+    setGate(false);
+  }
+
+  function handleOpen(){
+    // We cannot force-open the installed app from the browser.
+    // Best effort: close the tab if it was opened by script, otherwise just hide the gate.
+    try{ setGate(false); }catch(_){}
+    try{ window.close(); }catch(_){}
+  }
+
+  btnInstall.disabled = false;
+  btnInstall.addEventListener("click", handleInstall);
+  btnLater.addEventListener("click", handleLater);
+  btnOpen.addEventListener("click", handleOpen);
+
+  // Show gate on first load (unless already standalone)
+  if(decideShowGate()){
+    // If install prompt hasn't arrived yet, keep button enabled but explain
+    if(isIOS){
+      hint.innerHTML = "On iPhone/iPad: tap <b>Share</b> → <b>Add to Home Screen</b> → <b>Add</b>. Then launch from the Home Screen.";
+    }else{
+      hint.innerHTML = "Press <b>Install</b>. If your browser supports it, you'll get the system install dialog.";
+    }
+    setGate(true);
+  }else{
+    setGate(false);
+  }
+
 })();
 </script>
+
 </body>
 </html>
 
