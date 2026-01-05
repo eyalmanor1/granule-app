@@ -1,4 +1,4 @@
-const CACHE_NAME = "color-whisper-v5";
+const CACHE_NAME = "color-whisper-v6";
 const CORE = [
   "./",
   "./index.html",
