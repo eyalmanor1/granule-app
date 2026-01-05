@@ -1,7 +1,15 @@
-const CACHE_NAME = "color-whisper-v3";
-const CORE = ["./","./index.html","./manifest.json",
-  "./icon-192.png","./icon-512.png",
-  "./apple-touch-icon-120.png","./apple-touch-icon-152.png","./apple-touch-icon-167.png","./apple-touch-icon-180.png"
+const CACHE_NAME = "color-whisper-v5";
+const CORE = [
+  "./",
+  "./index.html",
+  "./app.html",
+  "./manifest.json",
+  "./icon-192.png",
+  "./icon-512.png",
+  "./apple-touch-icon-120.png",
+  "./apple-touch-icon-152.png",
+  "./apple-touch-icon-167.png",
+  "./apple-touch-icon-180.png"
 ];
 
 self.addEventListener("install", (event) => {
@@ -23,7 +31,7 @@ self.addEventListener("fetch", (event) => {
       const fetchPromise = fetch(req).then((res) => {
         caches.open(CACHE_NAME).then(c=>c.put(req, res.clone())).catch(()=>{});
         return res;
-      }).catch(() => cached || caches.match("./index.html"));
+      }).catch(() => cached || caches.match("./app.html"));
       return cached || fetchPromise;
     })
   );
