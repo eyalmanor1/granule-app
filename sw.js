@@ -1,51 +1,39 @@
-/* VSA PWA Service Worker - ms31 */
-const CACHE_NAME = "vsa-ms31";
-const ASSETS = [
-  "./",
-  "./index.html",
-  "./app.html",
-  "./manifest.webmanifest",
-  "./sw.js",
-  "./icons/icon-192.png",
-  "./icons/icon-512.png",
-  "./icons/maskable-192.png",
-  "./icons/maskable-512.png"
+/* Manor Engineering PWA Service Worker */
+const CACHE_NAME = 'manor-tools-v5';
+const CORE_ASSETS = [
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-180.png'
 ];
 
-self.addEventListener("install", (event) => {
-  self.skipWaiting();
+self.addEventListener('install', (event)=>{
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).catch(() => {})
+    caches.open(CACHE_NAME).then(cache=>cache.addAll(CORE_ASSETS)).then(()=>self.skipWaiting())
   );
 });
 
-self.addEventListener("activate", (event) => {
-  event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.map((k) => (k === CACHE_NAME ? null : caches.delete(k))));
-    await self.clients.claim();
-  })());
+self.addEventListener('activate', (event)=>{
+  event.waitUntil(
+    caches.keys().then(keys=>Promise.all(keys.map(k=>k!==CACHE_NAME ? caches.delete(k) : null)))
+      .then(()=>self.clients.claim())
+  );
 });
 
-self.addEventListener("fetch", (event) => {
+self.addEventListener('fetch', (event)=>{
   const req = event.request;
-  if (req.method !== "GET") return;
-
-  event.respondWith((async () => {
-    const cache = await caches.open(CACHE_NAME);
-    const cached = await cache.match(req, { ignoreSearch: true });
-    if (cached) return cached;
-
-    try {
-      const fresh = await fetch(req);
-      // Cache same-origin files (best effort)
-      if (fresh && fresh.ok && new URL(req.url).origin === self.location.origin) {
-        cache.put(req, fresh.clone()).catch(() => {});
-      }
-      return fresh;
-    } catch (e) {
-      // Offline fallback to app shell
-      return (await cache.match("./index.html")) || Response.error();
-    }
-  })());
+  // Only handle GET
+  if(req.method !== 'GET') return;
+  event.respondWith(
+    caches.match(req).then((cached)=>{
+      if(cached) return cached;
+      return fetch(req).then((resp)=>{
+        const copy = resp.clone();
+        caches.open(CACHE_NAME).then(cache=>cache.put(req, copy)).catch(()=>{});
+        return resp;
+      }).catch(()=>cached);
+    })
+  );
 });

@@ -1,31 +1,32 @@
 {
-  "name": "Vision System Autopilot",
-  "short_name": "VSA",
-  "description": "VSA Cloud System",
+  "name": "MANOR ENGINEERING Tools",
+  "short_name": "MANOR Tools",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0b0f14",
-  "theme_color": "#0b0f14",
+  "background_color": "#0b0f18",
+  "theme_color": "#0b0f18",
   "icons": [
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "icons/maskable-192.png",
+      "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "icons/maskable-512.png",
+      "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
