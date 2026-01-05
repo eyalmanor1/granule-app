@@ -1,5 +1,8 @@
-const CACHE_NAME = "color-whisper-v2";
-const CORE = ["./","./index.html","./manifest.json","./icon-192.png","./icon-512.png"];
+const CACHE_NAME = "color-whisper-v3";
+const CORE = ["./","./index.html","./manifest.json",
+  "./icon-192.png","./icon-512.png",
+  "./apple-touch-icon-120.png","./apple-touch-icon-152.png","./apple-touch-icon-167.png","./apple-touch-icon-180.png"
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()));

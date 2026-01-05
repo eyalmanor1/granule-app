@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
 <!-- version: ms20 -->
 <head>
-    <link rel="manifest" href="manifest.json">
+      <link rel="manifest" href="manifest.json">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Color Whisper</title>
@@ -2793,6 +2793,11 @@ body{ overflow-y: auto !important; } /* keep vertical scroll if needed */
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Color Whisper">
   <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="apple-touch-icon-167.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon-180.png">
 </head>
 <body>
 <script>
@@ -8709,10 +8714,11 @@ function renderDash(){
 
 <style>
   <style>
-  /* --- PWA Install Gate (ms34) --- */
+  <style>
+  /* --- PWA Install Gate (ms35) --- */
   #pwaGate{position:fixed;inset:0;z-index:999999;background:rgba(7,10,14,.72);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:18px}
   #pwaGate[hidden]{display:none}
-  #cwWin{width:min(720px,100%);border-radius:14px;background:#0c1118;border:1px solid rgba(255,255,255,.12);
+  #cwWin{width:min(740px,100%);border-radius:14px;background:#0c1118;border:1px solid rgba(255,255,255,.12);
     box-shadow:0 26px 90px rgba(0,0,0,.65);color:#e5e7eb;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;overflow:hidden}
   #cwTitlebar{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;
     background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
@@ -8720,9 +8726,9 @@ function renderDash(){
   #cwTitlebar .left{display:flex;gap:10px;align-items:center}
   #cwAppIcon{width:28px;height:28px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.14)}
   #cwAppIcon img{width:100%;height:100%;object-fit:cover}
-  #cwTitlebar .name{font-weight:800;font-size:13px;letter-spacing:.2px}
+  #cwTitlebar .name{font-weight:900;font-size:13px;letter-spacing:.2px}
   #cwTitlebar .ver{font-size:11px;color:rgba(229,231,235,.55)}
-  #cwBody{display:grid;grid-template-columns: 260px 1fr;gap:0;min-height:380px}
+  #cwBody{display:grid;grid-template-columns: 270px 1fr;gap:0;min-height:400px}
   #cwSide{padding:16px;border-right:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.02)}
   #cwSide h2{margin:0 0 8px;font-size:16px}
   #cwSide p{margin:0 0 12px;font-size:12px;line-height:1.35;color:rgba(229,231,235,.78)}
@@ -8736,7 +8742,7 @@ function renderDash(){
   .cwItem.doing .cwDot::before{content:"…";color:rgba(147,197,253,.95);font-weight:900}
   #cwMain{padding:16px}
   #cwMain h3{margin:0 0 8px;font-size:13px;color:rgba(229,231,235,.9)}
-  #cwLog{height:230px;border-radius:12px;border:1px solid rgba(255,255,255,.10);
+  #cwLog{height:240px;border-radius:12px;border:1px solid rgba(255,255,255,.10);
     background:rgba(0,0,0,.35);padding:10px;overflow:auto;
     font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     font-size:12px;line-height:1.35;color:rgba(229,231,235,.82)}
@@ -8748,25 +8754,32 @@ function renderDash(){
     border-top:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.02)}
   #cwFooter .hint{font-size:11px;color:rgba(229,231,235,.62)}
   #cwBtns{display:flex;gap:10px;flex-wrap:wrap}
-  .cwBtn{appearance:none;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#e5e7eb;border-radius:10px;padding:9px 11px;font-weight:800;font-size:12px;cursor:pointer}
+  .cwBtn{appearance:none;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#e5e7eb;border-radius:10px;padding:9px 11px;font-weight:900;font-size:12px;cursor:pointer}
   .cwBtn.primary{background:rgba(59,130,246,.22);border-color:rgba(59,130,246,.45)}
   .cwBtn:disabled{opacity:.55;cursor:not-allowed}
+  /* iOS steps modal */
+  #iosSteps{position:fixed;inset:0;z-index:1000000;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:18px}
+  #iosCard{width:min(520px,100%);border-radius:14px;background:#0c1118;border:1px solid rgba(255,255,255,.12);box-shadow:0 26px 90px rgba(0,0,0,.65);padding:16px;color:#e5e7eb}
+  #iosCard h3{margin:0 0 10px;font-size:16px}
+  #iosCard ol{margin:0 0 12px;padding-left:18px;color:rgba(229,231,235,.85);font-size:13px;line-height:1.35}
+  #iosCard .note{font-size:12px;color:rgba(229,231,235,.65);margin:0 0 12px}
+  #iosCard .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
 </style>
 
-<div id="pwaGate" hidden>
+<div id="pwaGate">
   <div id="cwWin" role="dialog" aria-modal="true" aria-label="Install Color Whisper">
     <div id="cwTitlebar">
       <div class="left">
         <div id="cwAppIcon"><img src="icon-192.png" alt="Color Whisper icon"></div>
         <div class="name">Color Whisper Setup</div>
       </div>
-      <div class="ver">ms34</div>
+      <div class="ver">ms35</div>
     </div>
 
     <div id="cwBody">
       <div id="cwSide">
-        <h2>Installing…</h2>
-        <p>This will prepare offline cache and full-screen experience. The installer stays visible for ~15 seconds.</p>
+        <h2>Welcome</h2>
+        <p>Press <b>Install</b> to install <b>Color Whisper</b> as an app (full-screen + offline cache).</p>
 
         <ul id="cwChecklist">
           <li class="cwItem" data-step="0"><span class="cwDot"></span><span class="txt">Preparing installer</span></li>
@@ -8783,8 +8796,8 @@ function renderDash(){
 
         <div id="cwProgressWrap">
           <div id="cwStatus">
-            <span id="cwStatusText">Initializing…</span>
-            <span><span id="cwPct">0</span>% • <span id="cwEta">~15s</span></span>
+            <span id="cwStatusText">Waiting for user…</span>
+            <span><span id="cwPct">0</span>% • <span id="cwEta">—</span></span>
           </div>
           <div id="cwBarOuter"><div id="cwBar"></div></div>
         </div>
@@ -8792,11 +8805,26 @@ function renderDash(){
     </div>
 
     <div id="cwFooter">
-      <div class="hint" id="cwHint">Tip: Desktop Chrome/Edge often shows install under the ⋮ menu → “Install app”. iOS: Share → Add to Home Screen.</div>
+      <div class="hint" id="cwHint">Android/Chrome: Install prompt appears after you click Install. iOS: you’ll get steps to “Add to Home Screen”.</div>
       <div id="cwBtns">
-        <button class="cwBtn primary" id="cwInstallBtn" disabled>Install</button>
-        <button class="cwBtn" id="cwContinueBtn">Continue</button>
+        <button class="cwBtn primary" id="cwInstallBtn">Install</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<div id="iosSteps">
+  <div id="iosCard" role="dialog" aria-modal="true" aria-label="Add to Home Screen">
+    <h3>Install on iPhone/iPad</h3>
+    <ol>
+      <li>Tap the <b>Share</b> button in Safari</li>
+      <li>Choose <b>Add to Home Screen</b></li>
+      <li>Confirm the name <b>Color Whisper</b> and tap <b>Add</b></li>
+    </ol>
+    <p class="note">When you’re done, go to the Home Screen and open the new icon.</p>
+    <div class="row">
+      <button class="cwBtn" id="iosClose">Close</button>
+      <button class="cwBtn primary" id="iosDone">I added it</button>
     </div>
   </div>
 </div>
@@ -8804,14 +8832,17 @@ function renderDash(){
 <script>
 (function(){
   const $ = (id)=>document.getElementById(id);
-  const gate = $("pwaGate");
   const log = $("cwLog");
   const bar = $("cwBar");
   const pctEl = $("cwPct");
   const etaEl = $("cwEta");
   const statusEl = $("cwStatusText");
   const installBtn = $("cwInstallBtn");
-  const continueBtn = $("cwContinueBtn");
+  const hintEl = $("cwHint");
+
+  const iosSteps = $("iosSteps");
+  const iosClose = $("iosClose");
+  const iosDone = $("iosDone");
 
   const dayKey = "pwaGateDismissedDay";
   const today = new Date().toISOString().slice(0,10);
@@ -8888,6 +8919,7 @@ function renderDash(){
   }
 
   function runSimulation(){
+    if (timer) { clearInterval(timer); timer=null; }
     log.innerHTML = "";
     setPct(0);
     startTs = performance.now();
@@ -8896,6 +8928,7 @@ function renderDash(){
 
     markChecklist(0);
     statusEl.textContent = "Preparing installer…";
+    etaEl.textContent = formatEta(totalMs);
     appendLine("[setup] Starting Color Whisper setup…");
 
     timer = setInterval(()=>{
@@ -8933,7 +8966,7 @@ function renderDash(){
         etaEl.textContent = "~0s";
         setPct(100);
         localStorage.setItem(dayKey, today);
-        setTimeout(()=>{ gate.hidden = true; }, 650);
+        setTimeout(()=>{ document.getElementById("pwaGate").hidden = true; }, 650);
       }
     }, tickMs);
   }
@@ -8941,7 +8974,6 @@ function renderDash(){
   window.addEventListener('beforeinstallprompt', (e)=>{
     e.preventDefault();
     deferredPrompt = e;
-    installBtn.disabled = false;
     appendLine("[pwa] Install prompt is ready.");
   });
 
@@ -8949,9 +8981,20 @@ function renderDash(){
     appendLine("[pwa] App installed ✅");
   });
 
+  // Must be user-driven. No skip button.
   installBtn.addEventListener('click', async ()=>{
+    // On iOS, show steps
+    if (isIOS()){
+      iosSteps.style.display = "flex";
+      return;
+    }
+
+    // Start the "Windows installer" simulation immediately
+    runSimulation();
+
+    // Trigger real prompt if available
     if (!deferredPrompt){
-      appendLine("[pwa] No prompt. Try ⋮ menu → Install app.");
+      appendLine("[pwa] No prompt from browser. Try ⋮ menu → Install app.");
       return;
     }
     appendLine("[pwa] Opening install prompt…");
@@ -8966,32 +9009,37 @@ function renderDash(){
     installBtn.disabled = true;
   });
 
-  continueBtn.addEventListener('click', ()=>{
+  iosClose.addEventListener('click', ()=>{ iosSteps.style.display="none"; });
+  iosDone.addEventListener('click', ()=>{
+    iosSteps.style.display="none";
+    // keep them on page; they can switch to the home screen icon manually
     localStorage.setItem(dayKey, today);
-    gate.hidden = true;
+    document.getElementById("pwaGate").hidden = true;
   });
 
-  function showGate(){
+  function init(){
+    // Do not show inside standalone
     const isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
     if (isStandalone) return;
+
+    // Show gate unless already dismissed today
     const dismissed = localStorage.getItem(dayKey) === today;
     if (dismissed) return;
 
-    gate.hidden = false;
-    if (isIOS()){
-      $("cwHint").textContent = "iOS: Tap Share → Add to Home Screen (no install dialog).";
-      installBtn.disabled = true;
-    }
-    runSimulation();
+    appendLine("[setup] Ready. Click Install to begin.");
+    hintEl.textContent = isIOS()
+      ? "iOS: Tap Install to see Add-to-Home-Screen steps (Safari only)."
+      : "Android/Chrome: Tap Install to trigger the PWA prompt (or use ⋮ menu → Install app).";
   }
 
+  // Register SW (needed for installability on many browsers)
   if ('serviceWorker' in navigator){
     window.addEventListener('load', ()=>{
       navigator.serviceWorker.register('./sw.js').catch(()=>{});
     });
   }
 
-  setTimeout(showGate, 250);
+  init();
 })();
 </script>
 </body>
