@@ -2,7 +2,7 @@
   "name": "Color Whisper",
   "short_name": "Whisper",
   "description": "Instant color sampling & calibration.",
-  "start_url": "./app.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0b0f14",
