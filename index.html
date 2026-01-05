@@ -8716,7 +8716,7 @@ function renderDash(){
 <style>
   <style>
   <style>
-  /* --- PWA Install Gate (ms37) --- */
+  /* --- PWA Install Gate (ms38) --- */
 
   /* Mobile WOW mode: fullscreen terminal installer (ms37) */
   #cwWin { max-width: 740px; }
@@ -8844,7 +8844,7 @@ function renderDash(){
         <div id="cwAppIcon"><img src="icon-192.png" alt="Color Whisper icon"></div>
         <div class="name">Color Whisper Setup</div>
       </div>
-      <div class="ver">ms37</div>
+      <div class="ver">ms38</div>
     </div>
 
     <div id="cwBody">
@@ -9041,7 +9041,8 @@ function renderDash(){
         etaEl.textContent = "~0s";
         setPct(100);
         localStorage.setItem(dayKey, today);
-        setTimeout(()=>{ document.getElementById("pwaGate").hidden = true; document.body.classList.remove("cw-installing"); document.body.classList.remove("cw-installing"); }, 650);
+        setTimeout(()=>{ window.location.reload();
+document.body.classList.remove("cw-installing"); }, 650);
       }
     }, tickMs);
   }
@@ -9089,8 +9090,8 @@ function renderDash(){
     iosSteps.style.display="none";
     // keep them on page; they can switch to the home screen icon manually
     localStorage.setItem(dayKey, today);
-    document.getElementById("pwaGate").hidden = true; document.body.classList.remove("cw-installing");
-  });
+    window.location.reload();
+});
 
   function init(){
     document.body.classList.add("cw-installing");
