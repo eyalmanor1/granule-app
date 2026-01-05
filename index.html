@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
 <!-- version: ms20 -->
 <head>
-  <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Color Whisper</title>
@@ -2795,12 +2795,6 @@ body{ overflow-y: auto !important; } /* keep vertical scroll if needed */
   <link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
-<div id="ms33-badge" style="position:fixed;top:10px;left:10px;z-index:999997;
-background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.14);color:rgba(255,255,255,.75);
-font:12px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial;padding:6px 10px;border-radius:999px;backdrop-filter:blur(8px)">
-  Color Whisper • ms33
-</div>
-
 <script>
 // ===== GLOBAL Transparent Flag (single source of truth) =====
 (function(){
@@ -8714,53 +8708,95 @@ function renderDash(){
 </script>
 
 <style>
-  /* --- PWA Install Gate (ms33) --- */
-  #pwaGate{position:fixed;inset:0;z-index:999999;background:rgba(5,8,12,.78);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:18px}
+  <style>
+  /* --- PWA Install Gate (ms34) --- */
+  #pwaGate{position:fixed;inset:0;z-index:999999;background:rgba(7,10,14,.72);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:18px}
   #pwaGate[hidden]{display:none}
-  #pwaCard{width:min(560px,100%);border-radius:20px;background:rgba(17,24,39,.92);border:1px solid rgba(255,255,255,.12);box-shadow:0 22px 70px rgba(0,0,0,.55);color:#e5e7eb;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;overflow:hidden;position:relative}
-  #pwaTop{display:flex;gap:14px;align-items:center;padding:18px 18px 12px}
-  #pwaIcon{width:56px;height:56px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);display:grid;place-items:center;overflow:hidden}
-  #pwaIcon img{width:100%;height:100%;object-fit:cover}
-  #pwaTitleWrap h1{margin:0 0 4px;font-size:20px;letter-spacing:.2px}
-  #pwaTitleWrap p{margin:0;color:rgba(229,231,235,.82);font-size:13px;line-height:1.35}
-  #pwaSteps{padding:8px 18px 0;display:grid;gap:10px}
-  .pwaStep{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:rgba(229,231,235,.9)}
-  .pwaStep .k{color:rgba(229,231,235,.75)}
-  #pwaBarWrap{margin:14px 18px 0;height:10px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
-  #pwaBar{height:100%;width:0%}
-  #pwaBtns{display:flex;gap:10px;flex-wrap:wrap;padding:16px 18px 18px}
-  .pwaBtn{appearance:none;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#e5e7eb;border-radius:12px;padding:10px 12px;font-weight:700;font-size:13px;cursor:pointer}
-  .pwaBtn.primary{background:rgba(59,130,246,.22);border-color:rgba(59,130,246,.45)}
-  .pwaBtn:disabled{opacity:.55;cursor:not-allowed}
-  #pwaNote{padding:0 18px 16px;color:rgba(229,231,235,.75);font-size:12px}
-  #pwaVer{position:absolute;top:10px;right:12px;font-size:11px;color:rgba(229,231,235,.55)}
+  #cwWin{width:min(720px,100%);border-radius:14px;background:#0c1118;border:1px solid rgba(255,255,255,.12);
+    box-shadow:0 26px 90px rgba(0,0,0,.65);color:#e5e7eb;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;overflow:hidden}
+  #cwTitlebar{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;
+    background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    border-bottom:1px solid rgba(255,255,255,.10)}
+  #cwTitlebar .left{display:flex;gap:10px;align-items:center}
+  #cwAppIcon{width:28px;height:28px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.14)}
+  #cwAppIcon img{width:100%;height:100%;object-fit:cover}
+  #cwTitlebar .name{font-weight:800;font-size:13px;letter-spacing:.2px}
+  #cwTitlebar .ver{font-size:11px;color:rgba(229,231,235,.55)}
+  #cwBody{display:grid;grid-template-columns: 260px 1fr;gap:0;min-height:380px}
+  #cwSide{padding:16px;border-right:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.02)}
+  #cwSide h2{margin:0 0 8px;font-size:16px}
+  #cwSide p{margin:0 0 12px;font-size:12px;line-height:1.35;color:rgba(229,231,235,.78)}
+  #cwChecklist{margin:12px 0 0;padding:0;list-style:none;display:grid;gap:10px}
+  .cwItem{display:flex;gap:10px;align-items:flex-start}
+  .cwDot{width:18px;height:18px;border-radius:6px;border:1px solid rgba(255,255,255,.16);display:grid;place-items:center;font-size:12px}
+  .cwItem .txt{font-size:12px;color:rgba(229,231,235,.85);line-height:1.25}
+  .cwItem.done .cwDot{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.55)}
+  .cwItem.done .cwDot::before{content:"✓";color:rgba(34,197,94,.95);font-weight:900}
+  .cwItem.doing .cwDot{background:rgba(59,130,246,.18);border-color:rgba(59,130,246,.55)}
+  .cwItem.doing .cwDot::before{content:"…";color:rgba(147,197,253,.95);font-weight:900}
+  #cwMain{padding:16px}
+  #cwMain h3{margin:0 0 8px;font-size:13px;color:rgba(229,231,235,.9)}
+  #cwLog{height:230px;border-radius:12px;border:1px solid rgba(255,255,255,.10);
+    background:rgba(0,0,0,.35);padding:10px;overflow:auto;
+    font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size:12px;line-height:1.35;color:rgba(229,231,235,.82)}
+  #cwProgressWrap{margin-top:12px}
+  #cwStatus{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:rgba(229,231,235,.78);margin:0 0 8px}
+  #cwBarOuter{height:12px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+  #cwBar{height:100%;width:0%}
+  #cwFooter{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;
+    border-top:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.02)}
+  #cwFooter .hint{font-size:11px;color:rgba(229,231,235,.62)}
+  #cwBtns{display:flex;gap:10px;flex-wrap:wrap}
+  .cwBtn{appearance:none;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#e5e7eb;border-radius:10px;padding:9px 11px;font-weight:800;font-size:12px;cursor:pointer}
+  .cwBtn.primary{background:rgba(59,130,246,.22);border-color:rgba(59,130,246,.45)}
+  .cwBtn:disabled{opacity:.55;cursor:not-allowed}
 </style>
 
 <div id="pwaGate" hidden>
-  <div id="pwaCard" role="dialog" aria-modal="true" aria-label="Install app">
-    <div id="pwaVer">ms33</div>
-    <div id="pwaTop">
-      <div id="pwaIcon"><img src="icon-192.png" alt="Color Whisper icon"></div>
-      <div id="pwaTitleWrap">
-        <h1>Welcome to Color Whisper</h1>
-        <p>Instant color sampling & calibration. Install for faster launch and full-screen mode.</p>
+  <div id="cwWin" role="dialog" aria-modal="true" aria-label="Install Color Whisper">
+    <div id="cwTitlebar">
+      <div class="left">
+        <div id="cwAppIcon"><img src="icon-192.png" alt="Color Whisper icon"></div>
+        <div class="name">Color Whisper Setup</div>
+      </div>
+      <div class="ver">ms34</div>
+    </div>
+
+    <div id="cwBody">
+      <div id="cwSide">
+        <h2>Installing…</h2>
+        <p>This will prepare offline cache and full-screen experience. The installer stays visible for ~15 seconds.</p>
+
+        <ul id="cwChecklist">
+          <li class="cwItem" data-step="0"><span class="cwDot"></span><span class="txt">Preparing installer</span></li>
+          <li class="cwItem" data-step="1"><span class="cwDot"></span><span class="txt">Installing core modules</span></li>
+          <li class="cwItem" data-step="2"><span class="cwDot"></span><span class="txt">Installing camera & PTZ</span></li>
+          <li class="cwItem" data-step="3"><span class="cwDot"></span><span class="txt">Installing calibration profiles</span></li>
+          <li class="cwItem" data-step="4"><span class="cwDot"></span><span class="txt">Finalizing & verifying</span></li>
+        </ul>
+      </div>
+
+      <div id="cwMain">
+        <h3>Installation details</h3>
+        <div id="cwLog" aria-label="Installer log"></div>
+
+        <div id="cwProgressWrap">
+          <div id="cwStatus">
+            <span id="cwStatusText">Initializing…</span>
+            <span><span id="cwPct">0</span>% • <span id="cwEta">~15s</span></span>
+          </div>
+          <div id="cwBarOuter"><div id="cwBar"></div></div>
+        </div>
       </div>
     </div>
 
-    <div id="pwaSteps">
-      <div class="pwaStep"><span>Service Worker</span><span class="k" id="pwaSW">checking…</span></div>
-      <div class="pwaStep"><span>Manifest</span><span class="k" id="pwaMan">checking…</span></div>
-      <div class="pwaStep"><span>Install</span><span class="k" id="pwaInst">waiting…</span></div>
-      <div class="pwaStep"><span>Auto-close</span><span class="k" id="pwaTimer">10s</span></div>
-    </div>
-
-    <div id="pwaBarWrap"><div id="pwaBar"></div></div>
-    <div id="pwaNote">Tip: On Chrome/Edge, install can appear in the ⋮ menu as “Install app”. On iOS: Share → Add to Home Screen.</div>
-
-    <div id="pwaBtns">
-      <button class="pwaBtn primary" id="pwaInstallBtn" disabled>Install</button>
-      <button class="pwaBtn" id="pwaContinueBtn">Continue</button>
-      <button class="pwaBtn" id="pwaResetBtn">Reset</button>
+    <div id="cwFooter">
+      <div class="hint" id="cwHint">Tip: Desktop Chrome/Edge often shows install under the ⋮ menu → “Install app”. iOS: Share → Add to Home Screen.</div>
+      <div id="cwBtns">
+        <button class="cwBtn primary" id="cwInstallBtn" disabled>Install</button>
+        <button class="cwBtn" id="cwContinueBtn">Continue</button>
+      </div>
     </div>
   </div>
 </div>
@@ -8769,88 +8805,162 @@ function renderDash(){
 (function(){
   const $ = (id)=>document.getElementById(id);
   const gate = $("pwaGate");
-  const bar = $("pwaBar");
-  const installBtn = $("pwaInstallBtn");
-  const continueBtn = $("pwaContinueBtn");
-  const resetBtn = $("pwaResetBtn");
+  const log = $("cwLog");
+  const bar = $("cwBar");
+  const pctEl = $("cwPct");
+  const etaEl = $("cwEta");
+  const statusEl = $("cwStatusText");
+  const installBtn = $("cwInstallBtn");
+  const continueBtn = $("cwContinueBtn");
 
   const dayKey = "pwaGateDismissedDay";
   const today = new Date().toISOString().slice(0,10);
 
+  const totalMs = 15000;
+  const tickMs = 250;
+  let startTs = 0;
+  let timer = null;
   let deferredPrompt = null;
-  let countdown = 10;
-  let countdownInt = null;
 
-  function setBar(p){ bar.style.width = Math.max(0,Math.min(100,p)) + "%"; }
-  function setBarOk(ok){ bar.style.background = ok ? "rgba(34,197,94,.9)" : "rgba(59,130,246,.9)"; }
+  const steps = [
+    {name:"Preparing installer", logs:[
+      "Checking environment…",
+      "Allocating workspace…",
+      "Verifying permissions…",
+      "Loading UI assets…",
+    ]},
+    {name:"Installing core modules", logs:[
+      "Installing: color-whisper-core…",
+      "Installing: ui-shell…",
+      "Installing: sampling-engine…",
+      "Installing: premium-upload…",
+    ]},
+    {name:"Installing camera & PTZ", logs:[
+      "Installing: camera-module…",
+      "Installing: ptz-controls…",
+      "Installing: frame-buffer…",
+      "Installing: realtime-preview…",
+    ]},
+    {name:"Installing calibration profiles", logs:[
+      "Installing: calibration-profiles…",
+      "Installing: white-balance presets…",
+      "Installing: gamma tables…",
+      "Installing: export formats…",
+    ]},
+    {name:"Finalizing & verifying", logs:[
+      "Registering offline cache…",
+      "Verifying app integrity…",
+      "Cleaning temporary files…",
+      "Installation complete.",
+    ]},
+  ];
 
-  async function checkManifest(){
-    try {
-      const r = await fetch("./manifest.json", {cache:"no-store"});
-      $("pwaMan").textContent = r.ok ? "loaded" : ("HTTP " + r.status);
-      return r.ok;
-    } catch(e) {
-      $("pwaMan").textContent = "fetch failed";
-      return false;
-    }
+  function isIOS(){ return /iPad|iPhone|iPod/.test(navigator.userAgent); }
+
+  function setPct(p){
+    const pp = Math.max(0, Math.min(100, p|0));
+    pctEl.textContent = pp;
+    bar.style.width = pp + "%";
+    bar.style.background = (pp>=100) ? "rgba(34,197,94,.9)" : "rgba(59,130,246,.9)";
   }
 
-  async function checkSW(){
-    if (!('serviceWorker' in navigator)) {
-      $("pwaSW").textContent = "not supported";
-      return false;
-    }
-    try {
-      const reg = await navigator.serviceWorker.getRegistration();
-      const controlled = !!navigator.serviceWorker.controller;
-      $("pwaSW").textContent = reg ? (controlled ? "active+controlled" : "active (reload once)") : "not registered";
-      return !!(reg && controlled);
-    } catch(e) {
-      $("pwaSW").textContent = "error";
-      return false;
-    }
+  function appendLine(s){
+    const line = document.createElement("div");
+    line.textContent = s;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
   }
 
-  function startCountdown(){
-    $("pwaTimer").textContent = countdown + "s";
-    countdownInt = setInterval(()=>{
-      countdown -= 1;
-      $("pwaTimer").textContent = Math.max(0,countdown) + "s";
-      setBar(100 * (1 - (countdown/10)));
-      if (countdown <= 0) {
-        clearInterval(countdownInt);
-        // Auto-close after 10s (keeps ability to install via menu later)
-        localStorage.setItem(dayKey, today);
-        gate.hidden = true;
+  function markChecklist(stepIndex){
+    const items = document.querySelectorAll("#cwChecklist .cwItem");
+    items.forEach(li=>li.classList.remove("doing","done"));
+    for (let i=0;i<stepIndex;i++){
+      const li = document.querySelector('#cwChecklist .cwItem[data-step="'+i+'"]');
+      if (li) li.classList.add("done");
+    }
+    const cur = document.querySelector('#cwChecklist .cwItem[data-step="'+stepIndex+'"]');
+    if (cur) cur.classList.add("doing");
+  }
+
+  function formatEta(msLeft){
+    const s = Math.max(0, Math.ceil(msLeft/1000));
+    return "~" + s + "s";
+  }
+
+  function runSimulation(){
+    log.innerHTML = "";
+    setPct(0);
+    startTs = performance.now();
+    let stepIdx = 0;
+    let logIdx = 0;
+
+    markChecklist(0);
+    statusEl.textContent = "Preparing installer…";
+    appendLine("[setup] Starting Color Whisper setup…");
+
+    timer = setInterval(()=>{
+      const now = performance.now();
+      const elapsed = now - startTs;
+      const p = Math.min(1, elapsed/totalMs);
+      setPct(Math.floor(p*100));
+
+      const msLeft = Math.max(0, totalMs - elapsed);
+      etaEl.textContent = formatEta(msLeft);
+
+      const targetStep = Math.min(steps.length-1, Math.floor(p * steps.length));
+      if (targetStep !== stepIdx){
+        const prev = document.querySelector('#cwChecklist .cwItem[data-step="'+stepIdx+'"]');
+        if (prev){ prev.classList.remove("doing"); prev.classList.add("done"); }
+        stepIdx = targetStep;
+        logIdx = 0;
+        markChecklist(stepIdx);
+        statusEl.textContent = steps[stepIdx].name + "…";
+        appendLine("");
+        appendLine("[setup] " + steps[stepIdx].name + "…");
       }
-    }, 1000);
+
+      if (logIdx < steps[stepIdx].logs.length && (elapsed % (tickMs*2) < tickMs)){
+        appendLine("  • " + steps[stepIdx].logs[logIdx]);
+        logIdx++;
+      }
+
+      if (elapsed >= totalMs){
+        clearInterval(timer);
+        timer = null;
+        const last = document.querySelector('#cwChecklist .cwItem[data-step="'+(steps.length-1)+'"]');
+        if (last){ last.classList.remove("doing"); last.classList.add("done"); }
+        statusEl.textContent = "Installation complete.";
+        etaEl.textContent = "~0s";
+        setPct(100);
+        localStorage.setItem(dayKey, today);
+        setTimeout(()=>{ gate.hidden = true; }, 650);
+      }
+    }, tickMs);
   }
 
   window.addEventListener('beforeinstallprompt', (e)=>{
     e.preventDefault();
     deferredPrompt = e;
-    $("pwaInst").textContent = "prompt ready ✅";
     installBtn.disabled = false;
+    appendLine("[pwa] Install prompt is ready.");
   });
 
   window.addEventListener('appinstalled', ()=>{
-    $("pwaInst").textContent = "installed ✅";
-    setBar(100); setBarOk(true);
-    setTimeout(()=> gate.hidden = true, 800);
+    appendLine("[pwa] App installed ✅");
   });
 
   installBtn.addEventListener('click', async ()=>{
-    if (!deferredPrompt) {
-      $("pwaInst").textContent = "no prompt (use ⋮ menu)";
+    if (!deferredPrompt){
+      appendLine("[pwa] No prompt. Try ⋮ menu → Install app.");
       return;
     }
-    $("pwaInst").textContent = "opening prompt…";
+    appendLine("[pwa] Opening install prompt…");
     deferredPrompt.prompt();
-    try {
+    try{
       const choice = await deferredPrompt.userChoice;
-      $("pwaInst").textContent = "user: " + choice.outcome;
-    } catch(e) {
-      $("pwaInst").textContent = "done";
+      appendLine("[pwa] User choice: " + choice.outcome);
+    }catch(e){
+      appendLine("[pwa] Prompt closed.");
     }
     deferredPrompt = null;
     installBtn.disabled = true;
@@ -8861,63 +8971,27 @@ function renderDash(){
     gate.hidden = true;
   });
 
-  resetBtn.addEventListener('click', ()=>{
-    localStorage.removeItem(dayKey);
-    gate.hidden = true;
-    setTimeout(()=> showGate(true), 50);
-  });
-
-  async function showGate(force){
-    // Don't show in standalone
+  function showGate(){
     const isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
     if (isStandalone) return;
-
     const dismissed = localStorage.getItem(dayKey) === today;
-    if (dismissed && !force) return;
+    if (dismissed) return;
 
     gate.hidden = false;
-    setBarOk(false);
-    setBar(0);
-
-    // Start countdown immediately (8-10s requested; we use 10s)
-    countdown = 10;
-    if (countdownInt) clearInterval(countdownInt);
-    startCountdown();
-
-    // Checks
-    const mOk = await checkManifest();
-    setBar(20);
-    const swOk = await checkSW();
-    setBar(40);
-
-    // iOS hint
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    if (isIOS) {
-      $("pwaInst").textContent = "iOS: Share → Add to Home Screen";
+    if (isIOS()){
+      $("cwHint").textContent = "iOS: Tap Share → Add to Home Screen (no install dialog).";
       installBtn.disabled = true;
-    } else {
-      if (!deferredPrompt) {
-        $("pwaInst").textContent = swOk && mOk ? "use ⋮ menu → Install app" : "fix SW/manifest then try";
-      }
     }
-
-    // If SW not controlling yet, suggest reload
-    if (!swOk) {
-      $("pwaInst").textContent = "Reload once so SW controls, then install";
-    }
+    runSimulation();
   }
 
-  // Register SW
-  if ('serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator){
     window.addEventListener('load', ()=>{
       navigator.serviceWorker.register('./sw.js').catch(()=>{});
-      // give controller a moment on first load
-      setTimeout(()=>{ checkSW(); }, 900);
     });
   }
 
-  // Auto show
-  setTimeout(()=> showGate(false), 250);
+  setTimeout(showGate, 250);
 })();
 </script>
 </body>
