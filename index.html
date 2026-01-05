@@ -3772,930 +3772,110 @@ body{ overflow-y: auto !important; } /* keep vertical scroll if needed */
 </style>
 
     <script>
-      (function(){
-        const root = document.getElementById('analyze');
-        if(!root) return;
-
-        const tilesHost = root.querySelector('#anTiles');
-        const overlay = root.querySelector('#anSheetOverlay');
-        const sheet = root.querySelector('#anSheet');
-        const sheetBody = root.querySelector('#anSheetBody');
-        const sheetTitle = root.querySelector('#anSheetTitle');
-        const btnClose = root.querySelector('#anSheetClose');
-        const templatesRoot = root.querySelector('#anTemplates');
-
-        const MODULES = [
-          { key:'calibration', title:'Calibration', sub:'Captured readings from 4 tools' },
-          { key:'light',      title:'Light Settings', sub:'Front/Rear lights + background boards' },
-          { key:'color',       title:'Color',       sub:'Valid vs Defect — quick delta' },
-          { key:'config',      title:'Config',      sub:'Machine model selector (stable)' },
-          { key:'history',     title:'History',     sub:'Notes / results (placeholder)' },
-        ];
-
-
-        // ===== Analyze: Export-to-Machine + History wiring (ms75) =====
-        const LS_CFG_MODEL = 'an_cfg_model_v2';
-        const LS_EXPORT_HIST = 'an_export_history_v2';
-
-        function readJSON(key, fallback){
-          try{
-            const s = localStorage.getItem(key);
-            if(!s) return fallback;
-            return JSON.parse(s);
-          }catch(e){ return fallback; }
-        }
-        function writeJSON(key, val){
-          try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
-        }
-        function nowISO(){
-          try{ return new Date().toISOString(); }catch(e){ return ''+Date.now(); }
-        }
-        function pretty(obj){
-          try{ return JSON.stringify(obj, null, 2); }catch(e){ return '{}'; }
-        }
-        function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
-        function fmtTs(iso){
-          try{
-            const d = new Date(iso);
-            const hh = String(d.getHours()).padStart(2,'0');
-            const mm = String(d.getMinutes()).padStart(2,'0');
-            const ss = String(d.getSeconds()).padStart(2,'0');
-            const dd = String(d.getDate()).padStart(2,'0');
-            const mo = String(d.getMonth()+1).padStart(2,'0');
-            return `${dd}/${mo} ${hh}:${mm}:${ss}`;
-          }catch(e){ return iso || ''; }
-        }
-
-        function buildPayload(ctx){
-          const sel = ctx.querySelector('#cfgModelSelect');
-          const model = sel ? (sel.value || '') : '';
-
-          const v = window.last?.valid?.c || null;
-          const d = window.last?.defect?.c || null;
-          const delta = (v && d) ? { dr:v.r-d.r, dg:v.g-d.g, db:v.b-d.b } : null;
-          const dist = (v && d) ? Math.sqrt(delta.dr*delta.dr + delta.dg*delta.dg + delta.db*delta.db) : null;
-
-          return {
-            type: "EXPORT_PAYLOAD",
-            app_build: document.querySelector('meta[name="app-build"]')?.content || "",
-            timestamp: nowISO(),
-            machine: { model },
-            analysis: {
-              valid_rgb: v,
-              defect_rgb: d,
-              delta_rgb: delta,
-              delta_dist: (dist == null) ? null : Math.round(dist*10)/10
-            }
-          };
-        }
-
-        function pushHistory(entry){
-          const arr = readJSON(LS_EXPORT_HIST, []);
-          arr.unshift(entry);
-          if(arr.length > 80) arr.length = 80;
-          writeJSON(LS_EXPORT_HIST, arr);
-        }
-
-        function bindModule(key){
-          if(!sheetBody) return;
-          if(key === 'light')  bindLight(sheetBody);
-          if(key === 'config') bindConfigExport(sheetBody);
-          if(key === 'history') bindHistory(sheetBody);
-        }
-
-        // ===== Light Settings (Analyze) =====
-        const LS_KEY = 'mem1_light_settings_v1';
-
-        function lsClamp(v){ v = Number(v); return isFinite(v) ? Math.max(0, Math.min(255, Math.round(v))) : 0; }
-
-        function rgbToHex(r,g,b){
-          const h = (n)=> n.toString(16).padStart(2,'0');
-          return '#' + h(lsClamp(r)) + h(lsClamp(g)) + h(lsClamp(b));
-        }
-        function hexToRgb(hex){
-          if(!hex || typeof hex !== 'string') return {r:0,g:0,b:0};
-          const m = hex.trim().match(/^#?([0-9a-f]{6})$/i);
-          if(!m) return {r:0,g:0,b:0};
-          const n = parseInt(m[1], 16);
-          return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
-        }
-        function fmtRGB(o){ return `RGB(${o.r},${o.g},${o.b})`; }
-        function fmtRgbCss(o){ return `rgb(${o.r}, ${o.g}, ${o.b})`; }
-
-        function loadLS(){
-          const def = {
-            mode: 'opaque',
-            frontLight: 180,
-            rearLight: 160,
-            frontBg: {r:85,g:85,b:85},
-            rearBg: {r:80,g:80,b:80},
-          };
-          try{
-            const raw = localStorage.getItem(LS_KEY);
-            if(!raw) return def;
-            const o = JSON.parse(raw);
-            if(!o || typeof o !== 'object') return def;
-            const mode = (o.mode === 'transparent') ? 'transparent' : 'opaque';
-            return {
-              mode,
-              frontLight: lsClamp(o.frontLight ?? def.frontLight),
-              rearLight:  lsClamp(o.rearLight  ?? def.rearLight),
-              frontBg: { r:lsClamp(o.frontBg?.r ?? def.frontBg.r), g:lsClamp(o.frontBg?.g ?? def.frontBg.g), b:lsClamp(o.frontBg?.b ?? def.frontBg.b) },
-              rearBg:  { r:lsClamp(o.rearBg?.r  ?? def.rearBg.r),  g:lsClamp(o.rearBg?.g  ?? def.rearBg.g),  b:lsClamp(o.rearBg?.b  ?? def.rearBg.b)  },
-            };
-          }catch(_){ return def; }
-        }
-        function saveLS(s){
-          try{ localStorage.setItem(LS_KEY, JSON.stringify(s)); }catch(_){}
-        }
-
-        function makeParticles(n, w, h){
-          const arr = [];
-          for(let i=0;i<n;i++){
-            const r = 4 + Math.random()*10;
-            arr.push({
-              x: Math.random()*w,
-              y: Math.random()*h,
-              r,
-              a: 0.18 + Math.random()*0.35
-            });
-          }
-          return arr;
-        }
-
-        function drawSim(canvas, bg, light, mode, particles){
-          if(!canvas) return;
-          const dpr = (window.devicePixelRatio || 1);
-          const rect = canvas.getBoundingClientRect();
-          const W = Math.max(1, Math.floor(rect.width * dpr));
-          const H = Math.max(1, Math.floor(rect.height * dpr));
-          if(canvas.width !== W || canvas.height !== H){
-            canvas.width = W; canvas.height = H;
-          }
-          const ctx = canvas.getContext('2d');
-          if(!ctx) return;
-
-          // Background with light influence (simple, stable)
-          const k = Math.max(0.25, Math.min(1.25, (light/200)));
-          const br = lsClamp(bg.r * k);
-          const bgc = lsClamp(bg.g * k);
-          const bb = lsClamp(bg.b * k);
-          ctx.fillStyle = `rgb(${br},${bgc},${bb})`;
-          ctx.fillRect(0,0,W,H);
-
-          // Particles (granules)
-          if(!particles || particles.length === 0) particles = makeParticles(85, W, H);
-          const baseAlpha = (mode === 'transparent') ? 0.16 : 0.30;
-          const pLum = (mode === 'transparent') ? 220 : 245;
-          ctx.save();
-          ctx.globalCompositeOperation = 'screen';
-          for(const p of particles){
-            ctx.beginPath();
-            ctx.fillStyle = `rgba(${pLum},${pLum},${pLum},${baseAlpha * p.a})`;
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-            ctx.fill();
-          }
-          ctx.restore();
-
-          // subtle vignette
-          const grd = ctx.createRadialGradient(W*0.5, H*0.5, Math.min(W,H)*0.15, W*0.5, H*0.5, Math.max(W,H)*0.7);
-          grd.addColorStop(0, 'rgba(0,0,0,0)');
-          grd.addColorStop(1, 'rgba(0,0,0,0.25)');
-          ctx.fillStyle = grd;
-          ctx.fillRect(0,0,W,H);
-
-          return particles;
-        }
-
-        function bindLight(ctx){
-          const s = loadLS();
-
-          const modeBadge = ctx.querySelector('#lsModeBadge');
-          const btnO = ctx.querySelector('#lsModeOpaque');
-          const btnT = ctx.querySelector('#lsModeTransparent');
-
-          const fL = ctx.querySelector('#lsFrontLight');
-          const rL = ctx.querySelector('#lsRearLight');
-          const fLV = ctx.querySelector('#lsFrontLightVal');
-          const rLV = ctx.querySelector('#lsRearLightVal');
-
-          const fBg = ctx.querySelector('#lsFrontBg');
-          const rBg = ctx.querySelector('#lsRearBg');
-
-          const fTxt = ctx.querySelector('#lsFrontBgTxt');
-          const rTxt = ctx.querySelector('#lsRearBgTxt');
-
-          const fR = ctx.querySelector('#lsFrontR');
-          const fG = ctx.querySelector('#lsFrontG');
-          const fB = ctx.querySelector('#lsFrontB');
-          const rR = ctx.querySelector('#lsRearR');
-          const rG = ctx.querySelector('#lsRearG');
-          const rB = ctx.querySelector('#lsRearB');
-
-          const cF = ctx.querySelector('#lsSimFront');
-          const cR = ctx.querySelector('#lsSimRear');
-          const lF = ctx.querySelector('#lsSimFrontLbl');
-          const lR = ctx.querySelector('#lsSimRearLbl');
-
-          let pf = null, pr = null;
-
-          function apply(){
-            if(modeBadge) modeBadge.textContent = (s.mode === 'transparent') ? 'Transparent' : 'Opaque';
-            if(btnO && btnT){
-              btnO.classList.toggle('active', s.mode !== 'transparent');
-              btnT.classList.toggle('active', s.mode === 'transparent');
-            }
-
-            if(fL){ fL.value = String(s.frontLight); }
-            if(rL){ rL.value = String(s.rearLight); }
-            if(fLV) fLV.textContent = String(s.frontLight);
-            if(rLV) rLV.textContent = String(s.rearLight);
-
-            if(fBg) fBg.value = rgbToHex(s.frontBg.r, s.frontBg.g, s.frontBg.b);
-            if(rBg) rBg.value = rgbToHex(s.rearBg.r, s.rearBg.g, s.rearBg.b);
-
-            const fStr = fmtRGB(s.frontBg);
-            const rStr = fmtRGB(s.rearBg);
-
-            if(fTxt) fTxt.textContent = fStr;
-            if(rTxt) rTxt.textContent = rStr;
-            if(fR) fR.textContent = String(s.frontBg.r);
-            if(fG) fG.textContent = String(s.frontBg.g);
-            if(fB) fB.textContent = String(s.frontBg.b);
-            if(rR) rR.textContent = String(s.rearBg.r);
-            if(rG) rG.textContent = String(s.rearBg.g);
-            if(rB) rB.textContent = String(s.rearBg.b);
-
-            if(lF) lF.textContent = fmtRgbCss(s.frontBg);
-            if(lR) lR.textContent = fmtRgbCss(s.rearBg);
-
-            // draw simulations
-            pf = drawSim(cF, s.frontBg, s.frontLight, s.mode, pf);
-            pr = drawSim(cR, s.rearBg, s.rearLight, s.mode, pr);
-
-            saveLS(s);
-          }
-
-          function setMode(mode){
-            s.mode = (mode === 'transparent') ? 'transparent' : 'opaque';
-            apply();
-          }
-
-          btnO && btnO.addEventListener('click', ()=>setMode('opaque'));
-          btnT && btnT.addEventListener('click', ()=>setMode('transparent'));
-
-          fL && fL.addEventListener('input', ()=>{
-            s.frontLight = lsClamp(fL.value);
-            apply();
-          }, {passive:true});
-          rL && rL.addEventListener('input', ()=>{
-            s.rearLight = lsClamp(rL.value);
-            apply();
-          }, {passive:true});
-
-          fBg && fBg.addEventListener('input', ()=>{
-            s.frontBg = hexToRgb(fBg.value);
-            apply();
-          }, {passive:true});
-          rBg && rBg.addEventListener('input', ()=>{
-            s.rearBg = hexToRgb(rBg.value);
-            apply();
-          }, {passive:true});
-
-          // ensure canvases are ready after open
-          setTimeout(apply, 0);
-          setTimeout(apply, 120);
-        }
-
-        function bindConfigExport(ctx){
-          const sel = ctx.querySelector('#cfgModelSelect');
-          const meta = ctx.querySelector('#cfgMeta');
-
-          const btnSend = ctx.querySelector('#anBtnExport');
-          const btnView = ctx.querySelector('#anBtnExportView');
-          const badge   = ctx.querySelector('#anExportBadge');
-          const previewWrap = ctx.querySelector('#anPayloadPreview');
-          const preSrc = ctx.querySelector('#anExportJsonSrc');
-
-          const simWrap = ctx.querySelector('#anSendSim');
-          const statusEl = ctx.querySelector('#anExportStatus');
-          const pctEl = ctx.querySelector('#anExportPct');
-          const barEl = ctx.querySelector('#anExportBar');
-          const pipeEl = ctx.querySelector('#anExportJsonPipe');
-          const dstEl  = ctx.querySelector('#anExportJsonDst');
-
-          let running = false;
-          let raf = null;
-          let t0 = 0;
-
-          function setBadge(txt, cls){
-            if(!badge) return;
-            badge.textContent = txt;
-            badge.classList.remove('ok','err');
-            if(cls) badge.classList.add(cls);
-          }
-          function setStatus(s){
-            if(statusEl) statusEl.textContent = s;
-          }
-          function setProgress(p){
-            const pp = clamp(p|0, 0, 100);
-            if(pctEl) pctEl.textContent = pp + '%';
-            if(barEl) barEl.style.width = pp + '%';
-          }
-          function setDisabled(dis){
-            if(btnSend) btnSend.disabled = !!dis;
-            if(btnView) btnView.disabled = !!dis;
-            if(sel) sel.disabled = !!dis;
-}
-          function stop(){
-            if(raf) cancelAnimationFrame(raf);
-            raf = null;
-            running = false;
-            setDisabled(false);
-          }
-
-          // Restore saved model
-          if(sel){
-            const saved = localStorage.getItem(LS_CFG_MODEL);
-            if(saved && sel.value !== saved){
-              sel.value = saved;
-            }
-            const updateMeta = ()=>{
-              const v = sel.value || '';
-              if(meta){
-                meta.textContent = v ? `Selected model: ${v}` : 'Select a machine model for export.';
-              }
-              // refresh payload preview if open
-              if(previewWrap && previewWrap.style.display !== 'none' && preSrc){
-                const payload = buildPayload(ctx);
-                preSrc.textContent = pretty(payload);
-              }
-            };
-            updateMeta();
-            sel.addEventListener('change', ()=>{
-              try{ localStorage.setItem(LS_CFG_MODEL, sel.value||''); }catch(e){}
-              updateMeta();
-            }, {passive:true});
-          }
-
-          function togglePayload(){
-            const payload = buildPayload(ctx);
-            if(preSrc) preSrc.textContent = pretty(payload);
-            if(previewWrap){
-              previewWrap.style.display = (previewWrap.style.display === 'none' || !previewWrap.style.display) ? 'block' : 'none';
-            }
-          }
-
-          function finalize(payload, report){
-            if(dstEl) dstEl.textContent = pretty(report);
-            if(pipeEl) pipeEl.textContent = pretty(payload);
-
-            setProgress(100);
-            setStatus(report.status === 'OK' ? 'Done ✓' : ('Error: ' + (report.message || report.code || 'ERROR')));
-            setBadge(report.status === 'OK' ? 'ok' : 'error', report.status === 'OK' ? 'ok' : 'err');
-
-            pushHistory({
-              id: 'exp_' + Date.now(),
-              ts: report.timestamp || nowISO(),
-              model: payload.machine?.model || '',
-              status: report.status || 'OK',
-              code: report.code || '',
-              payload,
-              report
-            });
-
-            if(simWrap) simWrap.style.display = 'block';
-            stop();
-          }
-
-          function run(){
-            if(running) return;
-
-            const payload = buildPayload(ctx);
-            const disconnect = (typeof navigator !== 'undefined' && navigator.onLine === false);
-            const payloadStr = pretty(payload);
-
-            if(simWrap) simWrap.style.display = 'block';
-            if(pipeEl) pipeEl.textContent = '';
-            if(dstEl) dstEl.textContent = '{}';
-
-            // Validate: model selected
-            if(!payload.machine || !payload.machine.model){
-              const rep = { status:'ERROR', code:'NO_MODEL', message:'No machine model selected', applied:false, timestamp: nowISO() };
-              finalize(payload, rep);
-              return;
-            }
-
-            running = true;
-            setDisabled(true);
-            setBadge('connecting', '');
-            setStatus('Connecting to machine…');
-            setProgress(0);
-
-            const connectMs = 900;
-            const sendMs = 1700;
-            const applyMs = 700;
-            const total = connectMs + sendMs + applyMs;
-
-            t0 = performance.now ? performance.now() : Date.now();
-
-            const tick = (tNow)=>{
-              const tn = tNow || (performance.now ? performance.now() : Date.now());
-              const dt = tn - t0;
-
-              if(dt < connectMs){
-                setBadge('connecting', '');
-                setStatus('Connecting to machine…');
-                setProgress((dt/connectMs)*18);
-              }else if(dt < connectMs + sendMs){
-                setBadge('sending', '');
-                setStatus('Sending payload…');
-                const t = dt - connectMs;
-                setProgress(18 + (t/sendMs)*70);
-
-                const frac = clamp(t/sendMs, 0, 1);
-                const n = Math.floor(payloadStr.length * frac);
-                if(pipeEl) pipeEl.textContent = payloadStr.slice(0, n);
-              }else if(dt < total){
-                setBadge('applying', '');
-                setStatus('Applying settings…');
-                const t = dt - (connectMs + sendMs);
-                setProgress(88 + (t/applyMs)*12);
-                if(pipeEl) pipeEl.textContent = payloadStr;
-              }else{
-                const report = disconnect
-                  ? { status:'ERROR', code:'NOT_CONNECTED', message:'Machine not connected', applied:false, timestamp: nowISO() }
-                  : { status:'OK', code:'APPLIED', message:'Payload applied', applied:true, checksum: (''+Math.random()).slice(2,8), timestamp: nowISO() };
-
-                finalize(payload, report);
-                return;
-              }
-
-              raf = requestAnimationFrame(tick);
-            };
-
-            raf = requestAnimationFrame(tick);
-          }
-
-          if(btnView){
-            btnView.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); togglePayload(); }, true);
-          }
-          if(btnSend){
-            btnSend.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); run(); }, true);
-          }
-
-          setBadge('idle', '');
-          setProgress(0);
-          setStatus('—');
-        }
-
-        function bindHistory(ctx){
-          const listEl = ctx.querySelector('#anHistList');
-          const clearBtn = ctx.querySelector('#anHistClear');
-          const emptyHint = ctx.querySelector('#anHistEmptyHint');
-
-          const detailCard = ctx.querySelector('#anHistDetail');
-          const badge = ctx.querySelector('#anHistDetailBadge');
-          const tTime = ctx.querySelector('#anHistTime');
-          const tModel = ctx.querySelector('#anHistModel');
-          const tStatus = ctx.querySelector('#anHistStatus');
-          const tCode = ctx.querySelector('#anHistCode');
-
-          const btnPay = ctx.querySelector('#anHistViewPayload');
-          const btnRep = ctx.querySelector('#anHistViewReport');
-          const jsonWrap = ctx.querySelector('#anHistJsonWrap');
-          const jsonTitle = ctx.querySelector('#anHistJsonTitle');
-          const jsonPre = ctx.querySelector('#anHistJson');
-
-          let selected = null;
-
-          function render(){
-            const hist = readJSON(LS_EXPORT_HIST, []);
-
-            if(listEl) listEl.innerHTML = '';
-            if(emptyHint) emptyHint.style.display = hist.length ? 'none' : 'block';
-            if(detailCard) detailCard.style.display = 'none';
-            if(jsonWrap) jsonWrap.style.display = 'none';
-
-            if(!listEl) return;
-
-            hist.forEach((h)=>{
-              const row = document.createElement('button');
-              row.type = 'button';
-              row.className = 'anHistRow';
-              row.style.width = '100%';
-              row.style.display = 'flex';
-              row.style.justifyContent = 'space-between';
-              row.style.alignItems = 'center';
-              row.style.gap = '10px';
-              row.style.padding = '12px';
-              row.style.borderRadius = '14px';
-              row.style.textAlign = 'left';
-              row.style.background = 'linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.05))';
-              row.style.border = '1px solid rgba(255,255,255,.14)';
-              row.style.backdropFilter = 'blur(14px)';
-              row.style.webkitBackdropFilter = 'blur(14px)';
-
-              const left = document.createElement('div');
-              left.style.display = 'flex';
-              left.style.flexDirection = 'column';
-              left.style.gap = '2px';
-
-              const a = document.createElement('div');
-              a.style.fontWeight = '950';
-              a.textContent = (h.model || '—') + ' • ' + (h.status || 'OK');
-
-              const b = document.createElement('div');
-              b.style.fontSize = '12px';
-              b.style.opacity = '.75';
-              b.textContent = fmtTs(h.ts) + (h.code ? (' • ' + h.code) : '');
-
-              left.appendChild(a);
-              left.appendChild(b);
-
-              const tag = document.createElement('span');
-              tag.className = 'anBadge ' + ((h.status === 'OK') ? 'ok' : 'err');
-              tag.textContent = (h.status === 'OK') ? 'OK' : 'ERR';
-
-              row.appendChild(left);
-              row.appendChild(tag);
-
-              row.addEventListener('click', (e)=>{
-                e.preventDefault(); e.stopPropagation();
-                selected = h;
-
-                if(detailCard) detailCard.style.display = 'block';
-                if(badge){
-                  badge.textContent = (h.status === 'OK') ? 'ok' : 'error';
-                  badge.classList.remove('ok','err');
-                  badge.classList.add((h.status === 'OK') ? 'ok' : 'err');
-                }
-                if(tTime) tTime.textContent = fmtTs(h.ts);
-                if(tModel) tModel.textContent = h.model || '—';
-                if(tStatus) tStatus.textContent = h.status || '—';
-                if(tCode) tCode.textContent = h.code || (h.report?.code || '—');
-
-                if(jsonWrap) jsonWrap.style.display = 'none';
-              }, true);
-
-              listEl.appendChild(row);
-            });
-          }
-
-          function showJSON(kind){
-            if(!selected || !jsonWrap) return;
-            jsonWrap.style.display = 'block';
-            if(kind === 'payload'){
-              if(jsonTitle) jsonTitle.textContent = 'Payload JSON';
-              if(jsonPre) jsonPre.textContent = pretty(selected.payload || {});
-            }else{
-              if(jsonTitle) jsonTitle.textContent = 'Report JSON';
-              if(jsonPre) jsonPre.textContent = pretty(selected.report || {});
-            }
-          }
-
-          if(btnPay) btnPay.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); showJSON('payload'); }, true);
-          if(btnRep) btnRep.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); showJSON('report'); }, true);
-
-          if(clearBtn){
-            clearBtn.addEventListener('click', (e)=>{
-              e.preventDefault(); e.stopPropagation();
-              writeJSON(LS_EXPORT_HIST, []);
-              render();
-            }, true);
-          }
-
-          render();
-        }
-
-
-        function el(tag, cls){
-          const n=document.createElement(tag);
-          if(cls) n.className = cls;
-          return n;
-        }
-
-        function renderTiles(){
-          if(!tilesHost) return;
-          tilesHost.innerHTML = '';
-          for(const m of MODULES){
-            const b = el('button','anTile');
-            b.type = 'button';
-            b.setAttribute('data-key', m.key);
-            b.setAttribute('role','listitem');
-            b.innerHTML =
-              '<span class="ico" aria-hidden="true">'+(window.__anIconForKey?window.__anIconForKey(m.key):'')+'</span>' +
-              '<span class="txt"><div class="t">'+m.title+'</div><div class="s">'+m.sub+'</div></span>' +
-              '<span class="chev" aria-hidden="true">›</span>';
-            b.addEventListener('click', (e)=>{
-              e.preventDefault();
-              e.stopPropagation();
-              openSheet(m.key);
-            }, true);
-            b.addEventListener('pointerup', (e)=>{
-              // Some webviews drop click; pointerup is more reliable
-              try{ e.preventDefault(); }catch(_){}
-            }, {passive:false});
-            tilesHost.appendChild(b);
-          }
-        }
-
-        function closeSheet(){
-          overlay?.classList.remove('on');
-          sheet?.classList.remove('on');
-          sheet?.setAttribute('aria-hidden','true');
-          overlay?.setAttribute('aria-hidden','true');
-          if(sheetBody) sheetBody.innerHTML = '';
-        }
-
-        function openSheet(key){
-          if(!templatesRoot || !sheetBody || !sheetTitle) return;
-          const tpl = templatesRoot.querySelector('[data-key="'+key+'"]');
-          if(!tpl) return;
-
-          // Reset body to avoid duplicate IDs alive at the same time
-          sheetBody.innerHTML = '';
-          const content = tpl.cloneNode(true);
-          content.removeAttribute('style');
-          // only insert its inner module nodes (avoid keeping data attributes container)
-          const inner = content.querySelector('.anModule') || content.firstElementChild;
-          if(inner) sheetBody.appendChild(inner.cloneNode(true));
-          sheetTitle.textContent = tpl.getAttribute('data-title') || 'Analyze';
-
-          overlay.classList.add('on');
-          sheet.classList.add('on');
-          sheet.setAttribute('aria-hidden','false');
-          overlay.setAttribute('aria-hidden','false');
-
-          // After module mounts, init hooks for Config selector and refresh the data
-          try{ bindModule(key); }catch(_e){}
-          try{ window.updateAnalysis && window.updateAnalysis(); }catch(_e){}
-          try{ window.__analyze_refresh && window.__analyze_refresh(); }catch(_e){}
-        }
-
-        // Close interactions
-        btnClose?.addEventListener('click', (e)=>{ e.preventDefault(); closeSheet(); }, true);
-        overlay?.addEventListener('click', (e)=>{ e.preventDefault(); closeSheet(); }, true);
-        window.addEventListener('keydown', (e)=>{
-          if(e.key === 'Escape' && sheet?.classList.contains('on')) closeSheet();
-        });
-
-        renderTiles();
-
-        /* ============================
-           DATA / LOGIC (global-friendly)
-           ============================ */
-
-        // Shared last colors (used elsewhere too)
-        if(!window.last){
-          window.last = { valid: {c:null, src:'—'}, defect: {c:null, src:'—'} };
-        }
-
-        function setTxt(id, v){
-          const el = document.getElementById(id);
-          if(el) el.textContent = (v==null?'—':String(v));
-        }
-        function rgbStr(c){ return c ? (c.r+', '+c.g+', '+c.b) : '—'; }
-
-        function setSwatch(idSw, idTxt, c){
-          const el = document.getElementById(idSw);
-          const tx = document.getElementById(idTxt);
-          if(!el || !tx || !c) return;
-          el.style.background = 'rgb('+c.r+','+c.g+','+c.b+')';
-          tx.textContent = rgbStr(c);
-          const lum = (0.2126*c.r + 0.7152*c.g + 0.0722*c.b)/255;
-          tx.style.color = lum > 0.62 ? 'rgba(0,0,0,.84)' : 'rgba(255,255,255,.95)';
-          tx.style.textShadow = lum > 0.62 ? '0 1px 0 rgba(255,255,255,.18)' : '0 1px 0 rgba(0,0,0,.35)';
-        }
-
-        function pick(which){
-          const st = window.__samples_state || window.samplesState || null;
-          if(!st || !st.saved) return null;
-          const order = ['upload','camera','picker'];
-          for(const src of order){
-            const v = st.saved[src]?.[which];
-            if(v && typeof v.r === 'number') return { c: {r:v.r|0,g:v.g|0,b:v.b|0}, src: src.toUpperCase() };
-          }
-          return null;
-        }
-
-        // Ensure decideModeHF is global (other parts may call it)
-        if(typeof window.decideModeHF !== 'function'){
-          window.decideModeHF = function(vr,vg,vb, dr,dg,db, isTransparent){
-            const dR = vr - dr, dG = vg - dg, dB = vb - db;
-            const aR = Math.abs(dR), aG = Math.abs(dG), aB = Math.abs(dB);
-            const maxDelta = Math.max(aR,aG,aB);
-            if(maxDelta === 0) return { mode:'none', maxDelta:0, secondDelta:0, arr:[] };
-
-            const arr = [
-              { k:'Red', v:aR },
-              { k:'Green', v:aG },
-              { k:'Blue', v:aB },
-            ].sort((a,b)=>b.v-a.v);
-
-            if(isTransparent) return { mode:'gray', maxDelta:arr[0].v, secondDelta:arr[1].v, arr, d:{dR,dG,dB} };
-
-            const sameSign = (dR >= 0 && dG >= 0 && dB >= 0) || (dR <= 0 && dG <= 0 && dB <= 0);
-            const sumV = vr + vg + vb;
-            const sumD = dr + dg + db;
-            if(sumV === 0 || sumD === 0) return { mode:'gray', maxDelta:arr[0].v, secondDelta:arr[1].v, arr, d:{dR,dG,dB} };
-
-            const vN0 = vr / sumV, vN1 = vg / sumV, vN2 = vb / sumV;
-            const dN0 = dr / sumD, dN1 = dg / sumD, dN2 = db / sumD;
-            const diff = Math.abs(vN0-dN0) + Math.abs(vN1-dN1) + Math.abs(vN2-dN2);
-
-            const RATIO_PRESERVE_EPS = 0.10;
-            if(sameSign && diff < RATIO_PRESERVE_EPS){
-              return { mode:'gray', maxDelta:arr[0].v, secondDelta:arr[1].v, arr, d:{dR,dG,dB} };
-            }
-            return { mode:'chromatic', maxDelta:arr[0].v, secondDelta:arr[1].v, arr, d:{dR,dG,dB} };
-          };
-        }
-
-        // HF panel updater (kept compatible)
-        if(typeof window.updateHFFromColors !== 'function'){
-          window.updateHFFromColors = function(valid, defect){
-            const boxProg = document.getElementById('sortingProgramBox');
-            const boxCh   = document.getElementById('analysisChannelBox');
-            const boxOrd  = document.getElementById('hfColorOrderBox');
-            const boxCant = document.getElementById('hfCannotUseBox');
-            const boxSens = document.getElementById('sensitivityBox');
-            const when    = document.getElementById('hfWhen');
-            if(!boxProg || !boxCh || !boxOrd || !boxCant || !boxSens) return;
-
-            const modelSel = document.getElementById('cfgModelSelect');
-            const modelVal = (modelSel?.value || '').toLowerCase();
-            const isHFModel = modelVal.startsWith('hf') || modelVal.includes('hf');
-            const isWSModel = modelVal.startsWith('wn') || modelVal.includes('wn') || modelVal.startsWith('ws') || modelVal.includes('ws');
-            const card = document.getElementById('hfCardInConfig');
-            const ph   = document.getElementById('hfPlaceholder');
-            if(card) card.style.display = isHFModel ? '' : 'none';
-            if(ph)   ph.style.display   = (!isHFModel && !isWSModel) ? '' : 'none';
-            if(!isHFModel) return;
-
-            const isTransparent = (window.getTransparentFlag && typeof window.getTransparentFlag === 'function') ? window.getTransparentFlag() : false;
-
-            if(!valid || !defect){
-              boxProg.textContent = '—';
-              boxCh.textContent = '—';
-              boxOrd.textContent = '—';
-              boxCant.textContent = '—';
-              boxSens.textContent = '—';
-              if(when) when.textContent = 'waiting';
-              return;
-            }
-
-            const vr=valid.r|0, vg=valid.g|0, vb=valid.b|0;
-            const dr=defect.r|0, dg=defect.g|0, db=defect.b|0;
-
-            const decision = window.decideModeHF(vr,vg,vb, dr,dg,db, isTransparent);
-            if(when) when.textContent = 'HF';
-            const t = document.getElementById('hfTrans');
-            if(t) t.textContent = isTransparent ? 'Transparent' : 'Opaque';
-
-            if(decision.mode === 'none'){
-              boxProg.textContent = '—';
-              boxCh.textContent = '—';
-              boxOrd.textContent = '—';
-              boxCant.textContent = '—';
-              boxSens.textContent = '0%';
-              return;
-            }
-
-            const top = decision.arr[0];
-            boxCh.textContent = top.k;
-            boxProg.textContent = (decision.mode === 'chromatic') ? 'Chromatic' : 'Color';
-
-            if(decision.mode === 'chromatic'){
-              const a = decision.arr[0], b = decision.arr[1];
-              const dR = vr - dr, dG = vg - dg, dB = vb - db;
-              const d = { Red:dR, Green:dG, Blue:dB };
-              const left = (d[a.k] >= d[b.k]) ? a.k : b.k;
-              const right = (left === a.k) ? b.k : a.k;
-              boxOrd.textContent = left+'>'+right;
-              boxCant.textContent = 'Cannot use '+left;
-            }else{
-              boxOrd.textContent = '—';
-              boxCant.textContent = '—';
-            }
-
-            const dR = vr - dr, dG = vg - dg, dB = vb - db;
-            const rgbDist = Math.sqrt(dR*dR + dG*dG + dB*dB);
-            const sensPct = Math.max(0, Math.min(100, Math.round((rgbDist / (Math.sqrt(3) * 255)) * 100)));
-            boxSens.textContent = sensPct+'%';
-          };
-        }
-
-        // Small helper to stamp time
-        function nowStamp(){
-          const d=new Date();
-          const hh=String(d.getHours()).padStart(2,'0');
-          const mm=String(d.getMinutes()).padStart(2,'0');
-          const ss=String(d.getSeconds()).padStart(2,'0');
-          return hh+':'+mm+':'+ss;
-        }
-
-        // Calibration capture collector (uses existing calibration metric IDs)
-        const calib = {
-          lux: { when:null, a:'—', b:'—', c:'—' },
-          ct:  { when:null, a:'—', b:'—', c:'—' },
-          fl:  { when:null, a:'—', b:'—', c:'—' },
-          ls:  { when:null, a:'—', b:'—', c:'—' },
-        };
-        function writeCalib(){
-          setTxt('anLuxWhen', calib.lux.when || '—'); setTxt('anLuxA', calib.lux.a); setTxt('anLuxB', calib.lux.b); setTxt('anLuxC', calib.lux.c);
-          setTxt('anCTWhen',  calib.ct.when  || '—'); setTxt('anCTA',  calib.ct.a);  setTxt('anCTB',  calib.ct.b);  setTxt('anCTC',  calib.ct.c);
-          setTxt('anFWhen',   calib.fl.when  || '—'); setTxt('anFA',   calib.fl.a);  setTxt('anFB',   calib.fl.b);  setTxt('anFC',   calib.fl.c);
-          setTxt('anLSWhen',  calib.ls.when  || '—'); setTxt('anLSA',  calib.ls.a);  setTxt('anLSB',  calib.ls.b);  setTxt('anLSC',  calib.ls.c);
-        }
-        function hookCapture(btnId, kind, ids){
-          const btn = document.getElementById(btnId);
-          if(!btn) return;
-          btn.addEventListener('click', ()=>{
-            calib[kind] = {
-              when: nowStamp(),
-              a: (document.getElementById(ids[0])?.textContent ?? '—'),
-              b: (document.getElementById(ids[1])?.textContent ?? '—'),
-              c: (document.getElementById(ids[2])?.textContent ?? '—'),
-            };
-            writeCalib();
-          }, true);
-        }
-        hookCapture('btnLuxCapture', 'lux', ['metE','metCct','metDuv']);
-        hookCapture('btnCTCapture',  'ct',  ['metE_CT','metCct_CT','metDuv_CT']);
-        hookCapture('btnFlickerCapture','fl',['metE_Flicker','metCct_Flicker','metDuv_Flicker']);
-        hookCapture('btnLSCapture',  'ls',  ['metPeak_LS','metCct_LS','metCri_LS']);
-        writeCalib();
-
-        // Config selector init (works whenever module is open)
-        const DB = {
-          HF1:{label:'HF1 Chute', vendor:'HF', family:'HF', chute:'1'},
-          HF2:{label:'HF2 Chute', vendor:'HF', family:'HF', chute:'2'},
-          HF3:{label:'HF3 Chute', vendor:'HF', family:'HF', chute:'3'},
-          HF4:{label:'HF4 Chute', vendor:'HF', family:'HF', chute:'4'},
-          WN1:{label:'WN1 Chute', vendor:'Winio', family:'WN', chute:'1'},
-          WN2:{label:'WN2 Chute', vendor:'Winio', family:'WN', chute:'2'},
-          WN3:{label:'WN3 Chute', vendor:'Winio', family:'WN', chute:'3'},
-          WN4:{label:'WN4 Chute', vendor:'Winio', family:'WN', chute:'4'},
-        };
-        function renderMeta(k){
-          const meta = document.getElementById('cfgMeta');
-          const m = DB[k] || DB.HF1;
-          if(meta){
-            meta.innerHTML =
-              '<span class="anPill"><span class="k">Vendor</span><span class="v">'+m.vendor+'</span></span>'+
-              '<span class="anPill"><span class="k">Family</span><span class="v">'+m.family+'</span></span>'+
-              '<span class="anPill"><span class="k">Model</span><span class="v">'+m.label+'</span></span>'+
-              '<span class="anPill"><span class="k">Chute</span><span class="v">'+m.chute+'</span></span>';
-          }
-        }
-        function initConfigSelector(){
-          const sel = document.getElementById('cfgModelSelect');
-          if(!sel) return;
-          let model = 'HF1';
-          try{ model = localStorage.getItem('an_cfg_model') || 'HF1'; }catch(_e){}
-          if(DB[model]) sel.value = model;
-          renderMeta(sel.value);
-          sel.onchange = ()=>{
-            const v = sel.value;
-            try{ localStorage.setItem('an_cfg_model', v); }catch(_e){}
-            renderMeta(v);
-            try{ window.updateAnalysis && window.updateAnalysis(); }catch(_e){}
-          };
-        }
-
-        // Public refresher (used by other scripts)
-        window.updateAnalysis = function(){
-          try{ window.updateHFFromColors(window.last?.valid?.c, window.last?.defect?.c); }catch(_e){}
-          try{ window.updateWSFromColors && window.updateWSFromColors(window.last?.valid?.c, window.last?.defect?.c); }catch(_e){}
-          try{ writeCalib(); }catch(_e){}
-        };
-
-        // Continuous refresh: keep the module data updated when open
-        window.__analyze_refresh = function(){
-          // Color module
-          const pv = pick('valid'); if(pv){ window.last.valid = pv; }
-          const pd = pick('defect'); if(pd){ window.last.defect = pd; }
-
-          const v = window.last.valid.c, d = window.last.defect.c;
-          if(v){ setSwatch('anValidSwatch','anValidRgb',v); setTxt('anValidSrc', window.last.valid.src); }
-          if(d){ setSwatch('anDefectSwatch','anDefectRgb',d); setTxt('anDefectSrc', window.last.defect.src); }
-          if(v && d){
-            const dr=v.r-d.r, dg=v.g-d.g, db=v.b-d.b;
-            const dist = Math.sqrt(dr*dr+dg*dg+db*db);
-            setTxt('anDdist', (Math.round(dist*10)/10).toFixed(1));
-            setTxt('anDrgb', dr+', '+dg+', '+db);
-          }
-
-          // Config panels (HF/WS)
-          try{ window.updateAnalysis(); }catch(_e){}
-        };
-
-        // Poll (cheap + reliable)
-        setInterval(()=>{ try{ window.__analyze_refresh(); }catch(_e){} }, 200);
-
-      })();
-    </script>
+(function(){
+  const gate = document.getElementById('vsaInstallGate');
+  const statusEl = document.getElementById('vsaStatus');
+  const barEl = document.getElementById('vsaBar');
+  const continueBtn = document.getElementById('vsaContinueBtn');
+  const installBtn = document.getElementById('vsaInstallBtn');
+
+  const LS_KEY = 'vsa_install_demo_done_v1';
+
+  function isStandalone(){
+    return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+      || (window.navigator && window.navigator.standalone);
+  }
+
+  // Register SW
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(()=>{});
+    });
+  }
+
+  // Always show the install gate ONCE (first run), even if already installed/standalone.
+  // After user clicks Continue, we remember it in localStorage and never show again
+  // unless user clears site data.
+  const alreadyDone = (() => {
+    try { return localStorage.getItem(LS_KEY) === '1'; } catch(e){ return false; }
+  })();
+
+  if (alreadyDone) {
+    if (gate) gate.hidden = true;
+    return;
+  }
+
+  // Handle system install prompt when available (mainly for non-standalone mode)
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (installBtn) installBtn.hidden = false;
+  });
+
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      installBtn.disabled = true;
+      try{
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+      }catch(_){}
+      deferredPrompt = null;
+      installBtn.hidden = true;
+      installBtn.disabled = false;
+    });
+  }
+
+  // Fake installation progress (10-12 seconds)
+  const totalMs = 11600; // ~11.6s
+  const start = performance.now();
+  const steps = [
+    {t: 0.08, msg: 'Checking requirements…'},
+    {t: 0.22, msg: 'Downloading core modules…'},
+    {t: 0.45, msg: 'Installing offline cache…'},
+    {t: 0.68, msg: 'Optimizing vision pipeline…'},
+    {t: 0.86, msg: 'Finalizing…'},
+    {t: 1.00, msg: 'Installation complete ✔️'}
+  ];
+  let stepIdx = 0;
+
+  function tick(now){
+    const p = Math.min(1, (now - start) / totalMs);
+    if (barEl) barEl.style.width = Math.round(p*100) + '%';
+
+    while(stepIdx < steps.length && p >= steps[stepIdx].t){
+      if (statusEl) statusEl.textContent = steps[stepIdx].msg;
+      stepIdx++;
+    }
+
+    if (p < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      if (continueBtn) continueBtn.disabled = false;
+      if (continueBtn) continueBtn.focus({preventScroll:true});
+    }
+  }
+  requestAnimationFrame(tick);
+
+  if (continueBtn) {
+    continueBtn.addEventListener('click', () => {
+      try { localStorage.setItem(LS_KEY, '1'); } catch(e){}
+      if (gate) gate.hidden = true;
+    });
+  }
+
+  // Small UX text tweak based on mode
+  try{
+    const hint = document.getElementById('vsaHint');
+    if (hint) {
+      if (isStandalone()) {
+        hint.innerHTML = 'Tip: You are running the installed app. Press <span class="vsaKbd">Continue</span> to start.';
+      }
+    }
+  }catch(e){}
+})();
+</script>
 
   </div>
 </section>
