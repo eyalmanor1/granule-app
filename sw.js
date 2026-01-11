@@ -1,4 +1,4 @@
-const CACHE = "manor-pwa-v1";
+const CACHE = "vsa-pwa-v1";
 const CORE = [
   "./",
   "./index.html",
@@ -11,14 +11,14 @@ const CORE = [
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)));
+  event.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)));
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.map(k => (k === CACHE ? null : caches.delete(k))));
+    await Promise.all(keys.map((k) => (k === CACHE ? null : caches.delete(k))));
     await self.clients.claim();
   })());
 });
@@ -26,10 +26,8 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   const url = new URL(req.url);
-
   if (url.origin !== self.location.origin) return;
 
-  // App-shell offline fallback for navigations
   if (req.mode === "navigate") {
     event.respondWith((async () => {
       const cache = await caches.open(CACHE);
@@ -37,23 +35,19 @@ self.addEventListener("fetch", (event) => {
         const fresh = await fetch(req);
         cache.put(req, fresh.clone());
         return fresh;
-      } catch (e) {
-        // Prefer app offline
+      } catch {
         return (await cache.match("./app.html")) || (await cache.match("./index.html"));
       }
     })());
     return;
   }
 
-  // Cache-first for static; update cache in background
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
     const cached = await cache.match(req);
-    const fetchPromise = fetch(req).then(res => {
-      if (res && res.status === 200 && res.type === "basic") cache.put(req, res.clone());
-      return res;
-    }).catch(() => null);
-
-    return cached || (await fetchPromise) || new Response("", {status: 504});
+    if (cached) return cached;
+    const fresh = await fetch(req);
+    if (fresh && fresh.status === 200 && fresh.type === "basic") cache.put(req, fresh.clone());
+    return fresh;
   })());
 });

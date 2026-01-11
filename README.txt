@@ -1,23 +1,18 @@
-REAL PWA INSTALL BUNDLE (EN)
+VSA — Visual System Autopilot (PWA)
 
-Files:
-- index.html              Installer screen (with file-transfer animation + REAL install prompt when supported)
+FILES
+- index.html              Install screen (English) + file-transfer animation + REAL install prompt
 - app.html                Your app (copied from ms9.html)
-- manifest.webmanifest    PWA manifest (start_url points to app.html)
+- manifest.webmanifest    PWA manifest (start_url -> app.html)
 - sw.js                   Service worker (offline cache)
 - icon-192.png / icon-512.png / apple-touch-icon.png
 
-How to use:
-1) Serve over HTTPS (GitHub Pages is perfect) or localhost.
-2) Open /index.html
-3) Click Install (Android/Desktop shows a REAL prompt if eligible)
-4) iOS: Safari → Share → Add to Home Screen
+DEPLOY
+- Must be served over HTTPS (GitHub Pages is OK) or localhost.
+- Open /index.html and click Install.
+- Android/Desktop: real install requires the official browser prompt.
+- iOS: manual install (Safari -> Share -> Add to Home Screen).
 
-Important:
-- No webpage can "force install" without the browser prompt.
-- If Android installs but you don't see an icon: check the App Drawer and then Add to Home.
-
-
-Post-install behavior:
-- After real install (appinstalled), the installer auto-navigates to app.html after ~1.2s.
-- It also shows buttons: Open VSA / Close tab (close may be blocked by browser security).
+POST-INSTALL
+- On 'appinstalled' we show: Installed + Continue + Close tab (close may be blocked).
+- We also auto-navigate to app.html after ~1.2s for a smooth flow.

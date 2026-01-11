@@ -14,26 +14,17 @@
 
   <style>
     :root{
-      --bg:#0b1220;
-      --panel:#0f172a;
-      --panel2:#0b1531;
-      --txt:#e5e7eb;
-      --muted:#94a3b8;
-      --acc:#38bdf8;
-      --good:#22c55e;
-      --warn:#f59e0b;
-      --bad:#ef4444;
-      --shadow: 0 18px 45px rgba(0,0,0,.45);
-      --r: 18px;
+      --bg:#0b1220; --panel:#0f172a; --txt:#e5e7eb; --muted:#94a3b8; --acc:#38bdf8;
+      --good:#22c55e; --warn:#f59e0b; --bad:#ef4444; --r:18px; --shadow:0 18px 45px rgba(0,0,0,.45);
     }
     *{box-sizing:border-box}
     body{
-      margin:0;
-      background: radial-gradient(1000px 600px at 70% -10%, rgba(56,189,248,.18), transparent 60%),
-                  radial-gradient(800px 500px at 10% 10%, rgba(34,197,94,.10), transparent 60%),
-                  var(--bg);
-      color:var(--txt);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      margin:0; color:var(--txt);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background:
+        radial-gradient(1000px 600px at 70% -10%, rgba(56,189,248,.18), transparent 60%),
+        radial-gradient(800px 500px at 10% 10%, rgba(34,197,94,.10), transparent 60%),
+        var(--bg);
     }
     .wrap{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:18px;}
     .card{
@@ -44,209 +35,117 @@
       box-shadow: var(--shadow);
       overflow:hidden;
     }
-    .top{
-      display:flex; gap:16px; align-items:center; padding:18px 18px 14px;
+    .top{display:flex; gap:16px; align-items:center; padding:18px 18px 14px;
       background: linear-gradient(90deg, rgba(56,189,248,.14), transparent 55%);
-      border-bottom:1px solid rgba(148,163,184,.14);
-    }
-    .logo{
-      width:54px; height:54px; border-radius:14px;
+      border-bottom:1px solid rgba(148,163,184,.14);}
+    .logo{width:54px; height:54px; border-radius:14px;
       background: rgba(56,189,248,.10);
       border:1px solid rgba(56,189,248,.22);
-      display:grid; place-items:center;
-    }
+      display:grid; place-items:center;}
     .logo img{width:42px; height:42px; border-radius:12px;}
     .title h1{margin:0; font-size:18px; line-height:1.25;}
-    .title p{margin:6px 0 0; color:var(--muted); font-size:13px;}
-    .grid{
-      display:grid; grid-template-columns: 1.2fr .8fr; gap:14px;
-      padding:14px 18px 18px;
-    }
-    @media (max-width: 860px){
-      .grid{grid-template-columns:1fr}
-    }
-    .panel{
-      background: rgba(15,23,42,.60);
-      border:1px solid rgba(148,163,184,.12);
-      border-radius: var(--r);
-      padding:14px;
-    }
+    .title p{margin:6px 0 0; color:var(--muted); font-size:13px; line-height:1.4}
+    .grid{display:grid; grid-template-columns: 1.2fr .8fr; gap:14px; padding:14px 18px 18px;}
+    @media (max-width: 860px){.grid{grid-template-columns:1fr}}
+    .panel{background: rgba(15,23,42,.60); border:1px solid rgba(148,163,184,.12); border-radius: var(--r); padding:14px;}
     .panel h2{margin:0 0 10px; font-size:14px; color:#dbeafe; letter-spacing:.2px;}
-    .steps{display:grid; gap:10px;}
-    .step{
-      background: rgba(2,6,23,.45);
-      border:1px solid rgba(148,163,184,.12);
-      border-radius: 14px;
-      padding:12px;
-    }
+    .step{background: rgba(2,6,23,.45); border:1px solid rgba(148,163,184,.12); border-radius:14px; padding:12px;}
     .step b{color:#e0f2fe}
     .step small{display:block; color:var(--muted); margin-top:6px; line-height:1.45}
     .actions{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
     button{
-      border:0;
-      border-radius: 14px;
-      padding:12px 14px;
-      font-weight:700;
-      cursor:pointer;
-      color:#001018;
+      border:0; border-radius:14px; padding:12px 14px; font-weight:800;
+      cursor:pointer; color:#001018;
       background: linear-gradient(180deg, rgba(56,189,248,1), rgba(56,189,248,.82));
       box-shadow: 0 10px 22px rgba(56,189,248,.18);
     }
     button.secondary{
-      color: var(--txt);
-      background: rgba(148,163,184,.10);
-      border:1px solid rgba(148,163,184,.18);
-      box-shadow:none;
+      color:var(--txt); background: rgba(148,163,184,.10);
+      border:1px solid rgba(148,163,184,.18); box-shadow:none;
     }
     button:disabled{opacity:.55; cursor:not-allowed}
-    .hint{color:var(--muted); font-size:12px; margin-top:8px; line-height:1.45}
     .statusline{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:10px}
-    .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:8px 10px;
-      border-radius: 999px;
-      border:1px solid rgba(148,163,184,.16);
-      background: rgba(2,6,23,.35);
-      color: var(--muted);
-      font-size:12px;
-    }
+    .pill{display:inline-flex; align-items:center; gap:8px; padding:8px 10px;
+      border-radius:999px; border:1px solid rgba(148,163,184,.16);
+      background: rgba(2,6,23,.35); color: var(--muted); font-size:12px;}
     .dot{width:10px; height:10px; border-radius:999px; background: rgba(148,163,184,.6);}
-    .dot.good{background: var(--good)}
-    .dot.warn{background: var(--warn)}
-    .dot.bad{background: var(--bad)}
-    .sim{
-      display:grid;
-      grid-template-rows: auto auto 1fr;
-      gap:10px;
-    }
+    .dot.good{background: var(--good)} .dot.warn{background: var(--warn)} .dot.bad{background: var(--bad)}
+    .hint{color:var(--muted); font-size:12px; margin-top:8px; line-height:1.45}
+    .divider{height:1px; background: rgba(148,163,184,.12); margin:10px 0}
+
+    .sim{display:grid; grid-template-rows:auto auto 1fr; gap:10px;}
     .simtop{display:flex; align-items:center; justify-content:space-between; gap:10px}
-    .clock{
-      width:44px; height:44px; border-radius:999px;
-      border:2px solid rgba(56,189,248,.35);
-      position:relative;
-      box-shadow: inset 0 0 0 8px rgba(56,189,248,.08);
-    }
-    .clock:before, .clock:after{
-      content:""; position:absolute; left:50%; top:50%;
-      width:2px; background: rgba(56,189,248,.95);
-      transform-origin: bottom center;
-      border-radius: 2px;
-    }
+    .clock{width:44px; height:44px; border-radius:999px; border:2px solid rgba(56,189,248,.35);
+      position:relative; box-shadow: inset 0 0 0 8px rgba(56,189,248,.08);}
+    .clock:before,.clock:after{content:""; position:absolute; left:50%; top:50%; width:2px;
+      background: rgba(56,189,248,.95); transform-origin: bottom center; border-radius:2px;}
     .clock:before{height:14px; transform: translate(-50%,-100%) rotate(0deg); animation: hand1 1.2s linear infinite;}
     .clock:after{height:18px; opacity:.8; transform: translate(-50%,-100%) rotate(0deg); animation: hand2 .9s linear infinite;}
     @keyframes hand1{to{transform: translate(-50%,-100%) rotate(360deg)}}
     @keyframes hand2{to{transform: translate(-50%,-100%) rotate(-360deg)}}
-    .progress{
-      height:10px; width:100%;
-      background: rgba(148,163,184,.12);
-      border-radius: 999px;
-      overflow:hidden;
-      border:1px solid rgba(148,163,184,.10);
-    }
-    .bar{
-      height:100%;
-      width:0%;
-      background: linear-gradient(90deg, rgba(34,197,94,.95), rgba(56,189,248,.95));
-      transition: width .25s ease;
-    }
-    .log{
-      list-style:none;
-      margin:0; padding:0;
-      display:grid; gap:8px;
-      max-height: 320px;
-      overflow:auto;
-      scrollbar-width: thin;
-    }
-    .row{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      padding:10px 10px;
-      border-radius: 14px;
-      border:1px solid rgba(148,163,184,.12);
-      background: rgba(2,6,23,.40);
-    }
+    .progress{height:10px; width:100%; background: rgba(148,163,184,.12); border-radius:999px; overflow:hidden; border:1px solid rgba(148,163,184,.10);}
+    .bar{height:100%; width:0%; background: linear-gradient(90deg, rgba(34,197,94,.95), rgba(56,189,248,.95)); transition: width .25s ease;}
+    .log{list-style:none; margin:0; padding:0; display:grid; gap:8px; max-height:320px; overflow:auto; scrollbar-width:thin;}
+    .row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 10px;
+      border-radius:14px; border:1px solid rgba(148,163,184,.12); background: rgba(2,6,23,.40);}
     .row .name{font-size:13px}
     .row .meta{color:var(--muted); font-size:12px; white-space:nowrap}
-    .tag{
-      font-size:11px;
-      padding:4px 8px;
-      border-radius: 999px;
-      border:1px solid rgba(148,163,184,.18);
-      background: rgba(148,163,184,.08);
-      color: var(--muted);
-      white-space:nowrap;
-    }
-    .tag.ok{border-color: rgba(34,197,94,.28); background: rgba(34,197,94,.10); color: #bbf7d0}
-    .tag.run{border-color: rgba(56,189,248,.28); background: rgba(56,189,248,.10); color: #cffafe}
-    .tag.wait{border-color: rgba(245,158,11,.30); background: rgba(245,158,11,.10); color: #fde68a}
-    .final{
-      display:none;
-      padding:12px;
-      border-radius: 14px;
-      border:1px dashed rgba(34,197,94,.35);
-      background: rgba(34,197,94,.10);
-      color: #bbf7d0;
-      line-height:1.55;
-      font-size:13px;
-    }
+    .tag{font-size:11px; padding:4px 8px; border-radius:999px; border:1px solid rgba(148,163,184,.18);
+      background: rgba(148,163,184,.08); color: var(--muted); white-space:nowrap;}
+    .tag.ok{border-color: rgba(34,197,94,.28); background: rgba(34,197,94,.10); color:#bbf7d0}
+    .tag.run{border-color: rgba(56,189,248,.28); background: rgba(56,189,248,.10); color:#cffafe}
+    .tag.wait{border-color: rgba(245,158,11,.30); background: rgba(245,158,11,.10); color:#fde68a}
+
+    .final{display:none; padding:12px; border-radius:14px; border:1px dashed rgba(34,197,94,.35);
+      background: rgba(34,197,94,.10); color:#bbf7d0; line-height:1.55; font-size:13px;}
     .final.show{display:block}
-    .kbd{
-      display:inline-block;
-      padding:2px 7px;
-      border-radius: 8px;
-      border:1px solid rgba(148,163,184,.22);
-      background: rgba(148,163,184,.10);
-      color: #e5e7eb;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
-      font-size: 11px;
-    }
-    .divider{height:1px; background: rgba(148,163,184,.12); margin:10px 0}
+    .kbd{display:inline-block; padding:2px 7px; border-radius:8px; border:1px solid rgba(148,163,184,.22);
+      background: rgba(148,163,184,.10); color:#e5e7eb; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace; font-size:11px;}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
       <div class="top">
-        <div class="logo"><img src="./icon-192.png" alt="icon"></div>
+        <div class="logo"><img src="./icon-192.png" alt="VSA icon"></div>
         <div class="title">
-          <h1>Install VSA (PWA)</h1>
-          <p>Real PWA install (Android/Desktop prompt) + file-transfer style install screen.</p>
+          <h1>VSA — Visual System Autopilot</h1>
+          <p>Simple install screen with a file-transfer animation. After install, you’ll see “Continue / Close”.</p>
         </div>
       </div>
 
       <div class="grid">
         <div class="panel">
-          <h2>How to install</h2>
+          <h2>Install</h2>
 
-          <div class="steps">
-            <div class="step" id="androidBlock">
-              <b>Android / Desktop (Chrome, Edge)</b>
-              <small>
-                Tap <span class="kbd">Install</span> below. If your browser supports it, a real install prompt will appear.<br/>
-                If you don’t see a prompt: menu <span class="kbd">⋮</span> → <span class="kbd">Install app</span> / <span class="kbd">Add to Home screen</span>.
-              </small>
-            </div>
+          <div class="step" id="androidBlock">
+            <b>Android / Desktop (Chrome, Edge)</b>
+            <small>
+              Tap <span class="kbd">Install</span>. If eligible, the official browser install prompt will appear.<br/>
+              If not: browser menu <span class="kbd">⋮</span> → <span class="kbd">Install app</span> / <span class="kbd">Add to Home screen</span>.
+            </small>
+          </div>
 
-            <div class="step" id="iosBlock">
-              <b>iOS (Safari)</b>
-              <small>
-                iOS does not allow an automatic install prompt.<br/>
-                Open in Safari → Share <span class="kbd">⬆︎</span> → <span class="kbd">Add to Home Screen</span> → <span class="kbd">Add</span>.
-              </small>
-            </div>
+          <div class="step" id="iosBlock" style="margin-top:10px">
+            <b>iOS (Safari)</b>
+            <small>
+              iOS requires manual install: Safari → Share <span class="kbd">⬆︎</span> → <span class="kbd">Add to Home Screen</span> → <span class="kbd">Add</span>.
+            </small>
           </div>
 
           <div class="actions">
             <button id="installBtn">Install</button>
-            <button class="secondary" id="openBtn">Open App</button>
+            <button class="secondary" id="openBtn">Continue (Open VSA)</button>
+            <button class="secondary" id="closeBtn">Close tab</button>
             <button class="secondary" id="resetBtn">Reset</button>
           </div>
 
-          <div class="hint" id="hint">
-            Note: the animation is visual, but the install itself is REAL only when your browser shows the official install prompt (Android/Desktop) or you use iOS “Add to Home Screen”.
+          <div class="hint">
+            Important: websites cannot force-install or force-close the browser. Real install requires the official prompt (Android/Desktop) or “Add to Home Screen” (iOS).
           </div>
 
           <div class="statusline">
-            <span class="pill"><span class="dot" id="pwaDot"></span><span id="pwaText">Checking install availability…</span></span>
+            <span class="pill"><span class="dot" id="pwaDot"></span><span id="pwaText">Checking install status…</span></span>
             <span class="pill"><span class="dot" id="swDot"></span><span id="swText">Registering service worker…</span></span>
           </div>
 
@@ -256,11 +155,10 @@
 
         <div class="panel sim">
           <div class="simtop">
-            <h2 style="margin:0">Installing…</h2>
+            <h2 style="margin:0">Install progress</h2>
             <div class="clock" aria-hidden="true"></div>
           </div>
-
-          <div class="progress" aria-label="progress"><div class="bar" id="bar"></div></div>
+          <div class="progress"><div class="bar" id="bar"></div></div>
           <ul class="log" id="log"></ul>
         </div>
       </div>
@@ -269,13 +167,11 @@
 
 <script>
 (() => {
-  // Real install is only possible via:
-  // - Android/Desktop: beforeinstallprompt → prompt()
-  // - iOS: Safari Share → Add to Home Screen (manual)
   let deferredPrompt = null;
 
   const installBtn = document.getElementById('installBtn');
   const openBtn = document.getElementById('openBtn');
+  const closeBtn = document.getElementById('closeBtn');
   const resetBtn = document.getElementById('resetBtn');
 
   const pwaDot = document.getElementById('pwaDot');
@@ -293,119 +189,101 @@
   function showFinal(html){ finalBox.innerHTML = html; finalBox.classList.add('show'); }
   function clearFinal(){ finalBox.classList.remove('show'); finalBox.innerHTML = ""; }
 
+  function inStandalone(){
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  }
+
+  function updateInstallStatus(){
+    if (inStandalone()){
+      setDot(pwaDot, "good");
+      pwaText.textContent = "Installed (standalone).";
+      installBtn.disabled = true;
+      return;
+    }
+    if (isIOS){
+      setDot(pwaDot, "warn");
+      pwaText.textContent = "iOS: manual install (Add to Home Screen).";
+      return;
+    }
+    setDot(pwaDot, deferredPrompt ? "good" : "warn");
+    pwaText.textContent = deferredPrompt ? "Install prompt is ready." : "Waiting for install prompt…";
+  }
+
+  // Capture real install prompt (Android/Desktop)
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    updateInstallStatus();
+  });
+
+  window.addEventListener('appinstalled', () => {
+    installBtn.disabled = true;
+    setDot(pwaDot, "good");
+    pwaText.textContent = "Installed.";
+    showFinal(`✅ Installed!<br/><br/>
+      The app is now available from your Home Screen / App Drawer (Android) or Home Screen (iOS manual).<br/><br/>
+      <div class="actions" style="margin-top:10px">
+        <button id="openNowBtn">Continue (Open VSA)</button>
+        <button class="secondary" id="tryCloseBtn">Close tab</button>
+      </div>
+      <div style="margin-top:10px; color: rgba(229,231,235,.8); font-size:12px; line-height:1.45">
+        Note: “Close tab” may be blocked by browser security. If it doesn’t close, just close this tab manually.
+      </div>
+    `);
+    wireFinalButtons();
+    // Best UX: move to app page (cannot close browser automatically)
+    setTimeout(() => { window.location.href = './app.html'; }, 1200);
+  });
+
+  function wireFinalButtons(){
+    const openNowBtn = document.getElementById('openNowBtn');
+    const tryCloseBtn = document.getElementById('tryCloseBtn');
+    if (openNowBtn) openNowBtn.onclick = () => window.location.href = './app.html';
+    if (tryCloseBtn) tryCloseBtn.onclick = tryCloseTab;
+  }
+
   function tryCloseTab(){
-    // Browsers usually block closing tabs that were not opened via script.
-    // We'll attempt anyway, and show a clear fallback message.
     window.close();
     setTimeout(() => {
-      // If it didn't close, show a helpful message.
+      // If it didn't close, show a short fallback
       showFinal(`✅ Installed.<br/><br/>
-        <b>Next steps:</b><br/>
-        • Tap <span class="kbd">Open VSA</span> to launch the app.<br/>
-        • Or simply close this tab manually (browser security blocks auto-close).<br/><br/>
+        Browser security blocks auto-close in most cases.<br/>
+        Please close this tab manually, or tap <span class="kbd">Continue</span>.<br/><br/>
         <div class="actions" style="margin-top:10px">
-          <button id="openNowBtn">Open VSA</button>
-          <button class="secondary" id="closeTabBtn">Close tab</button>
+          <button id="openNowBtn">Continue (Open VSA)</button>
         </div>
       `);
       wireFinalButtons();
     }, 450);
   }
 
-  function wireFinalButtons(){
-    const openNowBtn = document.getElementById('openNowBtn');
-    const closeTabBtn = document.getElementById('closeTabBtn');
-    if (openNowBtn) openNowBtn.addEventListener('click', () => window.location.href = './app.html');
-    if (closeTabBtn) closeTabBtn.addEventListener('click', tryCloseTab);
-  }
-
-  function showPostInstallActions(){
-    showFinal(`✅ Installed successfully.<br/><br/>
-      <div class="actions" style="margin-top:10px">
-        <button id="openNowBtn">Open VSA</button>
-        <button class="secondary" id="closeTabBtn">Close tab</button>
-      </div>
-      <div style="margin-top:10px; color: rgba(229,231,235,.8); font-size:12px; line-height:1.45">
-        Note: Browsers do not allow websites to close tabs automatically. If “Close tab” doesn’t work, please close it manually.
-      </div>
-    `);
-    wireFinalButtons();
-  }
-
-
-  function inStandalone(){
-    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-  }
-
-  function setInstalledUI(){
-    setDot(pwaDot, "good");
-    pwaText.textContent = "Installed / running standalone.";
-    installBtn.disabled = true;
-    showFinal("✅ Already installed."); showPostInstallActions();
-  }
-
-  if (inStandalone()) setInstalledUI();
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (!inStandalone()){
-      setDot(pwaDot, "good");
-      pwaText.textContent = "Real install prompt available.";
-    }
-  });
-
-  window.addEventListener('appinstalled', () => {
-    setInstalledUI();
-    showPostInstallActions();
-    // Auto-open the app after a short moment (cannot force-close the browser)
-    setTimeout(() => {
-      // If we're still not in standalone, open the app page anyway
-      window.location.href = './app.html';
-    }, 1200);
-  });
-
-  function updatePwaAvailability(){
-    if (inStandalone()) return;
-
-    if (isIOS){
-      setDot(pwaDot, "warn");
-      pwaText.textContent = "iOS requires manual “Add to Home Screen”.";
-      return;
-    }
-    setDot(pwaDot, "warn");
-    pwaText.textContent = deferredPrompt ? "Real install prompt available." : "Waiting for install prompt… (must be HTTPS/localhost)";
-  }
-  updatePwaAvailability();
-
-  // Service worker registration
-  async function registerSW(){
-    if (!('serviceWorker' in navigator)) {
+  // Service worker
+  (async () => {
+    if (!('serviceWorker' in navigator)){
       setDot(swDot, "bad");
-      swText.textContent = "Service worker not supported in this browser.";
+      swText.textContent = "Service worker not supported.";
       return;
     }
     try{
       await navigator.serviceWorker.register('./sw.js', { scope: './' });
       setDot(swDot, "good");
       swText.textContent = "Service worker active (offline cache).";
-    }catch(err){
+    }catch(e){
       setDot(swDot, "bad");
       swText.textContent = "Service worker registration failed.";
-      console.warn(err);
+      console.warn(e);
     }
-  }
-  registerSW();
+  })();
 
-  // Install animation (visual)
+  // Animation
   const files = [
-    {name:"manifest.webmanifest", size:"OK"},
-    {name:"sw.js", size:"OK"},
-    {name:"icon-192.png", size:"OK"},
-    {name:"icon-512.png", size:"OK"},
-    {name:"app.html", size:"OK"},
-    {name:"Cache warm-up", size:"OK"},
-    {name:"Finalize (home screen icon)", size:"OK"},
+    {name:"manifest.webmanifest", size:"1.2 KB"},
+    {name:"sw.js", size:"3.4 KB"},
+    {name:"icon-192.png", size:"~9 KB"},
+    {name:"icon-512.png", size:"~22 KB"},
+    {name:"app.html", size:"App"},
+    {name:"Cache warm-up", size:"—"},
+    {name:"Finalize Home Screen icon", size:"—"},
   ];
 
   function renderLog(statuses){
@@ -425,40 +303,34 @@
     });
   }
 
-  function resetSim(){
-    bar.style.width = "0%";
+  async function runAnim(){
     clearFinal();
-    renderLog(files.map(() => ({tag:"wait", text:"Queued"})));
-    installBtn.disabled = false;
-    updatePwaAvailability();
-  }
-  resetSim();
-
-  async function runSim(){
-    clearFinal();
-    installBtn.disabled = true;
-
     const statuses = files.map(() => ({tag:"wait", text:"Queued"}));
     renderLog(statuses);
-
+    bar.style.width = "0%";
     for (let i=0; i<files.length; i++){
       statuses[i] = {tag:"run", text:"Copying…"};
       renderLog(statuses);
-
-      const delay = 360 + Math.round(Math.random()*520) + (i===4 ? 700 : 0);
+      const delay = 320 + Math.round(Math.random()*520) + (i===4 ? 700 : 0);
       await new Promise(r => setTimeout(r, delay));
-
       statuses[i] = {tag:"ok", text:"Done"};
       renderLog(statuses);
-
-      const pct = Math.round(((i+1)/files.length)*100);
-      bar.style.width = pct + "%";
+      bar.style.width = Math.round(((i+1)/files.length)*100) + "%";
     }
   }
 
-  async function doRealInstall(){
+  async function doInstall(){
+    // Start animation immediately for UX, but trigger real prompt ASAP if available
+    runAnim();
+
     if (inStandalone()){
-      setInstalledUI();
+      showFinal("✅ Already installed. Tap Continue.");
+      return;
+    }
+
+    if (isIOS){
+      showFinal(`📌 iOS manual install:<br/>
+        Safari → Share <span class="kbd">⬆︎</span> → <span class="kbd">Add to Home Screen</span> → <span class="kbd">Add</span>`);
       return;
     }
 
@@ -466,41 +338,42 @@
       deferredPrompt.prompt();
       const choice = await deferredPrompt.userChoice;
       deferredPrompt = null;
+      updateInstallStatus();
 
-      if (choice && choice.outcome === "accepted"){
-        showFinal("🟢 Install accepted. If you don’t see an icon immediately on Android, check the App Drawer and “Add to Home”.");
+      if (choice && choice.outcome === 'accepted'){
+        showFinal("🟢 Install accepted. Finishing…");
       } else {
-        showFinal("ℹ️ Install dismissed. Use the browser menu ⋮ → Install app / Add to Home screen.");
+        showFinal(`ℹ️ Install dismissed.<br/>
+          Use menu <span class="kbd">⋮</span> → <span class="kbd">Install app</span> / <span class="kbd">Add to Home screen</span>.`);
         installBtn.disabled = false;
       }
       return;
     }
 
-    if (isIOS){
-      showFinal(`📌 iOS manual install:<br/>
-        Safari → Share <span class="kbd">⬆︎</span> → <span class="kbd">Add to Home Screen</span> → <span class="kbd">Add</span>`);
-      installBtn.disabled = false;
-      return;
-    }
-
-    showFinal(`⚠️ No real install prompt was provided by the browser.<br/>
-      Make sure you are on HTTPS (GitHub Pages is OK) and the manifest/service worker load without errors.<br/>
-      Try: browser menu <span class="kbd">⋮</span> → <span class="kbd">Install app</span>.`);
+    showFinal(`⚠️ No install prompt was provided.<br/>
+      Requirements: HTTPS (GitHub Pages is OK), manifest loads, service worker active, not already installed.<br/>
+      Try menu <span class="kbd">⋮</span> → <span class="kbd">Install app</span>.`);
     installBtn.disabled = false;
   }
 
-  installBtn.addEventListener('click', async () => {
-    await runSim();
-    await doRealInstall();
-  });
+  function reset(){
+    installBtn.disabled = false;
+    clearFinal();
+    bar.style.width = "0%";
+    renderLog(files.map(() => ({tag:"wait", text:"Queued"})));
+    updateInstallStatus();
+  }
 
-  openBtn.addEventListener('click', () => {
-    window.location.href = "./app.html";
-  });
+  installBtn.onclick = doInstall;
+  openBtn.onclick = () => window.location.href = './app.html';
+  closeBtn.onclick = tryCloseTab;
+  resetBtn.onclick = reset;
 
-  resetBtn.addEventListener('click', resetSim);
+  // initial
+  renderLog(files.map(() => ({tag:"wait", text:"Queued"})));
+  updateInstallStatus();
 
-  // Slight UI hint
+  // Visual highlight block
   if (isIOS){
     document.getElementById('iosBlock').style.borderColor = "rgba(56,189,248,.25)";
   } else {
