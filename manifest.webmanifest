@@ -1,7 +1,7 @@
 {
-  "name": "Manor Engineering",
-  "short_name": "Manor",
-  "description": "Manor Engineering PWA",
+  "name": "VSA \u2014 Visual System Autopilot",
+  "short_name": "VSA",
+  "description": "VSA (Visual System Autopilot) PWA",
   "id": "./",
   "start_url": "./app.html",
   "scope": "./",
