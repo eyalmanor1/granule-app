@@ -293,6 +293,46 @@
   function showFinal(html){ finalBox.innerHTML = html; finalBox.classList.add('show'); }
   function clearFinal(){ finalBox.classList.remove('show'); finalBox.innerHTML = ""; }
 
+  function tryCloseTab(){
+    // Browsers usually block closing tabs that were not opened via script.
+    // We'll attempt anyway, and show a clear fallback message.
+    window.close();
+    setTimeout(() => {
+      // If it didn't close, show a helpful message.
+      showFinal(`✅ Installed.<br/><br/>
+        <b>Next steps:</b><br/>
+        • Tap <span class="kbd">Open VSA</span> to launch the app.<br/>
+        • Or simply close this tab manually (browser security blocks auto-close).<br/><br/>
+        <div class="actions" style="margin-top:10px">
+          <button id="openNowBtn">Open VSA</button>
+          <button class="secondary" id="closeTabBtn">Close tab</button>
+        </div>
+      `);
+      wireFinalButtons();
+    }, 450);
+  }
+
+  function wireFinalButtons(){
+    const openNowBtn = document.getElementById('openNowBtn');
+    const closeTabBtn = document.getElementById('closeTabBtn');
+    if (openNowBtn) openNowBtn.addEventListener('click', () => window.location.href = './app.html');
+    if (closeTabBtn) closeTabBtn.addEventListener('click', tryCloseTab);
+  }
+
+  function showPostInstallActions(){
+    showFinal(`✅ Installed successfully.<br/><br/>
+      <div class="actions" style="margin-top:10px">
+        <button id="openNowBtn">Open VSA</button>
+        <button class="secondary" id="closeTabBtn">Close tab</button>
+      </div>
+      <div style="margin-top:10px; color: rgba(229,231,235,.8); font-size:12px; line-height:1.45">
+        Note: Browsers do not allow websites to close tabs automatically. If “Close tab” doesn’t work, please close it manually.
+      </div>
+    `);
+    wireFinalButtons();
+  }
+
+
   function inStandalone(){
     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   }
@@ -301,7 +341,7 @@
     setDot(pwaDot, "good");
     pwaText.textContent = "Installed / running standalone.";
     installBtn.disabled = true;
-    showFinal("✅ Already installed. Use “Open App”.");
+    showFinal("✅ Already installed."); showPostInstallActions();
   }
 
   if (inStandalone()) setInstalledUI();
@@ -317,6 +357,12 @@
 
   window.addEventListener('appinstalled', () => {
     setInstalledUI();
+    showPostInstallActions();
+    // Auto-open the app after a short moment (cannot force-close the browser)
+    setTimeout(() => {
+      // If we're still not in standalone, open the app page anyway
+      window.location.href = './app.html';
+    }, 1200);
   });
 
   function updatePwaAvailability(){
