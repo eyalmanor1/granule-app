@@ -1,12 +1,14 @@
 {
-  "name": "Manor Engineering App",
-  "short_name": "ManorApp",
-  "description": "PWA installation demo + app.",
-  "start_url": "./ms9.html",
+  "name": "Manor Engineering",
+  "short_name": "Manor",
+  "description": "Manor Engineering PWA",
+  "id": "./",
+  "start_url": "./app.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#38bdf8",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "./icon-192.png",

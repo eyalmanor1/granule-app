@@ -1,16 +1,18 @@
-PWA Install Bundle (Demo)
+REAL PWA INSTALL BUNDLE (EN)
 
-קבצים:
-- install.html  -> מסך Install + הדמיית התקנה + ניסיון Install אמיתי (Android/דסקטופ)
-- manifest.webmanifest -> Manifest
-- sw.js -> Service Worker (Cache)
-- icon-192.png / icon-512.png / apple-touch-icon.png -> אייקונים
-- ms9.html -> האפליקציה (הקובץ שהעלית)
+Files:
+- index.html              Installer screen (with file-transfer animation + REAL install prompt when supported)
+- app.html                Your app (copied from ms9.html)
+- manifest.webmanifest    PWA manifest (start_url points to app.html)
+- sw.js                   Service worker (offline cache)
+- icon-192.png / icon-512.png / apple-touch-icon.png
 
-איך להריץ:
-1) מומלץ HTTPS. לפיתוח מקומי: אפשר localhost.
-2) פתח install.html (דרך שרת סטטי, לא דרך file://)
-3) לחץ Install.
+How to use:
+1) Serve over HTTPS (GitHub Pages is perfect) or localhost.
+2) Open /index.html
+3) Click Install (Android/Desktop shows a REAL prompt if eligible)
+4) iOS: Safari → Share → Add to Home Screen
 
-טיפ:
-- ב-iOS חייבים Safari + Share -> Add to Home Screen.
+Important:
+- No webpage can "force install" without the browser prompt.
+- If Android installs but you don't see an icon: check the App Drawer and then Add to Home.
