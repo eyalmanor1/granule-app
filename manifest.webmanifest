@@ -1,21 +1,11 @@
 {
-  "name": "VSA",
+  "name": "VSA Autopilot",
   "short_name": "VSA",
-  "start_url": "./ms200.html",
+  "start_url": "./ms211.html",
   "display": "standalone",
-  "background_color": "#0b1020",
-  "theme_color": "#0b1020",
-  "icons": [
-    {
-      "src": "icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ],
-  "scope": "./"
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "scope": "./",
+  "description": "Vision System Autopilot",
+  "icons": []
 }
